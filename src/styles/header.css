@@ -1,0 +1,98 @@
+/* Header styles
+   The header is split into two sections: a top bar showing the current
+   user and logout link, and a bottom navigation bar with the site logo
+   and menu. Flexbox is used for horizontal alignment and spacing.
+*/
+
+.header {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  z-index: 999;
+}
+
+/* Top bar styling */
+.header-top {
+  background-color: #f5f5f5;
+  padding: 4px 16px;
+  font-size: 0.875rem;
+  color: #333;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.user-info li {
+  margin-right: 8px;
+}
+
+.user-info .divider {
+  margin: 0 8px;
+}
+
+.icon {
+  vertical-align: middle;
+}
+
+/* Reset default button styles for logout link */
+.link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+/* Main menu styling */
+.main-menu {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+}
+
+/* Logo area */
+.logo-link {
+  display: flex;
+  align-items: center;
+  margin-right: 32px;
+  text-decoration: none;
+}
+
+.logo-text {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #2a8fbd;
+}
+
+/* Navigation items */
+.nav-items {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-item {
+  margin-right: 24px;
+}
+
+.nav-item a {
+  text-decoration: none;
+  color: #333;
+  font-size: 1rem;
+}
+
+.nav-item a:hover {
+  color: #2a8fbd;
+}

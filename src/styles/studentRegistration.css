@@ -1,0 +1,71 @@
+/* Styles for the student registration page */
+.student-registration h2 {
+  margin-bottom: 16px;
+  color: #2a8fbd;
+}
+
+.registration-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.course-list, .selected-list {
+  flex: 1 1 500px;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.registration-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.registration-table th, .registration-table td {
+  padding: 8px;
+  border-bottom: 1px solid #f0f0f0;
+  text-align: left;
+}
+
+.registration-table th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+  color: #333;
+}
+
+.registration-table button {
+  background-color: #2a8fbd;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.registration-table button:hover {
+  background-color: #226c8d;
+}
+
+.action-row {
+  margin-top: 12px;
+  text-align: right;
+}
+
+.action-row button {
+  background-color: #2a8fbd;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.action-row button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}

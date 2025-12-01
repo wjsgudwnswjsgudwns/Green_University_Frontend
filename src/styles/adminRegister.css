@@ -1,0 +1,51 @@
+/* Styles for the admin registration pages */
+
+.admin-layout {
+  display: flex;
+  gap: 24px;
+}
+
+.admin-sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.admin-sidebar h2 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 1.4rem;
+  color: #2a8fbd;
+}
+
+.admin-sidebar nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.admin-sidebar nav li {
+  margin-bottom: 12px;
+}
+
+.admin-sidebar nav li.selected a {
+  font-weight: bold;
+  color: #2a8fbd;
+}
+
+.admin-sidebar nav a {
+  text-decoration: none;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.admin-main {
+  flex: 1;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 24px;
+}

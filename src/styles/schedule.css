@@ -1,0 +1,52 @@
+/* Styles for schedule pages */
+.schedule-list h2, .schedule-detail h2 {
+  margin-bottom: 16px;
+  color: #2a8fbd;
+}
+
+.schedule-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 0.875rem;
+}
+
+.schedule-table th, .schedule-table td {
+  padding: 8px;
+  border-bottom: 1px solid #f0f0f0;
+  text-align: left;
+}
+
+.schedule-table th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+}
+
+.schedule-detail .schedule-meta {
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 16px;
+}
+
+.schedule-content {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.back-link {
+  color: #2a8fbd;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}

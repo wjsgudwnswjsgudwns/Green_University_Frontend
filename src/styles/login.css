@@ -1,0 +1,88 @@
+/* Styles for the login page */
+
+.login-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(100vh - 100px);
+}
+
+.login-container {
+  width: 100%;
+  max-width: 400px;
+  background-color: #ffffff;
+  padding: 32px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.login-logo {
+  margin-bottom: 24px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px;
+}
+
+.form-group label {
+  margin-right: 8px;
+  color: #2a8fbd;
+}
+
+.form-group input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+}
+
+.remember-id {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.875rem;
+}
+
+.login-button {
+  background-color: #2a8fbd;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.login-button:hover {
+  background-color: #226c8d;
+}
+
+.login-links {
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  padding: 0;
+  margin-top: 16px;
+  font-size: 0.875rem;
+}
+
+.login-links li a {
+  text-decoration: none;
+  color: #2a8fbd;
+}
+
+.login-links li a:hover {
+  text-decoration: underline;
+}
