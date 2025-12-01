@@ -1,0 +1,51 @@
+/* Styles for the student info page */
+.student-info h2 {
+  margin-bottom: 16px;
+  color: #2a8fbd;
+}
+
+.info-card {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 24px;
+  max-width: 600px;
+}
+
+.info-card table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.info-card td {
+  padding: 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.info-card td:first-child {
+  font-weight: 600;
+  width: 25%;
+  color: #666;
+}
+
+.info-buttons {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+}
+
+.info-buttons button {
+  flex: 1;
+  background-color: #2a8fbd;
+  border: none;
+  color: #fff;
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.info-buttons button:hover {
+  background-color: #226c8d;
+}
