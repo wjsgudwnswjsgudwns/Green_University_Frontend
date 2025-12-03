@@ -1,7 +1,7 @@
-import React from 'react';
-import { useAuth } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
-import '../styles/mainPage.css';
+import React from "react";
+import { useAuth } from "../context/AuthContext";
+import { Link } from "react-router-dom";
+import "../styles/mainPage.css";
 
 /**
  * Main page component displayed after login. Shows a welcome message,
@@ -10,19 +10,43 @@ import '../styles/mainPage.css';
  * information would be fetched from the server.
  */
 export default function MainPage() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   // Mocked notice and schedule data
   const noticeList = [
-    { id: 1, category: '[학사]', title: '2025-1학기 수강신청 안내', date: '2024-12-10' },
-    { id: 2, category: '[일반]', title: '도서관 리모델링 공사 안내', date: '2024-12-05' },
-    { id: 3, category: '[학사]', title: '겨울학기 등록 일정 안내', date: '2024-12-01' },
+    {
+      id: 1,
+      category: "[학사]",
+      title: "2025-1학기 수강신청 안내",
+      date: "2024-12-10",
+    },
+    {
+      id: 2,
+      category: "[일반]",
+      title: "도서관 리모델링 공사 안내",
+      date: "2024-12-05",
+    },
+    {
+      id: 3,
+      category: "[학사]",
+      title: "겨울학기 등록 일정 안내",
+      date: "2024-12-01",
+    },
   ];
   const scheduleList = [
-    { id: 1, start: '02/01', end: '02/15', information: '2025-1학기 등록 기간' },
-    { id: 2, start: '03/01', end: '03/05', information: '수강신청 변경 기간' },
-    { id: 3, start: '06/20', end: '06/26', information: '기말고사' },
+    {
+      id: 1,
+      start: "02/01",
+      end: "02/15",
+      information: "2025-1학기 등록 기간",
+    },
+    { id: 2, start: "03/01", end: "03/05", information: "수강신청 변경 기간" },
+    { id: 3, start: "06/20", end: "06/26", information: "기말고사" },
   ];
+
+  const handleLogout = async () => {
+    await logout();
+  };
 
   return (
     <div className="main-page page-container">
@@ -72,13 +96,11 @@ export default function MainPage() {
             <div className="profile-card">
               <ul className="profile-header">
                 <li className="icon material-symbols-rounded">person</li>
-                <li className="welcome">
-                  {user.name}님, 환영합니다.
-                </li>
+                <li className="welcome">{user.name}님, 환영합니다.</li>
               </ul>
               <hr />
               {/* Display different information depending on user role */}
-              {user.role === 'student' && (
+              {user.userRole === "student" && (
                 <table className="profile-table">
                   <tbody>
                     <tr>
@@ -100,7 +122,7 @@ export default function MainPage() {
                   </tbody>
                 </table>
               )}
-              {user.role === 'professor' && (
+              {user.userRole === "professor" && (
                 <table className="profile-table">
                   <tbody>
                     <tr>
@@ -114,7 +136,7 @@ export default function MainPage() {
                   </tbody>
                 </table>
               )}
-              {user.role === 'staff' && (
+              {user.userRole === "staff" && (
                 <table className="profile-table">
                   <tbody>
                     <tr>
@@ -129,10 +151,10 @@ export default function MainPage() {
                 </table>
               )}
               <div className="profile-buttons">
-                <Link to={`/${user.role}/info`}>
+                <Link to={`/${user.userRole}/info`}>
                   <button>마이페이지</button>
                 </Link>
-                <button onClick={() => window.location.href = '/logout'}>로그아웃</button>
+                <button onClick={handleLogout}>로그아웃</button>
               </div>
             </div>
           )}

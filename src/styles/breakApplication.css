@@ -1,0 +1,410 @@
+/* Break Application Document Styles */
+
+/* 문서 컨테이너 */
+.document-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: 30px;
+}
+
+/* 문서 레이아웃 */
+.document-layout {
+  width: 100%;
+  max-width: 900px;
+  background: #ffffff;
+  border: 2px solid #2c3e50;
+  border-radius: 8px;
+  padding: 50px 40px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.document-layout::before {
+  content: "";
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  right: 15px;
+  bottom: 15px;
+  border: 1px solid #e0e6ed;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.document-layout h3 {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0 0 40px 0;
+  padding-bottom: 20px;
+  border-bottom: 3px double #216d30;
+  letter-spacing: 2px;
+}
+
+/* 문서 테이블 */
+.document-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  border: 2px solid #2c3e50;
+}
+
+.document-table th {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 16px 20px;
+  text-align: center;
+  font-weight: 600;
+  color: #2c3e50;
+  border: 1px solid #2c3e50;
+  font-size: 1rem;
+  letter-spacing: 0.5px;
+}
+
+.document-table td {
+  padding: 16px 20px;
+  color: #2c3e50;
+  border: 1px solid #2c3e50;
+  font-size: 1rem;
+  vertical-align: middle;
+}
+
+.document-table td[colspan] {
+  text-align: left;
+}
+
+/* 문서 내부 텍스트 */
+.document-table td p {
+  margin: 8px 0;
+  line-height: 1.8;
+  font-size: 1rem;
+  color: #2c3e50;
+}
+
+.document-table td p:first-child {
+  margin-top: 20px;
+}
+
+.document-table td p:last-child {
+  text-align: right;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+/* 셀렉트 박스 스타일 */
+.document-table select {
+  padding: 8px 12px;
+  border: 1px solid #2c3e50;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  color: #2c3e50;
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 0 4px;
+  font-weight: 500;
+}
+
+.document-table select:hover {
+  border-color: #216d30;
+  background-color: #f8f9fa;
+}
+
+.document-table select:focus {
+  outline: none;
+  border-color: #216d30;
+  box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
+}
+
+/* 라디오 버튼 스타일 */
+.document-table input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  margin: 0 6px 0 12px;
+  cursor: pointer;
+  accent-color: #216d30;
+}
+
+.document-table input[type="radio"]:first-of-type {
+  margin-left: 0;
+}
+
+.document-table label {
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #2c3e50;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.3s ease;
+}
+
+.document-table label:hover {
+  color: #216d30;
+}
+
+/* 버튼 컨테이너 */
+.button-container {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 900px;
+  margin-top: 30px;
+}
+
+.button-group {
+  display: flex;
+  gap: 16px;
+}
+
+/* 제출 버튼 스타일 */
+.btn-dark,
+.submit-button {
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 40px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(33, 109, 48, 0.3);
+  text-transform: none;
+  letter-spacing: 0.5px;
+}
+
+.btn-dark:hover:not(:disabled),
+.submit-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1a5524 0%, #0e2b14 100%);
+  box-shadow: 0 6px 16px rgba(33, 109, 48, 0.4);
+  transform: translateY(-2px);
+}
+
+.btn-dark:active:not(:disabled),
+.submit-button:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(33, 109, 48, 0.3);
+}
+
+.btn-dark:disabled,
+.submit-button:disabled {
+  background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+/* 리스트 테이블 */
+.list-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #e0e6ed;
+  background: #ffffff;
+  margin-top: 20px;
+}
+
+.list-table thead th {
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  color: #ffffff;
+  padding: 14px 12px;
+  text-align: center;
+  font-weight: 600;
+  border: 1px solid #1a5524;
+  font-size: 1rem;
+}
+
+.list-table tbody td {
+  padding: 16px 12px;
+  text-align: center;
+  color: #5a6c7d;
+  border: 1px solid #e0e6ed;
+  font-size: 0.95rem;
+}
+
+.list-table tbody tr:hover {
+  background-color: #f8f9fa;
+  transition: background-color 0.2s ease;
+}
+
+.list-table tbody td a {
+  color: #216d30;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  padding: 4px 12px;
+  border-radius: 4px;
+}
+
+.list-table tbody td a:hover {
+  background-color: rgba(33, 109, 48, 0.1);
+  color: #1a5524;
+}
+
+/* 빈 리스트 메시지 */
+.no-list-p {
+  text-align: center;
+  padding: 60px 20px;
+  color: #95a5a6;
+  font-size: 1.1rem;
+  font-weight: 500;
+  font-style: italic;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .document-layout {
+    padding: 40px 30px;
+  }
+
+  .document-layout h3 {
+    font-size: 1.8rem;
+    margin-bottom: 30px;
+  }
+}
+
+@media (max-width: 768px) {
+  .document-layout {
+    padding: 30px 20px;
+    max-width: 100%;
+  }
+
+  .document-layout h3 {
+    font-size: 1.5rem;
+    margin-bottom: 25px;
+    letter-spacing: 1px;
+  }
+
+  .document-table th,
+  .document-table td {
+    padding: 12px 14px;
+    font-size: 0.9rem;
+  }
+
+  .document-table select {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+  }
+
+  .document-table label {
+    font-size: 0.85rem;
+  }
+
+  .document-table input[type="radio"] {
+    width: 16px;
+    height: 16px;
+  }
+
+  .btn-dark,
+  .submit-button {
+    padding: 12px 32px;
+    font-size: 1rem;
+  }
+
+  .list-table thead th,
+  .list-table tbody td {
+    padding: 12px 8px;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .document-layout {
+    padding: 20px 15px;
+  }
+
+  .document-layout::before {
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+  }
+
+  .document-layout h3 {
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+  }
+
+  .document-table {
+    font-size: 0.8rem;
+  }
+
+  .document-table th,
+  .document-table td {
+    padding: 10px 12px;
+  }
+
+  .document-table td p {
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
+  /* 모바일에서 라디오 버튼 레이블 줄바꿈 */
+  .document-table td label {
+    display: inline-flex;
+    margin-right: 8px;
+    margin-bottom: 8px;
+  }
+
+  .btn-dark,
+  .submit-button {
+    width: 100%;
+    padding: 12px 20px;
+    font-size: 0.95rem;
+  }
+
+  .button-container {
+    flex-direction: column;
+  }
+
+  .button-group {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .list-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .list-table thead th,
+  .list-table tbody td {
+    white-space: nowrap;
+    min-width: 80px;
+  }
+}
+
+/* 인쇄 스타일 */
+@media print {
+  .side-menu,
+  .btn-dark,
+  .submit-button,
+  .button-container {
+    display: none;
+  }
+
+  .document-layout {
+    border: 2px solid #000;
+    box-shadow: none;
+    page-break-inside: avoid;
+  }
+
+  .document-layout::before {
+    border-color: #000;
+  }
+
+  .document-table {
+    border-color: #000;
+  }
+
+  .document-table th,
+  .document-table td {
+    border-color: #000;
+    color: #000;
+  }
+}

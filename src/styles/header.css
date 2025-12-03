@@ -1,7 +1,7 @@
 /* Header styles
-   The header is split into two sections: a top bar showing the current
-   user and logout link, and a bottom navigation bar with the site logo
-   and menu. Flexbox is used for horizontal alignment and spacing.
+ 	The header is split into two sections: a top bar showing the current
+ 	user and logout link, and a bottom navigation bar with the site logo
+ 	and menu. Flexbox is used for horizontal alignment and spacing.
 */
 
 .header {
@@ -71,7 +71,7 @@
 .logo-text {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #2a8fbd;
+  color: #216d30;
 }
 
 /* Navigation items */
@@ -94,5 +94,5 @@
 }
 
 .nav-item a:hover {
-  color: #2a8fbd;
+  color: #216d30;
 }

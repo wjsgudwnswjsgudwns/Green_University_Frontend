@@ -1,76 +1,188 @@
-import React from 'react';
-import { useAuth } from '../../context/AuthContext';
-import '../../styles/studentInfo.css';
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import api from "../../api/axiosConfig";
+import "../../styles/myPage.css";
 
-/**
- * StudentInfoPage displays detailed information about the logged in student.
- * The fields shown mirror those found in the original JSP: email, phone,
- * department, advisor, semester and status. For now static data is used.
- */
 export default function StudentInfoPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const [studentInfo, setStudentInfo] = useState(null);
+  const [stustatList, setStustatList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // Mocked student profile data. Replace with data fetched from API.
-  const profile = {
-    id: user?.id,
-    name: user?.name,
-    email: user?.email,
-    phone: '010-1234-5678',
-    department: '컴퓨터공학과',
-    advisor: '홍길동 교수',
-    grade: '3학년',
-    semester: '2학기',
-    status: '재학',
+  useEffect(() => {
+    if (user?.userRole !== "student") {
+      navigate("/");
+      return;
+    }
+    fetchStudentInfo();
+  }, [user, navigate]);
+
+  const fetchStudentInfo = async () => {
+    try {
+      const response = await api.get("/api/user/info/student");
+      setStudentInfo(response.data.student);
+      setStustatList(response.data.stustatList || []);
+    } catch (err) {
+      console.error("학생 정보 조회 실패:", err);
+      setError("정보를 불러오는데 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  return (
-    <div className="student-info page-container">
-      <h2>학생 정보</h2>
-      <div className="info-card">
-        <table>
-          <tbody>
-            <tr>
-              <td>학번</td>
-              <td>{profile.id}</td>
-            </tr>
-            <tr>
-              <td>이름</td>
-              <td>{profile.name}</td>
-            </tr>
-            <tr>
-              <td>이메일</td>
-              <td>{profile.email}</td>
-            </tr>
-            <tr>
-              <td>전화번호</td>
-              <td>{profile.phone}</td>
-            </tr>
-            <tr>
-              <td>학과</td>
-              <td>{profile.department}</td>
-            </tr>
-            <tr>
-              <td>지도교수</td>
-              <td>{profile.advisor}</td>
-            </tr>
-            <tr>
-              <td>학년/학기</td>
-              <td>
-                {profile.grade} {profile.semester}
-              </td>
-            </tr>
-            <tr>
-              <td>학적상태</td>
-              <td>{profile.status}</td>
-            </tr>
-          </tbody>
-        </table>
-        <div className="info-buttons">
-          {/* Buttons that would navigate to update pages */}
-          <button onClick={() => alert('비밀번호 변경 페이지로 이동합니다.')}>비밀번호 변경</button>
-          <button onClick={() => alert('정보 수정 페이지로 이동합니다.')}>정보 수정</button>
+  if (loading) {
+    return (
+      <div className="page-container">
+        <div className="loading-container">
+          <div className="spinner"></div>
+          <p>로딩 중...</p>
         </div>
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="page-container">
+        <div className="error-container">
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="my-page-container">
+      <aside className="side-menu">
+        <div className="side-menu-header">
+          <h2>MY</h2>
+        </div>
+        <nav className="side-menu-nav">
+          <Link to="/student/info" className="menu-item active">
+            내 정보 조회
+          </Link>
+          <Link to="/student/password" className="menu-item">
+            비밀번호 변경
+          </Link>
+          <Link to="/student/break/application" className="menu-item">
+            휴학 신청
+          </Link>
+          <Link to="/student/break/list" className="menu-item">
+            휴학 내역 조회
+          </Link>
+          <Link to="/student/tuition/list" className="menu-item">
+            등록금 내역 조회
+          </Link>
+          <Link to="/student/tuition/payment" className="menu-item">
+            등록금 납부 고지서
+          </Link>
+        </nav>
+      </aside>
+
+      <main className="main-content">
+        <h1>내 정보 조회</h1>
+        <div className="divider"></div>
+
+        {studentInfo && (
+          <>
+            <table className="info-table">
+              <tbody>
+                <tr>
+                  <th>학번</th>
+                  <td>{studentInfo.id}</td>
+                  <th>소속</th>
+                  <td>
+                    {studentInfo.collegeName} {studentInfo.deptName}
+                  </td>
+                </tr>
+                <tr>
+                  <th>학년</th>
+                  <td>{studentInfo.grade}</td>
+                  <th>학기</th>
+                  <td>{studentInfo.semester}</td>
+                </tr>
+                <tr>
+                  <th>입학일</th>
+                  <td>{studentInfo.entranceDate}</td>
+                  <th>졸업일(졸업예정일)</th>
+                  <td>{studentInfo.graduationDate || "-"}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <table className="info-table">
+              <tbody>
+                <tr>
+                  <th>성명</th>
+                  <td>{studentInfo.name}</td>
+                  <th>생년월일</th>
+                  <td>{studentInfo.birthDate}</td>
+                </tr>
+                <tr>
+                  <th>성별</th>
+                  <td>{studentInfo.gender}</td>
+                  <th>주소</th>
+                  <td>{studentInfo.address}</td>
+                </tr>
+                <tr>
+                  <th>연락처</th>
+                  <td>{studentInfo.tel}</td>
+                  <th>이메일</th>
+                  <td>{studentInfo.email}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <button
+              className="update-button"
+              onClick={() => navigate("/student/update")}
+            >
+              수정하기
+            </button>
+
+            <div className="section-divider"></div>
+
+            <h4 className="section-title">학적 변동 내역</h4>
+            <table className="stat-table">
+              <thead>
+                <tr>
+                  <th>변동 일자</th>
+                  <th>변동 구분</th>
+                  <th>세부</th>
+                  <th>승인 여부</th>
+                  <th>복학 예정 연도/학기</th>
+                </tr>
+              </thead>
+              <tbody>
+                {stustatList.length > 0 ? (
+                  stustatList.map((stat, index) => (
+                    <tr key={index}>
+                      <td>{stat.fromDate}</td>
+                      <td>{stat.status}</td>
+                      <td>{stat.detail}</td>
+                      <td>승인</td>
+                      <td>
+                        {stat.toYear && stat.toSemester
+                          ? `${stat.toYear}-${stat.toSemester}학기`
+                          : "-"}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="no-data">
+                      학적 변동 내역이 없습니다.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </>
+        )}
+      </main>
     </div>
   );
 }
