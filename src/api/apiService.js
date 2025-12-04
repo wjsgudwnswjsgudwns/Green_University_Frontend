@@ -72,25 +72,3 @@ export const userService = {
     return response.data;
   },
 };
-
-/**
- * 예시: 컴포넌트에서 사용하는 방법
- */
-
-// import { authService, userService } from '../utils/apiService';
-//
-// // 로그인
-// try {
-//   const result = await authService.login({ id: 123, password: 'pass' });
-//   console.log(result);
-// } catch (error) {
-//   console.error(error);
-// }
-//
-// // 학생 정보 조회
-// try {
-//   const studentInfo = await userService.getStudentInfo();
-//   console.log(studentInfo);
-// } catch (error) {
-//   console.error(error);
-// }

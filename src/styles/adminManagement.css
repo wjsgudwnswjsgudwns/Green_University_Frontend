@@ -1,0 +1,666 @@
+/* Admin Management Styles - 등록 관리 페이지 */
+
+/* CRUD 버튼 그룹 */
+.crud-buttons {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+.crud-button {
+  padding: 10px 24px;
+  border: 2px solid #216d30;
+  background-color: #ffffff;
+  color: #216d30;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.crud-button:hover {
+  background-color: #f0f7f2;
+}
+
+.crud-button.active {
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(33, 109, 48, 0.3);
+}
+
+/* Admin 폼 스타일 */
+.admin-form {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 30px;
+  border: 1px solid #e0e6ed;
+}
+
+.form-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  color: #216d30;
+}
+
+.form-header .material-symbols-outlined {
+  font-size: 24px;
+}
+
+.form-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.form-content {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Admin Input */
+.admin-input {
+  flex: 1;
+  min-width: 250px;
+  padding: 10px 14px;
+  border: 2px solid #e0e6ed;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  color: #2c3e50;
+  transition: all 0.3s ease;
+}
+
+.admin-input:focus {
+  outline: none;
+  border-color: #216d30;
+  box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
+}
+
+.admin-input::placeholder {
+  color: #95a5a6;
+}
+
+/* Admin Select */
+.admin-select {
+  flex: 1;
+  min-width: 200px;
+  padding: 10px 14px;
+  border: 2px solid #e0e6ed;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  color: #2c3e50;
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.admin-select:focus {
+  outline: none;
+  border-color: #216d30;
+  box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
+}
+
+/* Admin Button */
+.admin-button {
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 24px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(33, 109, 48, 0.3);
+  white-space: nowrap;
+}
+
+.admin-button:hover {
+  background: linear-gradient(135deg, #1a5524 0%, #0e2b14 100%);
+  box-shadow: 0 4px 12px rgba(33, 109, 48, 0.4);
+  transform: translateY(-1px);
+}
+
+.admin-button:active {
+  transform: translateY(0);
+}
+
+/* 삭제 안내 메시지 */
+.delete-notice {
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  color: #856404;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* Admin 테이블 */
+.admin-table-container {
+  overflow-x: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+}
+
+.admin-table thead th {
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  color: #ffffff;
+  padding: 14px 20px;
+  text-align: center;
+  font-weight: 600;
+  border: 1px solid #1a5524;
+  font-size: 1rem;
+}
+
+.admin-table tbody td {
+  padding: 14px 20px;
+  text-align: center;
+  color: #5a6c7d;
+  border: 1px solid #e0e6ed;
+  font-size: 0.95rem;
+}
+
+.admin-table tbody tr:hover {
+  background-color: #f8f9fa;
+  transition: background-color 0.2s ease;
+}
+
+.admin-table tbody tr:nth-child(even) {
+  background-color: #fafbfc;
+}
+
+.admin-table tbody tr:nth-child(even):hover {
+  background-color: #f8f9fa;
+}
+
+.admin-table .no-data {
+  padding: 40px;
+  color: #95a5a6;
+  font-style: italic;
+  text-align: center;
+}
+
+/* 삭제 링크 */
+.delete-link {
+  background: none;
+  border: none;
+  color: #e74c3c;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  transition: color 0.3s ease;
+}
+
+.delete-link:hover {
+  color: #c0392b;
+  text-decoration: none;
+}
+
+/* 라디오 버튼 그룹 */
+.radio-group-inline {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.radio-group-inline label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.radio-group-inline input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #216d30;
+}
+
+/* 복잡한 폼용 세로 레이아웃 */
+.admin-form-vertical .form-content {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.admin-form-vertical .admin-input,
+.admin-form-vertical .admin-select {
+  width: 100%;
+}
+
+.admin-form-vertical .admin-button {
+  align-self: flex-start;
+  margin-top: 10px;
+}
+
+/* 작은 폼 필드 */
+.form-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.form-row label {
+  min-width: 100px;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .crud-buttons {
+    flex-wrap: wrap;
+  }
+
+  .form-content {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-input,
+  .admin-select {
+    width: 100%;
+  }
+
+  .admin-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-form {
+    padding: 16px;
+  }
+
+  .admin-table thead th,
+  .admin-table tbody td {
+    padding: 10px 12px;
+    font-size: 0.85rem;
+  }
+
+  .crud-button {
+    padding: 8px 20px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-table-container {
+    margin-left: -16px;
+    margin-right: -16px;
+    border-radius: 0;
+  }
+
+  .crud-buttons {
+    gap: 8px;
+  }
+
+  .crud-button {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+}
+
+/* Admin Management Styles - 등록 관리 페이지 */
+
+/* CRUD 버튼 그룹 */
+.crud-buttons {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+.crud-button {
+  padding: 10px 24px;
+  border: 2px solid #216d30;
+  background-color: #ffffff;
+  color: #216d30;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.crud-button:hover {
+  background-color: #f0f7f2;
+}
+
+.crud-button.active {
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(33, 109, 48, 0.3);
+}
+
+/* Admin 폼 스타일 */
+.admin-form {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 30px;
+  border: 1px solid #e0e6ed;
+}
+
+.form-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  color: #216d30;
+}
+
+.form-header .material-symbols-outlined {
+  font-size: 24px;
+}
+
+.form-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.form-content {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Admin Input */
+.admin-input {
+  flex: 1;
+  min-width: 250px;
+  padding: 10px 14px;
+  border: 2px solid #e0e6ed;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  color: #2c3e50;
+  transition: all 0.3s ease;
+}
+
+.admin-input:focus {
+  outline: none;
+  border-color: #216d30;
+  box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
+}
+
+.admin-input::placeholder {
+  color: #95a5a6;
+}
+
+/* Admin Select */
+.admin-select {
+  flex: 1;
+  min-width: 200px;
+  padding: 10px 14px;
+  border: 2px solid #e0e6ed;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  color: #2c3e50;
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.admin-select:focus {
+  outline: none;
+  border-color: #216d30;
+  box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
+}
+
+/* Admin Button */
+.admin-button {
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 24px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(33, 109, 48, 0.3);
+  white-space: nowrap;
+}
+
+.admin-button:hover {
+  background: linear-gradient(135deg, #1a5524 0%, #0e2b14 100%);
+  box-shadow: 0 4px 12px rgba(33, 109, 48, 0.4);
+  transform: translateY(-1px);
+}
+
+.admin-button:active {
+  transform: translateY(0);
+}
+
+/* 삭제 안내 메시지 */
+.delete-notice {
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  color: #856404;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* Admin 테이블 */
+.admin-table-container {
+  overflow-x: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+}
+
+.admin-table thead th {
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  color: #ffffff;
+  padding: 14px 20px;
+  text-align: center;
+  font-weight: 600;
+  border: 1px solid #1a5524;
+  font-size: 1rem;
+}
+
+.admin-table tbody td {
+  padding: 14px 20px;
+  text-align: center;
+  color: #5a6c7d;
+  border: 1px solid #e0e6ed;
+  font-size: 0.95rem;
+}
+
+.admin-table tbody tr:hover {
+  background-color: #f8f9fa;
+  transition: background-color 0.2s ease;
+}
+
+.admin-table tbody tr:nth-child(even) {
+  background-color: #fafbfc;
+}
+
+.admin-table tbody tr:nth-child(even):hover {
+  background-color: #f8f9fa;
+}
+
+.admin-table .no-data {
+  padding: 40px;
+  color: #95a5a6;
+  font-style: italic;
+  text-align: center;
+}
+
+/* 삭제 링크 */
+.delete-link {
+  background: none;
+  border: none;
+  color: #e74c3c;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  transition: color 0.3s ease;
+}
+
+.delete-link:hover {
+  color: #c0392b;
+  text-decoration: none;
+}
+
+/* 라디오 버튼 그룹 */
+.radio-group-inline {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.radio-group-inline label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.radio-group-inline input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #216d30;
+}
+
+/* 복잡한 폼용 세로 레이아웃 */
+.admin-form-vertical .form-content {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.admin-form-vertical .admin-input,
+.admin-form-vertical .admin-select {
+  width: 100%;
+}
+
+.admin-form-vertical .admin-button {
+  align-self: flex-start;
+  margin-top: 10px;
+}
+
+/* 작은 폼 필드 */
+.form-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.form-row label {
+  min-width: 100px;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+/* 강의 테이블 - 넓은 테이블 */
+.subject-table {
+  min-width: 1200px;
+  font-size: 0.85rem;
+}
+
+.subject-table thead th {
+  padding: 12px 8px;
+  font-size: 0.9rem;
+}
+
+.subject-table tbody td {
+  padding: 12px 8px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .crud-buttons {
+    flex-wrap: wrap;
+  }
+
+  .form-content {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-input,
+  .admin-select {
+    width: 100%;
+  }
+
+  .admin-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-form {
+    padding: 16px;
+  }
+
+  .admin-table thead th,
+  .admin-table tbody td {
+    padding: 10px 12px;
+    font-size: 0.85rem;
+  }
+
+  .crud-button {
+    padding: 8px 20px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-table-container {
+    margin-left: -16px;
+    margin-right: -16px;
+    border-radius: 0;
+  }
+
+  .crud-buttons {
+    gap: 8px;
+  }
+
+  .crud-button {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+}

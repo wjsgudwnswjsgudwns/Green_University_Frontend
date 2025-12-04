@@ -13,12 +13,6 @@ import NoticeListPage from "./pages/board/NoticeListPage";
 import NoticeDetailPage from "./pages/board/NoticeDetailPage";
 import ScheduleListPage from "./pages/schedule/ScheduleListPage";
 import ScheduleDetailPage from "./pages/schedule/ScheduleDetailPage";
-import AdminRegisterPage from "./pages/admin/AdminRegisterPage";
-import AdminCollegePage from "./pages/admin/AdminCollegePage";
-import AdminDepartmentPage from "./pages/admin/AdminDepartmentPage";
-import AdminRoomPage from "./pages/admin/AdminRoomPage";
-import AdminSubjectPage from "./pages/admin/AdminSubjectPage";
-import AdminTuitionPage from "./pages/admin/AdminTuitionPage";
 import FindIdPage from "./pages/access/FindIdPage";
 import FindPasswordPage from "./pages/access/FindPasswordPage";
 import ProfessorInfoPage from "./pages/professor/ProfessorInfoPage";
@@ -38,6 +32,18 @@ import ProfessorListStaff from "./pages/professor/ProfessorListStaff";
 import RegisterStudent from "./pages/admin/RegisterStudent";
 import RegisterProfessor from "./pages/admin/RegisterProfessor";
 import RegisterStaff from "./pages/admin/RegisterStaff";
+import CollegeManagement from "./pages/admin/CollegeManagement";
+import UpdateStudentGradePage from "./pages/professor/UpdateStudentGradePage";
+import SubjectStudentListPage from "./pages/professor/SubjectStudentListPage";
+import ProfessorSubjectListPage from "./pages/professor/ProfessorSubjectListPage";
+import ReadSyllabusPage from "./pages/professor/ReadSyllabusPage";
+import UpdateSyllabusPage from "./pages/professor/UpdateSyllabusPage";
+import SubjectListPage from "./pages/professor/SubjectListPage";
+import SyllabusPage from "./pages/professor/SyllabusPage";
+import DepartmentManagement from "./pages/admin/DepartmentManagement";
+import RoomManagement from "./pages/admin/RoomManagement";
+import TuitionManagement from "./pages/admin/TuitionManagement";
+import SubjectManagement from "./pages/admin/SubjectManagement";
 
 /**
  * A wrapper for routes requiring authentication. If a user is not
@@ -159,6 +165,66 @@ export default function App() {
           element={<RegisterProfessor />}
         />
         <Route path="/staff/register-staff" element={<RegisterStaff />} />
+
+        <Route
+          path="/professor/subject"
+          element={
+            <PrivateRoute role="professor">
+              <ProfessorSubjectListPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/professor/subject/:subjectId"
+          element={
+            <PrivateRoute role="professor">
+              <SubjectStudentListPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/professor/subject/:subjectId/student/:studentId"
+          element={
+            <PrivateRoute role="professor">
+              <UpdateStudentGradePage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/professor/syllabus/:subjectId"
+          element={
+            <PrivateRoute>
+              <ReadSyllabusPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/professor/syllabus/edit/:subjectId"
+          element={
+            <PrivateRoute role="professor">
+              <UpdateSyllabusPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/subject/list/:page"
+          element={
+            <PrivateRoute>
+              <SubjectListPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/subject/syllabus/:subjectId"
+          element={
+            <PrivateRoute>
+              <SyllabusPage />
+            </PrivateRoute>
+          }
+        />
 
         {/* Home route */}
         <Route
@@ -310,20 +376,54 @@ export default function App() {
 
         {/* Admin registration routes (staff role) */}
         <Route
-          path="/admin/register"
+          path="/staff/admin"
           element={
             <PrivateRoute role="staff">
-              <AdminRegisterPage />
+              <Navigate to="/staff/admin/college" />
             </PrivateRoute>
           }
-        >
-          <Route index element={<AdminCollegePage />} />
-          <Route path="college" element={<AdminCollegePage />} />
-          <Route path="department" element={<AdminDepartmentPage />} />
-          <Route path="room" element={<AdminRoomPage />} />
-          <Route path="subject" element={<AdminSubjectPage />} />
-          <Route path="tuition" element={<AdminTuitionPage />} />
-        </Route>
+        />
+        <Route
+          path="/staff/admin/college"
+          element={
+            <PrivateRoute role="staff">
+              <CollegeManagement />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/staff/admin/department"
+          element={
+            <PrivateRoute role="staff">
+              <DepartmentManagement />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/staff/admin/room"
+          element={
+            <PrivateRoute role="staff">
+              <RoomManagement />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/staff/admin/tuition"
+          element={
+            <PrivateRoute role="staff">
+              <TuitionManagement />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/staff/admin/subject"
+          element={
+            <PrivateRoute role="staff">
+              <SubjectManagement />
+            </PrivateRoute>
+          }
+        />
 
         {/* Catch-all route for undefined paths */}
         <Route path="*" element={<Navigate to="/" replace />} />

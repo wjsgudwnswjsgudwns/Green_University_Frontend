@@ -90,7 +90,7 @@ export default function NoticeListPage() {
           <h2>학사정보</h2>
         </div>
         <div className="sub--menu--mid">
-          <table className="sub--menu--table" border="1">
+          <table className="sub--menu--table">
             <tbody>
               <tr>
                 <td>
