@@ -1,52 +1,880 @@
-/* Styles for schedule pages */
-.schedule-list h2, .schedule-detail h2 {
-  margin-bottom: 16px;
-  color: #2a8fbd;
+/* Schedule Page Styles */
+
+.schedule-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f5f7fa;
+  padding: 40px 20px;
+  gap: 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* 사이드 메뉴 */
+.side-menu {
+  min-width: 240px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  height: fit-content;
+  position: sticky;
+  top: 20px;
+}
+
+.side-menu-header {
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  color: #ffffff;
+  padding: 24px 20px;
+  text-align: center;
+}
+
+.side-menu-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.side-menu-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 0;
+}
+
+.menu-item {
+  display: block;
+  padding: 14px 20px;
+  color: #2c3e50;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  border-left: 3px solid transparent;
+}
+
+.menu-item:hover {
+  background-color: #f8f9fa;
+  color: #216d30;
+  border-left-color: #216d30;
+}
+
+.menu-item.active {
+  background-color: rgba(33, 109, 48, 0.1);
+  color: #216d30;
+  border-left-color: #216d30;
+  font-weight: 600;
+}
+
+/* 메인 컨텐츠 */
+.schedule-main {
+  flex: 1;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 40px;
+  min-height: 50px;
+}
+
+.schedule-main h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0 0 20px 0;
+}
+
+.manage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.manage-header h1 {
+  margin: 0;
+}
+
+.register-button {
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(33, 109, 48, 0.3);
+}
+
+.register-button:hover {
+  background: linear-gradient(135deg, #1a5524 0%, #0e2b14 100%);
+  box-shadow: 0 6px 16px rgba(33, 109, 48, 0.4);
+  transform: translateY(-2px);
+}
+
+.divider {
+  height: 2px;
+  background: linear-gradient(90deg, #216d30 0%, rgba(33, 109, 48, 0.2) 100%);
+  margin-bottom: 30px;
+}
+
+/* 학사일정 표 */
+.schedule-table-container {
+  margin-top: 20px;
 }
 
 .schedule-table {
   width: 100%;
   border-collapse: collapse;
-  background-color: #ffffff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  overflow: hidden;
-  font-size: 0.875rem;
+  border: 1px solid #e0e6ed;
 }
 
-.schedule-table th, .schedule-table td {
-  padding: 8px;
-  border-bottom: 1px solid #f0f0f0;
+.schedule-table tbody tr {
+  border-bottom: 1px solid #e0e6ed;
+}
+
+.schedule-table .month-row {
+  background-color: #f8f9fa;
+}
+
+.schedule-table .month-cell {
+  width: 100px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #216d30;
+  padding: 16px;
+  border-right: 2px solid #e0e6ed;
+  background-color: #f8f9fa;
+  vertical-align: middle;
+}
+
+.schedule-table .date-cell {
+  width: 250px;
+  padding: 16px;
+  text-align: center;
+  color: #5a6c7d;
+  font-weight: 500;
+  border-right: 1px solid #e0e6ed;
+}
+
+.schedule-table .info-cell {
+  padding: 16px 20px;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.schedule-table .info-cell.clickable {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.schedule-table .info-cell.clickable:hover {
+  background-color: #f8f9fa;
+  color: #216d30;
+}
+
+/* 관리 테이블 */
+.manage-table-container {
+  margin-top: 20px;
+}
+
+.manage-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #e0e6ed;
+}
+
+.manage-table thead {
+  background-color: #f8f9fa;
+}
+
+.manage-table th {
+  padding: 14px 16px;
   text-align: left;
+  font-weight: 600;
+  color: #2c3e50;
+  border-bottom: 2px solid #e0e6ed;
 }
 
-.schedule-table th {
-  background-color: #f5f5f5;
+.manage-table th:first-child {
+  width: 80px;
+  text-align: center;
+}
+
+.manage-table th:nth-child(2) {
+  width: 250px;
+}
+
+.manage-table th:last-child {
+  width: 100px;
+  text-align: center;
+}
+
+.manage-table tbody tr {
+  border-bottom: 1px solid #e0e6ed;
+  transition: background-color 0.2s ease;
+}
+
+.manage-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.manage-table td {
+  padding: 12px 16px;
+  color: #5a6c7d;
+}
+
+.manage-table td:first-child {
+  text-align: center;
   font-weight: 600;
 }
 
-.schedule-detail .schedule-meta {
-  font-size: 0.875rem;
-  color: #666;
-  margin-bottom: 16px;
+.manage-table td:last-child {
+  text-align: center;
 }
 
-.schedule-content {
-  background-color: #ffffff;
-  border: 1px solid #e0e0e0;
+.no-data-cell {
+  text-align: center !important;
+  padding: 40px !important;
+  color: #95a5a6;
+  font-style: italic;
+}
+
+/* 등록 폼 (새 페이지) */
+.schedule-register-form {
+  background: #ffffff;
+  border: 1px solid #e0e6ed;
+  border-radius: 12px;
+  padding: 40px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.form-group-vertical {
+  margin-bottom: 24px;
+}
+
+.form-group-vertical label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 8px;
+}
+
+.form-group-vertical input[type="date"],
+.form-group-vertical input[type="text"] {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e0e6ed;
   border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 16px;
+  font-size: 0.95rem;
+  color: #2c3e50;
+  transition: all 0.3s ease;
+}
+
+.form-group-vertical input:focus {
+  outline: none;
+  border-color: #216d30;
+  box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
+}
+
+.form-group-vertical input:disabled {
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.required {
+  color: #e74c3c;
+  margin-left: 4px;
+}
+
+.form-buttons-center {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+.submit-button-large,
+.cancel-button-large {
+  padding: 14px 48px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.submit-button-large {
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(33, 109, 48, 0.3);
+}
+
+.submit-button-large:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1a5524 0%, #0e2b14 100%);
+  box-shadow: 0 6px 16px rgba(33, 109, 48, 0.4);
+  transform: translateY(-2px);
+}
+
+.submit-button-large:disabled {
+  background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+.cancel-button-large {
+  background: #ffffff;
+  color: #5a6c7d;
+  border: 2px solid #e0e6ed;
+}
+
+.cancel-button-large:hover:not(:disabled) {
+  background: #f8f9fa;
+  border-color: #216d30;
+  color: #216d30;
+}
+
+/* 등록 폼 (기존 - 삭제 가능) */
+.schedule-form {
+  background: #f8f9fa;
+  border: 1px solid #e0e6ed;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.form-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.form-group {
+  flex: 1;
+}
+
+.form-group label {
+  display: block;
   font-size: 0.9rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 6px;
+}
+
+.form-group input[type="date"],
+.form-group input[type="text"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #e0e6ed;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #2c3e50;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #216d30;
+  box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
+}
+
+.form-group input:disabled {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.form-buttons-inline {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.submit-button-small,
+.cancel-button-small {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.submit-button-small {
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(33, 109, 48, 0.3);
+}
+
+.submit-button-small:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1a5524 0%, #0e2b14 100%);
+  box-shadow: 0 4px 12px rgba(33, 109, 48, 0.4);
+  transform: translateY(-1px);
+}
+
+.submit-button-small:disabled {
+  background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+.cancel-button-small {
+  background: #ffffff;
+  color: #5a6c7d;
+  border: 2px solid #e0e6ed;
+}
+
+.cancel-button-small:hover:not(:disabled) {
+  background: #f8f9fa;
+  border-color: #216d30;
+  color: #216d30;
+}
+
+.delete-button-small {
+  background: #e74c3c;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.delete-button-small:hover {
+  background: #c0392b;
+  transform: translateY(-1px);
+}
+
+/* Messages */
+.error-message {
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #fee 0%, #fdd 100%);
+  border: 1px solid #faa;
+  border-radius: 8px;
+  color: #c33;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(255, 102, 102, 0.1);
+}
+
+.no-data {
+  text-align: center;
+  padding: 60px 20px;
+  color: #95a5a6;
+  font-size: 1.1rem;
+  background: #f8f9fa;
+  border: 1px solid #e0e6ed;
+  border-radius: 12px;
+}
+
+/* Loading */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #e0e6ed;
+  border-top-color: #216d30;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .schedule-container {
+    flex-direction: column;
+    padding: 20px 15px;
+  }
+
+  .side-menu {
+    position: static;
+    width: 100%;
+    min-width: auto;
+  }
+
+  .schedule-main {
+    padding: 30px 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .schedule-main {
+    padding: 24px 16px;
+  }
+
+  .manage-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .schedule-table,
+  .manage-table {
+    font-size: 0.85rem;
+  }
+
+  .schedule-table .month-cell {
+    width: 60px;
+    font-size: 0.95rem;
+    padding: 12px 8px;
+  }
+
+  .schedule-table .date-cell {
+    width: 140px;
+    padding: 12px 8px;
+    font-size: 0.8rem;
+  }
+
+  .schedule-table .info-cell {
+    padding: 12px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .form-buttons-inline {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .submit-button-small,
+  .cancel-button-small {
+    flex: 1;
+  }
+
+  .manage-table {
+    display: block;
+    overflow-x: auto;
+  }
+}
+
+/* Schedule Detail Page Styles (ScheduleDetailPage.css) */
+
+/* 전체 페이지 컨테이너 및 헤더 */
+.schedule-page {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 30px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.schedule-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.schedule-header h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0;
+}
+
+/* 목록으로 돌아가기 버튼 (기존 register-button 스타일 활용) */
+.back-button {
+  background: #5a6c7d; /* 회색 계열로 변경하여 구분을 줌 */
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(90, 108, 125, 0.3);
+}
+
+.back-button:hover {
+  background: #465564;
+  box-shadow: 0 6px 12px rgba(90, 108, 125, 0.4);
+  transform: translateY(-2px);
+}
+
+/* 구분선 (기존 divider 스타일) */
+.divider {
+  height: 2px;
+  background: linear-gradient(90deg, #216d30 0%, rgba(33, 109, 48, 0.2) 100%);
+  margin-bottom: 30px;
+}
+
+/* 상세 정보 표시 영역 */
+.schedule-detail {
+  padding: 20px 0;
+}
+
+.detail-row {
+  display: flex;
+  align-items: flex-start;
+  padding: 18px 0;
+  border-bottom: 1px solid #e0e6ed;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  min-width: 120px;
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 1rem;
+  padding-right: 20px;
+}
+
+.detail-value {
+  flex: 1;
+  color: #5a6c7d;
+  font-size: 1rem;
   line-height: 1.6;
 }
 
-.back-link {
-  color: #2a8fbd;
-  text-decoration: none;
-  font-size: 0.875rem;
+/* 관리자 버튼 영역 */
+.detail-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end;
+  margin-top: 40px;
 }
 
-.back-link:hover {
-  text-decoration: underline;
+.edit-button,
+.delete-button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 수정 버튼 (기존 submit-button 스타일 활용) */
+.edit-button {
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  color: #ffffff;
+}
+
+.edit-button:hover {
+  background: linear-gradient(135deg, #1a5524 0%, #0e2b14 100%);
+  transform: translateY(-1px);
+}
+
+/* 삭제 버튼 (기존 delete-button 스타일 활용) */
+.delete-button {
+  background: #e74c3c;
+  color: #ffffff;
+}
+
+.delete-button:hover {
+  background: #c0392b;
+  transform: translateY(-1px);
+}
+
+/* 수정 폼 (ScheduleDetailPage.js 내에서 isEditing=true 일 때 사용) */
+/* 기존 schedule.css의 .form-group 및 form-group input 스타일을 재정의/활용 */
+
+.schedule-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: #f8f9fa; /* 배경색을 약간 다르게 하여 수정 모드임을 표시 */
+  border: 1px solid #e0e6ed;
+  border-radius: 12px;
+  padding: 30px;
+}
+
+.schedule-form label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 8px;
+}
+
+.schedule-form input[type="date"],
+.schedule-form input[type="text"],
+.schedule-form textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e0e6ed;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #2c3e50;
+  transition: all 0.3s ease;
+  box-sizing: border-box; /* 패딩이 너비에 포함되도록 설정 */
+  resize: vertical;
+}
+
+.schedule-form input:focus,
+.schedule-form textarea:focus {
+  outline: none;
+  border-color: #216d30;
+  box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
+}
+
+.schedule-form .form-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* 수정 폼 버튼 (기존 small 버튼 스타일 재활용 및 이름 변경) */
+.schedule-form .submit-button,
+.schedule-form .cancel-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.schedule-form .submit-button {
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(33, 109, 48, 0.3);
+}
+
+.schedule-form .submit-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1a5524 0%, #0e2b14 100%);
+  transform: translateY(-1px);
+}
+
+.schedule-form .cancel-button {
+  background: #ffffff;
+  color: #5a6c7d;
+  border: 2px solid #e0e6ed;
+}
+
+.schedule-form .cancel-button:hover:not(:disabled) {
+  background: #f8f9fa;
+  border-color: #216d30;
+  color: #216d30;
+}
+
+/* 에러 메시지 (기존 schedule.css의 .error-message 활용) */
+
+/* 로딩 컨테이너 (기존 schedule.css의 .loading-container 및 .spinner 활용) */
+/* 에러 컨테이너 스타일 추가 */
+.error-container {
+  text-align: center;
+  padding: 50px 20px;
+  border: 1px solid #faa;
+  background-color: #fefafa;
+  border-radius: 12px;
+  margin-top: 30px;
+}
+
+.error-container p {
+  color: #e74c3c;
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+}
+
+.error-container button {
+  /* back-button 스타일 재활용 */
+  background: #5a6c7d;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .schedule-page {
+    margin: 20px auto;
+    padding: 20px 15px;
+  }
+
+  .schedule-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .schedule-header h1 {
+    font-size: 1.6rem;
+  }
+
+  .back-button {
+    width: 100%;
+    text-align: center;
+    padding: 10px;
+  }
+
+  .detail-row {
+    flex-direction: column;
+    padding: 12px 0;
+  }
+
+  .detail-label {
+    min-width: auto;
+    padding-right: 0;
+    margin-bottom: 5px;
+    font-size: 0.95rem;
+  }
+
+  .detail-value {
+    font-size: 0.95rem;
+  }
+
+  .detail-buttons {
+    justify-content: center;
+    margin-top: 30px;
+  }
+
+  .edit-button,
+  .delete-button {
+    flex: 1;
+    padding: 10px;
+  }
+
+  .schedule-form .form-buttons {
+    flex-direction: column-reverse;
+  }
+
+  .schedule-form .submit-button,
+  .schedule-form .cancel-button {
+    width: 100%;
+  }
 }

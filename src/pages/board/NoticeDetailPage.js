@@ -1,39 +1,202 @@
-import React from 'react';
-import { useParams, Link } from 'react-router-dom';
-import '../../styles/notice.css';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import "../../styles/notice.css";
+import api from "../../api/axiosConfig";
 
-/**
- * NoticeDetailPage shows the content of a single notice. For now it
- * references a static list of notices. In production the notice would
- * be fetched from a server by ID.
- */
 export default function NoticeDetailPage() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const { id } = useParams();
-  const notices = [
-    { id: '1', category: '[학사]', title: '2025-1학기 수강신청 안내', date: '2024-12-10', content: '2025학년도 1학기 수강신청은 2024년 12월 20일부터 24일까지 진행됩니다. 자세한 사항은 첨부파일을 참고해주세요.' },
-    { id: '2', category: '[일반]', title: '도서관 리모델링 공사 안내', date: '2024-12-05', content: '도서관 리모델링 공사로 인해 1층 열람실이 임시 폐쇄됩니다. 이용에 참고 바랍니다.' },
-    { id: '3', category: '[학사]', title: '겨울학기 등록 일정 안내', date: '2024-12-01', content: '겨울학기 등록 일정은 2025년 1월 2일부터 1월 6일까지입니다.' },
-  ];
-  const notice = notices.find((n) => n.id === id);
 
-  if (!notice) {
+  const [notice, setNotice] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const isFetched = React.useRef(false);
+
+  // 공지사항 상세 조회
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchNoticeDetail = async () => {
+      // 이미 조회했으면 스킵 (Strict Mode 대응)
+      if (isFetched.current) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // 1. 공지사항 조회 (조회수 증가 없음)
+        const response = await api.get(`/api/notice/${id}`);
+
+        // 컴포넌트가 언마운트되지 않았을 때만 상태 업데이트
+        if (!cancelled) {
+          setNotice(response.data);
+          isFetched.current = true;
+
+          // 2. 조회수 증가 (별도 API 호출)
+          try {
+            await api.post(`/api/notice/${id}/views`);
+          } catch (viewError) {
+            // 조회수 증가 실패는 무시 (사용자 경험에 영향 없음)
+            console.warn("조회수 증가 실패:", viewError);
+          }
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error("공지사항 조회 실패:", error);
+          alert("공지사항을 불러오는데 실패했습니다.");
+          navigate("/board/notice");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchNoticeDetail();
+
+    // cleanup 함수: 컴포넌트 언마운트 시 실행
+    return () => {
+      cancelled = true;
+    };
+  }, [id, navigate]);
+
+  // 삭제 처리
+  const handleDelete = async () => {
+    if (!window.confirm("정말 삭제하시겠습니까?")) return;
+
+    try {
+      await api.delete(`/api/notice/${id}`);
+      alert("공지사항이 삭제되었습니다.");
+      navigate("/board/notice");
+    } catch (error) {
+      console.error("삭제 실패:", error);
+      alert("삭제에 실패했습니다.");
+    }
+  };
+
+  if (loading) {
     return (
-      <div className="notice-detail page-container">
-        <p>해당 공지사항을 찾을 수 없습니다.</p>
+      <div
+        className="d-flex justify-content-center align-items-start"
+        style={{ minWidth: "100em" }}
+      >
+        <main>
+          <h1>공지사항</h1>
+          <div className="split--div"></div>
+          <p className="no--list--p">로딩 중...</p>
+        </main>
       </div>
     );
   }
 
+  if (!notice) {
+    return null;
+  }
+
   return (
-    <div className="notice-detail page-container">
-      <h2>{notice.title}</h2>
-      <p className="notice-meta">
-        <span>{notice.category}</span> | <span>{notice.date}</span>
-      </p>
-      <div className="notice-content">
-        <p>{notice.content}</p>
+    <div
+      className="d-flex justify-content-center align-items-start"
+      style={{ minWidth: "100em" }}
+    >
+      {/* 사이드 메뉴 */}
+      <div className="sub--menu">
+        <div className="sub--menu--top">
+          <h2>학사정보</h2>
+        </div>
+        <div className="sub--menu--mid">
+          <table className="sub--menu--table" border="1">
+            <tbody>
+              <tr>
+                <td>
+                  <a href="/board/notice" className="selected--menu">
+                    공지사항
+                  </a>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <a href="/schedule">학사일정</a>
+                </td>
+              </tr>
+              {user?.userRole === "staff" && (
+                <tr>
+                  <td>
+                    <a href="/schedule/list">학사일정 등록</a>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
-      <Link to="/board/notice" className="back-link">목록으로</Link>
+
+      {/* 메인 컨텐츠 */}
+      <main>
+        <h1>공지사항</h1>
+        <div className="split--div"></div>
+
+        <div className="container">
+          <table className="table">
+            <tbody>
+              <tr className="title">
+                <td className="type">제목</td>
+                <td>
+                  {notice.category} {notice.title}
+                </td>
+              </tr>
+              <tr className="content--container">
+                <td className="type">내용</td>
+                <td>
+                  <div dangerouslySetInnerHTML={{ __html: notice.content }} />
+                  {notice.uuidFilename && (
+                    <>
+                      <br />
+                      <br />
+                      <img
+                        src={`/images/uploads/${notice.uuidFilename}`}
+                        alt="첨부 이미지"
+                        style={{ maxWidth: "600px", maxHeight: "800px" }}
+                        onError={(e) => {
+                          e.target.style.display = "none";
+                        }}
+                      />
+                    </>
+                  )}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div className="select--button">
+            <button
+              className="button"
+              onClick={() => navigate("/board/notice")}
+            >
+              목록
+            </button>
+            {user?.userRole === "staff" && (
+              <>
+                <button
+                  className="button"
+                  onClick={() => navigate(`/board/notice/edit/${id}`)}
+                  style={{ marginLeft: "10px" }}
+                >
+                  수정
+                </button>
+                <button
+                  className="button"
+                  onClick={handleDelete}
+                  style={{ marginLeft: "10px" }}
+                >
+                  삭제
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </main>
     </div>
   );
 }

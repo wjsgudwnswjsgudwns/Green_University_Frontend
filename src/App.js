@@ -30,6 +30,14 @@ import BreakListStudent from "./pages/break/BreakListStudent";
 import BreakDetail from "./pages/break/BreakDetail";
 import BreakListStaff from "./pages/break/BreakListStaff";
 import StudentListStaff from "./pages/student/StudentListStaff";
+import NoticeEditPage from "./pages/board/NoticeEditPage";
+import NoticeWritePage from "./pages/board/NoticeWritePage";
+import ScheduleManagePage from "./pages/schedule/ScheduleManagePage";
+import ScheduleRegisterPage from "./pages/schedule/ScheduleRegisterPage";
+import ProfessorListStaff from "./pages/professor/ProfessorListStaff";
+import RegisterStudent from "./pages/admin/RegisterStudent";
+import RegisterProfessor from "./pages/admin/RegisterProfessor";
+import RegisterStaff from "./pages/admin/RegisterStaff";
 
 /**
  * A wrapper for routes requiring authentication. If a user is not
@@ -72,6 +80,85 @@ export default function App() {
           path="/staff/student-list/:page"
           element={<StudentListStaff />}
         />
+
+        <Route
+          path="/board/notice"
+          element={
+            <PrivateRoute>
+              <NoticeListPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/board/notice/:id"
+          element={
+            <PrivateRoute>
+              <NoticeDetailPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/board/notice/write"
+          element={
+            <PrivateRoute role="staff">
+              <NoticeWritePage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/board/notice/edit/:id"
+          element={
+            <PrivateRoute role="staff">
+              <NoticeEditPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/schedule"
+          element={
+            <PrivateRoute>
+              <ScheduleListPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/schedule/manage"
+          element={
+            <PrivateRoute role="staff">
+              <ScheduleManagePage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/schedule/:id"
+          element={
+            <PrivateRoute>
+              <ScheduleDetailPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/schedule/register"
+          element={
+            <PrivateRoute role="staff">
+              <ScheduleRegisterPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route path="/staff/professor-list" element={<ProfessorListStaff />} />
+        <Route
+          path="/staff/professor-list/:page"
+          element={<ProfessorListStaff />}
+        />
+        <Route path="/staff/register-student" element={<RegisterStudent />} />
+        <Route
+          path="/staff/register-professor"
+          element={<RegisterProfessor />}
+        />
+        <Route path="/staff/register-staff" element={<RegisterStaff />} />
 
         {/* Home route */}
         <Route

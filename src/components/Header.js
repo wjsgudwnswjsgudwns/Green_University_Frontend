@@ -3,18 +3,12 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "../styles/header.css";
 
-/**
- * Header component renders the top navigation bar and user information.
- * It adapts the visible navigation items based on the current user's role.
- */
 export default function Header() {
   const { user, logout } = useAuth();
 
-  // Determine menu items based on user role.
-  // Each entry contains a display label and the target route.
   let menuItems = [];
   if (user) {
-    switch (user.role) {
+    switch (user.userRole) {
       case "student":
         menuItems = [
           { label: "홈", path: "/" },
@@ -48,39 +42,8 @@ export default function Header() {
 
   return (
     <header className="header">
-      <div className="header-top">
-        {user ? (
-          <ul className="user-info">
-            <li className="icon material-symbols-outlined">account_circle</li>
-            <li>
-              {user.name}님 ({user.id})
-            </li>
-            <li className="divider">|</li>
-            <li
-              className="icon material-symbols-outlined"
-              style={{ color: "#9BD2EC" }}
-            >
-              logout
-            </li>
-            <li>
-              {/* Logout triggers context logout and navigates to login */}
-              <button className="link-button" onClick={logout}>
-                로그아웃
-              </button>
-            </li>
-          </ul>
-        ) : (
-          // <ul className="user-info">
-          //   <li>
-          //     <Link to="/login">로그인</Link>
-          //   </li>
-          // </ul>
-          <div></div>
-        )}
-      </div>
       <nav className="main-menu">
         <Link to="/" className="logo-link">
-          {/* Placeholder logo; replace with your own logo asset */}
           <span className="logo-text">GREEN LMS</span>
         </Link>
         {user && (
