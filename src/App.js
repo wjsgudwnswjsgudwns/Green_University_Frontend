@@ -38,6 +38,9 @@ import ProfessorListStaff from "./pages/professor/ProfessorListStaff";
 import RegisterStudent from "./pages/admin/RegisterStudent";
 import RegisterProfessor from "./pages/admin/RegisterProfessor";
 import RegisterStaff from "./pages/admin/RegisterStaff";
+import MeetingListPage from "./pages/MeetingListPage";
+import MeetingDetailPage from "./pages/MeetingDetailPage";
+import MeetingJoinPage from "./pages/MeetingJoinPage";
 
 /**
  * A wrapper for routes requiring authentication. If a user is not
@@ -45,290 +48,340 @@ import RegisterStaff from "./pages/admin/RegisterStaff";
  * role based access control can be implemented by passing a role prop.
  */
 function PrivateRoute({ children, role }) {
-  const { user } = useAuth();
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-  if (role && user.userRole !== role) {
-    // If role doesn't match, redirect to home
-    return <Navigate to="/" replace />;
-  }
-  return children;
+    const { user } = useAuth();
+    if (!user) {
+        return <Navigate to="/login" replace />;
+    }
+    if (role && user.userRole !== role) {
+        // If role doesn't match, redirect to home
+        return <Navigate to="/" replace />;
+    }
+    return children;
 }
 
 export default function App() {
-  return (
-    <AuthProvider>
-      <Header />
-      <Routes>
-        {/* Public routes */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/find-id" element={<FindIdPage />} />
-        <Route path="/find-password" element={<FindPasswordPage />} />
+    return (
+        <AuthProvider>
+            <Header />
+            <Routes>
+                {/* Public routes */}
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/find-id" element={<FindIdPage />} />
+                <Route path="/find-password" element={<FindPasswordPage />} />
 
-        <Route
-          path="/student/break/application"
-          element={<BreakApplication />}
-        />
-        <Route path="/student/break/list" element={<BreakListStudent />} />
-        <Route path="/student/break/detail/:id" element={<BreakDetail />} />
-        <Route path="/staff/break/list" element={<BreakListStaff />} />
-        <Route path="/staff/break/detail/:id" element={<BreakDetail />} />
+                <Route
+                    path="/student/break/application"
+                    element={<BreakApplication />}
+                />
+                <Route
+                    path="/student/break/list"
+                    element={<BreakListStudent />}
+                />
+                <Route
+                    path="/student/break/detail/:id"
+                    element={<BreakDetail />}
+                />
+                <Route path="/staff/break/list" element={<BreakListStaff />} />
+                <Route
+                    path="/staff/break/detail/:id"
+                    element={<BreakDetail />}
+                />
 
-        <Route path="/staff/student-list" element={<StudentListStaff />} />
-        <Route
-          path="/staff/student-list/:page"
-          element={<StudentListStaff />}
-        />
+                <Route
+                    path="/staff/student-list"
+                    element={<StudentListStaff />}
+                />
+                <Route
+                    path="/staff/student-list/:page"
+                    element={<StudentListStaff />}
+                />
 
-        <Route
-          path="/board/notice"
-          element={
-            <PrivateRoute>
-              <NoticeListPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/board/notice/:id"
-          element={
-            <PrivateRoute>
-              <NoticeDetailPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/board/notice/write"
-          element={
-            <PrivateRoute role="staff">
-              <NoticeWritePage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/board/notice/edit/:id"
-          element={
-            <PrivateRoute role="staff">
-              <NoticeEditPage />
-            </PrivateRoute>
-          }
-        />
+                <Route
+                    path="/board/notice"
+                    element={
+                        <PrivateRoute>
+                            <NoticeListPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/board/notice/:id"
+                    element={
+                        <PrivateRoute>
+                            <NoticeDetailPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/board/notice/write"
+                    element={
+                        <PrivateRoute role="staff">
+                            <NoticeWritePage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/board/notice/edit/:id"
+                    element={
+                        <PrivateRoute role="staff">
+                            <NoticeEditPage />
+                        </PrivateRoute>
+                    }
+                />
 
-        <Route
-          path="/schedule"
-          element={
-            <PrivateRoute>
-              <ScheduleListPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/schedule/manage"
-          element={
-            <PrivateRoute role="staff">
-              <ScheduleManagePage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/schedule/:id"
-          element={
-            <PrivateRoute>
-              <ScheduleDetailPage />
-            </PrivateRoute>
-          }
-        />
+                <Route
+                    path="/schedule"
+                    element={
+                        <PrivateRoute>
+                            <ScheduleListPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/schedule/manage"
+                    element={
+                        <PrivateRoute role="staff">
+                            <ScheduleManagePage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/schedule/:id"
+                    element={
+                        <PrivateRoute>
+                            <ScheduleDetailPage />
+                        </PrivateRoute>
+                    }
+                />
 
-        <Route
-          path="/schedule/register"
-          element={
-            <PrivateRoute role="staff">
-              <ScheduleRegisterPage />
-            </PrivateRoute>
-          }
-        />
+                <Route
+                    path="/schedule/register"
+                    element={
+                        <PrivateRoute role="staff">
+                            <ScheduleRegisterPage />
+                        </PrivateRoute>
+                    }
+                />
 
-        <Route path="/staff/professor-list" element={<ProfessorListStaff />} />
-        <Route
-          path="/staff/professor-list/:page"
-          element={<ProfessorListStaff />}
-        />
-        <Route path="/staff/register-student" element={<RegisterStudent />} />
-        <Route
-          path="/staff/register-professor"
-          element={<RegisterProfessor />}
-        />
-        <Route path="/staff/register-staff" element={<RegisterStaff />} />
+                <Route
+                    path="/staff/professor-list"
+                    element={<ProfessorListStaff />}
+                />
+                <Route
+                    path="/staff/professor-list/:page"
+                    element={<ProfessorListStaff />}
+                />
+                <Route
+                    path="/staff/register-student"
+                    element={<RegisterStudent />}
+                />
+                <Route
+                    path="/staff/register-professor"
+                    element={<RegisterProfessor />}
+                />
+                <Route
+                    path="/staff/register-staff"
+                    element={<RegisterStaff />}
+                />
 
-        {/* Home route */}
-        <Route
-          path="/"
-          element={
-            <PrivateRoute>
-              <MainPage />
-            </PrivateRoute>
-          }
-        />
+                {/* Home route */}
+                <Route
+                    path="/"
+                    element={
+                        <PrivateRoute>
+                            <MainPage />
+                        </PrivateRoute>
+                    }
+                />
 
-        {/* Student routes */}
-        <Route
-          path="/student/info"
-          element={
-            <PrivateRoute role="student">
-              <StudentInfoPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/student/update"
-          element={
-            <PrivateRoute role="student">
-              <UpdateUserPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/student/password"
-          element={
-            <PrivateRoute role="student">
-              <ChangePasswordPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/student/subjects"
-          element={
-            <PrivateRoute role="student">
-              <StudentCoursesPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/student/registration"
-          element={
-            <PrivateRoute role="student">
-              <StudentRegistrationPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/student/grades"
-          element={
-            <PrivateRoute role="student">
-              <StudentGradesPage />
-            </PrivateRoute>
-          }
-        />
+                {/* Student routes */}
+                <Route
+                    path="/student/info"
+                    element={
+                        <PrivateRoute role="student">
+                            <StudentInfoPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/student/update"
+                    element={
+                        <PrivateRoute role="student">
+                            <UpdateUserPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/student/password"
+                    element={
+                        <PrivateRoute role="student">
+                            <ChangePasswordPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/student/subjects"
+                    element={
+                        <PrivateRoute role="student">
+                            <StudentCoursesPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/student/registration"
+                    element={
+                        <PrivateRoute role="student">
+                            <StudentRegistrationPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/student/grades"
+                    element={
+                        <PrivateRoute role="student">
+                            <StudentGradesPage />
+                        </PrivateRoute>
+                    }
+                />
 
-        {/* Professor routes */}
-        <Route
-          path="/professor/info"
-          element={
-            <PrivateRoute role="professor">
-              <ProfessorInfoPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/professor/update"
-          element={
-            <PrivateRoute role="professor">
-              <UpdateUserPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/professor/password"
-          element={
-            <PrivateRoute role="professor">
-              <ChangePasswordPage />
-            </PrivateRoute>
-          }
-        />
+                {/* Professor routes */}
+                <Route
+                    path="/professor/info"
+                    element={
+                        <PrivateRoute role="professor">
+                            <ProfessorInfoPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/professor/update"
+                    element={
+                        <PrivateRoute role="professor">
+                            <UpdateUserPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/professor/password"
+                    element={
+                        <PrivateRoute role="professor">
+                            <ChangePasswordPage />
+                        </PrivateRoute>
+                    }
+                />
 
-        {/* Staff routes */}
-        <Route
-          path="/staff/info"
-          element={
-            <PrivateRoute role="staff">
-              <StaffInfoPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/staff/update"
-          element={
-            <PrivateRoute role="staff">
-              <UpdateUserPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/staff/password"
-          element={
-            <PrivateRoute role="staff">
-              <ChangePasswordPage />
-            </PrivateRoute>
-          }
-        />
+                {/* Staff routes */}
+                <Route
+                    path="/staff/info"
+                    element={
+                        <PrivateRoute role="staff">
+                            <StaffInfoPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/staff/update"
+                    element={
+                        <PrivateRoute role="staff">
+                            <UpdateUserPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/staff/password"
+                    element={
+                        <PrivateRoute role="staff">
+                            <ChangePasswordPage />
+                        </PrivateRoute>
+                    }
+                />
 
-        {/* Board routes */}
-        <Route
-          path="/board/notice"
-          element={
-            <PrivateRoute>
-              <NoticeListPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/board/notice/:id"
-          element={
-            <PrivateRoute>
-              <NoticeDetailPage />
-            </PrivateRoute>
-          }
-        />
+                {/* Board routes */}
+                <Route
+                    path="/board/notice"
+                    element={
+                        <PrivateRoute>
+                            <NoticeListPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/board/notice/:id"
+                    element={
+                        <PrivateRoute>
+                            <NoticeDetailPage />
+                        </PrivateRoute>
+                    }
+                />
 
-        {/* Schedule routes */}
-        <Route
-          path="/schedule"
-          element={
-            <PrivateRoute>
-              <ScheduleListPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/schedule/:id"
-          element={
-            <PrivateRoute>
-              <ScheduleDetailPage />
-            </PrivateRoute>
-          }
-        />
+                {/* Schedule routes */}
+                <Route
+                    path="/schedule"
+                    element={
+                        <PrivateRoute>
+                            <ScheduleListPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/schedule/:id"
+                    element={
+                        <PrivateRoute>
+                            <ScheduleDetailPage />
+                        </PrivateRoute>
+                    }
+                />
 
-        {/* Admin registration routes (staff role) */}
-        <Route
-          path="/admin/register"
-          element={
-            <PrivateRoute role="staff">
-              <AdminRegisterPage />
-            </PrivateRoute>
-          }
-        >
-          <Route index element={<AdminCollegePage />} />
-          <Route path="college" element={<AdminCollegePage />} />
-          <Route path="department" element={<AdminDepartmentPage />} />
-          <Route path="room" element={<AdminRoomPage />} />
-          <Route path="subject" element={<AdminSubjectPage />} />
-          <Route path="tuition" element={<AdminTuitionPage />} />
-        </Route>
+                {/* Admin registration routes (staff role) */}
+                <Route
+                    path="/admin/register"
+                    element={
+                        <PrivateRoute role="staff">
+                            <AdminRegisterPage />
+                        </PrivateRoute>
+                    }
+                >
+                    <Route index element={<AdminCollegePage />} />
+                    <Route path="college" element={<AdminCollegePage />} />
+                    <Route
+                        path="department"
+                        element={<AdminDepartmentPage />}
+                    />
+                    <Route path="room" element={<AdminRoomPage />} />
+                    <Route path="subject" element={<AdminSubjectPage />} />
+                    <Route path="tuition" element={<AdminTuitionPage />} />
+                </Route>
 
-        {/* Catch-all route for undefined paths */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-      <Footer />
-    </AuthProvider>
-  );
+                {/* Catch-all route for undefined paths */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+
+                {/* Web Chatting */}
+                <Route
+                    path="/meetings"
+                    element={
+                        <PrivateRoute>
+                            <MeetingListPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/meetings/:meetingId"
+                    element={
+                        <PrivateRoute>
+                            <MeetingDetailPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/meetings/:meetingId/join"
+                    element={
+                        <PrivateRoute>
+                            <MeetingJoinPage />
+                        </PrivateRoute>
+                    }
+                />
+            </Routes>
+            <Footer />
+        </AuthProvider>
+    );
 }
