@@ -1,24 +1,147 @@
 // src/pages/MeetingJoinPage.js
-import React, { useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import api from "../api/axiosConfig";
+import "../styles/MeetingJoinPage.css";
+import { useJanusLocalOnly } from "../hooks/useJanusLocalOnly";
 
 function MeetingJoinPage() {
     const { meetingId } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
 
+    // 이미 종료 처리했는지 여부 (재진입 방지)
+    const terminatedRef = useRef(false);
+
     // MeetingDetailPage 에서 넘긴 state (info)
-    const stateJoinInfo = location.state?.info;
+    const stateJoinInfo = location.state?.info || null;
 
     const [joinInfo, setJoinInfo] = useState(stateJoinInfo);
     const [error, setError] = useState("");
     const [scriptsLoaded, setScriptsLoaded] = useState(false);
-    const janusInstanceRef = useRef(null);
+    const [isLoadingJoinInfo, setIsLoadingJoinInfo] = useState(!stateJoinInfo);
+    const [hasJoined, setHasJoined] = useState(false); // /join 성공 여부
+
+    const [sessionKey, setSessionKey] = useState(null);
+    const [terminated, setTerminated] = useState(false); // 종료 처리 상태
+
+    // terminated 상태를 ref와 동기화
+    useEffect(() => {
+        terminatedRef.current = terminated;
+    }, [terminated]);
+
+    // 회의 종료 공통 처리: 먼저 나가기 → 그 다음 알럿
+    const handleTerminateAndLeave = useCallback(
+        (msg) => {
+            if (terminatedRef.current) return; // 이미 처리됨
+
+            terminatedRef.current = true;
+            setTerminated(true);
+
+            // 1) 회의 정리 + 목록 이동
+            //    (leaveRoom은 아래 useJanusLocalOnly에서 넘어오는 함수)
+            try {
+                // 이 시점에서는 첫 렌더가 끝난 뒤라 leaveRoom이 초기화된 상태에서만 호출됨
+                // (deps에 leaveRoom을 넣지 않아 TDZ 문제 없음)
+                // eslint-disable-next-line no-undef
+                leaveRoom?.();
+            } catch (e) {
+                console.error("leaveRoom 호출 중 오류", e);
+            }
+            navigate("/meetings");
+
+            // 2) 화면이 전환된 다음에 알럿
+            if (msg) {
+                setTimeout(() => {
+                    alert(msg);
+                }, 0);
+            }
+        },
+        [navigate]
+    );
+
+    // Janus 훅
+    const {
+        isSupported,
+        isConnecting,
+        isConnected,
+        error: janusError,
+        joinRoom,
+        leaveRoom,
+    } = useJanusLocalOnly(undefined, {
+        onRemoteParticipantsChanged: async () => {
+            console.log(
+                "[MeetingJoinPage] remoteParticipantsChanged, meetingId=",
+                meetingId,
+                "sessionKey=",
+                sessionKey,
+                "hasJoined=",
+                hasJoined
+            );
+
+            if (terminatedRef.current) return;
+
+            if (!meetingId) {
+                handleTerminateAndLeave(
+                    "회의 정보가 유효하지 않아 회의에서 나갑니다."
+                );
+                return;
+            }
+
+            // ✅ 이미 join 한 적 있는데 세션키가 없다 → 비정상 세션 → 강제 퇴장
+            if (!sessionKey && hasJoined) {
+                handleTerminateAndLeave(
+                    "세션 정보가 유실되어 회의에서 나갑니다. 다시 접속해 주세요."
+                );
+                return;
+            }
+
+            // 아직 join 전(초기 접속 중)인데 세션키가 없는 건 무시
+            if (!sessionKey && !hasJoined) {
+                return;
+            }
+
+            try {
+                const res = await api.post(
+                    `/api/meetings/${meetingId}/participants/ping`,
+                    { sessionKey }
+                );
+
+                const { active, reason } = res.data || {};
+                if (active) return;
+
+                let msg = "회의 연결이 종료되었습니다.";
+
+                if (reason === "SESSION_REPLACED") {
+                    msg =
+                        "다른 브라우저 또는 기기에서 이 계정으로 다시 회의에 접속하여, 현재 접속이 종료됩니다.";
+                } else if (reason === "MEETING_FINISHED") {
+                    msg = "회의 시간이 종료되었습니다.";
+                } else if (reason === "MEETING_CANCELED") {
+                    msg = "회의가 취소되었습니다.";
+                } else if (reason === "NOT_JOINED") {
+                    msg = "현재 회의 참가자로 등록되어 있지 않습니다.";
+                }
+
+                handleTerminateAndLeave(msg);
+            } catch (e) {
+                console.error("회의 상태 ping 실패 (Janus 이벤트 기반)", e);
+                // 여기선 네트워크 오류는 그냥 무시 (백그라운드 interval ping이 있으니까)
+            }
+        },
+    });
+
+    // 세션키가 join 이후에 유실되면 비정상으로 보고 내보내기 (백업용)
+    useEffect(() => {
+        if (hasJoined && !sessionKey && !terminatedRef.current) {
+            handleTerminateAndLeave(
+                "세션 정보가 유효하지 않아 회의에서 자동으로 나갑니다. 다시 접속해 주세요."
+            );
+        }
+    }, [hasJoined, sessionKey, handleTerminateAndLeave]);
 
     const loadScript = (src) =>
         new Promise((resolve, reject) => {
-            // 이미 로드된 경우 중복 로드 방지
             if (document.querySelector(`script[src="${src}"]`)) {
                 resolve();
                 return;
@@ -37,13 +160,51 @@ function MeetingJoinPage() {
             document.body.appendChild(script);
         });
 
-    // 0) janus.js, videoroomtest.js 로드
+    const handleJoined = useCallback(async () => {
+        if (hasJoined) return;
+        if (!meetingId) return;
+
+        try {
+            const res = await api.post(
+                `/api/meetings/${meetingId}/participants/join`
+            );
+            setHasJoined(true);
+
+            const serverSessionKey = res.data?.sessionKey;
+            if (serverSessionKey) {
+                setSessionKey(serverSessionKey);
+            }
+        } catch (e) {
+            console.error("참가자 join API 실패", e);
+
+            const msg =
+                e.response?.data?.message ||
+                "회의에 참가하는 도중 오류가 발생했습니다.";
+
+            alert(msg);
+            leaveRoom();
+            navigate("/meetings");
+        }
+    }, [meetingId, hasJoined, leaveRoom, navigate]);
+
+    const handleLeave = async () => {
+        try {
+            if (hasJoined) {
+                await api.post(`/api/meetings/${meetingId}/participants/leave`);
+            }
+        } catch (e) {
+            console.error("참가자 leave API 실패", e);
+        } finally {
+            leaveRoom();
+            navigate("/meetings");
+        }
+    };
+
+    // 0) janus.js 로드
     useEffect(() => {
         const loadJanusScripts = async () => {
             try {
-                // 경로는 실제 위치에 맞게 수정
                 await loadScript("/janus/janus.js");
-                await loadScript("/janus/videoroomtest.js");
                 setScriptsLoaded(true);
             } catch (e) {
                 setError("화상 회의 모듈을 불러오는 데 실패했습니다.");
@@ -64,6 +225,8 @@ function MeetingJoinPage() {
             } catch (err) {
                 console.error(err);
                 setError("회의 입장 정보를 불러오는 데 실패했습니다.");
+            } finally {
+                setIsLoadingJoinInfo(false);
             }
         };
         fetchIfNeeded();
@@ -77,45 +240,92 @@ function MeetingJoinPage() {
             return;
         }
 
-        if (typeof window.startJanusFromReact !== "function") {
+        if (!window.Janus) {
             console.error(
-                "[MeetingJoinPage] window.startJanusFromReact 가 없습니다. videoroomtest.js 내용/경로를 다시 확인하세요."
+                "window.Janus 가 없습니다. janus.js 경로를 확인하세요."
             );
+            setError("화상 회의 모듈이 초기화되지 않았습니다.");
             return;
         }
 
-        console.log("[MeetingJoinPage] startJanusFromReact 호출", joinInfo);
+        const roomNumber = joinInfo.roomNumber;
+        const displayName =
+            joinInfo.displayName ||
+            joinInfo.userName ||
+            joinInfo.nickname ||
+            "User";
 
-        const instance = window.startJanusFromReact({
-            roomNumber: joinInfo.roomNumber,
-            displayName: joinInfo.displayName,
-            userId: joinInfo.userId,
+        console.log("[MeetingJoinPage] joinRoom 호출", {
+            roomNumber,
+            displayName,
         });
 
-        janusInstanceRef.current = instance;
+        joinRoom({ roomNumber, displayName });
+    }, [joinInfo, scriptsLoaded, joinRoom]);
 
-        return () => {
-            if (janusInstanceRef.current?.destroy)
-                janusInstanceRef.current.destroy();
-        };
-    }, [joinInfo, scriptsLoaded]);
+    // Janus 연결 완료되면 /participants/join 호출
+    useEffect(() => {
+        if (!isConnected) return;
+        handleJoined();
+    }, [isConnected, handleJoined]);
 
-    const handleLeave = () => {
-        // 나중에 Janus 쪽에 leaveRoom 메시지 보내는 로직 추가 가능
-        navigate("/meetings");
+    // 주기적으로 세션 유효 여부 / 회의 상태 체크 (백그라운드용)
+    useEffect(() => {
+        if (!meetingId || !sessionKey || terminated) return;
+
+        const interval = setInterval(async () => {
+            try {
+                const res = await api.post(
+                    `/api/meetings/${meetingId}/participants/ping`,
+                    { sessionKey }
+                );
+
+                const { active, reason } = res.data || {};
+
+                if (active) return;
+
+                if (terminatedRef.current) return;
+
+                let msg = "회의 연결이 종료되었습니다.";
+
+                if (reason === "SESSION_REPLACED") {
+                    msg =
+                        "다른 브라우저 또는 기기에서 이 계정으로 다시 회의에 접속하여, 현재 접속이 종료됩니다.";
+                } else if (reason === "MEETING_FINISHED") {
+                    msg = "회의 시간이 종료되었습니다.";
+                } else if (reason === "MEETING_CANCELED") {
+                    msg = "회의가 취소되었습니다.";
+                } else if (reason === "NOT_JOINED") {
+                    msg = "현재 회의 참가자로 등록되어 있지 않습니다.";
+                }
+
+                handleTerminateAndLeave(msg);
+            } catch (e) {
+                console.error("회의 상태 ping 실패", e);
+            }
+        }, 10000);
+
+        return () => clearInterval(interval);
+    }, [meetingId, sessionKey, terminated, handleTerminateAndLeave]);
+
+    const renderStatusText = () => {
+        if (!isSupported) return "이 브라우저는 WebRTC를 지원하지 않습니다.";
+        if (isLoadingJoinInfo) return "회의 입장 정보를 불러오는 중입니다...";
+        if (error) return error;
+        if (janusError) return janusError;
+        if (isConnecting) return "회의에 접속 중입니다...";
+        if (isConnected) return "회의에 접속되었습니다.";
+        return "";
     };
 
-    if (error) {
+    if (error && !joinInfo) {
         return (
-            <div
-                style={{
-                    maxWidth: 1000,
-                    margin: "40px auto",
-                    padding: "0 16px",
-                }}
-            >
-                <p style={{ color: "red" }}>{error}</p>
-                <button onClick={() => navigate("/meetings")}>
+            <div className="meeting-join-page__error-wrap">
+                <p className="meeting-join-page__error-text">{error}</p>
+                <button
+                    className="meeting-join-page__back-button"
+                    onClick={() => navigate("/meetings")}
+                >
                     목록으로 돌아가기
                 </button>
             </div>
@@ -124,180 +334,99 @@ function MeetingJoinPage() {
 
     if (!joinInfo) {
         return (
-            <div
-                style={{
-                    maxWidth: 1000,
-                    margin: "40px auto",
-                    padding: "0 16px",
-                }}
-            >
+            <div className="meeting-join-page__error-wrap">
                 <p>회의 입장 정보를 불러오는 중입니다...</p>
             </div>
         );
     }
 
     return (
-        <div
-            style={{
-                minHeight: "100vh",
-                padding: "24px",
-                background: "#f3f4f6", // 연한 회색 배경
-                boxSizing: "border-box",
-            }}
-        >
+        <div className="meeting-join-page">
             {/* 상단 헤더 */}
-            <div
-                style={{
-                    maxWidth: 1200,
-                    margin: "0 auto 16px",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                }}
-            >
+            <div className="meeting-join-page__header">
                 <div>
-                    <div style={{ fontSize: 13, color: "#6b7280" }}>
+                    <div className="meeting-join-page__subtitle">
                         GREEN LMS · 화상 회의
                     </div>
-                    <h2
-                        style={{
-                            margin: "4px 0 2px",
-                            fontSize: 20,
-                            color: "#111827",
-                        }}
-                    >
+                    <h2 className="meeting-join-page__title">
                         {joinInfo.title}
                     </h2>
-                    <div style={{ fontSize: 13, color: "#6b7280" }}>
+
+                    <div className="meeting-join-page__meta">
                         방 번호 {joinInfo.roomNumber} · {joinInfo.displayName} (
                         {joinInfo.userRole})
+                    </div>
+
+                    <div className="meeting-join-page__status">
+                        {renderStatusText()}
                     </div>
                 </div>
                 <button
                     onClick={handleLeave}
-                    style={{
-                        padding: "8px 14px",
-                        borderRadius: 999,
-                        border: "1px solid #fecaca",
-                        background: "#fef2f2",
-                        color: "#b91c1c",
-                        cursor: "pointer",
-                        fontSize: 13,
-                    }}
+                    className="meeting-join-page__leave-button"
                 >
                     회의 나가기
                 </button>
             </div>
 
-            {/* 메인 레이아웃: 좌측 비디오 / 우측 패널 */}
-            <div
-                style={{
-                    maxWidth: 1200,
-                    margin: "0 auto",
-                    display: "grid",
-                    gridTemplateColumns:
-                        "minmax(0, 3.5fr) minmax(260px, 1.4fr)",
-                    gap: 16,
-                }}
-            >
-                {/* 🔹 비디오 영역 컨테이너 (id="videos" 는 Janus용) */}
-                <div
-                    id="videos"
-                    style={{
-                        background: "#ffffff",
-                        borderRadius: 16,
-                        padding: 16,
-                        boxShadow:
-                            "0 10px 20px rgba(15,23,42,0.05), 0 0 0 1px #e5e7eb",
-                        display: "flex",
-                        flexDirection: "column",
-                        minHeight: 520,
-                    }}
-                >
-                    {/* 메인 비디오 영역 */}
-                    <div
-                        style={{
-                            flex: 1,
-                            display: "grid",
-                            gridTemplateColumns:
-                                "repeat(auto-fit, minmax(260px, 1fr))",
-                            gap: 12,
-                            alignItems: "stretch",
-                            justifyItems: "stretch",
-                        }}
-                    >
-                        {/* 내 영상: 혼자 있을 땐 이 슬롯 하나만 꽉 채워짐 */}
-                        <div
-                            id="videolocal"
-                            style={{
-                                borderRadius: 16,
-                                overflow: "hidden",
-                                background: "#0f172a",
-                                position: "relative",
-                                minHeight: 260,
-                            }}
-                        >
-                            {/* 로컬 이름 라벨 */}
-                            <div
-                                style={{
-                                    position: "absolute",
-                                    left: 8,
-                                    bottom: 8,
-                                    padding: "4px 8px",
-                                    borderRadius: 999,
-                                    background: "rgba(15,23,42,0.75)",
-                                    fontSize: 11,
-                                    color: "#e5e7eb",
-                                }}
-                            >
-                                나
-                            </div>
+            {/* 메인 레이아웃 */}
+            <div className="meeting-join-page__main">
+                {/* 비디오 영역 */}
+                <div id="videos" className="meeting-video">
+                    <div className="meeting-video__grid">
+                        <div id="videolocal" className="meeting-video__local">
+                            <div className="meeting-video__label">나</div>
                         </div>
 
-                        {/* 다자간용 슬롯
-                            - 2명일 땐 videolocal + videoremote1 → 2개가 横으로 배치
-                            - 3명 이상이면 자동으로 2x2, 3x2처럼 그리드로 늘어남
-                         */}
-                        <div id="videoremote1" style={remoteSlotStyle} />
-                        <div id="videoremote2" style={remoteSlotStyle} />
-                        <div id="videoremote3" style={remoteSlotStyle} />
-                        <div id="videoremote4" style={remoteSlotStyle} />
-                        <div id="videoremote5" style={remoteSlotStyle} />
-                        <div id="videoremote6" style={remoteSlotStyle} />
+                        <div
+                            id="videoremote1"
+                            className="meeting-video__remote"
+                        />
+                        <div
+                            id="videoremote2"
+                            className="meeting-video__remote"
+                        />
+                        <div
+                            id="videoremote3"
+                            className="meeting-video__remote"
+                        />
+                        <div
+                            id="videoremote4"
+                            className="meeting-video__remote"
+                        />
+                        <div
+                            id="videoremote5"
+                            className="meeting-video__remote"
+                        />
+                        <div
+                            id="videoremote6"
+                            className="meeting-video__remote"
+                        />
                     </div>
 
-                    {/* 하단 컨트롤 바 */}
-                    <div
-                        style={{
-                            marginTop: 12,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: 12,
-                        }}
-                    >
-                        <button id="btn-toggle-mic" style={controlButtonStyle}>
+                    {/* 컨트롤 바 */}
+                    <div className="meeting-video__controls">
+                        <button
+                            id="btn-toggle-mic"
+                            className="meeting-video__control-btn"
+                        >
                             🎙
                         </button>
                         <button
                             id="btn-toggle-camera"
-                            style={controlButtonStyle}
+                            className="meeting-video__control-btn"
                         >
                             🎥
                         </button>
                         <button
                             id="btn-screen-share"
-                            style={controlButtonStyle}
+                            className="meeting-video__control-btn"
                         >
                             🖥
                         </button>
                         <button
                             id="btn-end-call"
-                            style={{
-                                ...controlButtonStyle,
-                                background: "#ef4444",
-                                color: "white",
-                            }}
+                            className="meeting-video__control-btn meeting-video__control-btn--danger"
                             onClick={handleLeave}
                         >
                             ⏹
@@ -305,103 +434,30 @@ function MeetingJoinPage() {
                     </div>
                 </div>
 
-                {/* 🔹 오른쪽 패널 (채팅/참가자) */}
-                <div
-                    style={{
-                        background: "#ffffff",
-                        borderRadius: 16,
-                        padding: 16,
-                        boxShadow:
-                            "0 10px 20px rgba(15,23,42,0.05), 0 0 0 1px #e5e7eb",
-                        display: "flex",
-                        flexDirection: "column",
-                        minHeight: 520,
-                    }}
-                >
-                    {/* 탭 헤더 (UI만, 실제 탭 전환은 나중에) */}
-                    <div
-                        style={{
-                            display: "flex",
-                            marginBottom: 12,
-                            borderRadius: 999,
-                            background: "#f3f4f6",
-                            padding: 4,
-                        }}
-                    >
-                        <div
-                            style={{
-                                flex: 1,
-                                textAlign: "center",
-                                padding: "6px 0",
-                                borderRadius: 999,
-                                background: "white",
-                                fontSize: 13,
-                                border: "1px solid #e5e7eb",
-                                boxShadow: "0 1px 2px rgba(15,23,42,0.04)",
-                            }}
-                        >
+                {/* 오른쪽 패널 */}
+                <div className="meeting-side">
+                    <div className="meeting-side__tabs">
+                        <div className="meeting-side__tab meeting-side__tab--active">
                             채팅
                         </div>
-                        <div
-                            style={{
-                                flex: 1,
-                                textAlign: "center",
-                                padding: "6px 0",
-                                borderRadius: 999,
-                                fontSize: 13,
-                                color: "#6b7280",
-                            }}
-                        >
-                            참가자
-                        </div>
+                        <div className="meeting-side__tab">참가자</div>
                     </div>
 
-                    {/* 채팅 영역 (일단 더미) */}
-                    <div
-                        id="chat-area"
-                        style={{
-                            flex: 1,
-                            borderRadius: 12,
-                            background: "#f9fafb",
-                            padding: 12,
-                            overflowY: "auto",
-                            fontSize: 13,
-                            border: "1px solid #e5e7eb",
-                        }}
-                    >
-                        {/* 나중에 WebSocket 채팅 붙일 자리 */}
-                        <div style={{ color: "#9ca3af" }}>
+                    <div id="chat-area" className="meeting-side__chat">
+                        <div className="meeting-side__chat-empty">
                             아직 채팅이 없습니다. 메시지를 입력해보세요.
                         </div>
                     </div>
 
-                    {/* 입력창 */}
-                    <div style={{ marginTop: 10, display: "flex", gap: 8 }}>
+                    <div className="meeting-side__input-row">
                         <input
                             id="chat-input"
                             placeholder="메시지 입력..."
-                            style={{
-                                flex: 1,
-                                borderRadius: 999,
-                                border: "1px solid #d1d5db",
-                                padding: "8px 12px",
-                                fontSize: 13,
-                                background: "#ffffff",
-                                color: "#111827",
-                                outline: "none",
-                            }}
+                            className="meeting-side__input"
                         />
                         <button
                             id="chat-send"
-                            style={{
-                                padding: "8px 14px",
-                                borderRadius: 999,
-                                border: "none",
-                                background: "#2563eb",
-                                color: "white",
-                                fontSize: 13,
-                                cursor: "pointer",
-                            }}
+                            className="meeting-side__send-button"
                         >
                             전송
                         </button>
@@ -411,24 +467,5 @@ function MeetingJoinPage() {
         </div>
     );
 }
-
-const controlButtonStyle = {
-    width: 40,
-    height: 40,
-    borderRadius: 999,
-    border: "1px solid #e5e7eb",
-    background: "#ffffff",
-    color: "#111827",
-    fontSize: 18,
-    cursor: "pointer",
-    boxShadow: "0 1px 2px rgba(15,23,42,0.06)",
-};
-
-const remoteSlotStyle = {
-    borderRadius: 16,
-    overflow: "hidden",
-    background: "#e5e7eb",
-    minHeight: 180,
-};
 
 export default MeetingJoinPage;
