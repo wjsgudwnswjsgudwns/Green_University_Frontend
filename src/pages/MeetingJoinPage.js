@@ -12,6 +12,7 @@ function MeetingJoinPage() {
 
     // 이미 종료 처리했는지 여부 (재진입 방지)
     const terminatedRef = useRef(false);
+    const leaveRoomRef = useRef(null);
 
     // MeetingDetailPage 에서 넘긴 state (info)
     const stateJoinInfo = location.state?.info || null;
@@ -38,13 +39,8 @@ function MeetingJoinPage() {
             terminatedRef.current = true;
             setTerminated(true);
 
-            // 1) 회의 정리 + 목록 이동
-            //    (leaveRoom은 아래 useJanusLocalOnly에서 넘어오는 함수)
             try {
-                // 이 시점에서는 첫 렌더가 끝난 뒤라 leaveRoom이 초기화된 상태에서만 호출됨
-                // (deps에 leaveRoom을 넣지 않아 TDZ 문제 없음)
-                // eslint-disable-next-line no-undef
-                leaveRoom?.();
+                leaveRoomRef.current?.();
             } catch (e) {
                 console.error("leaveRoom 호출 중 오류", e);
             }
@@ -68,6 +64,10 @@ function MeetingJoinPage() {
         error: janusError,
         joinRoom,
         leaveRoom,
+        audioEnabled,
+        videoEnabled,
+        toggleAudio,
+        toggleVideo,
     } = useJanusLocalOnly(undefined, {
         onRemoteParticipantsChanged: async () => {
             console.log(
@@ -188,6 +188,8 @@ function MeetingJoinPage() {
     }, [meetingId, hasJoined, leaveRoom, navigate]);
 
     const handleLeave = async () => {
+        terminatedRef.current = true;
+        setTerminated(true);
         try {
             if (hasJoined) {
                 await api.post(`/api/meetings/${meetingId}/participants/leave`);
@@ -237,6 +239,13 @@ function MeetingJoinPage() {
         if (!joinInfo) return;
         if (!scriptsLoaded) {
             console.log("[MeetingJoinPage] scripts 아직 로드 안 됨, 대기");
+            return;
+        }
+
+        if (terminatedRef.current) {
+            console.log(
+                "[MeetingJoinPage] 이미 terminated 상태라 joinRoom 스킵"
+            );
             return;
         }
 
@@ -307,6 +316,10 @@ function MeetingJoinPage() {
 
         return () => clearInterval(interval);
     }, [meetingId, sessionKey, terminated, handleTerminateAndLeave]);
+
+    useEffect(() => {
+        leaveRoomRef.current = leaveRoom;
+    }, [leaveRoom]);
 
     const renderStatusText = () => {
         if (!isSupported) return "이 브라우저는 WebRTC를 지원하지 않습니다.";
@@ -408,26 +421,43 @@ function MeetingJoinPage() {
                     <div className="meeting-video__controls">
                         <button
                             id="btn-toggle-mic"
-                            className="meeting-video__control-btn"
+                            className={`meeting-video__control-btn ${
+                                audioEnabled
+                                    ? ""
+                                    : "meeting-video__control-btn--off"
+                            }`}
+                            onClick={toggleAudio}
+                            disabled={!isConnected}
                         >
-                            🎙
+                            {audioEnabled ? "🎙" : "🔇"}
                         </button>
+
                         <button
                             id="btn-toggle-camera"
-                            className="meeting-video__control-btn"
+                            className={`meeting-video__control-btn ${
+                                videoEnabled
+                                    ? ""
+                                    : "meeting-video__control-btn--off"
+                            }`}
+                            onClick={toggleVideo}
+                            disabled={!isConnected}
                         >
-                            🎥
+                            {videoEnabled ? "🎥" : "🚫"}
                         </button>
+
                         <button
                             id="btn-screen-share"
                             className="meeting-video__control-btn"
+                            disabled
                         >
                             🖥
                         </button>
+
                         <button
                             id="btn-end-call"
                             className="meeting-video__control-btn meeting-video__control-btn--danger"
                             onClick={handleLeave}
+                            disabled={!isConnected && !isConnecting}
                         >
                             ⏹
                         </button>
