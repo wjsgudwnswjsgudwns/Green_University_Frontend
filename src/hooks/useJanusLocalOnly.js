@@ -17,6 +17,15 @@ export function useJanusLocalOnly(
 
     const remoteChangedRef = useRef(null);
 
+    // 훅 존재 여부
+    const mountedRef = useRef(false);
+    useEffect(() => {
+        mountedRef.current = true;
+        return () => {
+            mountedRef.current = false;
+        };
+    }, []);
+
     useEffect(() => {
         remoteChangedRef.current = onRemoteParticipantsChanged;
     }, [onRemoteParticipantsChanged]);
@@ -43,6 +52,27 @@ export function useJanusLocalOnly(
     const [isConnecting, setIsConnecting] = useState(false); // 접속 여부
     const [isConnected, setIsConnected] = useState(false); // 방 여부
     const [error, setError] = useState(null); // 에러메세지
+
+    // 현재 오디오/비디오 활성 상태
+    const [audioEnabled, setAudioEnabled] = useState(true);
+    const [videoEnabled, setVideoEnabled] = useState(true);
+
+    // 토글에서 최신 값을 쓰기 위한 ref
+    const audioEnabledRef = useRef(true);
+    const videoEnabledRef = useRef(true);
+    const isConnectedRef = useRef(false);
+
+    useEffect(() => {
+        audioEnabledRef.current = audioEnabled;
+    }, [audioEnabled]);
+
+    useEffect(() => {
+        videoEnabledRef.current = videoEnabled;
+    }, [videoEnabled]);
+
+    useEffect(() => {
+        isConnectedRef.current = isConnected;
+    }, [isConnected]);
 
     // ========== Janus 내부 객체 ==========
     const janusRef = useRef(null); // Janus 세션
@@ -114,6 +144,7 @@ export function useJanusLocalOnly(
 
         setIsConnecting(false);
         setIsConnected(false);
+        isConnectedRef.current = false;
     }, []);
     // ========== 송출 시작 ==========
     // 세션에 영상, 음성을 보냄
@@ -146,6 +177,8 @@ export function useJanusLocalOnly(
                     handle.send({ message: body, jsep });
                     setIsConnected(true);
                     setIsConnecting(false);
+                    setAudioEnabled(useAudio);
+                    setVideoEnabled(useVideo);
                 },
                 error: (err) => {
                     console.error("createOffer error:", err);
@@ -310,17 +343,36 @@ export function useJanusLocalOnly(
             const Janus = window.Janus;
             if (!Janus) return;
 
-            janusRef.current = new Janus({
+            const janus = new Janus({
                 server: serverUrl,
 
                 // 세션 생성 성공
                 success: () => {
                     console.log("[useJanusLocalOnly] Janus 세션 생성 성공");
 
+                    if (!mountedRef.current) {
+                        console.warn(
+                            "[useJanusLocalOnly] unmounted 상태에서 세션 성공 콜백"
+                        );
+                        janus.destroy({
+                            success: () =>
+                                console.log(
+                                    "[useJanusLocalOnly] orphan janus destroyed (unmounted)"
+                                ),
+                        });
+                        return;
+                    }
+
                     if (!janusRef.current) {
                         console.warn(
                             "[useJanusLocalOnly] 세션 성공 콜백 시점에 janusRef가 null (이미 정리된 상태)"
                         );
+                        janus.destroy({
+                            success: () =>
+                                console.log(
+                                    "[useJanusLocalOnly] orphan janus destroyed (janusRef null)"
+                                ),
+                        });
                         setIsConnecting(false);
                         return;
                     }
@@ -385,6 +437,54 @@ export function useJanusLocalOnly(
                                 if (pluginRef.current) {
                                     pluginRef.current.send({
                                         message: createBody,
+                                        success: (result) => {
+                                            // ⬇️ 여기로 아까 로그에 나온 "created" 응답이 들어옴
+                                            const data =
+                                                (result.plugindata &&
+                                                    result.plugindata.data) ||
+                                                result ||
+                                                {};
+                                            console.log(
+                                                "[publisher] room create success:",
+                                                data
+                                            );
+
+                                            if (data.videoroom === "created") {
+                                                const newRoom = data.room;
+                                                console.log(
+                                                    "[publisher] room created:",
+                                                    newRoom
+                                                );
+
+                                                const joinMsg = {
+                                                    request: "join",
+                                                    room: newRoom,
+                                                    ptype: "publisher",
+                                                    display:
+                                                        displayName || "User",
+                                                };
+                                                try {
+                                                    pluginRef.current.send({
+                                                        message: joinMsg,
+                                                    });
+                                                } catch (e) {
+                                                    console.error(
+                                                        "[publisher] send join after create error:",
+                                                        e
+                                                    );
+                                                }
+                                            }
+                                        },
+                                        error: (err) => {
+                                            console.error(
+                                                "[publisher] room create error:",
+                                                err
+                                            );
+                                            setError(
+                                                "회의 방 생성 중 오류가 발생했습니다."
+                                            );
+                                            setIsConnecting(false);
+                                        },
                                     });
                                 }
                                 return;
@@ -573,13 +673,71 @@ export function useJanusLocalOnly(
                 // 세션 삭제
                 destroyed: () => {
                     console.log("[useJanusLocalOnly] Janus destroyed");
-                    setIsConnecting(false);
-                    setIsConnected(false);
+                    cleanup(true);
                 },
             });
+            janusRef.current = janus;
         },
         [serverUrl, cleanup, publishLocalStream]
     );
+    // ========== 오디오/비디오 토글 ==========
+
+    const toggleAudio = useCallback(() => {
+        const Janus = window.Janus;
+        const handle = pluginRef.current;
+        if (!Janus || !handle) return;
+
+        if (!isConnectedRef.current) {
+            console.log("[useJanusLocalOnly] 아직 연결 전이라 audio 토글 무시");
+            return;
+        }
+
+        const nextAudio = !audioEnabledRef.current;
+        console.log("[useJanusLocalOnly] toggleAudio ->", nextAudio);
+
+        // Janus에 재설정 (새 offer로 재협상)
+        publishLocalStream(nextAudio, videoEnabledRef.current);
+
+        // 로컬 트랙에도 바로 반영 (UX용)
+        try {
+            if (localStreamRef.current) {
+                localStreamRef.current
+                    .getAudioTracks()
+                    .forEach((t) => (t.enabled = nextAudio));
+            }
+        } catch (e) {
+            console.warn("toggleAudio local track error", e);
+        }
+    }, [publishLocalStream]);
+
+    const toggleVideo = useCallback(() => {
+        const Janus = window.Janus;
+        const handle = pluginRef.current;
+        if (!Janus || !handle) return;
+
+        if (!isConnectedRef.current) {
+            console.log("[useJanusLocalOnly] 아직 연결 전이라 video 토글 무시");
+            return;
+        }
+
+        const nextVideo = !videoEnabledRef.current;
+        console.log("[useJanusLocalOnly] toggleVideo ->", nextVideo);
+
+        // Janus에 재설정 (새 offer로 재협상)
+        publishLocalStream(audioEnabledRef.current, nextVideo);
+
+        // 로컬 트랙에도 바로 반영
+        try {
+            if (localStreamRef.current) {
+                localStreamRef.current
+                    .getVideoTracks()
+                    .forEach((t) => (t.enabled = nextVideo));
+            }
+        } catch (e) {
+            console.warn("toggleVideo local track error", e);
+        }
+    }, [publishLocalStream]);
+
     // ========== 회의 입장 시작 ==========
 
     const joinRoom = useCallback(
@@ -607,6 +765,13 @@ export function useJanusLocalOnly(
 
             // Janus 연결 가능 상태 => 세션 플러그인 생성 시작
             const start = () => {
+                if (!mountedRef.current) {
+                    console.log(
+                        "[useJanusLocalOnly] unmounted 상태에서 start 호출, 스킵"
+                    );
+                    setIsConnecting(false);
+                    return;
+                }
                 if (!initedRef.current) {
                     Janus.init({
                         debug: "all",
@@ -658,6 +823,10 @@ export function useJanusLocalOnly(
         isConnecting,
         isConnected,
         error,
+        audioEnabled,
+        videoEnabled,
+        toggleAudio,
+        toggleVideo,
         joinRoom,
         leaveRoom,
     };
