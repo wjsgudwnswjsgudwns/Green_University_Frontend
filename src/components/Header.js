@@ -23,7 +23,7 @@ export default function Header() {
         menuItems = [
           { label: "홈", path: "/" },
           { label: "MY", path: "/professor/info" },
-          { label: "수업", path: "/professor/subjects" },
+          { label: "수업", path: "/subject/list/:page" },
           { label: "학사정보", path: "/board/notice" },
         ];
         break;
@@ -33,7 +33,7 @@ export default function Header() {
           { label: "홈", path: "/" },
           { label: "MY", path: "/staff/info" },
           { label: "학사관리", path: "/staff/student-list/" },
-          { label: "등록", path: "/admin/register" },
+          { label: "등록", path: "/staff/admin/college" },
           { label: "학사정보", path: "/board/notice" },
         ];
         break;
