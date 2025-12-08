@@ -13,8 +13,8 @@ export default function Header() {
         menuItems = [
           { label: "홈", path: "/" },
           { label: "MY", path: "/student/info" },
-          { label: "수업", path: "/student/subjects" },
-          { label: "수강신청", path: "/student/registration" },
+          { label: "수업", path: "/subject/list/1" },
+          { label: "수강신청", path: "/sugang/subjectlist" },
           { label: "성적", path: "/student/grades" },
           { label: "학사정보", path: "/board/notice" },
         ];

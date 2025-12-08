@@ -1,0 +1,106 @@
+/* CreateTuitionBill.css - 등록금 고지서 발송(관리자) 페이지 스타일 */
+
+/* 메인 컨테이너 */
+.create-bill-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-width: 100em;
+  padding: 20px;
+}
+
+/* --- 메인 컨텐츠 영역 --- */
+main {
+  flex: 1;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 40px;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+main h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0 0 20px 0;
+}
+
+.split--div {
+  height: 2px;
+  background: linear-gradient(90deg, #216d30 0%, rgba(33, 109, 48, 0.2) 100%);
+  margin-bottom: 40px;
+}
+
+/* --- 생성 버튼 (.create--tui) --- */
+.create--tui {
+  align-self: flex-start; /* 왼쪽 정렬, 필요시 center */
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 16px 32px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(33, 109, 48, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 버튼 아이콘 효과 (만약 아이콘이 추가된다면) */
+.create--tui::before {
+  content: "📤"; /* 발송 아이콘 예시 */
+  font-size: 1.2rem;
+}
+
+.create--tui:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1a5524 0%, #0e2b14 100%);
+  box-shadow: 0 6px 16px rgba(33, 109, 48, 0.4);
+  transform: translateY(-2px);
+}
+
+.create--tui:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.create--tui:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.7;
+}
+
+/* 로딩 상태일 때 스피너 효과 (옵션) */
+.create--tui:disabled::after {
+  content: "";
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-left: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 안내 문구 (필요시 추가) */
+.info-text {
+  margin-top: 20px;
+  color: #5a6c7d;
+  font-size: 0.95rem;
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 6px;
+  border-left: 4px solid #216d30;
+}

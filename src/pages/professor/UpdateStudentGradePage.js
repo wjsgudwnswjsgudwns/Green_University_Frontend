@@ -119,11 +119,11 @@ export default function UpdateStudentGradePage() {
           <h2>수업</h2>
         </div>
         <div className="sub--menu--mid">
-          <table className="sub--menu--table" border="1">
+          <table className="sub--menu--table">
             <tbody>
               <tr>
                 <td>
-                  <a href="/subject/list">전체 강의 조회</a>
+                  <a href="/subject/list/1">전체 강의 조회</a>
                 </td>
               </tr>
               <tr>

@@ -193,7 +193,6 @@ export default function SubjectListPage() {
           </div>
 
           <button type="submit" className="search-button">
-            <span className="material-symbols-outlined">search</span>
             조회
           </button>
         </form>
@@ -243,9 +242,6 @@ export default function SubjectListPage() {
                           className="syllabus-button"
                           onClick={() => handleSyllabusClick(subject.id)}
                         >
-                          {/* <span className="material-symbols-outlined">
-                            content_paste_search
-                          </span> */}
                           조회
                         </button>
                       </td>

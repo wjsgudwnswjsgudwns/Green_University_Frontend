@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -44,12 +44,16 @@ import DepartmentManagement from "./pages/admin/DepartmentManagement";
 import RoomManagement from "./pages/admin/RoomManagement";
 import TuitionManagement from "./pages/admin/TuitionManagement";
 import SubjectManagement from "./pages/admin/SubjectManagement";
+import SubjectList from "./pages/sugang/SubjectList";
+import PreAppList from "./pages/sugang/PreAppList";
+import PreApplication from "./pages/sugang/PreApplication";
+import AppList from "./pages/sugang/AppList";
+import Application from "./pages/sugang/Application";
+import UpdatePeriodPage from "./pages/sugang/UpdatePeriodPage";
+import CreateTuitionBillPage from "./pages/tuition/CreateTuitionBillPage";
+import TuitionListPage from "./pages/tuition/TuitionListPage";
+import TuitionPaymentPage from "./pages/tuition/TuitionPaymentPage";
 
-/**
- * A wrapper for routes requiring authentication. If a user is not
- * authenticated, they will be redirected to the login page. Optionally
- * role based access control can be implemented by passing a role prop.
- */
 function PrivateRoute({ children, role }) {
   const { user } = useAuth();
   if (!user) {
@@ -62,16 +66,23 @@ function PrivateRoute({ children, role }) {
   return children;
 }
 
-export default function App() {
+function Layout() {
+  const location = useLocation();
+
+  // 헤더와 푸터를 숨길 경로들
+  const hideHeaderFooterPaths = ["/login", "/find-id", "/find-password"];
+  const shouldHideHeaderFooter = hideHeaderFooterPaths.includes(
+    location.pathname
+  );
+
   return (
-    <AuthProvider>
-      <Header />
+    <>
+      {!shouldHideHeaderFooter && <Header />}
       <Routes>
         {/* Public routes */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/find-id" element={<FindIdPage />} />
         <Route path="/find-password" element={<FindPasswordPage />} />
-
         <Route
           path="/student/break/application"
           element={<BreakApplication />}
@@ -80,13 +91,11 @@ export default function App() {
         <Route path="/student/break/detail/:id" element={<BreakDetail />} />
         <Route path="/staff/break/list" element={<BreakListStaff />} />
         <Route path="/staff/break/detail/:id" element={<BreakDetail />} />
-
         <Route path="/staff/student-list" element={<StudentListStaff />} />
         <Route
           path="/staff/student-list/:page"
           element={<StudentListStaff />}
         />
-
         <Route
           path="/board/notice"
           element={
@@ -119,7 +128,6 @@ export default function App() {
             </PrivateRoute>
           }
         />
-
         <Route
           path="/schedule"
           element={
@@ -144,7 +152,6 @@ export default function App() {
             </PrivateRoute>
           }
         />
-
         <Route
           path="/schedule/register"
           element={
@@ -153,7 +160,6 @@ export default function App() {
             </PrivateRoute>
           }
         />
-
         <Route path="/staff/professor-list" element={<ProfessorListStaff />} />
         <Route
           path="/staff/professor-list/:page"
@@ -165,7 +171,6 @@ export default function App() {
           element={<RegisterProfessor />}
         />
         <Route path="/staff/register-staff" element={<RegisterStaff />} />
-
         <Route
           path="/professor/subject"
           element={
@@ -190,7 +195,6 @@ export default function App() {
             </PrivateRoute>
           }
         />
-
         <Route
           path="/professor/syllabus/:subjectId"
           element={
@@ -199,7 +203,6 @@ export default function App() {
             </PrivateRoute>
           }
         />
-
         <Route
           path="/professor/syllabus/edit/:subjectId"
           element={
@@ -208,7 +211,6 @@ export default function App() {
             </PrivateRoute>
           }
         />
-
         <Route
           path="/subject/list/:page"
           element={
@@ -217,6 +219,75 @@ export default function App() {
             </PrivateRoute>
           }
         />
+        <Route
+          path="/sugang/preAppList"
+          element={
+            <PrivateRoute>
+              <PreAppList />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/sugang/pre"
+          element={
+            <PrivateRoute>
+              <PreApplication />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/sugang/list"
+          element={
+            <PrivateRoute>
+              <AppList />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/sugang/application"
+          element={
+            <PrivateRoute>
+              <Application />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/staff/course-period"
+          element={
+            <PrivateRoute role="staff">
+              <UpdatePeriodPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/staff/tuition/bill"
+          element={
+            <PrivateRoute role="staff">
+              <CreateTuitionBillPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/student/tuition/list"
+          element={
+            <PrivateRoute role="student">
+              <TuitionListPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/student/tuition/payment"
+          element={
+            <PrivateRoute>
+              <TuitionPaymentPage />
+            </PrivateRoute>
+          }
+        />
+
         <Route
           path="/subject/syllabus/:subjectId"
           element={
@@ -235,7 +306,6 @@ export default function App() {
             </PrivateRoute>
           }
         />
-
         {/* Student routes */}
         <Route
           path="/student/info"
@@ -285,7 +355,6 @@ export default function App() {
             </PrivateRoute>
           }
         />
-
         {/* Professor routes */}
         <Route
           path="/professor/info"
@@ -311,7 +380,6 @@ export default function App() {
             </PrivateRoute>
           }
         />
-
         {/* Staff routes */}
         <Route
           path="/staff/info"
@@ -337,7 +405,6 @@ export default function App() {
             </PrivateRoute>
           }
         />
-
         {/* Board routes */}
         <Route
           path="/board/notice"
@@ -355,7 +422,6 @@ export default function App() {
             </PrivateRoute>
           }
         />
-
         {/* Schedule routes */}
         <Route
           path="/schedule"
@@ -373,7 +439,7 @@ export default function App() {
             </PrivateRoute>
           }
         />
-
+        <Route path="/sugang/subjectlist" element={<SubjectList />} />
         {/* Admin registration routes (staff role) */}
         <Route
           path="/staff/admin"
@@ -415,7 +481,6 @@ export default function App() {
             </PrivateRoute>
           }
         />
-
         <Route
           path="/staff/admin/subject"
           element={
@@ -424,11 +489,18 @@ export default function App() {
             </PrivateRoute>
           }
         />
-
         {/* Catch-all route for undefined paths */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-      <Footer />
+      {!shouldHideHeaderFooter && <Footer />}
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <Layout />
     </AuthProvider>
   );
 }

@@ -1,23 +1,16 @@
-import React, { useState } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
-import '../../styles/adminRegister.css';
+import React, { useState } from "react";
+import { Outlet, Link, useLocation } from "react-router-dom";
+import "../../styles/adminRegister.css";
 
-/**
- * AdminRegisterPage wraps a set of subpages used for managing
- * fundamental entities such as colleges, departments, rooms, subjects
- * and tuition. A sidebar allows administrators to navigate between
- * sections. Nested routes display the appropriate component in the
- * main area. This mirrors the sub-menu structure of the JSP pages.
- */
 export default function AdminRegisterPage() {
   const location = useLocation();
-  const basePath = '/admin/register';
+  const basePath = "/admin/register";
   const menu = [
-    { label: '단과대학', path: `${basePath}/college` },
-    { label: '학과', path: `${basePath}/department` },
-    { label: '강의실', path: `${basePath}/room` },
-    { label: '강의', path: `${basePath}/subject` },
-    { label: '등록금', path: `${basePath}/tuition` },
+    { label: "단과대학", path: `${basePath}/college` },
+    { label: "학과", path: `${basePath}/department` },
+    { label: "강의실", path: `${basePath}/room` },
+    { label: "강의", path: `${basePath}/subject` },
+    { label: "등록금", path: `${basePath}/tuition` },
   ];
 
   return (
@@ -28,7 +21,10 @@ export default function AdminRegisterPage() {
           <nav>
             <ul>
               {menu.map((item) => (
-                <li key={item.path} className={location.pathname === item.path ? 'selected' : ''}>
+                <li
+                  key={item.path}
+                  className={location.pathname === item.path ? "selected" : ""}
+                >
                   <Link to={item.path}>{item.label}</Link>
                 </li>
               ))}

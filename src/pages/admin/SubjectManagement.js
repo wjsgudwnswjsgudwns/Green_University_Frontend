@@ -15,6 +15,17 @@ export default function SubjectManagement() {
   const [error, setError] = useState("");
   const [crud, setCrud] = useState(searchParams.get("crud") || "select");
 
+  // 페이징 관련 상태
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+  const [pageSize] = useState(10);
+
+  // 검색 관련 상태
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [updateSearchKeyword, setUpdateSearchKeyword] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+
   const [formData, setFormData] = useState({
     id: "",
     name: "",
@@ -31,32 +42,18 @@ export default function SubjectManagement() {
     capacity: "",
   });
 
-  useEffect(() => {
-    if (user?.userRole !== "staff") {
-      navigate("/");
-      return;
-    }
-    fetchData();
-  }, [user, navigate]);
-
-  useEffect(() => {
-    const crudParam = searchParams.get("crud") || "select";
-    setCrud(crudParam);
-  }, [searchParams]);
-
   const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await api.get(`/api/admin/subject?crud=${crud}`);
+      const searchParam = searchKeyword
+        ? `&search=${encodeURIComponent(searchKeyword)}`
+        : "";
+      const response = await api.get(
+        `/api/admin/subject?crud=${crud}&page=${currentPage}&size=${pageSize}${searchParam}`
+      );
       setSubjectList(response.data.subjectList || []);
-
-      // 수정 모드일 때 첫 번째 강의를 기본값으로 설정
-      if (crud === "update" && response.data.subjectList?.length > 0) {
-        setFormData((prev) => ({
-          ...prev,
-          id: response.data.subjectList[0].id,
-        }));
-      }
+      setTotalPages(response.data.totalPages || 0);
+      setTotalElements(response.data.totalElements || 0);
     } catch (err) {
       console.error("데이터 조회 실패:", err);
       setError("데이터를 불러오는데 실패했습니다.");
@@ -65,10 +62,28 @@ export default function SubjectManagement() {
     }
   };
 
+  useEffect(() => {
+    if (user?.userRole !== "staff") {
+      navigate("/");
+      return;
+    }
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, navigate, currentPage]);
+
+  useEffect(() => {
+    const crudParam = searchParams.get("crud") || "select";
+    setCrud(crudParam);
+  }, [searchParams]);
+
   const handleCrudChange = (newCrud) => {
     setSearchParams({ crud: newCrud });
     setCrud(newCrud);
     setError("");
+    setCurrentPage(0);
+    setSearchKeyword("");
+    setUpdateSearchKeyword("");
+    setSearchResults([]);
     setFormData({
       id: "",
       name: "",
@@ -84,14 +99,70 @@ export default function SubjectManagement() {
       grades: "",
       capacity: "",
     });
+  };
+
+  const handleSearch = () => {
+    setCurrentPage(0);
     fetchData();
+  };
+
+  const handleSearchKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
+  // 수정 모드용 실시간 검색
+  const handleUpdateSearch = async (keyword) => {
+    setUpdateSearchKeyword(keyword);
+
+    if (!keyword.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    try {
+      const response = await api.get(
+        `/api/admin/subject/search?keyword=${encodeURIComponent(keyword)}`
+      );
+      setSearchResults(response.data || []);
+    } catch (err) {
+      console.error("검색 실패:", err);
+      setSearchResults([]);
+    }
+  };
+
+  // 검색 결과에서 과목 선택
+  const handleSelectSubject = (subject) => {
+    setFormData({
+      id: subject.id,
+      name: subject.name,
+      professorId: subject.professor?.id || subject.professorId || "",
+      roomId: subject.room?.id || subject.roomId || "",
+      deptId: subject.department?.id || subject.deptId || "",
+      type: subject.type || "전공",
+      subYear: subject.subYear || "",
+      semester: subject.semester || "",
+      subDay: subject.subDay || "월",
+      startTime: subject.startTime || "",
+      endTime: subject.endTime || "",
+      grades: subject.grades || "",
+      capacity: subject.capacity || "",
+    });
+    setUpdateSearchKeyword(subject.name);
+    setSearchResults([]);
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 0 && newPage < totalPages) {
+      setCurrentPage(newPage);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    // 유효성 검사
     if (!formData.name.trim()) {
       setError("강의명을 입력해주세요.");
       return;
@@ -154,15 +225,20 @@ export default function SubjectManagement() {
     try {
       const requestData = {
         id: parseInt(formData.id),
-        name: formData.name,
-        professorId: parseInt(formData.professorId),
-        roomId: formData.roomId,
-        deptId: parseInt(formData.deptId),
-        subDay: formData.subDay,
-        startTime: parseInt(formData.startTime),
-        endTime: parseInt(formData.endTime),
-        capacity: parseInt(formData.capacity),
       };
+
+      // 값이 있는 필드만 추가
+      if (formData.name) requestData.name = formData.name;
+      if (formData.professorId)
+        requestData.professorId = parseInt(formData.professorId);
+      if (formData.roomId) requestData.roomId = formData.roomId;
+      if (formData.deptId) requestData.deptId = parseInt(formData.deptId);
+      if (formData.subDay) requestData.subDay = formData.subDay;
+      if (formData.startTime)
+        requestData.startTime = parseInt(formData.startTime);
+      if (formData.endTime) requestData.endTime = parseInt(formData.endTime);
+      if (formData.grades) requestData.grades = parseInt(formData.grades);
+      if (formData.capacity) requestData.capacity = parseInt(formData.capacity);
 
       await api.put("/api/admin/subject", requestData);
       alert("강의가 수정되었습니다.");
@@ -194,6 +270,7 @@ export default function SubjectManagement() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -204,6 +281,22 @@ export default function SubjectManagement() {
     const start =
       subject.startTime < 10 ? `0${subject.startTime}` : subject.startTime;
     return `${subject.subDay} ${start}:00-${subject.endTime}:00`;
+  };
+
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxPagesToShow = 5;
+    let startPage = Math.max(0, currentPage - Math.floor(maxPagesToShow / 2));
+    let endPage = Math.min(totalPages - 1, startPage + maxPagesToShow - 1);
+
+    if (endPage - startPage < maxPagesToShow - 1) {
+      startPage = Math.max(0, endPage - maxPagesToShow + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    return pages;
   };
 
   if (loading) {
@@ -269,6 +362,35 @@ export default function SubjectManagement() {
         </div>
 
         {error && <div className="error-message">{error}</div>}
+
+        {/* 검색 바 (조회/삭제 모드) */}
+        {(crud === "select" || crud === "delete") && (
+          <div className="search-bar">
+            <input
+              type="text"
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+              onKeyPress={handleSearchKeyPress}
+              placeholder="강의명으로 검색..."
+              className="search-input"
+            />
+            <button onClick={handleSearch} className="search-button">
+              검색
+            </button>
+            {searchKeyword && (
+              <button
+                onClick={() => {
+                  setSearchKeyword("");
+                  setCurrentPage(0);
+                  fetchData();
+                }}
+                className="search-clear-button"
+              >
+                초기화
+              </button>
+            )}
+          </div>
+        )}
 
         {/* 등록 폼 */}
         {crud === "insert" && (
@@ -429,91 +551,144 @@ export default function SubjectManagement() {
               <span className="form-title">수정하기</span>
             </div>
             <div className="form-content">
-              <select
-                name="id"
-                value={formData.id}
-                onChange={handleChange}
-                className="admin-select"
-                required
-              >
-                <option value="">수정할 강의 선택</option>
-                {subjectList.map((subject) => (
-                  <option key={subject.id} value={subject.id}>
-                    {subject.id} - {subject.name}
-                  </option>
-                ))}
-              </select>
-              <select
-                name="subDay"
-                value={formData.subDay}
-                onChange={handleChange}
-                className="admin-select"
-              >
-                <option value="월">월</option>
-                <option value="화">화</option>
-                <option value="수">수</option>
-                <option value="목">목</option>
-                <option value="금">금</option>
-              </select>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="강의명을 입력하세요"
-                className="admin-input"
-              />
-              <input
-                type="text"
-                name="roomId"
-                value={formData.roomId}
-                onChange={handleChange}
-                placeholder="강의실을 입력하세요"
-                className="admin-input"
-              />
-              <div className="form-row">
-                <label>변경 시작시간</label>
-                <select
-                  name="startTime"
-                  value={formData.startTime}
-                  onChange={handleChange}
-                  className="admin-select"
-                >
-                  <option value="">선택</option>
-                  {Array.from({ length: 8 }, (_, i) => i + 9).map((time) => (
-                    <option key={time} value={time}>
-                      {time}시
-                    </option>
-                  ))}
-                </select>
+              {/* 검색 입력 */}
+              <div className="search-select-wrapper">
+                <input
+                  type="text"
+                  value={updateSearchKeyword}
+                  onChange={(e) => handleUpdateSearch(e.target.value)}
+                  placeholder="수정할 강의를 검색하세요..."
+                  className="admin-input"
+                  autoComplete="off"
+                />
+
+                {/* 검색 결과 드롭다운 */}
+                {searchResults.length > 0 && (
+                  <div className="search-results-dropdown">
+                    {searchResults.map((subject) => (
+                      <div
+                        key={subject.id}
+                        className="search-result-item"
+                        onClick={() => handleSelectSubject(subject)}
+                      >
+                        <span className="result-id">ID: {subject.id}</span>
+                        <span className="result-name">{subject.name}</span>
+                        <span className="result-info">
+                          {subject.subYear}년 {subject.semester}학기
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-              <div className="form-row">
-                <label>변경 종료시간</label>
-                <select
-                  name="endTime"
-                  value={formData.endTime}
-                  onChange={handleChange}
-                  className="admin-select"
-                >
-                  <option value="">선택</option>
-                  {Array.from({ length: 8 }, (_, i) => i + 11).map((time) => (
-                    <option key={time} value={time}>
-                      {time}시
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <input
-                type="number"
-                name="capacity"
-                value={formData.capacity}
-                onChange={handleChange}
-                placeholder="정원을 입력하세요"
-                className="admin-input"
-              />
-              <button type="submit" className="admin-button">
-                수정
-              </button>
+
+              {formData.id && (
+                <>
+                  <div className="selected-subject-info">
+                    선택된 강의: ID {formData.id} - {formData.name}
+                  </div>
+
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="강의명을 입력하세요"
+                    className="admin-input"
+                  />
+                  <input
+                    type="number"
+                    name="professorId"
+                    value={formData.professorId}
+                    onChange={handleChange}
+                    placeholder="교수ID를 입력하세요"
+                    className="admin-input"
+                  />
+                  <input
+                    type="text"
+                    name="roomId"
+                    value={formData.roomId}
+                    onChange={handleChange}
+                    placeholder="강의실을 입력하세요"
+                    className="admin-input"
+                  />
+                  <input
+                    type="number"
+                    name="deptId"
+                    value={formData.deptId}
+                    onChange={handleChange}
+                    placeholder="학과ID를 입력하세요"
+                    className="admin-input"
+                  />
+                  <select
+                    name="subDay"
+                    value={formData.subDay}
+                    onChange={handleChange}
+                    className="admin-select"
+                  >
+                    <option value="월">월</option>
+                    <option value="화">화</option>
+                    <option value="수">수</option>
+                    <option value="목">목</option>
+                    <option value="금">금</option>
+                  </select>
+                  <div className="form-row">
+                    <label>변경 시작시간</label>
+                    <select
+                      name="startTime"
+                      value={formData.startTime}
+                      onChange={handleChange}
+                      className="admin-select"
+                    >
+                      <option value="">선택</option>
+                      {Array.from({ length: 8 }, (_, i) => i + 9).map(
+                        (time) => (
+                          <option key={time} value={time}>
+                            {time}시
+                          </option>
+                        )
+                      )}
+                    </select>
+                  </div>
+                  <div className="form-row">
+                    <label>변경 종료시간</label>
+                    <select
+                      name="endTime"
+                      value={formData.endTime}
+                      onChange={handleChange}
+                      className="admin-select"
+                    >
+                      <option value="">선택</option>
+                      {Array.from({ length: 8 }, (_, i) => i + 11).map(
+                        (time) => (
+                          <option key={time} value={time}>
+                            {time}시
+                          </option>
+                        )
+                      )}
+                    </select>
+                  </div>
+                  <input
+                    type="number"
+                    name="grades"
+                    value={formData.grades}
+                    onChange={handleChange}
+                    placeholder="학점을 입력하세요"
+                    className="admin-input"
+                  />
+                  <input
+                    type="number"
+                    name="capacity"
+                    value={formData.capacity}
+                    onChange={handleChange}
+                    placeholder="정원을 입력하세요"
+                    className="admin-input"
+                  />
+                  <button type="submit" className="admin-button">
+                    수정
+                  </button>
+                </>
+              )}
             </div>
           </form>
         )}
@@ -580,6 +755,57 @@ export default function SubjectManagement() {
               )}
             </tbody>
           </table>
+
+          {/* 페이징 컨트롤 */}
+          {totalPages > 0 && (
+            <div className="pagination">
+              <button
+                onClick={() => handlePageChange(0)}
+                disabled={currentPage === 0}
+                className="pagination-button"
+              >
+                처음
+              </button>
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 0}
+                className="pagination-button"
+              >
+                이전
+              </button>
+
+              {getPageNumbers().map((pageNum) => (
+                <button
+                  key={pageNum}
+                  onClick={() => handlePageChange(pageNum)}
+                  className={`pagination-button ${
+                    currentPage === pageNum ? "active" : ""
+                  }`}
+                >
+                  {pageNum + 1}
+                </button>
+              ))}
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage >= totalPages - 1}
+                className="pagination-button"
+              >
+                다음
+              </button>
+              <button
+                onClick={() => handlePageChange(totalPages - 1)}
+                disabled={currentPage >= totalPages - 1}
+                className="pagination-button"
+              >
+                마지막
+              </button>
+
+              <span className="pagination-info">
+                {currentPage + 1} / {totalPages} 페이지 (전체 {totalElements}개)
+              </span>
+            </div>
+          )}
         </div>
       </main>
     </div>

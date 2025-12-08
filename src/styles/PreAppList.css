@@ -1,0 +1,284 @@
+/* 예비/본 수강 신청 내역 페이지 스타일 */
+
+/* 전체 레이아웃 */
+.pre-app-list-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-width: 100em;
+  gap: 30px;
+  padding: 20px;
+}
+
+/* 사이드 메뉴 */
+.pre-app-list-container .sub--menu {
+  min-width: 240px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  height: fit-content;
+  position: sticky;
+  top: 20px;
+}
+
+.pre-app-list-container .sub--menu--top {
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  color: #ffffff;
+  padding: 24px 20px;
+  text-align: center;
+}
+
+.pre-app-list-container .sub--menu--top h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.pre-app-list-container .sub--menu--table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pre-app-list-container .sub--menu--table tbody {
+  display: block;
+}
+
+.pre-app-list-container .sub--menu--table tr {
+  display: block;
+  border-bottom: 1px solid #e0e6ed;
+}
+
+.pre-app-list-container .sub--menu--table tr:last-child {
+  border-bottom: none;
+}
+
+.pre-app-list-container .sub--menu--table td {
+  display: block;
+  padding: 0;
+}
+
+.pre-app-list-container .sub--menu--table a {
+  display: block;
+  padding: 14px 20px;
+  color: #2c3e50;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  border-left: 3px solid transparent;
+}
+
+.pre-app-list-container .sub--menu--table a:hover {
+  background-color: #f8f9fa;
+  color: #216d30;
+  border-left-color: #216d30;
+}
+
+.pre-app-list-container .sub--menu--table a.selected--menu {
+  background-color: rgba(33, 109, 48, 0.1);
+  color: #216d30;
+  border-left-color: #216d30;
+  font-weight: 600;
+}
+
+/* 메인 컨텐츠 */
+.pre-app-list-container main {
+  flex: 1;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 40px;
+  min-height: 600px;
+  min-width: 1050px;
+}
+
+.pre-app-list-container main h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0 0 20px 0;
+}
+
+.pre-app-list-container .split--div {
+  height: 2px;
+  background: linear-gradient(90deg, #216d30 0%, rgba(33, 109, 48, 0.2) 100%);
+  margin-bottom: 30px;
+}
+
+/* 내역 및 버튼 영역 */
+.pre-app-list-container .d-flex.justify-content-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.pre-app-list-container .d-flex.justify-content-between > div:first-child {
+  flex: 1;
+}
+
+/* 강의 검색 버튼 */
+.pre-app-list-container .preStuSubList--button {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #e0b960 0%, #d4a84d 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(224, 185, 96, 0.3);
+  white-space: nowrap;
+  margin-left: 20px;
+}
+
+.pre-app-list-container .preStuSubList--button:hover {
+  background: linear-gradient(135deg, #d4a84d 0%, #c99a3d 100%);
+  box-shadow: 0 4px 14px rgba(224, 185, 96, 0.4);
+  transform: translateY(-1px);
+}
+
+/* 강의 목록 헤더 */
+.pre-app-list-container main h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 16px;
+  margin-top: 20px;
+}
+
+.pre-app-list-container main h4:first-of-type {
+  margin-top: 0;
+}
+
+/* 강의 목록 테이블 */
+.pre-app-list-container .sub--list--table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 30px;
+  font-size: 0.9rem;
+  background-color: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.pre-app-list-container .sub--list--table thead {
+  background-color: #f8f9fa;
+}
+
+.pre-app-list-container .sub--list--table th {
+  padding: 12px 10px;
+  text-align: center;
+  font-weight: 600;
+  color: #2c3e50;
+  border-bottom: 2px solid #e0e6ed;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.pre-app-list-container .sub--list--table td {
+  padding: 10px 8px;
+  text-align: center;
+  border-bottom: 1px solid #f0f0f0;
+  color: #5a6c7d;
+  vertical-align: middle;
+}
+
+.pre-app-list-container .sub--list--table tbody tr:hover {
+  background-color: #f8f9fa;
+  transition: background-color 0.2s ease;
+}
+
+.pre-app-list-container .sub--list--table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.pre-app-list-container .sub--list--name {
+  font-weight: 600;
+  color: #2c3e50;
+  text-align: left;
+}
+
+/* 수강신청 버튼 */
+.pre-app-list-container .sub--list--button--row button {
+  padding: 6px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pre-app-list-container .sub--list--button--row button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* 결과 없음 메시지 */
+.pre-app-list-container .no--list--p {
+  text-align: center;
+  padding: 60px 20px;
+  color: #95a5a6;
+  font-size: 1.1rem;
+  background-color: #f8f9fa;
+  border: 1px solid #e0e6ed;
+  border-radius: 8px;
+  margin-top: 20px;
+  font-weight: 500;
+  font-style: italic;
+}
+
+/* 반응형 */
+@media (max-width: 1200px) {
+  .pre-app-list-container main {
+    min-width: auto;
+  }
+}
+
+@media (max-width: 1024px) {
+  .pre-app-list-container {
+    flex-direction: column;
+    min-width: auto;
+  }
+
+  .pre-app-list-container .sub--menu {
+    position: static;
+    width: 100%;
+    min-width: auto;
+  }
+
+  .pre-app-list-container main {
+    min-width: auto;
+  }
+
+  .pre-app-list-container .d-flex.justify-content-between {
+    flex-direction: column;
+  }
+
+  .pre-app-list-container .preStuSubList--button {
+    margin-left: 0;
+    margin-top: 16px;
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .pre-app-list-container main {
+    padding: 24px 16px;
+  }
+
+  .pre-app-list-container .sub--list--table {
+    font-size: 0.8rem;
+  }
+
+  .pre-app-list-container .sub--list--table th,
+  .pre-app-list-container .sub--list--table td {
+    padding: 8px 4px;
+  }
+}

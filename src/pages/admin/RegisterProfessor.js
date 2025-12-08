@@ -79,7 +79,7 @@ export default function RegisterProfessor() {
           <Link to="/staff/register-staff" className="menu-item">
             직원 등록
           </Link>
-          <Link to="/staff/tuition-bill" className="menu-item">
+          <Link to="/staff/tuition/bill" className="menu-item">
             등록금 고지서 발송
           </Link>
           <Link to="/staff/break/list" className="menu-item">

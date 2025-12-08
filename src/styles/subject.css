@@ -514,3 +514,101 @@
     align-items: flex-start;
   }
 }
+
+/* -------------------- 학생 목록 테이블 스타일 (성적 입력/조회용) -------------------- */
+
+.sub--list--table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px; /* 테이블 상단 간격 */
+  background-color: #ffffff;
+  border-radius: 8px;
+  overflow: hidden; /* 테이블 코너 둥글게 처리 */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.sub--list--table th,
+.sub--list--table td {
+  padding: 12px 10px;
+  text-align: center;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.9rem;
+  color: #333;
+  white-space: nowrap; /* 내용이 잘리지 않도록 (필요시) */
+}
+
+/* 테이블 헤더 스타일 */
+.sub--list--table th {
+  background-color: #f8f9fa; /* 밝은 회색 헤더 */
+  color: #216d30; /* 테마 색상 */
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+/* 테이블 행 호버 효과 */
+.sub--list--table tbody tr:hover {
+  background-color: #fcfcfc;
+}
+
+/* 테이블 마지막 행 border 제거 */
+.sub--list--table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* 이름 열 (2번째) 왼쪽 정렬 및 강조 */
+.sub--list--table td:nth-child(2) {
+  text-align: left;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+/* 점수 관련 열 (숫자 데이터) 스타일 */
+/* 학생 번호, 결석, 지각, 과제, 중간, 기말, 환산점수 열 */
+.sub--list--table td:nth-child(1), /* 학생 번호 */
+.sub--list--table td:nth-child(4), /* 결석 */
+.sub--list--table td:nth-child(5), /* 지각 */
+.sub--list--table td:nth-child(6), /* 과제점수 */
+.sub--list--table td:nth-child(7), /* 중간시험 */
+.sub--list--table td:nth-child(8), /* 기말시험 */
+.sub--list--table td:nth-child(9) {
+  /* 환산점수 */
+  font-weight: 500;
+  color: #444;
+}
+
+/* '점수 기입' 링크 스타일 (마지막 열) */
+.sub--list--table td:last-child a {
+  display: inline-block;
+  padding: 4px 10px;
+  background-color: #216d30; /* 강조 색상 (파란색 계열) */
+  color: #ffffff;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: background-color 0.2s;
+  min-width: 40px;
+  text-align: center;
+}
+
+.sub--list--table td:last-child a:hover {
+  background-color: #1a5524;
+}
+
+/* -------------------- 반응형 디자인 -------------------- */
+
+@media (max-width: 1024px) {
+  /* 테이블이 너무 넓어질 경우 가로 스크롤 허용 */
+  .sub--list--table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    width: 100%;
+  }
+
+  .sub--list--table th,
+  .sub--list--table td {
+    font-size: 0.8rem;
+    padding: 10px 8px;
+  }
+}

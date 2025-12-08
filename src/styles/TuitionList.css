@@ -1,0 +1,159 @@
+/* TuitionList.css - 등록금 내역 조회 페이지 스타일 */
+
+/* 전체 레이아웃 컨테이너 */
+.tuition-list-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-width: 100em;
+  gap: 30px;
+  padding: 20px;
+}
+
+/* --- 공통 사이드 메뉴 스타일 (AppList.css 참고) --- */
+.sub--menu {
+  min-width: 240px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  height: fit-content;
+  position: sticky;
+  top: 20px;
+}
+
+.sub--menu--top {
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  color: #ffffff;
+  padding: 24px 20px;
+  text-align: center;
+}
+
+.sub--menu--top h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.sub--menu--table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.sub--menu--table td {
+  display: block;
+  padding: 0;
+  border-bottom: 1px solid #e0e6ed;
+}
+
+.sub--menu--table td:last-child {
+  border-bottom: none;
+}
+
+.sub--menu--table a {
+  display: block;
+  padding: 14px 20px;
+  color: #2c3e50;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  border-left: 3px solid transparent;
+}
+
+.sub--menu--table a:hover {
+  background-color: #f8f9fa;
+  color: #216d30;
+  border-left-color: #216d30;
+}
+
+.sub--menu--table a.selected--menu {
+  background-color: rgba(33, 109, 48, 0.1);
+  color: #216d30;
+  border-left-color: #216d30;
+  font-weight: 600;
+}
+
+/* --- 메인 컨텐츠 영역 --- */
+main {
+  flex: 1;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 40px;
+  min-height: 600px;
+  min-width: 800px; /* AppList보다 약간 작아도 됨 */
+}
+
+main h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0 0 20px 0;
+}
+
+.split--div {
+  height: 2px;
+  background: linear-gradient(90deg, #216d30 0%, rgba(33, 109, 48, 0.2) 100%);
+  margin-bottom: 30px;
+}
+
+/* --- 등록금 내역 테이블 (.list--table) --- */
+.list--table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.list--table thead th {
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  color: #ffffff;
+  padding: 14px 12px;
+  text-align: center;
+  font-weight: 600;
+  border: 1px solid #1a5524;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.list--table tbody td {
+  padding: 16px 12px;
+  text-align: center;
+  color: #5a6c7d;
+  border: 1px solid #e0e6ed;
+  font-size: 0.95rem;
+  vertical-align: middle;
+}
+
+.list--table tbody tr:hover {
+  background-color: #f8f9fa;
+  transition: background-color 0.2s ease;
+}
+
+/* 금액 등 숫자가 우측 정렬되어야 한다면 추가 */
+.list--table tbody td:nth-child(4),
+.list--table tbody td:nth-child(5),
+.list--table tbody td:nth-child(6) {
+  text-align: right;
+  padding-right: 20px;
+  font-family: "Roboto", sans-serif; /* 숫자 가독성 */
+}
+
+/* 결과 없음 메시지 */
+.no--list--p {
+  text-align: center;
+  padding: 60px 20px;
+  color: #95a5a6;
+  font-size: 1.1rem;
+  background-color: #f8f9fa;
+  border: 1px solid #e0e6ed;
+  border-radius: 8px;
+  margin-top: 20px;
+  font-weight: 500;
+  font-style: italic;
+}

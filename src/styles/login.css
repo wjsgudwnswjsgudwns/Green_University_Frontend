@@ -1,40 +1,146 @@
-/* Green University Login Page Styles */
+/* Green University Login Page Styles - Split Layout */
 
-.login-page {
+/* 전역 리셋 */
+body,
+html {
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-x: hidden;
+}
+
+#root {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.login-page-wrapper {
+  display: flex;
+  min-height: 100vh;
+  overflow: hidden;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100vw;
   position: relative;
+  left: 0;
+  right: 0;
+}
+
+/* 배경 이미지 제거 */
+.login-page-wrapper > img {
+  display: none;
+}
+
+/* 좌측 영역 (30% - 금색) */
+.login-left {
+  flex: 0 0 30%;
+  background: #e0b960;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 40px;
+  position: relative;
+}
+
+.login-left::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(0, 0, 0, 0.1),
+    transparent
+  );
+}
+
+.login-left-content {
+  text-align: center;
+  animation: fadeIn 0.8s ease-out;
+}
+
+.login-left .login-logo {
+  margin-bottom: 0px;
+}
+
+.login-left .login-logo img {
+  max-width: 400px;
+  height: auto;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+}
+
+.login-left-text {
+  color: #123e25;
+  margin-top: -40px;
+  margin-left: 85px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-left-text p {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.3;
+  opacity: 1;
+  margin: 0;
+  letter-spacing: 0.1em;
+  text-align: left;
+}
+
+.passion {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-top: 3px solid #123e25;
+  border-bottom: 3px solid #123e25;
+  margin-bottom: 8px;
+  width: 240px;
+}
+
+.logotext {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 3px solid #123e25;
+  margin-bottom: 8px;
+  width: 240px;
+}
+
+/* 우측 영역 (70% - 녹색) */
+.login-right {
+  flex: 0 0 70%;
+  background: #123e25;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  overflow: hidden;
-}
-
-/* 배경 이미지 스타일 */
-.login-page > img {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  /* z-index: -1; */
-  /* filter: brightness(0.7) blur(2px); */
-  filter: brightness(0.7);
+  padding: 60px 80px;
 }
 
 /* 로그인 컨테이너 */
 .login-container {
   position: relative;
   width: 100%;
-  max-width: 440px;
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(10px);
-  padding: 48px 40px;
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05);
-  text-align: center;
+  max-width: 600px;
+  background: transparent;
+  backdrop-filter: none;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+  text-align: left;
   animation: fadeInUp 0.6s ease-out;
-  border: 1px solid rgba(33, 109, 48, 0.1);
+  border: none;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes fadeInUp {
@@ -48,18 +154,15 @@
   }
 }
 
-/* 로고 영역 */
-.login-logo {
-  margin-bottom: 32px;
-  padding-bottom: 24px;
-  border-bottom: 2px solid rgba(33, 109, 48, 0.1);
-}
-
-.login-logo img {
-  max-width: 200px;
-  height: auto;
-  margin: 0 auto;
-  display: block;
+/* 로그인 타이틀 */
+.login-container-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 40px;
+  padding-bottom: 16px;
+  border-bottom: 3px solid #ffffff;
+  display: inline-block;
 }
 
 /* 에러 메시지 */
@@ -88,18 +191,18 @@
 .form-group {
   display: flex;
   align-items: center;
-  background: #f8f9fa;
-  border: 2px solid #e0e6ed;
-  border-radius: 10px;
-  padding: 14px 16px;
+  background: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 16px 20px;
   transition: all 0.3s ease;
   position: relative;
 }
 
 .form-group:focus-within {
-  background: #ffffff;
-  border-color: #216d30;
-  box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
+  background: #f0f0f0;
+  border: none;
+  box-shadow: 0 0 0 3px rgba(224, 185, 96, 0.3);
   transform: translateY(-1px);
 }
 
@@ -108,16 +211,17 @@
   align-items: center;
   justify-content: center;
   margin-right: 12px;
-  color: #216d30;
+  color: #123e25;
   transition: color 0.3s ease;
 }
 
 .form-group:focus-within label {
-  color: #123c19;
+  color: #123e25;
 }
 
 .form-group label .material-symbols-outlined {
   font-size: 22px;
+  display: none;
 }
 
 .form-group input {
@@ -125,13 +229,13 @@
   border: none;
   outline: none;
   background: transparent;
-  font-size: 1rem;
-  color: #2c3e50;
+  font-size: 1.1rem;
+  color: #123e25;
   font-weight: 500;
 }
 
 .form-group input::placeholder {
-  color: #95a5a6;
+  color: #7a7a7a;
   font-weight: 400;
 }
 
@@ -146,8 +250,8 @@
   align-items: center;
   justify-content: flex-start;
   gap: 8px;
-  font-size: 0.9rem;
-  color: #5a6c7d;
+  font-size: 0.95rem;
+  color: #ffffff;
   padding: 8px 4px;
   user-select: none;
 }
@@ -156,39 +260,40 @@
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #216d30;
+  accent-color: #e0b960;
 }
 
 .remember-id label {
   cursor: pointer;
   font-weight: 500;
+  color: #ffffff;
 }
 
 /* 로그인 버튼 */
 .login-button {
-  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  background: #2c2c2c;
   color: #ffffff;
   border: none;
-  border-radius: 10px;
-  padding: 15px 24px;
-  font-size: 1.05rem;
+  border-radius: 8px;
+  padding: 16px 24px;
+  font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(33, 109, 48, 0.3);
+  box-shadow: none;
   letter-spacing: 0.5px;
-  margin-top: 8px;
+  margin-top: 12px;
 }
 
 .login-button:hover:not(:disabled) {
-  background: linear-gradient(135deg, #1a5524 0%, #0e2b14 100%);
-  box-shadow: 0 6px 16px rgba(33, 109, 48, 0.4);
+  background: #1a1a1a;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   transform: translateY(-2px);
 }
 
 .login-button:active:not(:disabled) {
   transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(33, 109, 48, 0.3);
+  box-shadow: none;
 }
 
 .login-button:disabled {
@@ -201,13 +306,13 @@
 .login-links {
   list-style: none;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 24px;
   padding: 0;
   margin-top: 24px;
   font-size: 0.9rem;
   padding-top: 20px;
-  border-top: 1px solid rgba(33, 109, 48, 0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .login-links li {
@@ -218,12 +323,12 @@
   content: "|";
   position: absolute;
   right: -12px;
-  color: #d0d7de;
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .login-links li a {
   text-decoration: none;
-  color: #5a6c7d;
+  color: #ffffff;
   font-weight: 500;
   transition: all 0.3s ease;
   padding: 4px 8px;
@@ -231,20 +336,69 @@
 }
 
 .login-links li a:hover {
-  color: #216d30;
-  background: rgba(33, 109, 48, 0.05);
+  color: #e0b960;
+  background: rgba(224, 185, 96, 0.1);
 }
 
 /* 반응형 디자인 */
-@media (max-width: 768px) {
-  .login-container {
-    max-width: 90%;
-    padding: 36px 28px;
-    margin: 20px;
+@media (max-width: 1024px) {
+  .login-left {
+    flex: 0 0 35%;
+    padding: 40px 30px;
   }
 
-  .login-logo img {
+  .login-right {
+    flex: 0 0 65%;
+  }
+
+  .login-left .login-logo img {
+    max-width: 200px;
+  }
+
+  .login-left-text h1 {
+    font-size: 1.7rem;
+  }
+
+  .login-left-text p {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .login-page {
+    flex-direction: column;
+  }
+
+  .login-left {
+    flex: 0 0 auto;
+    min-height: 35vh;
+    padding: 40px 20px;
+  }
+
+  .login-left .login-logo img {
     max-width: 160px;
+  }
+
+  .login-left-text h1 {
+    font-size: 1.5rem;
+  }
+
+  .login-left-text p {
+    font-size: 0.95rem;
+  }
+
+  .login-right {
+    flex: 1;
+    padding: 40px 20px;
+  }
+
+  .login-container {
+    max-width: 100%;
+    padding: 36px 28px;
+  }
+
+  .login-container-title {
+    font-size: 1.5rem;
   }
 
   .form-group {
@@ -263,17 +417,32 @@
 }
 
 @media (max-width: 480px) {
+  .login-left {
+    min-height: 30vh;
+    padding: 30px 20px;
+  }
+
+  .login-left .login-logo img {
+    max-width: 140px;
+  }
+
+  .login-left-text h1 {
+    font-size: 1.3rem;
+    margin-bottom: 12px;
+  }
+
+  .login-left-text p {
+    font-size: 0.9rem;
+  }
+
   .login-container {
     padding: 28px 20px;
   }
 
-  .login-logo {
+  .login-container-title {
+    font-size: 1.3rem;
     margin-bottom: 24px;
     padding-bottom: 20px;
-  }
-
-  .login-logo img {
-    max-width: 140px;
   }
 
   .form-group {

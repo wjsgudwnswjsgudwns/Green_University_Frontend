@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../api/axiosConfig";
 import "../../styles/subject.css";
+import "../../styles/ProfessorSubjectListPage.css";
 
 export default function ProfessorSubjectListPage() {
   const navigate = useNavigate();
@@ -64,7 +65,7 @@ export default function ProfessorSubjectListPage() {
   // 강의계획서 팝업
   const openSyllabus = (subjectId) => {
     window.open(
-      `/professor/syllabus/${subjectId}`,
+      `/subject/syllabus/${subjectId}`,
       "_blank",
       "width=1000,height=1000"
     );
@@ -81,11 +82,11 @@ export default function ProfessorSubjectListPage() {
           <h2>수업</h2>
         </div>
         <div className="sub--menu--mid">
-          <table className="sub--menu--table" border="1">
+          <table className="sub--menu--table">
             <tbody>
               <tr>
                 <td>
-                  <a href="/subject/list">전체 강의 조회</a>
+                  <a href="/subject/list/1">전체 강의 조회</a>
                 </td>
               </tr>
               <tr>
@@ -134,14 +135,6 @@ export default function ProfessorSubjectListPage() {
                   style={{ margin: 0 }}
                 >
                   <li style={{ height: "24px", marginRight: "2px" }}>조회</li>
-                  <li style={{ height: "24px" }}>
-                    <span
-                      className="material-symbols-outlined"
-                      style={{ fontSize: "18px", paddingTop: "4px" }}
-                    >
-                      search
-                    </span>
-                  </li>
                 </ul>
               </button>
             </div>
@@ -176,7 +169,7 @@ export default function ProfessorSubjectListPage() {
                       ? `0${subject.startTime}`
                       : subject.startTime}
                     :00-
-                    {subject.endTime}:00 ({subject.roomId})
+                    {subject.endTime}:00 ({subject.room.id})
                   </td>
                   <td>
                     <ul
@@ -192,19 +185,6 @@ export default function ProfessorSubjectListPage() {
                           }}
                         >
                           조회
-                        </a>
-                      </li>
-                      <li style={{ height: "24px" }}>
-                        <a
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            openSyllabus(subject.id);
-                          }}
-                        >
-                          <span className="material-symbols-outlined">
-                            content_paste_search
-                          </span>
                         </a>
                       </li>
                     </ul>
@@ -223,19 +203,6 @@ export default function ProfessorSubjectListPage() {
                           }}
                         >
                           조회
-                        </a>
-                      </li>
-                      <li style={{ height: "24px" }}>
-                        <a
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            navigate(`/professor/subject/${subject.id}`);
-                          }}
-                        >
-                          <span className="material-symbols-outlined">
-                            content_paste_search
-                          </span>
                         </a>
                       </li>
                     </ul>

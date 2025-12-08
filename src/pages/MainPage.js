@@ -95,7 +95,6 @@ export default function MainPage() {
           {user && (
             <div className="profile-card">
               <ul className="profile-header">
-                <li className="icon material-symbols-rounded">person</li>
                 <li className="welcome">{user.name}님, 환영합니다.</li>
               </ul>
               <hr />
