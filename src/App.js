@@ -60,6 +60,14 @@ import MyEvaluation from "./pages/evaluation/MyEvaluation";
 import EvaluationForm from "./pages/evaluation/EvaluationForm";
 import ChatbotPage from "./pages/chatbot/ChatbotPage";
 import ChatbotButton from "./components/ChatbotButton";
+import StudentCounselingList from "./pages/ai/StudentCounselingList";
+import StudentCounselingDetail from "./pages/ai/StudentCounselingDetail";
+import ProfessorCounselingList from "./pages/ai/ProfessorCounselingList";
+import ProfessorCounselingForm from "./pages/ai/ProfessorCounselingForm";
+import ProfessorCounselingDetail from "./pages/ai/ProfessorCounselingDetail";
+import StaffCounselingStudentDetail from "./pages/ai/StaffCounselingStudentDetail";
+import StaffCounselingStatistics from "./pages/ai/StaffCounselingStatistics";
+import StaffCounselingDashboard from "./pages/ai/StaffCounselingDashboard";
 
 function PrivateRoute({ children, role }) {
   const { user } = useAuth();
@@ -411,6 +419,76 @@ function Layout() {
           element={
             <PrivateRoute role="professor">
               <MyEvaluation />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Student Counseling routes */}
+        <Route
+          path="/student/counseling/list"
+          element={
+            <PrivateRoute role="student">
+              <StudentCounselingList />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/student/counseling/:id"
+          element={
+            <PrivateRoute role="student">
+              <StudentCounselingDetail />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Professor Counseling routes */}
+        <Route
+          path="/professor/counseling/list"
+          element={
+            <PrivateRoute role="professor">
+              <ProfessorCounselingList />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/professor/counseling/form"
+          element={
+            <PrivateRoute role="professor">
+              <ProfessorCounselingForm />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/professor/counseling/:id"
+          element={
+            <PrivateRoute role="professor">
+              <ProfessorCounselingDetail />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Staff Counseling routes */}
+        <Route
+          path="/staff/counseling/dashboard"
+          element={
+            <PrivateRoute role="staff">
+              <StaffCounselingDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/staff/counseling/statistics"
+          element={
+            <PrivateRoute role="staff">
+              <StaffCounselingStatistics />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/staff/counseling/student/:studentId"
+          element={
+            <PrivateRoute role="staff">
+              <StaffCounselingStudentDetail />
             </PrivateRoute>
           }
         />
