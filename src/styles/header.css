@@ -2,9 +2,9 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  background-color: #ffffff;
-  border-bottom: 1px solid #e0e0e0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  background-color: #216d30;
+  border-bottom: 2px solid #216d30; /* 더 굵은 브랜드 컬러 테두리 */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* 더 뚜렷한 그림자 */
   z-index: 999;
 }
 
@@ -36,7 +36,6 @@
   vertical-align: middle;
 }
 
-/* Reset default button styles for logout link */
 .link-button {
   background: none;
   border: none;
@@ -45,27 +44,46 @@
   color: inherit;
   font: inherit;
   cursor: pointer;
+  text-align: left;
 }
 
-/* Main menu styling */
 .main-menu {
   display: flex;
   align-items: center;
-  padding: 8px 16px;
+  padding: 16px 32px; /* 패딩 증가 */
+  min-height: 70px; /* 최소 높이 설정 */
 }
 
-/* Logo area */
+.main-menu-logged-in {
+  justify-content: space-between;
+}
+
 .logo-link {
   display: flex;
   align-items: center;
-  margin-right: 32px;
+  margin-right: 48px; /* 간격 증가 */
   text-decoration: none;
+  padding: 8px 0;
+  transition: transform 0.2s ease;
+}
+
+.logo-link:hover {
+  transform: scale(1.02);
+}
+
+/* 로고 이미지 스타일 */
+.logo-link img {
+  height: 50px; /* 원하는 높이로 조절 */
+  width: auto; /* 비율 유지 */
+  object-fit: contain; /* 이미지 비율 유지하며 맞춤 */
 }
 
 .logo-text {
-  font-size: 1.5rem;
-  font-weight: bold;
+  font-size: 1.75rem; /* 크기 증가 */
+  font-weight: 700;
   color: #216d30;
+  letter-spacing: 0.5px; /* 자간 추가 */
+  text-shadow: 0 1px 2px rgba(33, 109, 48, 0.1); /* 미묘한 텍스트 그림자 */
 }
 
 /* Navigation items */
@@ -75,18 +93,171 @@
   list-style: none;
   margin: 0;
   padding: 0;
+  flex-grow: 1;
+  justify-content: center;
+  gap: 60px; /* gap 조정 */
 }
 
 .nav-item {
-  margin-right: 24px;
+  position: relative;
+}
+
+.nav-item:hover {
+  transform: translate(1px, -1px);
 }
 
 .nav-item a {
   text-decoration: none;
-  color: #333;
-  font-size: 1rem;
+  color: #ffffff;
+  font-size: 1.5rem; /* 폰트 크기 증가 */
+  font-weight: 700;
+  padding: 0px 16px;
+  display: inline-block;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+/* 호버 시 밑줄 애니메이션 */
+/* .nav-item a::after {
+  content: "";
+  position: absolute;
+  bottom: 5px;
+  left: 16px;
+  right: 16px;
+  height: 2px;
+  background-color: #ffffff;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
 }
 
 .nav-item a:hover {
+  color: #ffffff;
+}
+
+.nav-item a:hover::after {
+  transform: scaleX(1);
+} */
+
+/* 활성 메뉴 표시 (옵션) */
+.nav-item a.active {
+  color: #333;
+  font-weight: 600;
+}
+
+.nav-item a.active::after {
+  transform: scaleX(1);
+}
+
+/* User menu styling */
+.user-menu-wrapper {
+  position: relative;
+  margin-left: 24px;
+}
+
+.user-name-button {
+  background: none;
+  border: none; /* 테두리 제거 */
+  padding: 8px 12px; /* 패딩 조정 */
+  color: #333;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.user-name-button:hover {
+  border-color: #216d30;
+  /* background: linear-gradient(135deg, #5ac26e 0%, #216d30 100%); */
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(33, 109, 48, 0.1);
+}
+
+.user-name-button::after {
+  content: "▼";
+  font-size: 0.7rem;
+  color: #666;
+  transition: transform 0.3s ease;
+}
+
+.user-name-button[aria-expanded="true"]::after {
+  transform: rotate(180deg);
+}
+
+.user-name-text {
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px; /* 더 둥근 모서리 */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); /* 더 뚜렷한 그림자 */
+  min-width: 160px;
+  z-index: 1000;
+  padding: 8px 0;
+  animation: dropdown-appear 0.2s ease;
+}
+
+@keyframes dropdown-appear {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 12px 20px; /* 패딩 증가 */
+  text-decoration: none;
+  color: #333;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  background: none;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background-color: #f0f7f2;
   color: #216d30;
+  padding-left: 24px; /* 호버 시 들여쓰기 효과 */
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .nav-items {
+    gap: 30px;
+  }
+
+  .main-menu {
+    padding: 12px 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .logo-text {
+    font-size: 1.5rem;
+  }
+
+  .nav-items {
+    gap: 16px;
+  }
+
+  .nav-item a {
+    font-size: 0.95rem;
+    padding: 8px 12px;
+  }
 }
