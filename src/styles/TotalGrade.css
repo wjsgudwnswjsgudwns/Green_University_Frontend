@@ -1,8 +1,7 @@
-/* TuitionList.css */
-/* 접두어: tl- (Tuition List) */
+/* 총 누계 성적 페이지 스타일 - tg (TotalGrade) prefix */
 
 /* 전체 레이아웃 */
-.tl-container {
+.total-grade-container {
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -11,8 +10,8 @@
   padding: 20px;
 }
 
-/* 사이드 메뉴 스타일 */
-.tl-sub-menu {
+/* 사이드 메뉴 */
+.tg-sub-menu {
   min-width: 240px;
   background: #ffffff;
   border-radius: 12px;
@@ -23,36 +22,48 @@
   top: 20px;
 }
 
-.tl-sub-menu-top {
+.tg-sub-menu-top {
   background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
   color: #ffffff;
   padding: 24px 20px;
   text-align: center;
 }
 
-.tl-sub-menu-top h2 {
+.tg-sub-menu-top h2 {
   margin: 0;
   font-size: 1.4rem;
   font-weight: 700;
   letter-spacing: 1px;
 }
 
-.tl-sub-menu-table {
+.tg-sub-menu-mid {
+  padding: 0;
+}
+
+.tg-sub-menu-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.tl-sub-menu-table td {
+.tg-sub-menu-table tbody {
   display: block;
-  padding: 0;
+}
+
+.tg-sub-menu-table tr {
+  display: block;
   border-bottom: 1px solid #e0e6ed;
 }
 
-.tl-sub-menu-table td:last-child {
+.tg-sub-menu-table tr:last-child {
   border-bottom: none;
 }
 
-.tl-sub-menu-table a {
+.tg-sub-menu-table td {
+  display: block;
+  padding: 0;
+}
+
+.tg-sub-menu-table a {
   display: block;
   padding: 14px 20px;
   color: #2c3e50;
@@ -63,89 +74,97 @@
   border-left: 3px solid transparent;
 }
 
-.tl-sub-menu-table a:hover {
+.tg-sub-menu-table a:hover {
   background-color: #f8f9fa;
   color: #216d30;
   border-left-color: #216d30;
 }
 
-.tl-sub-menu-table a.tl-selected-menu {
-  background-color: rgba(33, 109, 48, 0.1);
-  color: #216d30;
-  border-left-color: #216d30;
-  font-weight: 600;
+.tg-selected-menu {
+  background-color: rgba(33, 109, 48, 0.1) !important;
+  color: #216d30 !important;
+  border-left-color: #216d30 !important;
+  font-weight: 600 !important;
 }
 
 /* 메인 컨텐츠 */
-.tl-main {
+.tg-main {
   flex: 1;
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   padding: 40px;
   min-height: 600px;
-  min-width: 800px;
+  min-width: 1050px;
 }
 
-.tl-main h1 {
+.tg-main h1 {
   font-size: 1.8rem;
   font-weight: 700;
   color: #2c3e50;
   margin: 0 0 20px 0;
 }
 
-.tl-split-div {
+.tg-split-div {
   height: 2px;
   background: linear-gradient(90deg, #216d30 0%, rgba(33, 109, 48, 0.2) 100%);
   margin-bottom: 30px;
 }
 
-/* 리스트 테이블 */
-.tl-list-table {
+/* 섹션 타이틀 */
+.tg-section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 16px;
+  margin-top: 20px;
+}
+
+/* 테이블 */
+.tg-list-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 20px;
+  margin-bottom: 30px;
+  font-size: 0.9rem;
   background-color: #ffffff;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
-.tl-list-table thead th {
-  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
-  color: #ffffff;
-  padding: 14px 12px;
+.tg-list-table thead {
+  background-color: #f8f9fa;
+}
+
+.tg-list-table th {
+  padding: 12px 25px;
   text-align: center;
   font-weight: 600;
-  border: 1px solid #1a5524;
-  font-size: 1rem;
+  color: #2c3e50;
+  border-bottom: 2px solid #e0e6ed;
   white-space: nowrap;
-}
-
-.tl-list-table tbody td {
-  padding: 16px 12px;
-  text-align: center;
-  color: #5a6c7d;
-  border: 1px solid #e0e6ed;
-  font-size: 0.95rem;
   vertical-align: middle;
 }
 
-.tl-list-table tbody tr:hover {
+.tg-list-table td {
+  padding: 10px 8px;
+  text-align: center;
+  border-bottom: 1px solid #f0f0f0;
+  color: #5a6c7d;
+  vertical-align: middle;
+}
+
+.tg-list-table tbody tr:hover {
   background-color: #f8f9fa;
   transition: background-color 0.2s ease;
 }
 
-/* 금액 우측 정렬 */
-.tl-list-table tbody td:nth-child(4),
-.tl-list-table tbody td:nth-child(5),
-.tl-list-table tbody td:nth-child(6) {
-  text-align: right;
-  padding-right: 20px;
+.tg-list-table tbody tr:last-child td {
+  border-bottom: none;
 }
 
 /* 결과 없음 메시지 */
-.tl-no-list {
+.tg-no-list-p {
   text-align: center;
   padding: 60px 20px;
   color: #95a5a6;
@@ -156,4 +175,43 @@
   margin-top: 20px;
   font-weight: 500;
   font-style: italic;
+}
+
+/* 반응형 */
+@media (max-width: 1200px) {
+  .tg-main {
+    min-width: auto;
+  }
+}
+
+@media (max-width: 1024px) {
+  .total-grade-container {
+    flex-direction: column;
+    min-width: auto;
+  }
+
+  .tg-sub-menu {
+    position: static;
+    width: 100%;
+    min-width: auto;
+  }
+
+  .tg-main {
+    min-width: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .tg-main {
+    padding: 24px 16px;
+  }
+
+  .tg-list-table {
+    font-size: 0.8rem;
+  }
+
+  .tg-list-table th,
+  .tg-list-table td {
+    padding: 8px 4px;
+  }
 }

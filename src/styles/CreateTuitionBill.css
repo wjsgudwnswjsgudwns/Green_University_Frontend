@@ -1,7 +1,7 @@
-/* CreateTuitionBill.css - 등록금 고지서 발송(관리자) 페이지 스타일 */
+/* CreateTuitionBill.css */
+/* 접두어: cb- (Create Bill) */
 
-/* 메인 컨테이너 */
-.create-bill-container {
+.cb-container {
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -9,8 +9,73 @@
   padding: 20px;
 }
 
-/* --- 메인 컨텐츠 영역 --- */
-main {
+/* 사이드 메뉴 (독립적용) */
+.cb-sub-menu {
+  min-width: 240px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  height: fit-content;
+  position: sticky;
+  top: 20px;
+}
+
+.cb-sub-menu-top {
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  color: #ffffff;
+  padding: 24px 20px;
+  text-align: center;
+}
+
+.cb-sub-menu-top h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.cb-sub-menu-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cb-sub-menu-table td {
+  display: block;
+  padding: 0;
+  border-bottom: 1px solid #e0e6ed;
+}
+
+.cb-sub-menu-table td:last-child {
+  border-bottom: none;
+}
+
+.cb-sub-menu-table a {
+  display: block;
+  padding: 14px 20px;
+  color: #2c3e50;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  border-left: 3px solid transparent;
+}
+
+.cb-sub-menu-table a:hover {
+  background-color: #f8f9fa;
+  color: #216d30;
+  border-left-color: #216d30;
+}
+
+.cb-sub-menu-table a.cb-selected-menu {
+  background-color: rgba(33, 109, 48, 0.1);
+  color: #216d30;
+  border-left-color: #216d30;
+  font-weight: 600;
+}
+
+/* 메인 영역 */
+.cb-main {
   flex: 1;
   background: #ffffff;
   border-radius: 12px;
@@ -21,22 +86,22 @@ main {
   flex-direction: column;
 }
 
-main h1 {
+.cb-main h1 {
   font-size: 1.8rem;
   font-weight: 700;
   color: #2c3e50;
   margin: 0 0 20px 0;
 }
 
-.split--div {
+.cb-split-div {
   height: 2px;
   background: linear-gradient(90deg, #216d30 0%, rgba(33, 109, 48, 0.2) 100%);
   margin-bottom: 40px;
 }
 
-/* --- 생성 버튼 (.create--tui) --- */
-.create--tui {
-  align-self: flex-start; /* 왼쪽 정렬, 필요시 center */
+/* 생성 버튼 */
+.cb-create-btn {
+  align-self: flex-start;
   background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
   color: #ffffff;
   border: none;
@@ -52,55 +117,19 @@ main h1 {
   gap: 10px;
 }
 
-/* 버튼 아이콘 효과 (만약 아이콘이 추가된다면) */
-.create--tui::before {
-  content: "📤"; /* 발송 아이콘 예시 */
-  font-size: 1.2rem;
-}
-
-.create--tui:hover:not(:disabled) {
+.cb-create-btn:hover:not(:disabled) {
   background: linear-gradient(135deg, #1a5524 0%, #0e2b14 100%);
   box-shadow: 0 6px 16px rgba(33, 109, 48, 0.4);
   transform: translateY(-2px);
 }
 
-.create--tui:active:not(:disabled) {
+.cb-create-btn:active:not(:disabled) {
   transform: translateY(0);
 }
 
-.create--tui:disabled {
+.cb-create-btn:disabled {
   background: #95a5a6;
   cursor: not-allowed;
   box-shadow: none;
   opacity: 0.7;
-}
-
-/* 로딩 상태일 때 스피너 효과 (옵션) */
-.create--tui:disabled::after {
-  content: "";
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  margin-left: 10px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* 안내 문구 (필요시 추가) */
-.info-text {
-  margin-top: 20px;
-  color: #5a6c7d;
-  font-size: 0.95rem;
-  background-color: #f8f9fa;
-  padding: 15px;
-  border-radius: 6px;
-  border-left: 4px solid #216d30;
 }

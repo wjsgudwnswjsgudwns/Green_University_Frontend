@@ -1,9 +1,3 @@
-/* Header styles
- 	The header is split into two sections: a top bar showing the current
- 	user and logout link, and a bottom navigation bar with the site logo
- 	and menu. Flexbox is used for horizontal alignment and spacing.
-*/
-
 .header {
   display: flex;
   flex-direction: column;

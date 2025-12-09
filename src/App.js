@@ -8,7 +8,6 @@ import MainPage from "./pages/MainPage";
 import StudentInfoPage from "./pages/student/StudentInfoPage";
 import StudentCoursesPage from "./pages/student/StudentCoursesPage";
 import StudentRegistrationPage from "./pages/student/StudentRegistrationPage";
-import StudentGradesPage from "./pages/student/StudentGradesPage";
 import NoticeListPage from "./pages/board/NoticeListPage";
 import NoticeDetailPage from "./pages/board/NoticeDetailPage";
 import ScheduleListPage from "./pages/schedule/ScheduleListPage";
@@ -56,6 +55,11 @@ import UpdatePeriodPage from "./pages/sugang/UpdatePeriodPage";
 import CreateTuitionBillPage from "./pages/tuition/CreateTuitionBillPage";
 import TuitionListPage from "./pages/tuition/TuitionListPage";
 import TuitionPaymentPage from "./pages/tuition/TuitionPaymentPage";
+import ThisSemesterGrade from "./pages/grade/ThisSemesterGrade";
+import SemesterGrade from "./pages/grade/SemesterGrade";
+import TotalGrade from "./pages/grade/TotalGrade";
+import MyEvaluation from "./pages/evaluation/MyEvaluation";
+import EvaluationForm from "./pages/evaluation/EvaluationForm";
 
 function PrivateRoute({ children, role }) {
   const { user } = useAuth();
@@ -351,13 +355,39 @@ function Layout() {
           }
         />
         <Route
-          path="/student/grades"
+          path="/grade/thisSemester"
           element={
             <PrivateRoute role="student">
-              <StudentGradesPage />
+              <ThisSemesterGrade />
             </PrivateRoute>
           }
         />
+        <Route
+          path="/grade/semester"
+          element={
+            <PrivateRoute role="student">
+              <SemesterGrade />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/grade/total"
+          element={
+            <PrivateRoute role="student">
+              <TotalGrade />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/evaluation"
+          element={
+            <PrivateRoute role="student">
+              <EvaluationForm />
+            </PrivateRoute>
+          }
+        />
+
         {/* Professor routes */}
         <Route
           path="/professor/info"
@@ -383,6 +413,16 @@ function Layout() {
             </PrivateRoute>
           }
         />
+
+        <Route
+          path="/evaluation/read"
+          element={
+            <PrivateRoute role="professor">
+              <MyEvaluation />
+            </PrivateRoute>
+          }
+        />
+
         {/* Staff routes */}
         <Route
           path="/staff/info"
