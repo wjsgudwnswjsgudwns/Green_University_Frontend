@@ -21,9 +21,9 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
   border: none;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(33, 109, 48, 0.4);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -35,11 +35,11 @@
 
 .chatbot-floating-button:hover {
   transform: scale(1.1);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+  box-shadow: 0 6px 20px rgba(33, 109, 48, 0.6);
 }
 
 .chatbot-floating-button.active {
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  background: linear-gradient(135deg, #1a5524 0%, #216d30 100%);
   transform: scale(0.95);
 }
 
@@ -75,7 +75,7 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: rgba(102, 126, 234, 0.3);
+  background: rgba(33, 109, 48, 0.3);
   animation: pulse 2s infinite;
   z-index: -1;
 }

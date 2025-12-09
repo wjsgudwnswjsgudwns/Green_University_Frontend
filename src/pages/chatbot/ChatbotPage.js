@@ -192,7 +192,7 @@ const ChatbotPage = () => {
     <div className="chatbot-container">
       <div className="chatbot-header">
         <div className="chatbot-header-content">
-          <h1>🤖 챗봇 상담</h1>
+          <h1>챗봇 상담</h1>
           <p>등록 여부, 수강 신청, 학점, 졸업 요건 등에 대해 물어보세요!</p>
         </div>
         <button
@@ -228,7 +228,34 @@ const ChatbotPage = () => {
             }`}
           >
             <div className="message-content">
-              {message.type === "bot" && <div className="bot-avatar">🤖</div>}
+              {message.type === "bot" && (
+                <div className="bot-avatar">
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <circle
+                      cx="12"
+                      cy="7"
+                      r="4"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+              )}
               <div className="message-bubble">
                 <div className="message-text">{message.text}</div>
                 <div className="message-time">
@@ -242,7 +269,32 @@ const ChatbotPage = () => {
         {isLoading && (
           <div className="chatbot-message bot-message">
             <div className="message-content">
-              <div className="bot-avatar">🤖</div>
+              <div className="bot-avatar">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <circle
+                    cx="12"
+                    cy="7"
+                    r="4"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
               <div className="message-bubble">
                 <div className="typing-indicator">
                   <span></span>
