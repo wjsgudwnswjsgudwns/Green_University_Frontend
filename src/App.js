@@ -6,8 +6,6 @@ import Footer from "./components/Footer";
 import LoginPage from "./pages/LoginPage";
 import MainPage from "./pages/MainPage";
 import StudentInfoPage from "./pages/student/StudentInfoPage";
-import StudentCoursesPage from "./pages/student/StudentCoursesPage";
-import StudentRegistrationPage from "./pages/student/StudentRegistrationPage";
 import NoticeListPage from "./pages/board/NoticeListPage";
 import NoticeDetailPage from "./pages/board/NoticeDetailPage";
 import ScheduleListPage from "./pages/schedule/ScheduleListPage";
@@ -337,22 +335,6 @@ function Layout() {
           element={
             <PrivateRoute role="student">
               <ChangePasswordPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/student/subjects"
-          element={
-            <PrivateRoute role="student">
-              <StudentCoursesPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/student/registration"
-          element={
-            <PrivateRoute role="student">
-              <StudentRegistrationPage />
             </PrivateRoute>
           }
         />

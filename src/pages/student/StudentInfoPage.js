@@ -35,9 +35,9 @@ export default function StudentInfoPage() {
 
   if (loading) {
     return (
-      <div className="page-container">
-        <div className="loading-container">
-          <div className="spinner"></div>
+      <div className="mypage-container">
+        <div className="mypage-loading-container">
+          <div className="mypage-spinner"></div>
           <p>로딩 중...</p>
         </div>
       </div>
@@ -46,8 +46,8 @@ export default function StudentInfoPage() {
 
   if (error) {
     return (
-      <div className="page-container">
-        <div className="error-container">
+      <div className="mypage-container">
+        <div className="mypage-error-container">
           <p>{error}</p>
         </div>
       </div>
@@ -55,40 +55,40 @@ export default function StudentInfoPage() {
   }
 
   return (
-    <div className="my-page-container">
-      <aside className="side-menu">
-        <div className="side-menu-header">
+    <div className="mypage-container">
+      <aside className="mypage-side-menu">
+        <div className="mypage-side-menu-header">
           <h2>MY</h2>
         </div>
-        <nav className="side-menu-nav">
-          <Link to="/student/info" className="menu-item active">
+        <nav className="mypage-side-menu-nav">
+          <Link to="/student/info" className="mypage-menu-item active">
             내 정보 조회
           </Link>
-          <Link to="/student/password" className="menu-item">
+          <Link to="/student/password" className="mypage-menu-item">
             비밀번호 변경
           </Link>
-          <Link to="/student/break/application" className="menu-item">
+          <Link to="/student/break/application" className="mypage-menu-item">
             휴학 신청
           </Link>
-          <Link to="/student/break/list" className="menu-item">
+          <Link to="/student/break/list" className="mypage-menu-item">
             휴학 내역 조회
           </Link>
-          <Link to="/student/tuition/list" className="menu-item">
+          <Link to="/student/tuition/list" className="mypage-menu-item">
             등록금 내역 조회
           </Link>
-          <Link to="/student/tuition/payment" className="menu-item">
+          <Link to="/student/tuition/payment" className="mypage-menu-item">
             등록금 납부 고지서
           </Link>
         </nav>
       </aside>
 
-      <main className="main-content">
+      <main className="mypage-main-content">
         <h1>내 정보 조회</h1>
-        <div className="divider"></div>
+        <div className="mypage-divider"></div>
 
         {studentInfo && (
           <>
-            <table className="info-table">
+            <table className="mypage-info-table">
               <tbody>
                 <tr>
                   <th>학번</th>
@@ -113,7 +113,7 @@ export default function StudentInfoPage() {
               </tbody>
             </table>
 
-            <table className="info-table">
+            <table className="mypage-info-table">
               <tbody>
                 <tr>
                   <th>성명</th>
@@ -137,16 +137,16 @@ export default function StudentInfoPage() {
             </table>
 
             <button
-              className="update-button"
+              className="mypage-update-button"
               onClick={() => navigate("/student/update")}
             >
               수정하기
             </button>
 
-            <div className="section-divider"></div>
+            <div className="mypage-section-divider"></div>
 
-            <h4 className="section-title">학적 변동 내역</h4>
-            <table className="stat-table">
+            <h4 className="mypage-section-title">학적 변동 내역</h4>
+            <table className="mypage-stat-table">
               <thead>
                 <tr>
                   <th>변동 일자</th>

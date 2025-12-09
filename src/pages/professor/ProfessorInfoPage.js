@@ -33,9 +33,9 @@ export default function ProfessorInfoPage() {
 
   if (loading) {
     return (
-      <div className="page-container">
-        <div className="loading-container">
-          <div className="spinner"></div>
+      <div className="mypage-container">
+        <div className="mypage-loading-container">
+          <div className="mypage-spinner"></div>
           <p>로딩 중...</p>
         </div>
       </div>
@@ -44,8 +44,8 @@ export default function ProfessorInfoPage() {
 
   if (error) {
     return (
-      <div className="page-container">
-        <div className="error-container">
+      <div className="mypage-container">
+        <div className="mypage-error-container">
           <p>{error}</p>
         </div>
       </div>
@@ -53,28 +53,28 @@ export default function ProfessorInfoPage() {
   }
 
   return (
-    <div className="my-page-container">
-      <aside className="side-menu">
-        <div className="side-menu-header">
+    <div className="mypage-container">
+      <aside className="mypage-side-menu">
+        <div className="mypage-side-menu-header">
           <h2>MY</h2>
         </div>
-        <nav className="side-menu-nav">
-          <Link to="/professor/info" className="menu-item active">
+        <nav className="mypage-side-menu-nav">
+          <Link to="/professor/info" className="mypage-menu-item active">
             내 정보 조회
           </Link>
-          <Link to="/professor/password" className="menu-item">
+          <Link to="/professor/password" className="mypage-menu-item">
             비밀번호 변경
           </Link>
         </nav>
       </aside>
 
-      <main className="main-content">
+      <main className="mypage-main-content">
         <h1>내 정보 조회</h1>
-        <div className="divider"></div>
+        <div className="mypage-divider"></div>
 
         {professorInfo && (
           <>
-            <table className="info-table">
+            <table className="mypage-info-table">
               <tbody>
                 <tr>
                   <th>ID</th>
@@ -87,7 +87,7 @@ export default function ProfessorInfoPage() {
               </tbody>
             </table>
 
-            <table className="info-table">
+            <table className="mypage-info-table">
               <tbody>
                 <tr>
                   <th>성명</th>
@@ -111,7 +111,7 @@ export default function ProfessorInfoPage() {
             </table>
 
             <button
-              className="update-button"
+              className="mypage-update-button"
               onClick={() => navigate("/professor/update")}
             >
               수정하기
