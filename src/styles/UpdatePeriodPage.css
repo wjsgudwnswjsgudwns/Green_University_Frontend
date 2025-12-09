@@ -1,0 +1,341 @@
+/* UpdatePeriodPage.css */
+/* 접두어: period- */
+
+/* 전체 컨테이너 */
+.period-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-width: 100em;
+  padding: 20px;
+  background-color: #f8f9fa;
+}
+
+/* 사이드 메뉴 */
+.period-sidebar {
+  min-width: 240px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  height: fit-content;
+  position: sticky;
+  top: 20px;
+  margin-right: 20px;
+}
+
+.period-sidebar-header {
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  color: #ffffff;
+  padding: 24px 20px;
+  text-align: center;
+}
+
+.period-sidebar-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.period-sidebar-menu {
+  padding: 0;
+}
+
+.period-menu-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.period-menu-table tbody tr {
+  display: block;
+  border-bottom: 1px solid #e0e6ed;
+}
+
+.period-menu-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.period-menu-table td {
+  display: block;
+  padding: 0;
+}
+
+.period-menu-table a {
+  display: block;
+  padding: 14px 20px;
+  color: #2c3e50;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  border-left: 3px solid transparent;
+}
+
+.period-menu-table a:hover {
+  background-color: #f8f9fa;
+  color: #216d30;
+  border-left-color: #216d30;
+}
+
+.period-menu-table a.period-menu-active {
+  background-color: rgba(33, 109, 48, 0.1);
+  color: #216d30;
+  border-left-color: #216d30;
+  font-weight: 600;
+}
+
+/* 메인 영역 */
+.period-main {
+  flex: 1;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 40px;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+.period-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0 0 20px 0;
+}
+
+.period-divider {
+  height: 2px;
+  background: linear-gradient(90deg, #216d30 0%, rgba(33, 109, 48, 0.2) 100%);
+  margin-bottom: 40px;
+  border: none;
+}
+
+/* 상태 표시 박스 */
+.period-status-box {
+  background-color: #f8f9fa;
+  padding: 30px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  border: 1px solid #e0e6ed;
+  text-align: center;
+}
+
+.period-status-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+}
+
+.period-status-text {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+/* 메시지 (로딩, 에러) */
+.period-message {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #5a6c7d;
+  padding: 60px 20px;
+  margin: 0;
+  font-weight: 500;
+}
+
+.period-message.period-error {
+  color: #e74c3c;
+  font-weight: 600;
+}
+
+/* 버튼 컨테이너 */
+.period-button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  margin-top: 20px;
+}
+
+/* 버튼 공통 스타일 */
+.period-btn {
+  min-width: 280px;
+  padding: 16px 32px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.period-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.period-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.period-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 시작 버튼 (녹색) */
+.period-btn-primary {
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(33, 109, 48, 0.3);
+}
+
+.period-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1a5524 0%, #0e2b14 100%);
+  box-shadow: 0 6px 16px rgba(33, 109, 48, 0.4);
+}
+
+/* 종료 버튼 (빨간색) */
+.period-btn-danger {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+.period-btn-danger:hover:not(:disabled) {
+  background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+  box-shadow: 0 6px 16px rgba(231, 76, 60, 0.4);
+}
+
+/* 초기화 버튼 (주황색) */
+.period-btn-warning {
+  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3);
+}
+
+.period-btn-warning:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+  box-shadow: 0 6px 16px rgba(243, 156, 18, 0.4);
+}
+
+/* 로딩 상태 */
+.period-btn:disabled {
+  background: #95a5a6;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .period-container {
+    min-width: auto;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+  }
+
+  .period-sidebar {
+    width: 100%;
+    max-width: 600px;
+    margin-right: 0;
+    margin-bottom: 20px;
+    position: static;
+  }
+
+  .period-main {
+    width: 100%;
+    max-width: 600px;
+    padding: 30px;
+  }
+}
+
+@media (max-width: 768px) {
+  .period-title {
+    font-size: 1.5rem;
+  }
+
+  .period-status-icon {
+    font-size: 2.5rem;
+  }
+
+  .period-status-text {
+    font-size: 1.1rem;
+  }
+
+  .period-btn {
+    min-width: 100%;
+    font-size: 1rem;
+    padding: 14px 24px;
+  }
+
+  .period-main {
+    padding: 24px;
+  }
+
+  .period-status-box {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .period-sidebar-header {
+    padding: 20px 16px;
+  }
+
+  .period-sidebar-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .period-menu-table a {
+    padding: 12px 16px;
+    font-size: 0.9rem;
+  }
+
+  .period-title {
+    font-size: 1.3rem;
+  }
+
+  .period-status-icon {
+    font-size: 2rem;
+  }
+
+  .period-status-text {
+    font-size: 1rem;
+  }
+
+  .period-main {
+    padding: 20px;
+  }
+
+  .period-status-box {
+    padding: 20px;
+  }
+
+  .period-btn {
+    font-size: 0.95rem;
+    padding: 12px 20px;
+  }
+}
+
+/* 애니메이션 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.period-status-box {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.period-button-container {
+  animation: fadeIn 0.7s ease-out;
+}

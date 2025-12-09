@@ -13,7 +13,7 @@ const Application = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  // ✅ 표시 모드: 'pre' = 예비 신청 목록, 'all' = 전체 목록
+  // 표시 모드: 'pre' = 예비 신청 목록, 'all' = 전체 목록
   const [viewMode, setViewMode] = useState("pre");
 
   // 검색 필터
@@ -28,29 +28,59 @@ const Application = () => {
     fetchPreSubjectList();
   }, []);
 
-  // ✅ 예비 수강 신청한 과목 목록 조회
+  // 예비 수강 신청한 과목 목록 조회 (수정됨)
   const fetchPreSubjectList = async () => {
     try {
       setLoading(true);
       console.log("예비 수강 신청 목록 조회 중...");
 
-      const response = await api.get("/api/sugang/preAppList", {
+      // 예비 신청 목록 조회
+      const preAppResponse = await api.get("/api/sugang/preAppList", {
         params: { type: 1 },
       });
-      const data = response.data;
+      const preAppData = preAppResponse.data;
+      console.log("예비 신청 목록 API 응답:", preAppData);
 
-      console.log("예비 신청 목록 API 응답:", data);
+      // 전체 과목 목록 조회 (한 번만)
+      const allSubjectsResponse = await api.get("/api/sugang/application/1");
+      const allSubjects = allSubjectsResponse.data.subjectList || [];
 
-      // 신청 미완료 목록 (preStuSubList)
-      const preList = data.preStuSubList || [];
+      // subjectId를 key로 하는 Map 생성 (빠른 검색)
+      const subjectMap = new Map(allSubjects.map((s) => [s.id, s]));
+
+      // 신청 미완료 목록 (preStuSubList) 매핑
+      const preList = (preAppData.preStuSubList || []).map((item) => {
+        const subjectDetail = subjectMap.get(item.subjectId);
+
+        return {
+          subjectId: item.subjectId,
+          id: item.subjectId,
+          subjectName: item.subjectName,
+          name: item.subjectName,
+          professorName: item.professorName,
+          grades: item.grades,
+          subDay: item.subDay,
+          startTime: item.startTime,
+          endTime: item.endTime,
+          numOfStudent: item.numOfStudent,
+          capacity: item.capacity,
+          roomId: item.roomId,
+          status: false, // 아직 본 수강 신청 안 함
+          // 상세 정보에서 가져온 필드들
+          collName: subjectDetail?.collName || "",
+          deptName: subjectDetail?.deptName || "",
+          type: subjectDetail?.type || "",
+        };
+      });
 
       setSubjectList(preList);
       setSubjectCount(preList.length);
       setPageCount(0); // 페이징 없음
       setViewMode("pre");
 
-      // 필터용 데이터도 가져오기
-      await fetchFilterData();
+      // 5. 필터용 데이터 설정
+      setDeptList(allSubjectsResponse.data.deptList || []);
+      setSubNameList(allSubjectsResponse.data.subNameList || []);
     } catch (error) {
       console.error("예비 신청 목록 조회 실패:", error);
       if (error.response?.status === 400) {
