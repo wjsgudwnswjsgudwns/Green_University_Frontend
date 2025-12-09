@@ -98,7 +98,7 @@ export default function ProfessorSubjectListPage() {
               </tr>
               <tr>
                 <td>
-                  <a href="/professor/evaluation">내 강의 평가</a>
+                  <a href="/evaluation/read">내 강의 평가</a>
                 </td>
               </tr>
             </tbody>
