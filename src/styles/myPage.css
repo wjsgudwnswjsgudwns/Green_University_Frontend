@@ -129,7 +129,7 @@
   width: 25%;
 }
 
-/* 학적 변동 테이블 */
+/* 학점 변동 테이블 */
 .mypage-stat-table {
   width: 100%;
   border-collapse: collapse;
@@ -159,7 +159,7 @@
   background-color: #f8f9fa;
 }
 
-.mypage-stat-table .no-data {
+.mypage-stat-table .mypage-no-data {
   padding: 40px;
   color: #95a5a6;
   font-style: italic;
