@@ -16,6 +16,7 @@ export default function Header() {
           { label: "수업", path: "/subject/list/1" },
           { label: "수강신청", path: "/sugang/subjectlist" },
           { label: "성적", path: "/grade/thisSemester" },
+          { label: "챗봇", path: "/chatbot" },
           { label: "학사정보", path: "/board/notice" },
         ];
         break;

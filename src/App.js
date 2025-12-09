@@ -60,6 +60,8 @@ import SemesterGrade from "./pages/grade/SemesterGrade";
 import TotalGrade from "./pages/grade/TotalGrade";
 import MyEvaluation from "./pages/evaluation/MyEvaluation";
 import EvaluationForm from "./pages/evaluation/EvaluationForm";
+import ChatbotPage from "./pages/chatbot/ChatbotPage";
+import ChatbotButton from "./components/ChatbotButton";
 
 function PrivateRoute({ children, role }) {
   const { user } = useAuth();
@@ -378,6 +380,14 @@ function Layout() {
             </PrivateRoute>
           }
         />
+        <Route
+          path="/chatbot"
+          element={
+            <PrivateRoute role="student">
+              <ChatbotPage />
+            </PrivateRoute>
+          }
+        />
 
         <Route
           path="/evaluation"
@@ -536,6 +546,7 @@ function Layout() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       {!shouldHideHeaderFooter && <Footer />}
+      {!shouldHideHeaderFooter && <ChatbotButton />}
     </>
   );
 }

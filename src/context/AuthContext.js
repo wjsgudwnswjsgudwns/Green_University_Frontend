@@ -77,6 +77,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       // 로컬 스토리지 및 상태 초기화
       localStorage.removeItem("token");
+      localStorage.removeItem("chatbot_history"); // 챗봇 대화 내역 초기화
       setUser(null);
       navigate("/login");
     }
