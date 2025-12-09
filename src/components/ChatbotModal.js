@@ -210,7 +210,7 @@ const ChatbotModal = ({
     <div className="chatbot-modal-container" ref={modalRef}>
       <div className="chatbot-modal-header">
         <div className="chatbot-modal-header-content">
-          <h2>🤖 챗봇 상담</h2>
+          <h2>챗봇 상담</h2>
           <p>등록 여부, 수강 신청, 학점, 졸업 요건 등에 대해 물어보세요!</p>
         </div>
         <div className="chatbot-modal-header-actions">
@@ -269,7 +269,34 @@ const ChatbotModal = ({
             }`}
           >
             <div className="message-content">
-              {message.type === "bot" && <div className="bot-avatar">🤖</div>}
+              {message.type === "bot" && (
+                <div className="bot-avatar">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <circle
+                      cx="12"
+                      cy="7"
+                      r="4"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+              )}
               <div className="message-bubble">
                 <div className="message-text">{message.text}</div>
                 <div className="message-time">
@@ -283,7 +310,32 @@ const ChatbotModal = ({
         {isLoading && (
           <div className="chatbot-modal-message bot-message">
             <div className="message-content">
-              <div className="bot-avatar">🤖</div>
+              <div className="bot-avatar">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <circle
+                    cx="12"
+                    cy="7"
+                    r="4"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
               <div className="message-bubble">
                 <div className="typing-indicator">
                   <span></span>

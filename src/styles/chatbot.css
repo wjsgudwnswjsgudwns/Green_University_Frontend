@@ -11,7 +11,7 @@
 }
 
 .chatbot-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
   color: white;
   padding: 20px;
   display: flex;
@@ -113,11 +113,17 @@
 }
 
 .bot-avatar {
-  background: #e0e7ff;
+  background: #e8f5e9;
+  color: #216d30;
+}
+
+.bot-avatar svg {
+  width: 24px;
+  height: 24px;
 }
 
 .user-avatar {
-  background: #dbeafe;
+  background: #c8e6c9;
 }
 
 .message-bubble {
@@ -130,7 +136,7 @@
 }
 
 .user-message .message-bubble {
-  background: #667eea;
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
   color: white;
 }
 
@@ -161,7 +167,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #999;
+  background: #216d30;
   animation: typing 1.4s infinite;
 }
 
@@ -190,22 +196,23 @@
   display: flex;
   padding: 16px;
   background: white;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid #e0e6ed;
   gap: 8px;
 }
 
 .chatbot-input {
   flex: 1;
   padding: 12px 16px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid #e0e6ed;
   border-radius: 24px;
   font-size: 14px;
   outline: none;
-  transition: border-color 0.2s;
+  transition: all 0.3s ease;
 }
 
 .chatbot-input:focus {
-  border-color: #667eea;
+  border-color: #216d30;
+  box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
 }
 
 .chatbot-input:disabled {
@@ -215,18 +222,21 @@
 
 .chatbot-send-button {
   padding: 12px 24px;
-  background: #667eea;
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
   color: white;
   border: none;
   border-radius: 24px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(33, 109, 48, 0.3);
 }
 
 .chatbot-send-button:hover:not(:disabled) {
-  background: #5568d3;
+  background: linear-gradient(135deg, #1a5524 0%, #0e2b14 100%);
+  box-shadow: 0 4px 12px rgba(33, 109, 48, 0.4);
+  transform: translateY(-1px);
 }
 
 .chatbot-send-button:disabled {
@@ -238,8 +248,8 @@
   display: flex;
   gap: 8px;
   padding: 12px 16px;
-  background: #f9fafb;
-  border-top: 1px solid #e5e7eb;
+  background: #f8f9fa;
+  border-top: 1px solid #e0e6ed;
   flex-wrap: wrap;
   justify-content: center;
 }
@@ -247,18 +257,19 @@
 .quick-action-btn {
   padding: 8px 16px;
   background: white;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e0e6ed;
   border-radius: 20px;
   font-size: 12px;
-  color: #667eea;
+  color: #216d30;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
 }
 
 .quick-action-btn:hover:not(:disabled) {
-  background: #667eea;
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
   color: white;
-  border-color: #667eea;
+  border-color: #216d30;
+  box-shadow: 0 2px 8px rgba(33, 109, 48, 0.2);
 }
 
 .quick-action-btn:disabled {
