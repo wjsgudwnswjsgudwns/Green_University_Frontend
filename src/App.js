@@ -61,6 +61,16 @@ import MyEvaluation from "./pages/evaluation/MyEvaluation";
 import EvaluationForm from "./pages/evaluation/EvaluationForm";
 import ChatbotPage from "./pages/chatbot/ChatbotPage";
 import ChatbotButton from "./components/ChatbotButton";
+import StudentCounselingList from "./pages/ai/StudentCounselingList";
+import StudentCounselingDetail from "./pages/ai/StudentCounselingDetail";
+import ProfessorCounselingList from "./pages/ai/ProfessorCounselingList";
+import ProfessorCounselingForm from "./pages/ai/ProfessorCounselingForm";
+import ProfessorCounselingDetail from "./pages/ai/ProfessorCounselingDetail";
+import StaffCounselingStudentDetail from "./pages/ai/StaffCounselingStudentDetail";
+import StaffCounselingStatistics from "./pages/ai/StaffCounselingStatistics";
+import StaffCounselingDashboard from "./pages/ai/StaffCounselingDashboard";
+import ProfessorCounselingPage from "./pages/ProfessorCounselingPage";
+import StudentCounselingPage from "./pages/StudentCounselingPage";
 
 function PrivateRoute({ children, role }) {
   const { user } = useAuth();
@@ -88,22 +98,23 @@ function Layout() {
       {!shouldHideHeaderFooter && <Header />}
       <Routes>
         {/* Public routes */}
+        {/* 로그인 관련 */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/find-id" element={<FindIdPage />} />
         <Route path="/find-password" element={<FindPasswordPage />} />
+
+        {/* 홈 */}
+
         <Route
-          path="/student/break/application"
-          element={<BreakApplication />}
+          path="/"
+          element={
+            <PrivateRoute>
+              <MainPage />
+            </PrivateRoute>
+          }
         />
-        <Route path="/student/break/list" element={<BreakListStudent />} />
-        <Route path="/student/break/detail/:id" element={<BreakDetail />} />
-        <Route path="/staff/break/list" element={<BreakListStaff />} />
-        <Route path="/staff/break/detail/:id" element={<BreakDetail />} />
-        <Route path="/staff/student-list" element={<StudentListStaff />} />
-        <Route
-          path="/staff/student-list/:page"
-          element={<StudentListStaff />}
-        />
+
+        {/* 공통 */}
         <Route
           path="/board/notice"
           element={
@@ -121,22 +132,6 @@ function Layout() {
           }
         />
         <Route
-          path="/board/notice/write"
-          element={
-            <PrivateRoute role="staff">
-              <NoticeWritePage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/board/notice/edit/:id"
-          element={
-            <PrivateRoute role="staff">
-              <NoticeEditPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
           path="/schedule"
           element={
             <PrivateRoute>
@@ -144,14 +139,7 @@ function Layout() {
             </PrivateRoute>
           }
         />
-        <Route
-          path="/schedule/manage"
-          element={
-            <PrivateRoute role="staff">
-              <ScheduleManagePage />
-            </PrivateRoute>
-          }
-        />
+
         <Route
           path="/schedule/:id"
           element={
@@ -160,49 +148,7 @@ function Layout() {
             </PrivateRoute>
           }
         />
-        <Route
-          path="/schedule/register"
-          element={
-            <PrivateRoute role="staff">
-              <ScheduleRegisterPage />
-            </PrivateRoute>
-          }
-        />
-        <Route path="/staff/professor-list" element={<ProfessorListStaff />} />
-        <Route
-          path="/staff/professor-list/:page"
-          element={<ProfessorListStaff />}
-        />
-        <Route path="/staff/register-student" element={<RegisterStudent />} />
-        <Route
-          path="/staff/register-professor"
-          element={<RegisterProfessor />}
-        />
-        <Route path="/staff/register-staff" element={<RegisterStaff />} />
-        <Route
-          path="/professor/subject"
-          element={
-            <PrivateRoute role="professor">
-              <ProfessorSubjectListPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/professor/subject/:subjectId"
-          element={
-            <PrivateRoute role="professor">
-              <SubjectStudentListPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/professor/subject/:subjectId/student/:studentId"
-          element={
-            <PrivateRoute role="professor">
-              <UpdateStudentGradePage />
-            </PrivateRoute>
-          }
-        />
+
         <Route
           path="/professor/syllabus/:subjectId"
           element={
@@ -211,14 +157,28 @@ function Layout() {
             </PrivateRoute>
           }
         />
+
         <Route
-          path="/professor/syllabus/edit/:subjectId"
+          path="/subject/syllabus/:subjectId"
           element={
-            <PrivateRoute role="professor">
-              <UpdateSyllabusPage />
+            <PrivateRoute>
+              <SyllabusPage />
             </PrivateRoute>
           }
         />
+
+        {/* 학생 */}
+
+        {/* 휴학 */}
+        <Route
+          path="/student/break/application"
+          element={<BreakApplication />}
+        />
+        <Route path="/student/break/list" element={<BreakListStudent />} />
+        <Route path="/student/break/detail/:id" element={<BreakDetail />} />
+        <Route path="/staff/break/list" element={<BreakListStaff />} />
+        <Route path="/staff/break/detail/:id" element={<BreakDetail />} />
+
         <Route
           path="/subject/list/:page"
           element={
@@ -227,6 +187,9 @@ function Layout() {
             </PrivateRoute>
           }
         />
+
+        <Route path="/sugang/subjectlist" element={<SubjectList />} />
+
         <Route
           path="/sugang/preAppList"
           element={
@@ -269,61 +232,6 @@ function Layout() {
         />
 
         <Route
-          path="/staff/course-period"
-          element={
-            <PrivateRoute role="staff">
-              <UpdatePeriodPage />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/staff/tuition/bill"
-          element={
-            <PrivateRoute role="staff">
-              <CreateTuitionBillPage />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/student/tuition/list"
-          element={
-            <PrivateRoute role="student">
-              <TuitionListPage />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/student/tuition/payment"
-          element={
-            <PrivateRoute>
-              <TuitionPaymentPage />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/subject/syllabus/:subjectId"
-          element={
-            <PrivateRoute>
-              <SyllabusPage />
-            </PrivateRoute>
-          }
-        />
-
-        {/* Home route */}
-        <Route
-          path="/"
-          element={
-            <PrivateRoute>
-              <MainPage />
-            </PrivateRoute>
-          }
-        />
-        {/* Student routes */}
-        <Route
           path="/student/info"
           element={
             <PrivateRoute role="student">
@@ -347,6 +255,7 @@ function Layout() {
             </PrivateRoute>
           }
         />
+
         <Route
           path="/grade/thisSemester"
           element={
@@ -371,14 +280,6 @@ function Layout() {
             </PrivateRoute>
           }
         />
-        <Route
-          path="/chatbot"
-          element={
-            <PrivateRoute role="student">
-              <ChatbotPage />
-            </PrivateRoute>
-          }
-        />
 
         <Route
           path="/evaluation"
@@ -389,7 +290,59 @@ function Layout() {
           }
         />
 
-        {/* Professor routes */}
+        {/* 교수 */}
+        <Route
+          path="/professor/subject"
+          element={
+            <PrivateRoute role="professor">
+              <ProfessorSubjectListPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/professor/subject/:subjectId"
+          element={
+            <PrivateRoute role="professor">
+              <SubjectStudentListPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/professor/subject/:subjectId/student/:studentId"
+          element={
+            <PrivateRoute role="professor">
+              <UpdateStudentGradePage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/professor/syllabus/edit/:subjectId"
+          element={
+            <PrivateRoute role="professor">
+              <UpdateSyllabusPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/student/tuition/list"
+          element={
+            <PrivateRoute role="student">
+              <TuitionListPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/student/tuition/payment"
+          element={
+            <PrivateRoute>
+              <TuitionPaymentPage />
+            </PrivateRoute>
+          }
+        />
+
         <Route
           path="/professor/info"
           element={
@@ -424,7 +377,86 @@ function Layout() {
           }
         />
 
-        {/* Staff routes */}
+        <Route
+          path="/chatbot"
+          element={
+            <PrivateRoute role="student">
+              <ChatbotPage />
+            </PrivateRoute>
+          }
+        />
+
+        {/* 직원 */}
+
+        <Route path="/staff/student-list" element={<StudentListStaff />} />
+        <Route
+          path="/staff/student-list/:page"
+          element={<StudentListStaff />}
+        />
+
+        <Route
+          path="/board/notice/write"
+          element={
+            <PrivateRoute role="staff">
+              <NoticeWritePage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/board/notice/edit/:id"
+          element={
+            <PrivateRoute role="staff">
+              <NoticeEditPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/schedule/manage"
+          element={
+            <PrivateRoute role="staff">
+              <ScheduleManagePage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/schedule/register"
+          element={
+            <PrivateRoute role="staff">
+              <ScheduleRegisterPage />
+            </PrivateRoute>
+          }
+        />
+        <Route path="/staff/professor-list" element={<ProfessorListStaff />} />
+        <Route
+          path="/staff/professor-list/:page"
+          element={<ProfessorListStaff />}
+        />
+        <Route path="/staff/register-student" element={<RegisterStudent />} />
+        <Route
+          path="/staff/register-professor"
+          element={<RegisterProfessor />}
+        />
+        <Route path="/staff/register-staff" element={<RegisterStaff />} />
+
+        <Route
+          path="/staff/course-period"
+          element={
+            <PrivateRoute role="staff">
+              <UpdatePeriodPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/staff/tuition/bill"
+          element={
+            <PrivateRoute role="staff">
+              <CreateTuitionBillPage />
+            </PrivateRoute>
+          }
+        />
+
         <Route
           path="/staff/info"
           element={
@@ -449,42 +481,7 @@ function Layout() {
             </PrivateRoute>
           }
         />
-        {/* Board routes */}
-        <Route
-          path="/board/notice"
-          element={
-            <PrivateRoute>
-              <NoticeListPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/board/notice/:id"
-          element={
-            <PrivateRoute>
-              <NoticeDetailPage />
-            </PrivateRoute>
-          }
-        />
-        {/* Schedule routes */}
-        <Route
-          path="/schedule"
-          element={
-            <PrivateRoute>
-              <ScheduleListPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/schedule/:id"
-          element={
-            <PrivateRoute>
-              <ScheduleDetailPage />
-            </PrivateRoute>
-          }
-        />
-        <Route path="/sugang/subjectlist" element={<SubjectList />} />
-        {/* Admin registration routes (staff role) */}
+
         <Route
           path="/staff/admin"
           element={
@@ -530,6 +527,108 @@ function Layout() {
           element={
             <PrivateRoute role="staff">
               <SubjectManagement />
+            </PrivateRoute>
+          }
+        />
+
+        {/* 상담 */}
+        <Route
+          path="/professor/counseling"
+          element={<ProfessorCounselingPage />}
+        />
+        <Route path="/student/counseling" element={<StudentCounselingPage />} />
+
+        {/* Web Chatting */}
+        <Route
+          path="/meetings"
+          element={
+            <PrivateRoute>
+              <MeetingListPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/meetings/:meetingId"
+          element={
+            <PrivateRoute>
+              <MeetingDetailPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/meetings/:meetingId/join"
+          element={
+            <PrivateRoute>
+              <MeetingJoinPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/student/counseling/list"
+          element={
+            <PrivateRoute role="student">
+              <StudentCounselingList />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/student/counseling/:id"
+          element={
+            <PrivateRoute role="student">
+              <StudentCounselingDetail />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Professor Counseling routes */}
+        <Route
+          path="/professor/counseling/list"
+          element={
+            <PrivateRoute role="professor">
+              <ProfessorCounselingList />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/professor/counseling/form"
+          element={
+            <PrivateRoute role="professor">
+              <ProfessorCounselingForm />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/professor/counseling/:id"
+          element={
+            <PrivateRoute role="professor">
+              <ProfessorCounselingDetail />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Staff Counseling routes */}
+        <Route
+          path="/staff/counseling/dashboard"
+          element={
+            <PrivateRoute role="staff">
+              <StaffCounselingDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/staff/counseling/statistics"
+          element={
+            <PrivateRoute role="staff">
+              <StaffCounselingStatistics />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/staff/counseling/student/:studentId"
+          element={
+            <PrivateRoute role="staff">
+              <StaffCounselingStudentDetail />
             </PrivateRoute>
           }
         />
