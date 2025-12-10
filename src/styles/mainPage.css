@@ -1,141 +1,448 @@
-/* Styles for the main dashboard page */
+/* Main Page Styles - 클래스명 충돌 방지 */
 
+/* 배너 슬라이더 */
+.banner-slider {
+  position: relative;
+  width: 100%;
+  height: 841px;
+  overflow: hidden;
+  margin-bottom: 32px;
+  border-radius: 8px;
+}
+
+.slider-track {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+  height: 100%;
+}
+
+.slider-track .slide {
+  min-width: 100%;
+  height: 100%;
+}
+
+.slider-track .slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.slider-indicators {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 10;
+}
+
+.slider-indicators .indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.5);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.slider-indicators .indicator.active {
+  background-color: #ffffff;
+  transform: scale(1.2);
+}
+
+.slider-indicators .indicator:hover {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+/* 메인 컨텐츠 레이아웃 */
 .main-page .main-content {
   display: flex;
   flex-wrap: wrap;
   gap: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
-.main-column {
+.main-page .main-column {
   flex: 1 1 600px;
   display: flex;
   flex-direction: column;
   gap: 24px;
+  min-width: 0;
 }
 
-.side-column {
-  width: 300px;
+.main-page .side-column {
+  width: 320px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
-.notice-section, .schedule-section {
+/* 컨텐츠 섹션 공통 스타일 */
+.main-page .content-section {
   background-color: #ffffff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 16px;
+  /* border: 1px solid #e0e0e0; */
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
 }
 
-.notice-section h3, .schedule-section h3 {
-  margin: 0;
-  font-size: 1.2rem;
-  color: #2a8fbd;
+.main-page .content-section:hover {
+  /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); */
 }
 
-.split {
-  border-top: 1px solid #e0e0e0;
-  margin: 8px 0;
-}
-
-.list-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.875rem;
-}
-
-.list-table td {
-  padding: 6px 4px;
-}
-
-.list-table .date-cell {
-  white-space: nowrap;
-  text-align: right;
-  width: 80px;
-  color: #888;
-}
-
-.ellipsis {
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-/* Profile card */
-.profile-card {
-  background-color: #ffffff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 16px;
-}
-
-.profile-header {
-  list-style: none;
+/* 섹션 헤더 */
+.main-page .section-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 8px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #216d30;
+}
+
+.main-page .section-header h2 {
   margin: 0;
-  padding: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #216d30;
 }
 
-.profile-header .welcome {
-  font-weight: 600;
-  font-size: 1rem;
+.main-page .more-link {
+  color: #666;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.3s ease;
 }
 
-.profile-table {
-  width: 100%;
-  margin-top: 8px;
-  font-size: 0.875rem;
-  border-collapse: collapse;
+.main-page .more-link:hover {
+  color: #216d30;
 }
 
-.profile-table td {
-  padding: 4px;
-}
-
-.profile-buttons {
-  margin-top: 12px;
+/* 공지사항 리스트 */
+.main-page .notice-list {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.profile-buttons button {
-  flex: 1;
-  background-color: #2a8fbd;
-  border: none;
-  color: #fff;
-  padding: 8px;
-  border-radius: 4px;
+.main-page .notice-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  transition: all 0.3s ease;
   cursor: pointer;
-  font-size: 0.875rem;
 }
 
-.profile-buttons button:hover {
-  background-color: #226c8d;
+.main-page .notice-item:hover {
+  background-color: #e9ecef;
+  transform: translateX(4px);
 }
 
-/* Notification card */
-.notification-card {
+.main-page .notice-title {
+  flex: 1;
+  font-size: 0.95rem;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 16px;
+}
+
+.main-page .notice-date {
+  font-size: 0.85rem;
+  color: #888;
+  white-space: nowrap;
+}
+
+/* 학사일정 리스트 */
+.main-page .schedule-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.main-page .schedule-item {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.main-page .schedule-item:hover {
+  background-color: #e9ecef;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.main-page .schedule-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  height: 60px;
+  background-color: #216d30;
+  color: white;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.main-page .schedule-date .month {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.main-page .schedule-date .day {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.main-page .schedule-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.main-page .schedule-content h3 {
+  margin: 0 0 4px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.main-page .schedule-content p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+/* 프로필 카드 */
+.main-page .profile-card {
   background-color: #ffffff;
   border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 16px;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.notification-header {
+.main-page .profile-header {
   list-style: none;
   display: flex;
   align-items: center;
   gap: 8px;
+  margin: 0 0 16px 0;
   padding: 0;
-  margin: 0;
-  font-weight: 600;
-  font-size: 1rem;
 }
 
-.notification-card p {
-  margin-top: 8px;
-  font-size: 0.875rem;
+.main-page .profile-header .welcome {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #216d30;
+}
+
+.main-page .profile-card hr {
+  border: none;
+  border-top: 1px solid #216d30;
+  margin: 16px 0;
+}
+
+.main-page .profile-table {
+  width: 100%;
+  margin: 16px 0;
+  font-size: 0.9rem;
+  border-collapse: collapse;
+}
+
+.main-page .profile-table tr {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.main-page .profile-table tr:last-child {
+  border-bottom: none;
+}
+
+.main-page .profile-table td {
+  padding: 10px 8px;
+  vertical-align: middle;
+}
+
+.main-page .profile-table td:first-child {
+  font-weight: 600;
+  color: #555;
+  width: 80px;
+}
+
+.main-page .profile-table td:last-child {
+  color: #333;
+}
+
+.main-page .profile-buttons {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.main-page .profile-btn {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.main-page .mypage-btn {
+  background-color: #216d30;
+  color: #fff;
+}
+
+.main-page .mypage-btn:hover {
+  background-color: #216d30;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(42, 143, 189, 0.3);
+}
+
+.main-page .logout-btn {
+  background-color: #216d30;
+  color: #fff;
+}
+
+.main-page .logout-btn:hover {
+  background-color: #216d30;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+}
+
+/* 알림 카드 */
+.main-page .notification-card {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.main-page .notification-header {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  margin: 0 0 16px 0;
+}
+
+.main-page .notification-header .icon {
+  font-size: 1.5rem;
+  color: #216d30;
+}
+
+.main-page .notification-header .title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.main-page .notification-card p {
+  margin: 0;
+  padding: 16px;
+  font-size: 0.9rem;
+  color: #ffffff;
+  text-align: center;
+  background-color: #216d30;
+  border-radius: 8px;
+}
+
+/* 페이드인 애니메이션 */
+.main-page .fade-in-section {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.main-page .fade-in-section.animate-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .main-page .side-column {
+    width: 100%;
+  }
+
+  .banner-slider {
+    height: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-page .main-content {
+    padding: 0 16px;
+  }
+
+  .main-page .main-column {
+    flex: 1 1 100%;
+  }
+
+  .banner-slider {
+    height: 250px;
+  }
+
+  .main-page .section-header h2 {
+    font-size: 1.25rem;
+  }
+
+  .main-page .schedule-date {
+    min-width: 50px;
+    height: 50px;
+  }
+
+  .main-page .schedule-date .day {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .banner-slider {
+    height: 200px;
+  }
+
+  .main-page .content-section {
+    padding: 16px;
+  }
+
+  .main-page .profile-card,
+  .main-page .notification-card {
+    padding: 16px;
+  }
+
+  .main-page .profile-buttons {
+    flex-direction: column;
+  }
+
+  .main-page .schedule-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .main-page .schedule-date {
+    align-self: flex-start;
+  }
 }

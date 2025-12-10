@@ -106,17 +106,17 @@ export default function ChangePasswordPage() {
   };
 
   return (
-    <div className="my-page-container">
-      <aside className="side-menu">
-        <div className="side-menu-header">
+    <div className="mypage-container">
+      <aside className="mypage-side-menu">
+        <div className="mypage-side-menu-header">
           <h2>MY</h2>
         </div>
-        <nav className="side-menu-nav">
+        <nav className="mypage-side-menu-nav">
           {getMenuItems().map((item) => (
             <Link
               key={item.path}
               to={item.path}
-              className={`menu-item ${item.active ? "active" : ""}`}
+              className={`mypage-menu-item ${item.active ? "active" : ""}`}
             >
               {item.label}
             </Link>
@@ -124,15 +124,15 @@ export default function ChangePasswordPage() {
         </nav>
       </aside>
 
-      <main className="main-content">
+      <main className="mypage-main-content">
         <h1>비밀번호 변경</h1>
-        <div className="divider"></div>
+        <div className="mypage-divider"></div>
 
-        {error && <div className="error-message">{error}</div>}
-        {success && <div className="success-message">{success}</div>}
+        {error && <div className="mypage-error-message">{error}</div>}
+        {success && <div className="mypage-success-message">{success}</div>}
 
-        <form onSubmit={handleSubmit} className="update-form">
-          <table className="form-table">
+        <form onSubmit={handleSubmit} className="mypage-update-form">
+          <table className="mypage-form-table">
             <tbody>
               <tr>
                 <th>
@@ -145,7 +145,7 @@ export default function ChangePasswordPage() {
                     name="beforePassword"
                     value={formData.beforePassword}
                     onChange={handleChange}
-                    className="input-field"
+                    className="mypage-input-field"
                     disabled={isSubmitting}
                     required
                   />
@@ -162,7 +162,7 @@ export default function ChangePasswordPage() {
                     name="afterPassword"
                     value={formData.afterPassword}
                     onChange={handleChange}
-                    className="input-field"
+                    className="mypage-input-field"
                     disabled={isSubmitting}
                     required
                   />
@@ -179,7 +179,7 @@ export default function ChangePasswordPage() {
                     name="passwordCheck"
                     value={formData.passwordCheck}
                     onChange={handleChange}
-                    className="input-field"
+                    className="mypage-input-field"
                     disabled={isSubmitting}
                     required
                   />
@@ -190,7 +190,7 @@ export default function ChangePasswordPage() {
 
           <button
             type="submit"
-            className="submit-button"
+            className="mypage-submit-button"
             disabled={isSubmitting}
           >
             {isSubmitting ? "변경 중..." : "수정하기"}

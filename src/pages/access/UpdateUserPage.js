@@ -143,9 +143,9 @@ export default function UpdateUserPage() {
 
   if (loading) {
     return (
-      <div className="page-container">
-        <div className="loading-container">
-          <div className="spinner"></div>
+      <div className="mypage-container">
+        <div className="mypage-loading-container">
+          <div className="mypage-spinner"></div>
           <p>로딩 중...</p>
         </div>
       </div>
@@ -153,29 +153,29 @@ export default function UpdateUserPage() {
   }
 
   return (
-    <div className="my-page-container">
-      <aside className="side-menu">
-        <div className="side-menu-header">
+    <div className="mypage-container">
+      <aside className="mypage-side-menu">
+        <div className="mypage-side-menu-header">
           <h2>MY</h2>
         </div>
-        <nav className="side-menu-nav">
+        <nav className="mypage-side-menu-nav">
           {getMenuItems().map((item) => (
-            <Link key={item.path} to={item.path} className="menu-item">
+            <Link key={item.path} to={item.path} className="mypage-menu-item">
               {item.label}
             </Link>
           ))}
         </nav>
       </aside>
 
-      <main className="main-content">
+      <main className="mypage-main-content">
         <h1>개인 정보 수정</h1>
-        <div className="divider"></div>
+        <div className="mypage-divider"></div>
 
-        {error && <div className="error-message">{error}</div>}
-        {success && <div className="success-message">{success}</div>}
+        {error && <div className="mypage-error-message">{error}</div>}
+        {success && <div className="mypage-success-message">{success}</div>}
 
-        <form onSubmit={handleSubmit} className="update-form">
-          <table className="form-table">
+        <form onSubmit={handleSubmit} className="mypage-update-form">
+          <table className="mypage-form-table">
             <tbody>
               <tr>
                 <th>
@@ -188,7 +188,7 @@ export default function UpdateUserPage() {
                     name="address"
                     value={formData.address}
                     onChange={handleChange}
-                    className="input-field"
+                    className="mypage-input-field"
                     disabled={isSubmitting}
                     required
                   />
@@ -205,7 +205,7 @@ export default function UpdateUserPage() {
                     name="tel"
                     value={formData.tel}
                     onChange={handleChange}
-                    className="input-field"
+                    className="mypage-input-field"
                     disabled={isSubmitting}
                     required
                   />
@@ -222,7 +222,7 @@ export default function UpdateUserPage() {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className="input-field"
+                    className="mypage-input-field"
                     disabled={isSubmitting}
                     required
                   />
@@ -239,7 +239,7 @@ export default function UpdateUserPage() {
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
-                    className="input-field"
+                    className="mypage-input-field"
                     placeholder="현재 비밀번호를 입력하세요"
                     disabled={isSubmitting}
                     required
@@ -251,7 +251,7 @@ export default function UpdateUserPage() {
 
           <button
             type="submit"
-            className="submit-button"
+            className="mypage-submit-button"
             disabled={isSubmitting}
           >
             {isSubmitting ? "수정 중..." : "수정하기"}

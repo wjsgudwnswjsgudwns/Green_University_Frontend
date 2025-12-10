@@ -26,17 +26,14 @@ export default function TuitionListPage() {
   };
 
   return (
-    <div
-      className="d-flex justify-content-center align-items-start"
-      style={{ minWidth: "100em" }}
-    >
+    <div className="tl-container">
       {/* 세부 메뉴 */}
-      <div className="sub--menu">
-        <div className="sub--menu--top">
+      <div className="tl-sub-menu">
+        <div className="tl-sub-menu-top">
           <h2>MY</h2>
         </div>
-        <div className="sub--menu--mid">
-          <table className="sub--menu--table">
+        <div className="tl-sub-menu-mid">
+          <table className="tl-sub-menu-table">
             <tbody>
               <tr>
                 <td>
@@ -60,7 +57,7 @@ export default function TuitionListPage() {
               </tr>
               <tr>
                 <td>
-                  <a href="/student/tuition/list" className="selected--menu">
+                  <a href="/student/tuition/list" className="tl-selected-menu">
                     등록금 내역 조회
                   </a>
                 </td>
@@ -76,16 +73,16 @@ export default function TuitionListPage() {
       </div>
 
       {/* 메인 */}
-      <main>
+      <main className="tl-main">
         <h1>등록금 내역 조회</h1>
-        <div className="split--div"></div>
+        <div className="tl-split-div"></div>
 
         {loading ? (
-          <p className="no--list--p">로딩 중...</p>
+          <p className="tl-no-list">로딩 중...</p>
         ) : error ? (
-          <p className="no--list--p">{error}</p>
+          <p className="tl-no-list">{error}</p>
         ) : tuitionList.length > 0 ? (
-          <table border="1" className="list--table">
+          <table className="tl-list-table">
             <thead>
               <tr>
                 <th>등록연도</th>
@@ -121,7 +118,7 @@ export default function TuitionListPage() {
             </tbody>
           </table>
         ) : (
-          <p className="no--list--p">등록금 납부 내역이 없습니다.</p>
+          <p className="tl-no-list">등록금 납부 내역이 없습니다.</p>
         )}
       </main>
     </div>

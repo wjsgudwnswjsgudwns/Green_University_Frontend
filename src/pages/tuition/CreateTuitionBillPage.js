@@ -27,17 +27,14 @@ export default function CreateTuitionBillPage() {
   };
 
   return (
-    <div
-      className="d-flex justify-content-center align-items-start"
-      style={{ minWidth: "100em" }}
-    >
+    <div className="cb-container">
       {/* 세부 메뉴 */}
-      <div className="sub--menu">
-        <div className="sub--menu--top">
+      <div className="cb-sub-menu">
+        <div className="cb-sub-menu-top">
           <h2>학사관리</h2>
         </div>
-        <div className="sub--menu--mid">
-          <table className="sub--menu--table">
+        <div className="cb-sub-menu-mid">
+          <table className="cb-sub-menu-table">
             <tbody>
               <tr>
                 <td>
@@ -66,7 +63,7 @@ export default function CreateTuitionBillPage() {
               </tr>
               <tr>
                 <td>
-                  <a href="/staff/tuition/bill" className="selected--menu">
+                  <a href="/staff/tuition/bill" className="cb-selected-menu">
                     등록금 고지서 발송
                   </a>
                 </td>
@@ -87,13 +84,13 @@ export default function CreateTuitionBillPage() {
       </div>
 
       {/* 메인 */}
-      <main>
+      <main className="cb-main">
         <h1>등록금 고지서 발송</h1>
-        <div className="split--div"></div>
+        <div className="cb-split-div"></div>
 
         <button
           type="button"
-          className="btn btn-primary create--tui"
+          className="cb-create-btn"
           onClick={handleCreateBill}
           disabled={loading}
         >

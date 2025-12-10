@@ -1,0 +1,175 @@
+/* 강의 평가 폼 페이지 스타일 - eval-form prefix */
+
+/* 전체 컨테이너 */
+.eval-form-container {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  padding: 20px;
+}
+
+/* 메인 */
+.eval-form-main {
+  max-width: 900px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+}
+
+/* 로딩 */
+.eval-form-loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: #95a5a6;
+  font-size: 1.1rem;
+}
+
+/* 타이틀 */
+.eval-form-title-row {
+  text-align: center;
+  width: 100%;
+  margin: 20px 0;
+}
+
+.eval-form-title-row h1 {
+  font-weight: 600;
+  font-size: 2rem;
+  color: #2c3e50;
+}
+
+.eval-form-divider {
+  border: none;
+  border-top: 2px solid #e0e6ed;
+  margin-bottom: 30px;
+}
+
+/* 라디오 버튼 질문 */
+.eval-form-radio-check {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 25px;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 20px;
+}
+
+.eval-form-question {
+  font-size: 1.05rem;
+  margin-bottom: 12px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.eval-form-radio-check li:not(.eval-form-question) {
+  margin-bottom: 8px;
+  padding-left: 10px;
+}
+
+.eval-form-radio-check input[type="radio"] {
+  margin-right: 8px;
+  cursor: pointer;
+  accent-color: #216d30;
+}
+
+.eval-form-radio-check label {
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #5a6c7d;
+  transition: color 0.3s ease;
+}
+
+.eval-form-radio-check input[type="radio"]:checked + label {
+  color: #216d30;
+  font-weight: 500;
+}
+
+.eval-form-radio-check label:hover {
+  color: #216d30;
+}
+
+/* 건의사항 */
+.eval-form-etc-row {
+  list-style: none;
+  padding: 0;
+  margin-top: 30px;
+}
+
+.eval-form-etc-row li:first-of-type {
+  margin-bottom: 12px;
+}
+
+.eval-form-etc-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #2c3e50;
+}
+
+.eval-form-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e0e6ed;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  resize: vertical;
+  transition: all 0.3s ease;
+}
+
+.eval-form-textarea:focus {
+  outline: none;
+  border-color: #216d30;
+  box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
+}
+
+/* 버튼 영역 */
+.eval-form-button-row {
+  margin-top: 30px;
+  text-align: center;
+  width: 100%;
+}
+
+.eval-form-submit-btn {
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 40px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(33, 109, 48, 0.3);
+}
+
+.eval-form-submit-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1a5524 0%, #0e2b14 100%);
+  box-shadow: 0 6px 16px rgba(33, 109, 48, 0.4);
+  transform: translateY(-2px);
+}
+
+.eval-form-submit-btn:disabled {
+  background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .eval-form-main {
+    padding: 24px 16px;
+  }
+
+  .eval-form-title-row h1 {
+    font-size: 1.5rem;
+  }
+
+  .eval-form-textarea {
+    font-size: 0.9rem;
+  }
+
+  .eval-form-submit-btn {
+    width: 100%;
+    padding: 12px 20px;
+  }
+}

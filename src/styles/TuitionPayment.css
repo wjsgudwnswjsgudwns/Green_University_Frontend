@@ -1,10 +1,106 @@
-/* TuitionPayment.css - 등록금 납부 고지서 페이지 스타일 */
+/* TuitionPayment.css */
+/* 접두어: tp- (Tuition Payment) */
 
-/* (공통 사이드 메뉴 스타일은 위 TuitionList.css와 동일하다고 가정하거나 common에 있다면 생략 가능) */
-/* 여기서는 독립적인 파일 생성을 위해 필요한 부분만 override 또는 명시합니다. */
+.tp-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-width: 100em;
+  gap: 30px;
+  padding: 20px;
+}
 
-/* --- 문서 레이아웃 (고지서 형태) --- */
-.document--layout {
+/* 사이드 메뉴 (독립적용) */
+.tp-sub-menu {
+  min-width: 240px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  height: fit-content;
+  position: sticky;
+  top: 20px;
+}
+
+.tp-sub-menu-top {
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  color: #ffffff;
+  padding: 24px 20px;
+  text-align: center;
+}
+
+.tp-sub-menu-top h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.tp-sub-menu-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tp-sub-menu-table td {
+  display: block;
+  padding: 0;
+  border-bottom: 1px solid #e0e6ed;
+}
+
+.tp-sub-menu-table td:last-child {
+  border-bottom: none;
+}
+
+.tp-sub-menu-table a {
+  display: block;
+  padding: 14px 20px;
+  color: #2c3e50;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  border-left: 3px solid transparent;
+}
+
+.tp-sub-menu-table a:hover {
+  background-color: #f8f9fa;
+  color: #216d30;
+  border-left-color: #216d30;
+}
+
+.tp-sub-menu-table a.tp-selected-menu {
+  background-color: rgba(33, 109, 48, 0.1);
+  color: #216d30;
+  border-left-color: #216d30;
+  font-weight: 600;
+}
+
+/* 메인 영역 */
+.tp-main {
+  flex: 1;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 40px;
+  min-height: 600px;
+  min-width: 800px;
+}
+
+.tp-main h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0 0 20px 0;
+}
+
+.tp-split-div {
+  height: 2px;
+  background: linear-gradient(90deg, #216d30 0%, rgba(33, 109, 48, 0.2) 100%);
+  margin-bottom: 30px;
+}
+
+/* 고지서 레이아웃 */
+.tp-document-layout {
   width: 100%;
   max-width: 800px;
   background: #ffffff;
@@ -19,7 +115,7 @@
   align-items: center;
 }
 
-.document--layout::before {
+.tp-document-layout::before {
   content: "";
   position: absolute;
   top: 15px;
@@ -31,7 +127,7 @@
   pointer-events: none;
 }
 
-.document--layout h3 {
+.tp-document-layout h3 {
   text-align: center;
   font-size: 2rem;
   font-weight: 700;
@@ -41,24 +137,24 @@
   letter-spacing: 2px;
 }
 
-.document--layout p {
+.tp-document-layout p {
   font-size: 1.1rem;
   color: #5a6c7d;
   margin-bottom: 30px;
   font-weight: 500;
 }
 
-/* --- 고지서 테이블 (.tuition--payment--table) --- */
-.tuition--payment--table {
+/* 고지서 테이블 */
+.tp-payment-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
   border: 2px solid #2c3e50;
   background-color: #fff;
-  z-index: 1; /* 테두리 안쪽 컨텐츠 */
+  z-index: 1;
 }
 
-.tuition--payment--table th {
+.tp-payment-table th {
   background-color: #f0f4f8;
   color: #2c3e50;
   font-weight: 600;
@@ -69,28 +165,27 @@
   font-size: 0.95rem;
 }
 
-.tuition--payment--table td {
+.tp-payment-table td {
   padding: 14px 15px;
   border: 1px solid #2c3e50;
   color: #333;
   font-size: 0.95rem;
 }
 
-/* 테이블 내부 강조 스타일 */
-.tuition--payment--table tbody tr:nth-last-child(1) td,
-.tuition--payment--table tbody tr:nth-last-child(2) td,
-.tuition--payment--table tbody tr:nth-last-child(3) td {
+.tp-payment-table tbody tr:nth-last-child(1) td,
+.tp-payment-table tbody tr:nth-last-child(2) td,
+.tp-payment-table tbody tr:nth-last-child(3) td {
   font-weight: 600;
 }
 
-/* 납부금 행 강조 */
-.tuition--payment--table tbody tr:nth-last-child(3) td {
-  color: #c0392b; /* 붉은색 강조 */
+/* 납부금 강조 */
+.tp-payment-table tbody tr:nth-last-child(3) td {
+  color: #c0392b;
   font-size: 1.1rem;
 }
 
-/* --- 납부 버튼 스타일 --- */
-.btn-dark {
+/* 납부 버튼 */
+.tp-btn-pay {
   background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
   color: #ffffff;
   border: none;
@@ -104,14 +199,14 @@
   margin-top: 20px;
 }
 
-.btn-dark:hover {
+.tp-btn-pay:hover {
   background: linear-gradient(135deg, #1a5524 0%, #0e2b14 100%);
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(33, 109, 48, 0.4);
 }
 
-/* 납부 완료 메시지 */
-.no--list--p {
+/* 완료 메시지 */
+.tp-complete-msg {
   color: #216d30;
   font-weight: 700;
   font-size: 1.2rem;

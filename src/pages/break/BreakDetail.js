@@ -89,9 +89,9 @@ export default function BreakDetail() {
 
   if (loading) {
     return (
-      <div className="page-container">
-        <div className="loading-container">
-          <div className="spinner"></div>
+      <div className="mypage-container">
+        <div className="mypage-loading-container">
+          <div className="mypage-spinner"></div>
           <p>로딩 중...</p>
         </div>
       </div>
@@ -100,8 +100,8 @@ export default function BreakDetail() {
 
   if (error) {
     return (
-      <div className="page-container">
-        <div className="error-container">
+      <div className="mypage-container">
+        <div className="mypage-error-container">
           <p>{error}</p>
         </div>
       </div>
@@ -112,57 +112,63 @@ export default function BreakDetail() {
   const isStaff = user?.userRole === "staff";
 
   return (
-    <div className="my-page-container">
-      <aside className="side-menu">
-        <div className="side-menu-header">
+    <div className="mypage-container">
+      <aside className="mypage-side-menu">
+        <div className="mypage-side-menu-header">
           <h2>{isStudent ? "MY" : "학사관리"}</h2>
         </div>
-        <nav className="side-menu-nav">
+        <nav className="mypage-side-menu-nav">
           {isStudent ? (
             <>
-              <Link to="/student/info" className="menu-item">
+              <Link to="/student/info" className="mypage-menu-item">
                 내 정보 조회
               </Link>
-              <Link to="/student/password" className="menu-item">
+              <Link to="/student/password" className="mypage-menu-item">
                 비밀번호 변경
               </Link>
-              <Link to="/student/break/application" className="menu-item">
+              <Link
+                to="/student/break/application"
+                className="mypage-menu-item"
+              >
                 휴학 신청
               </Link>
-              <Link to="/student/break/list" className="menu-item active">
+              <Link
+                to="/student/break/list"
+                className="mypage-menu-item active"
+              >
                 휴학 내역 조회
               </Link>
-              <Link to="/student/tuition/list" className="menu-item">
+              <Link to="/student/tuition/list" className="mypage-menu-item">
                 등록금 내역 조회
               </Link>
-              <Link to="/student/tuition/payment" className="menu-item">
+              <Link to="/student/tuition/payment" className="mypage-menu-item">
                 등록금 납부 고지서
               </Link>
             </>
           ) : (
             <>
-              <Link to="/staff/student-list" className="menu-item">
+              <Link to="/staff/student-list" className="mypage-menu-item">
                 학생 명단 조회
               </Link>
-              <Link to="/staff/professor-list" className="menu-item">
+              <Link to="/staff/professor-list" className="mypage-menu-item">
                 교수 명단 조회
               </Link>
-              <Link to="/staff/register-student" className="menu-item">
+              <Link to="/staff/register-student" className="mypage-menu-item">
                 학생 등록
               </Link>
-              <Link to="/staff/register-professor" className="menu-item">
+              <Link to="/staff/register-professor" className="mypage-menu-item">
                 교수 등록
               </Link>
-              <Link to="/staff/register-staff" className="menu-item">
+              <Link to="/staff/register-staff" className="mypage-menu-item">
                 직원 등록
               </Link>
-              <Link to="/staff/tuition-bill" className="menu-item">
+              <Link to="/staff/tuition-bill" className="mypage-menu-item">
                 등록금 고지서 발송
               </Link>
-              <Link to="/staff/break/list" className="menu-item active">
+              <Link to="/staff/break/list" className="mypage-menu-item active">
                 휴학 처리
               </Link>
-              <Link to="/staff/course-period" className="menu-item">
+              <Link to="/staff/course-period" className="mypage-menu-item">
                 수강 신청 기간 설정
               </Link>
             </>
@@ -170,15 +176,15 @@ export default function BreakDetail() {
         </nav>
       </aside>
 
-      <main className="main-content">
+      <main className="mypage-main-content">
         <h1>휴학 내역 조회</h1>
-        <div className="divider"></div>
+        <div className="mypage-divider"></div>
 
         {breakApp && studentInfo && (
-          <div className="document-container">
-            <div className="document-layout">
+          <div className="break-document-container">
+            <div className="break-document-layout">
               <h3>휴학 신청서</h3>
-              <table className="document-table" border="1">
+              <table className="break-document-table" border="1">
                 <tbody>
                   <tr>
                     <th>단 과 대</th>
@@ -227,26 +233,26 @@ export default function BreakDetail() {
             </div>
 
             {breakApp.status === "처리중" && (
-              <div className="button-container">
+              <div className="break-button-container">
                 {isStudent && (
                   <button
                     onClick={handleCancel}
-                    className="btn btn-dark submit-button"
+                    className="break-submit-button"
                   >
                     취소하기
                   </button>
                 )}
                 {isStaff && (
-                  <div className="button-group">
+                  <div className="break-button-group">
                     <button
                       onClick={() => handleUpdate("승인")}
-                      className="btn btn-dark submit-button"
+                      className="break-submit-button"
                     >
                       승인하기
                     </button>
                     <button
                       onClick={() => handleUpdate("반려")}
-                      className="btn btn-dark submit-button"
+                      className="break-submit-button"
                       style={{ marginLeft: "10px" }}
                     >
                       반려하기
