@@ -29,7 +29,6 @@ function MeetingListPage() {
     const [meetings, setMeetings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const [creating, setCreating] = useState(false);
 
     const fetchMeetings = async () => {
         try {
@@ -52,32 +51,6 @@ function MeetingListPage() {
         navigate(`/meetings/${meetingId}`);
     };
 
-    const handleCreateInstantMeeting = async () => {
-        try {
-            setCreating(true);
-            setError("");
-
-            const res = await api.post("/api/meetings/instant");
-            const created = res.data; // MeetingSimpleResDto
-
-            // 목록 다시 불러오기
-            await fetchMeetings();
-
-            // 생성된 회의 상세 페이지로 바로 이동
-            if (created && created.meetingId) {
-                navigate(`/meetings/${created.meetingId}`);
-            }
-        } catch (err) {
-            console.error(err);
-            const msg =
-                err.response?.data?.message ||
-                "즉시 회의를 생성하는 중 오류가 발생했습니다.";
-            setError(msg);
-        } finally {
-            setCreating(false);
-        }
-    };
-
     return (
         <div style={{ maxWidth: 900, margin: "40px auto", padding: "0 16px" }}>
             <div
@@ -89,22 +62,7 @@ function MeetingListPage() {
                 }}
             >
                 <h2 style={{ margin: 0 }}>나의 회의 목록</h2>
-
-                <button
-                    onClick={handleCreateInstantMeeting}
-                    disabled={creating}
-                    style={{
-                        padding: "8px 14px",
-                        fontSize: 14,
-                        borderRadius: 6,
-                        border: "none",
-                        background: creating ? "#94a3b8" : "#2563eb",
-                        color: "white",
-                        cursor: creating ? "default" : "pointer",
-                    }}
-                >
-                    {creating ? "회의 생성 중..." : "즉시 회의 생성"}
-                </button>
+                {/* ➕ 여기 오른쪽에 나중에 '예약 회의 만들기' 버튼 같은 거 넣을 수 있음 */}
             </div>
 
             {loading && <p>불러오는 중...</p>}

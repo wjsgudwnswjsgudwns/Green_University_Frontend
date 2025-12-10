@@ -56,29 +56,29 @@ api.interceptors.response.use(
     (error) => {
         console.log("응답 실패:", error.config?.url, error.response?.status);
 
-        if (error.response?.status === 401) {
-            console.warn("401 에러 - 인증 실패");
+        // if (error.response?.status === 401) {
+        //     console.warn("401 에러 - 인증 실패");
 
-            // 공개 API는 토큰 삭제하지 않음
-            const isPublicUrl =
-                error.config?.url?.includes("/api/auth/login") ||
-                error.config?.url?.includes("/api/auth/find") ||
-                error.config?.url?.includes("/api/public");
+        //     // 공개 API는 토큰 삭제하지 않음
+        //     const isPublicUrl =
+        //         error.config?.url?.includes("/api/auth/login") ||
+        //         error.config?.url?.includes("/api/auth/find") ||
+        //         error.config?.url?.includes("/api/public");
 
-            if (!isPublicUrl) {
-                console.log("토큰 삭제 및 로그인 페이지로 이동");
-                localStorage.removeItem("token");
+        //     if (!isPublicUrl) {
+        //         console.log("토큰 삭제 및 로그인 페이지로 이동");
+        //         localStorage.removeItem("token");
 
-                // 로그인 페이지가 아닐 때만 리다이렉트
-                if (
-                    window.location.pathname !== "/login" &&
-                    window.location.pathname !== "/" &&
-                    !window.location.pathname.startsWith("/find-")
-                ) {
-                    window.location.href = "/login";
-                }
-            }
-        }
+        //         // 로그인 페이지가 아닐 때만 리다이렉트
+        //         if (
+        //             window.location.pathname !== "/login" &&
+        //             window.location.pathname !== "/" &&
+        //             !window.location.pathname.startsWith("/find-")
+        //         ) {
+        //             window.location.href = "/login";
+        //         }
+        //     }
+        // }
 
         return Promise.reject(error);
     }

@@ -50,7 +50,7 @@ function MeetingDetailPage() {
     }, [meetingId]);
 
     const handleBack = () => {
-        navigate("/meetings");
+        navigate(-1);
     };
 
     const handleJoinMeeting = () => {
@@ -116,7 +116,7 @@ function MeetingDetailPage() {
                     cursor: "pointer",
                 }}
             >
-                ← 회의 목록으로
+                ← 뒤로 가기
             </button>
 
             {loading && <p>불러오는 중...</p>}
