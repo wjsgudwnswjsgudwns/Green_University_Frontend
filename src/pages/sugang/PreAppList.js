@@ -203,6 +203,11 @@ const PreAppList = () => {
               </tr>
               <tr>
                 <td>
+                  <a href="/sugang/schedule">나의 시간표</a>
+                </td>
+              </tr>
+              <tr>
+                <td>
                   <a
                     href="/sugang/pre"
                     className={type === 0 ? "selected--menu" : ""}
