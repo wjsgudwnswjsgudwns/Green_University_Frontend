@@ -4,11 +4,11 @@ import StudentProfessorSelect from "../components/StudentProfessorSelect";
 import StudentOpenSlotGrid from "../components/StudentOpenSlotGrid";
 
 import {
-  getMyMajorProfessors,
-  getMyReservations,
-  reserveSlot,
-  cancelReservation,
-  getStudentSlots,
+    getMyMajorProfessors,
+    getMyReservations,
+    reserveSlot,
+    cancelReservation,
+    getStudentSlots,
 } from "../api/counselingApi";
 
 import { useWeekRange } from "../hooks/useWeekRange";
@@ -309,11 +309,8 @@ function StudentCounselingPage() {
                     </div>
                 </div>
             </section>
-
         </div>
-      </section>
-    </div>
-  );
+    );
 }
 
 export default StudentCounselingPage;
