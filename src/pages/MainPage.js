@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
+import api from "../api/axiosConfig";
 import "../styles/mainPage.css";
 import banner1 from "../images/Green_University_FrontView.png";
 import banner2 from "../images/Meeting_3_people.png";
@@ -10,6 +11,9 @@ import banner4 from "../images/Meeting_5_people.png";
 export default function MainPage() {
   const { user, logout } = useAuth();
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [notices, setNotices] = useState([]);
+  const [schedules, setSchedules] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // 애니메이션을 위한 ref
   const noticeRef = useRef(null);
@@ -25,6 +29,38 @@ export default function MainPage() {
 
     return () => clearInterval(interval);
   }, [banners.length]);
+
+  // 공지사항 및 학사일정 데이터 가져오기
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+
+        // 공지사항 최근 4개 가져오기
+        const noticeResponse = await api.get("/api/notice", {
+          params: { page: 0 },
+        });
+        const noticeList = noticeResponse.data.content || [];
+        setNotices(noticeList.slice(0, 4)); // 최대 4개만
+
+        // 학사일정 전체 가져오기
+        const scheduleResponse = await api.get("/api/schedule");
+        const scheduleList = scheduleResponse.data || [];
+
+        // ID 기준 내림차순 정렬 (최신순) 후 최대 3개만
+        const sortedSchedules = [...scheduleList]
+          .sort((a, b) => (b.id || 0) - (a.id || 0))
+          .slice(0, 3);
+        setSchedules(sortedSchedules);
+      } catch (error) {
+        console.error("데이터 조회 실패:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   // 스크롤 애니메이션
   useEffect(() => {
@@ -55,6 +91,36 @@ export default function MainPage() {
 
   const goToSlide = (index) => {
     setCurrentSlide(index);
+  };
+
+  // 날짜 포맷팅 (YYYY-MM-DD -> YYYY.MM.DD)
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    if (dateString.includes("T")) {
+      return dateString.split("T")[0].replace(/-/g, ".");
+    }
+    return dateString.replace(/-/g, ".");
+  };
+
+  // 학사일정 날짜에서 월/일 추출
+  const getMonthDay = (dateString) => {
+    if (!dateString) return { month: "01", day: "01" };
+    let month, day;
+
+    if (dateString.match(/^\d{2}-\d{2}/)) {
+      // MM-DD 형식
+      month = dateString.substring(0, 2);
+      day = dateString.substring(3, 5);
+    } else if (dateString.match(/^\d{4}-\d{2}-\d{2}/)) {
+      // YYYY-MM-DD 형식
+      month = dateString.substring(5, 7);
+      day = dateString.substring(8, 10);
+    } else {
+      month = "01";
+      day = "01";
+    }
+
+    return { month, day };
   };
 
   return (
@@ -96,26 +162,24 @@ export default function MainPage() {
               </Link>
             </div>
             <div className="notice-list">
-              <div className="notice-item">
-                <span className="notice-title">
-                  2024학년도 2학기 기말고사 일정 안내
-                </span>
-                <span className="notice-date">2024.12.01</span>
-              </div>
-              <div className="notice-item">
-                <span className="notice-title">
-                  2025학년도 1학기 수강신청 안내
-                </span>
-                <span className="notice-date">2024.11.28</span>
-              </div>
-              <div className="notice-item">
-                <span className="notice-title">학생 포털 시스템 점검 안내</span>
-                <span className="notice-date">2024.11.25</span>
-              </div>
-              <div className="notice-item">
-                <span className="notice-title">동계방학 도서관 운영 안내</span>
-                <span className="notice-date">2024.11.20</span>
-              </div>
+              {loading ? (
+                <div className="loading-text">로딩 중...</div>
+              ) : notices.length === 0 ? (
+                <div className="empty-text">공지사항이 없습니다.</div>
+              ) : (
+                notices.map((notice) => (
+                  <Link
+                    key={notice.id}
+                    to={`/board/notice/${notice.id}`}
+                    className="notice-item"
+                  >
+                    <span className="notice-title">{notice.title}</span>
+                    <span className="notice-date">
+                      {formatDate(notice.createdTime)}
+                    </span>
+                  </Link>
+                ))
+              )}
             </div>
           </div>
 
@@ -123,41 +187,40 @@ export default function MainPage() {
           <div ref={scheduleRef} className="content-section fade-in-section">
             <div className="section-header">
               <h2>학사일정</h2>
-              <Link to="/board/notice" className="more-link">
+              <Link to="/schedule" className="more-link">
                 더보기 +
               </Link>
             </div>
             <div className="schedule-list">
-              <div className="schedule-item">
-                <div className="schedule-date">
-                  <span className="month">12</span>
-                  <span className="day">16</span>
-                </div>
-                <div className="schedule-content">
-                  <h3>기말고사 시작</h3>
-                  <p>2024학년도 2학기 기말고사 기간</p>
-                </div>
-              </div>
-              <div className="schedule-item">
-                <div className="schedule-date">
-                  <span className="month">12</span>
-                  <span className="day">23</span>
-                </div>
-                <div className="schedule-content">
-                  <h3>성적 공개</h3>
-                  <p>2024학년도 2학기 성적 확인 가능</p>
-                </div>
-              </div>
-              <div className="schedule-item">
-                <div className="schedule-date">
-                  <span className="month">01</span>
-                  <span className="day">03</span>
-                </div>
-                <div className="schedule-content">
-                  <h3>수강신청</h3>
-                  <p>2025학년도 1학기 수강신청 시작</p>
-                </div>
-              </div>
+              {loading ? (
+                <div className="loading-text">로딩 중...</div>
+              ) : schedules.length === 0 ? (
+                <div className="empty-text">학사일정이 없습니다.</div>
+              ) : (
+                schedules.map((schedule) => {
+                  const { month, day } = getMonthDay(schedule.startDay);
+                  return (
+                    <Link
+                      key={schedule.id}
+                      to={`/schedule/${schedule.id}`}
+                      className="schedule-item"
+                    >
+                      <div className="schedule-date">
+                        <span className="month">{month}</span>
+                        <span className="day">{day}</span>
+                      </div>
+                      <div className="schedule-content">
+                        <h3>{schedule.information}</h3>
+                        <p>
+                          {schedule.startDay && schedule.endDay
+                            ? `${schedule.startDay} ~ ${schedule.endDay}`
+                            : schedule.startDay || ""}
+                        </p>
+                      </div>
+                    </Link>
+                  );
+                })
+              )}
             </div>
           </div>
         </div>
@@ -232,14 +295,6 @@ export default function MainPage() {
               </div>
             </div>
           )}
-
-          <div className="notification-card">
-            <ul className="notification-header">
-              <li className="icon material-symbols-rounded">notifications</li>
-              <li className="title">업무 알림</li>
-            </ul>
-            <p>처리해야 할 업무가 없습니다.</p>
-          </div>
         </div>
       </div>
     </div>
