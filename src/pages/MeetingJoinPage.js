@@ -4,6 +4,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import api from "../api/axiosConfig";
 import "../styles/MeetingJoinPage.css";
 import { useJanusLocalOnly } from "../hooks/useJanusLocalOnly";
+import MeetingChatPanel from "../components/MeetingChatPanel";
 
 function MeetingJoinPage() {
     const { meetingId } = useParams();
@@ -44,12 +45,20 @@ function MeetingJoinPage() {
             } catch (e) {
                 console.error("leaveRoom 호출 중 오류", e);
             }
-            navigate("/meetings");
 
-            // 2) 화면이 전환된 다음에 알럿
+            // 디버깅 로그
+            console.log("[handleTerminateAndLeave] called with msg:", msg);
+
+            // ✅ 비동기 콜백 안에서 React Router랑 부딪히지 않도록
+            //    alert + navigate 둘 다 setTimeout 안으로 묶어서 실행
             if (msg) {
-                setTimeout(() => {
+                window.setTimeout(() => {
                     alert(msg);
+                    navigate("/meetings");
+                }, 0);
+            } else {
+                window.setTimeout(() => {
+                    navigate("/meetings");
                 }, 0);
             }
         },
@@ -392,28 +401,8 @@ function MeetingJoinPage() {
                         </div>
 
                         <div
-                            id="videoremote1"
-                            className="meeting-video__remote"
-                        />
-                        <div
-                            id="videoremote2"
-                            className="meeting-video__remote"
-                        />
-                        <div
-                            id="videoremote3"
-                            className="meeting-video__remote"
-                        />
-                        <div
-                            id="videoremote4"
-                            className="meeting-video__remote"
-                        />
-                        <div
-                            id="videoremote5"
-                            className="meeting-video__remote"
-                        />
-                        <div
-                            id="videoremote6"
-                            className="meeting-video__remote"
+                            id="remote-grid"
+                            className="meeting-video__remote-grid"
                         />
                     </div>
 
@@ -464,35 +453,12 @@ function MeetingJoinPage() {
                     </div>
                 </div>
 
-                {/* 오른쪽 패널 */}
-                <div className="meeting-side">
-                    <div className="meeting-side__tabs">
-                        <div className="meeting-side__tab meeting-side__tab--active">
-                            채팅
-                        </div>
-                        <div className="meeting-side__tab">참가자</div>
-                    </div>
-
-                    <div id="chat-area" className="meeting-side__chat">
-                        <div className="meeting-side__chat-empty">
-                            아직 채팅이 없습니다. 메시지를 입력해보세요.
-                        </div>
-                    </div>
-
-                    <div className="meeting-side__input-row">
-                        <input
-                            id="chat-input"
-                            placeholder="메시지 입력..."
-                            className="meeting-side__input"
-                        />
-                        <button
-                            id="chat-send"
-                            className="meeting-side__send-button"
-                        >
-                            전송
-                        </button>
-                    </div>
-                </div>
+                {/* 오른쪽 채팅/참가자 패널 */}
+                <MeetingChatPanel
+                    meetingId={meetingId}
+                    joinInfo={joinInfo}
+                    terminated={terminated}
+                />
             </div>
         </div>
     );

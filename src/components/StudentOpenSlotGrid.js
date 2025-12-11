@@ -70,7 +70,6 @@ function StudentOpenSlotGrid({
 
     return (
         <div>
-            <h3 style={{ marginTop: 0 }}>예약 가능 시간</h3>
             <div
                 style={{
                     marginTop: "8px",
