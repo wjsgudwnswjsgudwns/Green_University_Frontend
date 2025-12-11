@@ -11,6 +11,7 @@ const ChatbotModal = ({
   const [messages, setMessages] = useState(initialMessages);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [scheduleSubjects, setScheduleSubjects] = useState([]); // 시간표 강의 리스트
   const messagesEndRef = useRef(null);
   const modalRef = useRef(null);
   const hasInitialized = useRef(false);
@@ -150,10 +151,51 @@ const ChatbotModal = ({
       });
       const botResponse = response.data.response;
 
+      // 시간표 조회 응답인지 확인 (강의 리스트 형식)
+      // 백엔드 응답 형식: "【2025년 2학기 수강 과목】\n\n아래 버튼을 클릭하여...\n\n1. 강의명\n2. 강의명..."
+      const hasScheduleListPattern =
+        botResponse.includes("【") && botResponse.includes("학기 수강 과목】");
+
+      // 강의 리스트 패턴 찾기 (예: "1. 강의명")
+      const lines = botResponse.split("\n");
+      const scheduleLine = lines.find((line) => {
+        const trimmed = line.trim();
+        return /^\d+\.\s/.test(trimmed);
+      });
+      const isScheduleList =
+        hasScheduleListPattern && scheduleLine !== undefined;
+
+      // 시간표 리스트인 경우 강의 정보 추출
+      if (isScheduleList) {
+        const subjects = [];
+        lines.forEach((line) => {
+          const trimmedLine = line.trim();
+          // "1. 강의명" 형식 매칭
+          const match = trimmedLine.match(/^(\d+)\.\s(.+)$/);
+          if (match) {
+            const [, number, subjectName] = match;
+            subjects.push({
+              number: parseInt(number),
+              name: subjectName.trim(),
+            });
+          }
+        });
+        if (subjects.length > 0) {
+          setScheduleSubjects(subjects);
+        }
+      } else if (botResponse.includes("【강의 상세 정보】")) {
+        // 강의 상세 정보를 조회한 경우 강의 리스트 유지 (사용자가 다른 강의도 볼 수 있도록)
+        // 리스트는 유지하되, 필요시 사용자가 "전체 메뉴" 버튼으로 돌아갈 수 있음
+      } else {
+        // 시간표가 아닌 다른 응답이면 강의 리스트 초기화
+        setScheduleSubjects([]);
+      }
+
       const newBotMessage = {
         type: "bot",
         text: botResponse,
         timestamp: new Date(),
+        isScheduleList: isScheduleList, // 시간표 리스트 여부
       };
       setMessages((prev) => [...prev, newBotMessage]);
     } catch (error) {
@@ -211,7 +253,10 @@ const ChatbotModal = ({
       <div className="chatbot-modal-header">
         <div className="chatbot-modal-header-content">
           <h2>챗봇 상담</h2>
-          <p>등록 여부, 수강 신청, 학점, 졸업 요건 등에 대해 물어보세요!</p>
+          <p>
+            등록 여부, 수강 신청, 학점, 졸업 요건, 휴학, 등록금, 시간표, 학적
+            상태, 성적 등에 대해 물어보세요!
+          </p>
         </div>
         <div className="chatbot-modal-header-actions">
           <button
@@ -350,34 +395,94 @@ const ChatbotModal = ({
       </div>
 
       <div className="chatbot-modal-quick-actions">
-        <button
-          className="quick-action-btn"
-          onClick={() => handleQuickAction("등록 여부 확인")}
-          disabled={isLoading}
-        >
-          등록 여부
-        </button>
-        <button
-          className="quick-action-btn"
-          onClick={() => handleQuickAction("수강 신청 내역")}
-          disabled={isLoading}
-        >
-          수강 신청
-        </button>
-        <button
-          className="quick-action-btn"
-          onClick={() => handleQuickAction("취득 학점 조회")}
-          disabled={isLoading}
-        >
-          취득 학점
-        </button>
-        <button
-          className="quick-action-btn"
-          onClick={() => handleQuickAction("졸업 요건 확인")}
-          disabled={isLoading}
-        >
-          졸업 요건
-        </button>
+        {scheduleSubjects.length > 0 ? (
+          // 시간표 강의 버튼들
+          <>
+            {scheduleSubjects.map((subject) => (
+              <button
+                key={subject.number}
+                className="quick-action-btn"
+                onClick={() => handleQuickAction(`${subject.number}번 강의`)}
+                disabled={isLoading}
+              >
+                {subject.name}
+              </button>
+            ))}
+            <button
+              className="quick-action-btn"
+              onClick={() => {
+                setScheduleSubjects([]);
+              }}
+              disabled={isLoading}
+              style={{
+                border: "2px dashed #216d30",
+                background: "transparent",
+              }}
+            >
+              ← 전체 메뉴
+            </button>
+          </>
+        ) : (
+          // 일반 퀵 액션 버튼들
+          <>
+            <button
+              className="quick-action-btn"
+              onClick={() => handleQuickAction("등록 여부 확인")}
+              disabled={isLoading}
+            >
+              등록 여부
+            </button>
+            <button
+              className="quick-action-btn"
+              onClick={() => handleQuickAction("수강 신청 내역")}
+              disabled={isLoading}
+            >
+              수강 신청
+            </button>
+            <button
+              className="quick-action-btn"
+              onClick={() => handleQuickAction("취득 학점 조회")}
+              disabled={isLoading}
+            >
+              취득 학점
+            </button>
+            <button
+              className="quick-action-btn"
+              onClick={() => handleQuickAction("졸업 요건 확인")}
+              disabled={isLoading}
+            >
+              졸업 요건
+            </button>
+            <button
+              className="quick-action-btn"
+              onClick={() => handleQuickAction("휴학 신청 내역")}
+              disabled={isLoading}
+            >
+              휴학 내역
+            </button>
+            <button
+              className="quick-action-btn"
+              onClick={() => handleQuickAction("시간표 조회")}
+              disabled={isLoading}
+            >
+              시간표
+            </button>
+            <button
+              className="quick-action-btn"
+              onClick={() => handleQuickAction("학적 상태 조회")}
+              disabled={isLoading}
+            >
+              학적 상태
+            </button>
+            <button
+              className="quick-action-btn"
+              onClick={() => handleQuickAction("학기별 성적 조회")}
+              disabled={isLoading}
+            >
+              학기별 성적
+            </button>
+          </>
+        )}
       </div>
 
       <form className="chatbot-modal-input-form" onSubmit={handleFormSubmit}>

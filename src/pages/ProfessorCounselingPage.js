@@ -3,6 +3,7 @@ import React, { useState, useCallback, useEffect } from "react";
 import ScheduleEditor from "../components/ScheduleEditor";
 import WeekRangeControls from "../components/WeekRangeControls";
 
+
 import {
     approveReservation,
     getProfessorReservations,
@@ -12,7 +13,7 @@ import { useWeekRange } from "../hooks/useWeekRange";
 import CounselingList from "../components/CounselingList";
 import CounselingDetailPanel from "../components/CounselingDetailPanel";
 
-function CounselingProfessorPage() {
+function ProfessorCounselingPage() {
     // 공통 주간 범위 훅
     const { fromDate, toDate, setFromDate, setToDate, goPrevWeek, goNextWeek } =
         useWeekRange();
@@ -71,10 +72,12 @@ function CounselingProfessorPage() {
     const confirmWeekChangeIfNeeded = () => {
         if (!hasDraft) return true;
 
+
         const ok = window.confirm(
-            "현재 주에서 편집 중인 내용 중 아직 적용되지 않은 변경 사항이 있습니다.\n" +
-                "주를 이동하면 이 변경 사항이 사라집니다. 계속 진행하시겠습니까?"
+          "편집 모드에서 적용되지 않은 변경 사항이 있습니다.\n" +
+            "편집 모드를 종료하면 이 변경 사항이 사라집니다. 계속하시겠습니까?"
         );
+
         return ok;
     };
 
@@ -382,8 +385,11 @@ function CounselingProfessorPage() {
                     </div>
                 </div>
             </section>
+
         </div>
-    );
+      </section>
+    </div>
+  );
 }
 
-export default CounselingProfessorPage;
+export default ProfessorCounselingPage;

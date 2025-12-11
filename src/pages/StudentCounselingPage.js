@@ -4,17 +4,18 @@ import StudentProfessorSelect from "../components/StudentProfessorSelect";
 import StudentOpenSlotGrid from "../components/StudentOpenSlotGrid";
 
 import {
-    getMyMajorProfessors,
-    getMyReservations,
-    reserveSlot,
-    cancelReservation,
-    getStudentSlots,
+  getMyMajorProfessors,
+  getMyReservations,
+  reserveSlot,
+  cancelReservation,
+  getStudentSlots,
 } from "../api/counselingApi";
+
 import { useWeekRange } from "../hooks/useWeekRange";
 import CounselingList from "../components/CounselingList";
 import CounselingDetailPanel from "../components/CounselingDetailPanel";
 
-function CounselingStudentPage() {
+function StudentCounselingPage() {
     // 공통 주간 범위 훅
     const { fromDate, toDate, setFromDate, setToDate, goPrevWeek, goNextWeek } =
         useWeekRange();
@@ -308,8 +309,11 @@ function CounselingStudentPage() {
                     </div>
                 </div>
             </section>
+
         </div>
-    );
+      </section>
+    </div>
+  );
 }
 
-export default CounselingStudentPage;
+export default StudentCounselingPage;

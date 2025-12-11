@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom"; // useNavigate 추가
 import { useAuth } from "../context/AuthContext";
+import NotificationBell from "./NotificationBell";
 import "../styles/header.css";
 import logo from "../images/GU1-Headear.png";
 
@@ -94,6 +95,9 @@ export default function Header() {
 
             {/* 사용자 이름 및 드롭다운 메뉴 */}
             <div className="user-menu-wrapper">
+              {/* 알림 아이콘 */}
+              <NotificationBell />
+
               <button
                 className="user-name-button"
                 onClick={toggleDropdown}
