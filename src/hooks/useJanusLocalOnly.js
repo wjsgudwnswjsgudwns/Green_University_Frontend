@@ -1,14 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const REMOTE_SLOT_IDS = [
-    "videoremote1",
-    "videoremote2",
-    "videoremote3",
-    "videoremote4",
-    "videoremote5",
-    "videoremote6",
-];
-
 export function useJanusLocalOnly(
     serverUrl = "https://janus.jsflux.co.kr/janus",
     options = {}
@@ -85,13 +76,62 @@ export function useJanusLocalOnly(
     const remoteFeedsRef = useRef({});
     const privateIdRef = useRef(null); // publisher joined 시 받은 private_id
 
+    function resetAllRemoteFeeds() {
+        console.log("[useJanusLocalOnly] resetAllRemoteFeeds");
+
+        Object.keys(remoteFeedsRef.current).forEach((feedId) => {
+            // 여기서는 우리가 주도적으로 정리하는 거니까
+            // skipHandleCleanup: false (기본값) → handle까지 정리
+            detachRemoteFeed(feedId);
+        });
+
+        const grid = document.getElementById("remote-grid");
+        if (grid) {
+            grid.innerHTML = "";
+        }
+
+        remoteFeedsRef.current = {};
+    }
+    function syncRemoteDomWithFeeds() {
+        const grid = document.getElementById("remote-grid");
+        if (!grid) return;
+
+        // 1) 현재 살아있는 feedId 기준으로 유효한 DOM id 리스트 만들기
+        const validIds = new Set(
+            Object.keys(remoteFeedsRef.current).map(
+                (feedId) => `remote-${feedId}`
+            )
+        );
+
+        console.log("[syncRemoteDomWithFeeds] feeds =", remoteFeedsRef.current);
+        console.log(
+            "[syncRemoteDomWithFeeds] DOM children =",
+            Array.from(grid.children).map((c) => c.id)
+        );
+
+        // 2) remote-grid 아래의 자식들 중
+        //    validIds에 없는 것들은 전부 제거
+        Array.from(grid.children).forEach((child) => {
+            if (
+                child.id &&
+                child.id.startsWith("remote-") &&
+                !validIds.has(child.id)
+            ) {
+                console.log("[subscriber] stray remote DOM 제거:", child.id);
+                grid.removeChild(child);
+            }
+        });
+    }
     // ========== 공통 정리 로직 ==========
     // fromJanus === true : Janus.destroy() 이후 콜백에서 호출
     // fromJanus === false: 우리가 직접 정리할 때 호출
     const cleanup = useCallback((fromJanus = false) => {
         console.log("[useJanusLocalOnly] cleanup, fromJanus =", fromJanus);
 
-        // 로컬 미디어 정리
+        // ✅ remote feed + remote DOM 전부 정리
+        resetAllRemoteFeeds();
+
+        // ✅ 로컬 미디어 정리
         try {
             if (localStreamRef.current) {
                 localStreamRef.current.getTracks().forEach((t) => t.stop());
@@ -99,23 +139,7 @@ export function useJanusLocalOnly(
         } catch (e) {
             console.warn("local stream cleanup error", e);
         }
-        // remote feed 정리
-        try {
-            Object.values(remoteFeedsRef.current).forEach((feedInfo) => {
-                try {
-                    feedInfo.handle.hangup?.();
-                    feedInfo.handle.detach?.();
-                } catch (e) {
-                    console.warn("remote feed cleanup error", e);
-                }
-                const container = document.getElementById(feedInfo.slotId);
-                if (container) {
-                    container.innerHTML = "";
-                }
-            });
-        } catch (e) {
-            console.warn("remoteFeeds cleanup error", e);
-        }
+
         remoteFeedsRef.current = {};
         privateIdRef.current = null;
 
@@ -128,7 +152,6 @@ export function useJanusLocalOnly(
             console.warn("plugin hangup error", e);
         }
 
-        // fromJanus=false 일 때만 destroy 호출 (무한루프 방지)
         try {
             if (janusRef.current && !fromJanus) {
                 janusRef.current.destroy();
@@ -137,7 +160,6 @@ export function useJanusLocalOnly(
             console.warn("janus destroy error", e);
         }
 
-        // ref / 상태 초기화
         janusRef.current = null;
         pluginRef.current = null;
         localStreamRef.current = null;
@@ -146,6 +168,7 @@ export function useJanusLocalOnly(
         setIsConnected(false);
         isConnectedRef.current = false;
     }, []);
+
     // ========== 송출 시작 ==========
     // 세션에 영상, 음성을 보냄
     const publishLocalStream = useCallback(
@@ -195,33 +218,70 @@ export function useJanusLocalOnly(
         []
     );
     // ========== remote feed 유틸 ==========
-    const getFreeSlotId = () => {
-        const used = new Set(
-            Object.values(remoteFeedsRef.current).map((f) => f.slotId)
-        );
-        return REMOTE_SLOT_IDS.find((id) => !used.has(id)) || null;
-    };
+    function getOrCreateRemoteContainer(feedId, display) {
+        const grid = document.getElementById("remote-grid");
+        if (!grid) {
+            console.error("#remote-grid element not found");
+            return null;
+        }
 
-    const detachRemoteFeed = (feedId) => {
+        const containerId = `remote-${feedId}`;
+        let container = document.getElementById(containerId);
+
+        if (!container) {
+            container = document.createElement("div");
+            container.id = containerId;
+            container.className = "meeting-video__remote";
+
+            // 필요하면 label 같은 것도 여기서 추가 가능
+            // const label = document.createElement("div");
+            // label.className = "meeting-video__remote-label";
+            // label.innerText = display || "참가자";
+            // container.appendChild(label);
+
+            grid.appendChild(container);
+        }
+
+        return container;
+    }
+
+    const detachRemoteFeed = (feedId, options = {}) => {
+        const { skipHandleCleanup = false } = options;
+
         const feedInfo = remoteFeedsRef.current[feedId];
         if (!feedInfo) return;
 
-        console.log(
-            "[subscriber] detachRemoteFeed (DOM only):",
-            feedId,
-            feedInfo.slotId
-        );
+        console.log("[subscriber] detachRemoteFeed:", feedId);
 
-        const container = document.getElementById(feedInfo.slotId);
-        if (container) {
-            container.innerHTML = "";
+        // 🔹 1) Janus 핸들 정리 (oncleanup에서 호출된 경우는 생략)
+        if (!skipHandleCleanup) {
+            try {
+                feedInfo.handle?.hangup?.();
+                feedInfo.handle?.detach?.();
+            } catch (e) {
+                console.warn(
+                    "[subscriber] detachRemoteFeed handle cleanup error",
+                    e
+                );
+            }
         }
+
+        // 🔹 2) DOM 제거
+        const containerId = `remote-${feedId}`;
+        const container = document.getElementById(containerId);
+        if (container && container.parentNode) {
+            container.parentNode.removeChild(container);
+        }
+
+        // 🔹 3) ref에서 제거
         delete remoteFeedsRef.current[feedId];
 
+        // 🔹 4) 싱크 & 콜백
+        syncRemoteDomWithFeeds();
         notifyRemoteParticipantsChanged();
     };
 
-    const newRemoteFeed = (feedId, display, roomNumber) => {
+    const newRemoteFeed = (feedId, display, roomNumber, forcedSlotId) => {
         const Janus = window.Janus;
         if (!Janus || !janusRef.current) return;
 
@@ -231,27 +291,38 @@ export function useJanusLocalOnly(
             return;
         }
 
-        const slotId = getFreeSlotId();
-        if (!slotId) {
-            console.warn("[subscriber] no free remote slot for feed", feedId);
-            return;
-        }
+        // 🔥 같은 display 가진 기존 feed 정리 (이 로직 살릴 수 있게 info.display를 유지)
+        Object.entries(remoteFeedsRef.current).forEach(([oldFeedId, info]) => {
+            if (
+                info.display === display &&
+                String(oldFeedId) !== String(feedId)
+            ) {
+                console.log(
+                    "[subscriber] same display, remove old feed:",
+                    oldFeedId,
+                    "->",
+                    feedId,
+                    display
+                );
+                detachRemoteFeed(oldFeedId); // ✅ 여기서도 handle까지 같이 정리
+            }
+        });
 
-        console.log(
-            "[subscriber] attaching new feed:",
-            feedId,
-            "to slot",
-            slotId,
-            "display:",
-            display
-        );
+        syncRemoteDomWithFeeds();
+
+        console.log("[subscriber] attaching new feed:", feedId, display);
 
         janusRef.current.attach({
             plugin: "janus.plugin.videoroom",
 
             success: (handle) => {
                 // feedId -> { handle, slotId } 저장
-                remoteFeedsRef.current[feedId] = { handle, slotId };
+                remoteFeedsRef.current[feedId] = {
+                    ...(remoteFeedsRef.current[feedId] || {}),
+                    handle,
+                    feedId,
+                    display,
+                };
 
                 const subscribe = {
                     request: "join",
@@ -306,14 +377,8 @@ export function useJanusLocalOnly(
             onremotestream: (stream) => {
                 console.log("[subscriber] onremotestream feed", feedId, stream);
 
-                const container = document.getElementById(slotId);
-                if (!container) {
-                    console.error(
-                        "[subscriber] container not found for slot",
-                        slotId
-                    );
-                    return;
-                }
+                const container = getOrCreateRemoteContainer(feedId, display);
+                if (!container) return;
 
                 // 기존 내용 제거 후 비디오 태그 새로 생성
                 container.innerHTML = "";
@@ -332,7 +397,7 @@ export function useJanusLocalOnly(
             oncleanup: () => {
                 console.log("[subscriber] oncleanup feed", feedId);
                 // 정리 시 해당 feed도 같이 제거
-                detachRemoteFeed(feedId);
+                detachRemoteFeed(feedId, { skipHandleCleanup: true });
             },
         });
     };
@@ -520,97 +585,69 @@ export function useJanusLocalOnly(
                                 publishLocalStream(true); // audio=true, video=true
 
                                 const list = data["publishers"] || [];
-                                list.forEach((p) => {
-                                    console.log(
-                                        "[publisher] existing publisher:",
-                                        p.id,
-                                        p.display
-                                    );
-                                    newRemoteFeed(p.id, p.display, roomNumber);
-                                });
-
                                 if (list.length > 0) {
+                                    list.slice()
+                                        .sort((a, b) => a.id - b.id)
+                                        .forEach((p) => {
+                                            newRemoteFeed(
+                                                p.id,
+                                                p.display,
+                                                roomNumber
+                                            );
+                                        });
                                     notifyRemoteParticipantsChanged();
                                 }
                             }
 
                             if (event === "event") {
-                                //  새로 들어온 퍼블리셔들 (list)
-                                const list = data["publishers"] || [];
-                                list.forEach((p) => {
-                                    console.log(
-                                        "[publisher] new publisher event:",
-                                        p.id,
-                                        p.display
-                                    );
-                                    newRemoteFeed(p.id, p.display, roomNumber);
-                                });
+                                let changed = false;
 
+                                // Janus가 현재 publisher 리스트를 내려주는 경우:
+                                const list = data["publishers"] || [];
                                 if (list.length > 0) {
-                                    notifyRemoteParticipantsChanged();
+                                    list.forEach((p) => {
+                                        console.log(
+                                            "[publisher] new publisher event:",
+                                            p.id,
+                                            p.display
+                                        );
+                                        newRemoteFeed(
+                                            p.id,
+                                            p.display,
+                                            roomNumber
+                                        );
+                                    });
+                                    changed = true;
                                 }
-                                //  누가 나갔을 때 (leaving)
+
+                                // 🔹 누가 나갔을 때
                                 const leaving = data["leaving"];
                                 if (leaving) {
                                     console.log(
                                         "[publisher] publisher leaving:",
                                         leaving
                                     );
-                                    const feedInfo =
-                                        remoteFeedsRef.current[leaving];
-                                    if (feedInfo) {
-                                        try {
-                                            console.log(
-                                                "[publisher] detaching remote feed handle:",
-                                                leaving
-                                            );
-                                            // 서버에 detach 요청 한 번만
-                                            feedInfo.handle.detach();
-                                        } catch (e) {
-                                            console.warn(
-                                                "[publisher] remote feed detach error",
-                                                e
-                                            );
-                                        }
-                                    } else {
-                                        // 혹시라도 이미 oncleanup 등에서 제거된 경우,
-                                        // DOM이 남아있으면 마지막으로 한 번 더 정리
-                                        detachRemoteFeed(leaving);
-                                    }
-
-                                    notifyRemoteParticipantsChanged();
+                                    detachRemoteFeed(leaving);
+                                    changed = true;
                                 }
 
-                                //  방송 중단(unpublished)
+                                // 🔹 방송 중단(unpublished)
                                 const unpublished = data["unpublished"];
                                 if (unpublished && unpublished !== "ok") {
                                     console.log(
                                         "[publisher] publisher unpublished:",
                                         unpublished
                                     );
-                                    const feedInfo =
-                                        remoteFeedsRef.current[unpublished];
-                                    if (feedInfo) {
-                                        try {
-                                            console.log(
-                                                "[publisher] detaching remote feed handle (unpublished):",
-                                                unpublished
-                                            );
-                                            feedInfo.handle.detach();
-                                        } catch (e) {
-                                            console.warn(
-                                                "[publisher] remote feed detach error (unpublished)",
-                                                e
-                                            );
-                                        }
-                                    } else {
-                                        detachRemoteFeed(unpublished);
-                                    }
+                                    detachRemoteFeed(unpublished);
+                                    changed = true;
+                                }
 
+                                if (changed) {
+                                    syncRemoteDomWithFeeds();
                                     notifyRemoteParticipantsChanged();
                                 }
 
-                                //  방 자체가 사라진 경우
+                                // 🔹 방 자체가 사라진 경우
                                 if (data["error"] === "Room not found") {
                                     console.error(
                                         "[publisher] room not found (destroyed)"
@@ -760,6 +797,9 @@ export function useJanusLocalOnly(
                 return;
             }
 
+            resetAllRemoteFeeds();
+
+            syncRemoteDomWithFeeds();
             setError(null);
             setIsConnecting(true);
 

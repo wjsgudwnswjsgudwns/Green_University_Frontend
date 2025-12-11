@@ -1,10 +1,13 @@
 /* src/pages/MeetingJoinPage.css */
 
 .meeting-join-page {
-    min-height: 100vh;
+    height: 100vh;
     padding: 24px;
     background: #f3f4f6;
     box-sizing: border-box;
+
+    display: flex;
+    flex-direction: column;
 }
 
 .meeting-join-page__header {
@@ -44,9 +47,13 @@
 .meeting-join-page__main {
     max-width: 1200px;
     margin: 0 auto;
+
     display: grid;
     grid-template-columns: minmax(0, 3.5fr) minmax(260px, 1.4fr);
     gap: 16px;
+
+    flex: 1;
+    min-height: 0;
 }
 
 /* 에러 / 로딩 공통 레이아웃 */
@@ -149,9 +156,14 @@
     border-radius: 16px;
     padding: 16px;
     box-shadow: 0 10px 20px rgba(15, 23, 42, 0.05), 0 0 0 1px #e5e7eb;
+
     display: flex;
     flex-direction: column;
-    min-height: 520px;
+
+    /* 기존 min-height 대신 */
+    /* min-height: 520px; */
+    height: 100%;
+    min-height: 0;
 }
 
 .meeting-side__tabs {
@@ -184,9 +196,11 @@
     border-radius: 12px;
     background: #f9fafb;
     padding: 12px;
-    overflow-y: auto;
+    overflow-y: auto; /* 🔥 스크롤 */
     font-size: 13px;
     border: 1px solid #e5e7eb;
+
+    min-height: 0;
 }
 
 .meeting-side__chat-empty {
@@ -218,4 +232,77 @@
     color: #ffffff;
     font-size: 13px;
     cursor: pointer;
+}
+
+.meeting-side__new-messages {
+    margin-top: 6px;
+    margin-bottom: 6px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.75); /* 반투명 딥 네이비 */
+    color: #e5e7eb;
+    font-size: 12px;
+    cursor: pointer;
+
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.meeting-side__new-messages-count {
+    font-weight: 600;
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+.meeting-side__new-messages-preview {
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0.9;
+}
+
+.meeting-side__new-messages-hint {
+    font-size: 10px;
+    opacity: 0.7;
+}
+
+@keyframes chatPrependFade {
+    0% {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.meeting-side__chat-message--prepend {
+    animation: chatPrependFade 0.18s ease-out;
+}
+
+/* 위로 로딩 중 상단 표시 (텍스트 스타일만 가볍게) */
+.meeting-side__chat-loading-top {
+    text-align: center;
+    font-size: 11px;
+    color: #9ca3af;
+    margin-bottom: 6px;
+}
+
+/* prepend 애니메이션 */
+@keyframes chatPrependFade {
+    0% {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.meeting-side__chat-message--prepend {
+    animation: chatPrependFade 0.18s ease-out;
 }
