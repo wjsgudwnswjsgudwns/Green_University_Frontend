@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/axiosConfig";
-import "../../styles/common.css";
+import "../../styles/UpdatePeriodPage.css";
 
 const UpdatePeriodPage = () => {
   const navigate = useNavigate();
@@ -31,7 +31,9 @@ const UpdatePeriodPage = () => {
     const confirmMessage =
       action === "start"
         ? "수강 신청 기간을 시작하시겠습니까?"
-        : "수강 신청 기간을 종료하시겠습니까?";
+        : action === "end"
+        ? "수강 신청 기간을 종료하시겠습니까?"
+        : "수강 신청 기간을 초기화하시겠습니까?";
 
     if (!window.confirm(confirmMessage)) {
       return;
@@ -65,37 +67,46 @@ const UpdatePeriodPage = () => {
     }
   };
 
-  const getButtonConfig = () => {
+  const getButtonsConfig = () => {
     switch (sugangPeriod) {
       case 0:
-        return {
-          text: "수강 신청 기간 시작",
-          action: "start",
-          show: true,
-        };
+        return [
+          {
+            text: "수강 신청 기간 시작",
+            action: "start",
+            className: "period-btn-primary",
+          },
+        ];
       case 1:
-        return {
-          text: "수강 신청 기간 종료",
-          action: "end",
-          show: true,
-        };
+        return [
+          {
+            text: "수강 신청 기간 종료",
+            action: "end",
+            className: "period-btn-danger",
+          },
+        ];
+      case 2:
+        return [
+          {
+            text: "수강 신청 기간 초기화",
+            action: "reset",
+            className: "period-btn-warning",
+          },
+        ];
       default:
-        return { show: false };
+        return [];
     }
   };
 
   if (loading) {
     return (
-      <div
-        className="d-flex justify-content-center align-items-start"
-        style={{ minWidth: "100em" }}
-      >
-        <div className="sub--menu">
-          <div className="sub--menu--top">
+      <div className="period-container">
+        <div className="period-sidebar">
+          <div className="period-sidebar-header">
             <h2>학사관리</h2>
           </div>
-          <div className="sub--menu--mid">
-            <table className="sub--menu--table">
+          <div className="period-sidebar-menu">
+            <table className="period-menu-table">
               <tbody>
                 <tr>
                   <td>
@@ -134,7 +145,10 @@ const UpdatePeriodPage = () => {
                 </tr>
                 <tr>
                   <td>
-                    <a href="/staff/course-period" className="selected--menu">
+                    <a
+                      href="/staff/course-period"
+                      className="period-menu-active"
+                    >
                       수강 신청 기간 설정
                     </a>
                   </td>
@@ -143,10 +157,10 @@ const UpdatePeriodPage = () => {
             </table>
           </div>
         </div>
-        <main>
-          <h1>수강 신청 기간 설정</h1>
-          <div className="split--div"></div>
-          <p className="no--list--p">로딩 중...</p>
+        <main className="period-main">
+          <h1 className="period-title">수강 신청 기간 설정</h1>
+          <div className="period-divider"></div>
+          <p className="period-message">로딩 중...</p>
         </main>
       </div>
     );
@@ -154,16 +168,13 @@ const UpdatePeriodPage = () => {
 
   if (error) {
     return (
-      <div
-        className="d-flex justify-content-center align-items-start"
-        style={{ minWidth: "100em" }}
-      >
-        <div className="sub--menu">
-          <div className="sub--menu--top">
+      <div className="period-container">
+        <div className="period-sidebar">
+          <div className="period-sidebar-header">
             <h2>학사관리</h2>
           </div>
-          <div className="sub--menu--mid">
-            <table className="sub--menu--table">
+          <div className="period-sidebar-menu">
+            <table className="period-menu-table">
               <tbody>
                 <tr>
                   <td>
@@ -202,7 +213,10 @@ const UpdatePeriodPage = () => {
                 </tr>
                 <tr>
                   <td>
-                    <a href="/staff/course-period" className="selected--menu">
+                    <a
+                      href="/staff/course-period"
+                      className="period-menu-active"
+                    >
                       수강 신청 기간 설정
                     </a>
                   </td>
@@ -211,32 +225,25 @@ const UpdatePeriodPage = () => {
             </table>
           </div>
         </div>
-        <main>
-          <h1>수강 신청 기간 설정</h1>
-          <div className="split--div"></div>
-          <p className="no--list--p" style={{ color: "red" }}>
-            {error}
-          </p>
+        <main className="period-main">
+          <h1 className="period-title">수강 신청 기간 설정</h1>
+          <div className="period-divider"></div>
+          <p className="period-message period-error">{error}</p>
         </main>
       </div>
     );
   }
 
-  const buttonConfig = getButtonConfig();
+  const buttonsConfig = getButtonsConfig();
 
   return (
-    <div
-      className="d-flex justify-content-center align-items-start"
-      style={{ minWidth: "100em" }}
-    >
-      {/* 세부 메뉴 div */}
-      <div className="sub--menu">
-        <div className="sub--menu--top">
+    <div className="period-container">
+      <div className="period-sidebar">
+        <div className="period-sidebar-header">
           <h2>학사관리</h2>
         </div>
-        {/* 메뉴 */}
-        <div className="sub--menu--mid">
-          <table className="sub--menu--table">
+        <div className="period-sidebar-menu">
+          <table className="period-menu-table">
             <tbody>
               <tr>
                 <td>
@@ -275,7 +282,7 @@ const UpdatePeriodPage = () => {
               </tr>
               <tr>
                 <td>
-                  <a href="/staff/course-period" className="selected--menu">
+                  <a href="/staff/course-period" className="period-menu-active">
                     수강 신청 기간 설정
                   </a>
                 </td>
@@ -285,25 +292,28 @@ const UpdatePeriodPage = () => {
         </div>
       </div>
 
-      {/* 메인 div */}
-      <main>
-        <h1>수강 신청 기간 설정</h1>
-        <div className="split--div"></div>
+      <main className="period-main">
+        <h1 className="period-title">수강 신청 기간 설정</h1>
+        <div className="period-divider"></div>
 
-        <p className="no--list--p">{getPeriodText()}</p>
+        <div className="period-status-box">
+          <p className="period-status-text">{getPeriodText()}</p>
+        </div>
 
-        {buttonConfig.show && (
-          <>
-            <br />
-            <button
-              type="button"
-              className="btn btn-primary create--tui"
-              onClick={() => handleUpdatePeriod(buttonConfig.action)}
-              disabled={loading}
-            >
-              {buttonConfig.text}
-            </button>
-          </>
+        {buttonsConfig.length > 0 && (
+          <div className="period-button-container">
+            {buttonsConfig.map((btn, index) => (
+              <button
+                key={index}
+                type="button"
+                className={`period-btn ${btn.className}`}
+                onClick={() => handleUpdatePeriod(btn.action)}
+                disabled={loading}
+              >
+                {btn.text}
+              </button>
+            ))}
+          </div>
         )}
       </main>
     </div>

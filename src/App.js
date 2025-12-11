@@ -6,9 +6,6 @@ import Footer from "./components/Footer";
 import LoginPage from "./pages/LoginPage";
 import MainPage from "./pages/MainPage";
 import StudentInfoPage from "./pages/student/StudentInfoPage";
-import StudentCoursesPage from "./pages/student/StudentCoursesPage";
-import StudentRegistrationPage from "./pages/student/StudentRegistrationPage";
-import StudentGradesPage from "./pages/student/StudentGradesPage";
 import NoticeListPage from "./pages/board/NoticeListPage";
 import NoticeDetailPage from "./pages/board/NoticeDetailPage";
 import ScheduleListPage from "./pages/schedule/ScheduleListPage";
@@ -58,6 +55,21 @@ import TuitionListPage from "./pages/tuition/TuitionListPage";
 import TuitionPaymentPage from "./pages/tuition/TuitionPaymentPage";
 import ProfessorCounselingPage from "./pages/ProfessorCounselingPage";
 import StudentCounselingPage from "./pages/StudentCounselingPage";
+import ThisSemesterGrade from "./pages/grade/ThisSemesterGrade";
+import SemesterGrade from "./pages/grade/SemesterGrade";
+import TotalGrade from "./pages/grade/TotalGrade";
+import MyEvaluation from "./pages/evaluation/MyEvaluation";
+import EvaluationForm from "./pages/evaluation/EvaluationForm";
+import ChatbotPage from "./pages/chatbot/ChatbotPage";
+import ChatbotButton from "./components/ChatbotButton";
+import StudentCounselingList from "./pages/ai/StudentCounselingList";
+import StudentCounselingDetail from "./pages/ai/StudentCounselingDetail";
+import ProfessorCounselingList from "./pages/ai/ProfessorCounselingList";
+import ProfessorCounselingForm from "./pages/ai/ProfessorCounselingForm";
+import ProfessorCounselingDetail from "./pages/ai/ProfessorCounselingDetail";
+import StaffCounselingStudentDetail from "./pages/ai/StaffCounselingStudentDetail";
+import StaffCounselingStatistics from "./pages/ai/StaffCounselingStatistics";
+import StaffCounselingDashboard from "./pages/ai/StaffCounselingDashboard";
 
 function PrivateRoute({ children, role }) {
     const { user } = useAuth();
@@ -555,6 +567,303 @@ function Layout() {
             {!shouldHideHeaderFooter && <Footer />}
         </>
     );
+        {/* Home route */}
+        <Route
+          path="/"
+          element={
+            <PrivateRoute>
+              <MainPage />
+            </PrivateRoute>
+          }
+        />
+        {/* Student routes */}
+        <Route
+          path="/student/info"
+          element={
+            <PrivateRoute role="student">
+              <StudentInfoPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/student/update"
+          element={
+            <PrivateRoute role="student">
+              <UpdateUserPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/student/password"
+          element={
+            <PrivateRoute role="student">
+              <ChangePasswordPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/grade/thisSemester"
+          element={
+            <PrivateRoute role="student">
+              <ThisSemesterGrade />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/grade/semester"
+          element={
+            <PrivateRoute role="student">
+              <SemesterGrade />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/grade/total"
+          element={
+            <PrivateRoute role="student">
+              <TotalGrade />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/chatbot"
+          element={
+            <PrivateRoute role="student">
+              <ChatbotPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/evaluation"
+          element={
+            <PrivateRoute role="student">
+              <EvaluationForm />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Professor routes */}
+        <Route
+          path="/professor/info"
+          element={
+            <PrivateRoute role="professor">
+              <ProfessorInfoPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/professor/update"
+          element={
+            <PrivateRoute role="professor">
+              <UpdateUserPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/professor/password"
+          element={
+            <PrivateRoute role="professor">
+              <ChangePasswordPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/evaluation/read"
+          element={
+            <PrivateRoute role="professor">
+              <MyEvaluation />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Student Counseling routes */}
+        <Route
+          path="/student/counseling/list"
+          element={
+            <PrivateRoute role="student">
+              <StudentCounselingList />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/student/counseling/:id"
+          element={
+            <PrivateRoute role="student">
+              <StudentCounselingDetail />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Professor Counseling routes */}
+        <Route
+          path="/professor/counseling/list"
+          element={
+            <PrivateRoute role="professor">
+              <ProfessorCounselingList />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/professor/counseling/form"
+          element={
+            <PrivateRoute role="professor">
+              <ProfessorCounselingForm />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/professor/counseling/:id"
+          element={
+            <PrivateRoute role="professor">
+              <ProfessorCounselingDetail />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Staff Counseling routes */}
+        <Route
+          path="/staff/counseling/dashboard"
+          element={
+            <PrivateRoute role="staff">
+              <StaffCounselingDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/staff/counseling/statistics"
+          element={
+            <PrivateRoute role="staff">
+              <StaffCounselingStatistics />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/staff/counseling/student/:studentId"
+          element={
+            <PrivateRoute role="staff">
+              <StaffCounselingStudentDetail />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Staff routes */}
+        <Route
+          path="/staff/info"
+          element={
+            <PrivateRoute role="staff">
+              <StaffInfoPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/staff/update"
+          element={
+            <PrivateRoute role="staff">
+              <UpdateUserPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/staff/password"
+          element={
+            <PrivateRoute role="staff">
+              <ChangePasswordPage />
+            </PrivateRoute>
+          }
+        />
+        {/* Board routes */}
+        <Route
+          path="/board/notice"
+          element={
+            <PrivateRoute>
+              <NoticeListPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/board/notice/:id"
+          element={
+            <PrivateRoute>
+              <NoticeDetailPage />
+            </PrivateRoute>
+          }
+        />
+        {/* Schedule routes */}
+        <Route
+          path="/schedule"
+          element={
+            <PrivateRoute>
+              <ScheduleListPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/schedule/:id"
+          element={
+            <PrivateRoute>
+              <ScheduleDetailPage />
+            </PrivateRoute>
+          }
+        />
+        <Route path="/sugang/subjectlist" element={<SubjectList />} />
+        {/* Admin registration routes (staff role) */}
+        <Route
+          path="/staff/admin"
+          element={
+            <PrivateRoute role="staff">
+              <Navigate to="/staff/admin/college" />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/staff/admin/college"
+          element={
+            <PrivateRoute role="staff">
+              <CollegeManagement />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/staff/admin/department"
+          element={
+            <PrivateRoute role="staff">
+              <DepartmentManagement />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/staff/admin/room"
+          element={
+            <PrivateRoute role="staff">
+              <RoomManagement />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/staff/admin/tuition"
+          element={
+            <PrivateRoute role="staff">
+              <TuitionManagement />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/staff/admin/subject"
+          element={
+            <PrivateRoute role="staff">
+              <SubjectManagement />
+            </PrivateRoute>
+          }
+        />
+        {/* Catch-all route for undefined paths */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      {!shouldHideHeaderFooter && <Footer />}
+      {!shouldHideHeaderFooter && <ChatbotButton />}
+    </>
+  );
 }
 
 export default function App() {

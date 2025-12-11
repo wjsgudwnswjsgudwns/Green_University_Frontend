@@ -1,0 +1,119 @@
+.chatbot-floating-button-container {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 1000;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chatbot-floating-button {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  border: none;
+  box-shadow: 0 4px 12px rgba(33, 109, 48, 0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.chatbot-floating-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(33, 109, 48, 0.6);
+}
+
+.chatbot-floating-button.active {
+  background: linear-gradient(135deg, #1a5524 0%, #216d30 100%);
+  transform: scale(0.95);
+}
+
+.chatbot-floating-button:active {
+  transform: scale(0.95);
+}
+
+.chatbot-floating-button::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.chatbot-floating-button:hover::before {
+  opacity: 1;
+}
+
+.chatbot-floating-button svg {
+  width: 28px;
+  height: 28px;
+  z-index: 1;
+}
+
+/* 펄스 애니메이션 (선택사항) */
+.chatbot-floating-button::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(33, 109, 48, 0.3);
+  animation: pulse 2s infinite;
+  z-index: -1;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .chatbot-floating-button-container {
+    bottom: 20px;
+    right: 20px;
+  }
+
+  .chatbot-floating-button {
+    width: 56px;
+    height: 56px;
+  }
+
+  .chatbot-floating-button svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* 챗봇 페이지에서는 버튼 숨기기 */
+body.chatbot-page-active .chatbot-floating-button-container {
+  display: none;
+}

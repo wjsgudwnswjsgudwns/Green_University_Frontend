@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/axiosConfig";
-// import "../../styles/sugang.css";
 import "../../styles/AppList.css";
 
 const AppList = () => {

@@ -16,7 +16,6 @@ export default function StudentListStaff() {
   const [currentPage, setCurrentPage] = useState(parseInt(urlPage) || 1);
   const [totalPages, setTotalPages] = useState(1);
 
-  // 검색 필터
   const [filters, setFilters] = useState({
     deptId: "",
     studentId: "",
@@ -34,7 +33,6 @@ export default function StudentListStaff() {
     try {
       setLoading(true);
 
-      // 쿼리 파라미터 구성
       const params = new URLSearchParams();
       if (filters.deptId) params.append("deptId", filters.deptId);
       if (filters.studentId) params.append("studentId", filters.studentId);
@@ -47,7 +45,7 @@ export default function StudentListStaff() {
       const response = await api.get(url);
 
       setStudentList(response.data.studentList || []);
-      setTotalPages(response.data.totalPages || 1); // listCount 대신 totalPages 사용
+      setTotalPages(response.data.totalPages || 1);
       setCurrentPage(response.data.currentPage || page);
     } catch (err) {
       console.error("학생 목록 조회 실패:", err);
@@ -102,9 +100,9 @@ export default function StudentListStaff() {
 
   if (loading && studentList.length === 0) {
     return (
-      <div className="page-container">
-        <div className="loading-container">
-          <div className="spinner"></div>
+      <div className="mypage-container">
+        <div className="mypage-loading-container">
+          <div className="mypage-spinner"></div>
           <p>로딩 중...</p>
         </div>
       </div>
@@ -112,47 +110,46 @@ export default function StudentListStaff() {
   }
 
   return (
-    <div className="my-page-container">
-      <aside className="side-menu">
-        <div className="side-menu-header">
+    <div className="mypage-container">
+      <aside className="mypage-side-menu">
+        <div className="mypage-side-menu-header">
           <h2>학사관리</h2>
         </div>
-        <nav className="side-menu-nav">
-          <Link to="/staff/student-list" className="menu-item active">
+        <nav className="mypage-side-menu-nav">
+          <Link to="/staff/student-list" className="mypage-menu-item active">
             학생 명단 조회
           </Link>
-          <Link to="/staff/professor-list" className="menu-item">
+          <Link to="/staff/professor-list" className="mypage-menu-item">
             교수 명단 조회
           </Link>
-          <Link to="/staff/register-student" className="menu-item">
+          <Link to="/staff/register-student" className="mypage-menu-item">
             학생 등록
           </Link>
-          <Link to="/staff/register-professor" className="menu-item">
+          <Link to="/staff/register-professor" className="mypage-menu-item">
             교수 등록
           </Link>
-          <Link to="/staff/register-staff" className="menu-item">
+          <Link to="/staff/register-staff" className="mypage-menu-item">
             직원 등록
           </Link>
-          <Link to="/staff/tuition/bill" className="menu-item">
+          <Link to="/staff/tuition/bill" className="mypage-menu-item">
             등록금 고지서 발송
           </Link>
-          <Link to="/staff/break/list" className="menu-item">
+          <Link to="/staff/break/list" className="mypage-menu-item">
             휴학 처리
           </Link>
-          <Link to="/staff/course-period" className="menu-item">
+          <Link to="/staff/course-period" className="mypage-menu-item">
             수강 신청 기간 설정
           </Link>
         </nav>
       </aside>
 
-      <main className="main-content">
+      <main className="mypage-main-content">
         <h1>학생 명단 조회</h1>
-        <div className="divider"></div>
+        <div className="mypage-divider"></div>
 
-        {/* 검색 필터 */}
-        <div className="filter-container">
-          <form onSubmit={handleSearch} className="filter-form">
-            <div className="filter-group">
+        <div className="stafflist-filter-container">
+          <form onSubmit={handleSearch} className="stafflist-filter-form">
+            <div className="stafflist-filter-group">
               <label htmlFor="deptId">학과 번호</label>
               <input
                 type="text"
@@ -173,7 +170,7 @@ export default function StudentListStaff() {
                 placeholder="학번"
               />
 
-              <button type="submit" className="search-button">
+              <button type="submit" className="stafflist-search-button">
                 <span>조회</span>
                 <span className="material-symbols-outlined">search</span>
               </button>
@@ -181,7 +178,7 @@ export default function StudentListStaff() {
               <button
                 type="button"
                 onClick={handleNewSemester}
-                className="semester-button"
+                className="stafflist-semester-button"
               >
                 새학기 적용
               </button>
@@ -189,13 +186,13 @@ export default function StudentListStaff() {
           </form>
         </div>
 
-        {error && <div className="error-message">{error}</div>}
+        {error && <div className="mypage-error-message">{error}</div>}
 
         {studentList.length > 0 ? (
           <>
-            <h4 className="list-title">학생 목록</h4>
-            <div className="table-container">
-              <table className="data-table">
+            <h4 className="stafflist-list-title">학생 목록</h4>
+            <div className="stafflist-table-container">
+              <table className="stafflist-data-table">
                 <thead>
                   <tr>
                     <th>학번</th>
@@ -235,15 +232,14 @@ export default function StudentListStaff() {
               </table>
             </div>
 
-            {/* 페이지네이션 */}
             {totalPages > 1 && (
-              <div className="pagination">
+              <div className="stafflist-pagination">
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(
                   (page) => (
                     <button
                       key={page}
                       onClick={() => handlePageChange(page)}
-                      className={`page-button ${
+                      className={`stafflist-page-button ${
                         page === currentPage ? "active" : ""
                       }`}
                     >
@@ -255,7 +251,7 @@ export default function StudentListStaff() {
             )}
           </>
         ) : (
-          !loading && <p className="no-list-p">검색 결과가 없습니다.</p>
+          !loading && <p className="mypage-no-list-p">검색 결과가 없습니다.</p>
         )}
       </main>
     </div>

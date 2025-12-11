@@ -1,6 +1,6 @@
-/* Green University My Page Styles */
+/* MyPage 전용 스타일 - 접두사: mypage- */
 
-.my-page-container {
+.mypage-container {
   display: flex;
   min-height: 100vh;
   background-color: #f5f7fa;
@@ -11,7 +11,7 @@
 }
 
 /* 사이드 메뉴 */
-.side-menu {
+.mypage-side-menu {
   min-width: 240px;
   background: #ffffff;
   border-radius: 12px;
@@ -22,27 +22,27 @@
   top: 20px;
 }
 
-.side-menu-header {
+.mypage-side-menu-header {
   background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
   color: #ffffff;
   padding: 24px 20px;
   text-align: center;
 }
 
-.side-menu-header h2 {
+.mypage-side-menu-header h2 {
   margin: 0;
   font-size: 1.4rem;
   font-weight: 700;
   letter-spacing: 1px;
 }
 
-.side-menu-nav {
+.mypage-side-menu-nav {
   display: flex;
   flex-direction: column;
   padding: 12px 0;
 }
 
-.menu-item {
+.mypage-menu-item {
   display: block;
   padding: 14px 20px;
   color: #2c3e50;
@@ -53,13 +53,13 @@
   border-left: 3px solid transparent;
 }
 
-.menu-item:hover {
+.mypage-menu-item:hover {
   background-color: #f8f9fa;
   color: #216d30;
   border-left-color: #216d30;
 }
 
-.menu-item.active {
+.mypage-menu-item.active {
   background-color: rgba(33, 109, 48, 0.1);
   color: #216d30;
   border-left-color: #216d30;
@@ -67,7 +67,7 @@
 }
 
 /* 메인 콘텐츠 */
-.main-content {
+.mypage-main-content {
   flex: 1;
   background: #ffffff;
   border-radius: 12px;
@@ -77,26 +77,26 @@
   min-width: 1000px;
 }
 
-.main-content h1 {
+.mypage-main-content h1 {
   font-size: 1.8rem;
   font-weight: 700;
   color: #2c3e50;
   margin: 0 0 20px 0;
 }
 
-.divider {
+.mypage-divider {
   height: 2px;
   background: linear-gradient(90deg, #216d30 0%, rgba(33, 109, 48, 0.2) 100%);
   margin-bottom: 30px;
 }
 
-.section-divider {
+.mypage-section-divider {
   height: 1px;
   background-color: #e0e6ed;
   margin: 40px 0 30px 0;
 }
 
-.section-title {
+.mypage-section-title {
   font-size: 1.2rem;
   font-weight: 600;
   color: #2c3e50;
@@ -104,7 +104,7 @@
 }
 
 /* 정보 테이블 */
-.info-table {
+.mypage-info-table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 20px;
@@ -112,7 +112,7 @@
   background: #ffffff;
 }
 
-.info-table th {
+.mypage-info-table th {
   background-color: #f8f9fa;
   padding: 14px 16px;
   text-align: left;
@@ -122,22 +122,22 @@
   width: 25%;
 }
 
-.info-table td {
+.mypage-info-table td {
   padding: 14px 16px;
   color: #5a6c7d;
   border: 1px solid #e0e6ed;
   width: 25%;
 }
 
-/* 학적 변동 테이블 */
-.stat-table {
+/* 학점 변동 테이블 */
+.mypage-stat-table {
   width: 100%;
   border-collapse: collapse;
   border: 1px solid #e0e6ed;
   background: #ffffff;
 }
 
-.stat-table thead th {
+.mypage-stat-table thead th {
   background-color: #216d30;
   color: #ffffff;
   padding: 14px 12px;
@@ -147,7 +147,7 @@
   font-size: 1rem;
 }
 
-.stat-table tbody td {
+.mypage-stat-table tbody td {
   padding: 16px;
   text-align: center;
   color: #5a6c7d;
@@ -155,18 +155,65 @@
   font-size: 0.95rem;
 }
 
-.stat-table tbody tr:hover {
+.mypage-stat-table tbody tr:hover {
   background-color: #f8f9fa;
 }
 
-.stat-table .no-data {
+.mypage-stat-table .mypage-no-data {
   padding: 40px;
   color: #95a5a6;
   font-style: italic;
 }
 
+/* 리스트 테이블 */
+.mypage-list-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #e0e6ed;
+  background: #ffffff;
+}
+
+.mypage-list-table thead th {
+  background-color: #216d30;
+  color: #ffffff;
+  padding: 14px 12px;
+  text-align: center;
+  font-weight: 600;
+  border: 1px solid #1a5524;
+  font-size: 1rem;
+}
+
+.mypage-list-table tbody td {
+  padding: 16px;
+  text-align: center;
+  color: #5a6c7d;
+  border: 1px solid #e0e6ed;
+  font-size: 0.95rem;
+}
+
+.mypage-list-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.mypage-list-table a {
+  color: #216d30;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.mypage-list-table a:hover {
+  text-decoration: underline;
+}
+
+.mypage-no-list-p {
+  text-align: center;
+  padding: 40px;
+  color: #95a5a6;
+  font-size: 1.1rem;
+}
+
 /* 수정 버튼 */
-.update-button {
+.mypage-update-button {
   background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
   color: #ffffff;
   border: none;
@@ -180,30 +227,30 @@
   margin-top: 24px;
 }
 
-.update-button:hover {
+.mypage-update-button:hover {
   background: linear-gradient(135deg, #1a5524 0%, #0e2b14 100%);
   box-shadow: 0 6px 16px rgba(33, 109, 48, 0.4);
   transform: translateY(-2px);
 }
 
-.update-button:active {
+.mypage-update-button:active {
   transform: translateY(0);
   box-shadow: 0 2px 8px rgba(33, 109, 48, 0.3);
 }
 
 /* 폼 스타일 */
-.update-form {
+.mypage-update-form {
   margin-top: 24px;
 }
 
-.form-table {
+.mypage-form-table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 24px;
   border: 1px solid #e0e6ed;
 }
 
-.form-table th {
+.mypage-form-table th {
   background-color: #f8f9fa;
   padding: 14px 16px;
   text-align: left;
@@ -214,12 +261,12 @@
   vertical-align: middle;
 }
 
-.form-table td {
+.mypage-form-table td {
   padding: 14px 16px;
   border: 1px solid #e0e6ed;
 }
 
-.input-field {
+.mypage-input-field {
   width: 100%;
   padding: 10px 14px;
   border: 2px solid #e0e6ed;
@@ -230,19 +277,19 @@
   background-color: #ffffff;
 }
 
-.input-field:focus {
+.mypage-input-field:focus {
   outline: none;
   border-color: #216d30;
   box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
 }
 
-.input-field:disabled {
+.mypage-input-field:disabled {
   background-color: #f8f9fa;
   cursor: not-allowed;
   opacity: 0.6;
 }
 
-.submit-button {
+.mypage-submit-button {
   background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
   color: #ffffff;
   border: none;
@@ -255,18 +302,18 @@
   box-shadow: 0 4px 12px rgba(33, 109, 48, 0.3);
 }
 
-.submit-button:hover:not(:disabled) {
+.mypage-submit-button:hover:not(:disabled) {
   background: linear-gradient(135deg, #1a5524 0%, #0e2b14 100%);
   box-shadow: 0 6px 16px rgba(33, 109, 48, 0.4);
   transform: translateY(-2px);
 }
 
-.submit-button:active:not(:disabled) {
+.mypage-submit-button:active:not(:disabled) {
   transform: translateY(0);
   box-shadow: 0 2px 8px rgba(33, 109, 48, 0.3);
 }
 
-.submit-button:disabled {
+.mypage-submit-button:disabled {
   background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
   cursor: not-allowed;
   box-shadow: none;
@@ -274,7 +321,7 @@
 }
 
 /* 메시지 */
-.error-message {
+.mypage-error-message {
   padding: 14px 16px;
   margin-bottom: 20px;
   background: linear-gradient(135deg, #fee 0%, #fdd 100%);
@@ -286,7 +333,7 @@
   box-shadow: 0 2px 8px rgba(255, 102, 102, 0.1);
 }
 
-.success-message {
+.mypage-success-message {
   padding: 14px 16px;
   margin-bottom: 20px;
   background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
@@ -299,8 +346,8 @@
 }
 
 /* 로딩 및 에러 */
-.loading-container,
-.error-container {
+.mypage-loading-container,
+.mypage-error-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -309,16 +356,16 @@
   gap: 16px;
 }
 
-.spinner {
+.mypage-spinner {
   width: 48px;
   height: 48px;
   border: 4px solid #e0e6ed;
   border-top-color: #216d30;
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: mypage-spin 0.8s linear infinite;
 }
 
-@keyframes spin {
+@keyframes mypage-spin {
   to {
     transform: rotate(360deg);
   }
@@ -326,76 +373,78 @@
 
 /* 반응형 디자인 */
 @media (max-width: 1024px) {
-  .my-page-container {
+  .mypage-container {
     flex-direction: column;
     padding: 20px 15px;
   }
 
-  .side-menu {
+  .mypage-side-menu {
     position: static;
     width: 100%;
     min-width: auto;
   }
 
-  .main-content {
+  .mypage-main-content {
     padding: 30px 20px;
+    min-width: auto;
   }
 }
 
 @media (max-width: 768px) {
-  .main-content {
+  .mypage-main-content {
     padding: 24px 16px;
   }
 
-  .main-content h1 {
+  .mypage-main-content h1 {
     font-size: 1.5rem;
   }
 
-  .info-table th,
-  .info-table td,
-  .form-table th,
-  .form-table td {
+  .mypage-info-table th,
+  .mypage-info-table td,
+  .mypage-form-table th,
+  .mypage-form-table td {
     padding: 10px 12px;
     font-size: 0.9rem;
   }
 
-  .info-table,
-  .form-table,
-  .stat-table {
+  .mypage-info-table,
+  .mypage-form-table,
+  .mypage-stat-table,
+  .mypage-list-table {
     font-size: 0.85rem;
   }
 }
 
 @media (max-width: 480px) {
-  .my-page-container {
+  .mypage-container {
     padding: 15px 10px;
   }
 
-  .main-content {
+  .mypage-main-content {
     padding: 20px 12px;
   }
 
-  .main-content h1 {
+  .mypage-main-content h1 {
     font-size: 1.3rem;
   }
 
-  .side-menu-nav {
+  .mypage-side-menu-nav {
     padding: 8px 0;
   }
 
-  .menu-item {
+  .mypage-menu-item {
     padding: 12px 16px;
     font-size: 0.9rem;
   }
 
-  .info-table,
-  .form-table {
+  .mypage-info-table,
+  .mypage-form-table {
     display: block;
     overflow-x: auto;
   }
 
-  .update-button,
-  .submit-button {
+  .mypage-update-button,
+  .mypage-submit-button {
     width: 100%;
     padding: 12px;
   }

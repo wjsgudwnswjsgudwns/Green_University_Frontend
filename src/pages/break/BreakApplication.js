@@ -56,10 +56,9 @@ export default function BreakApplication() {
     }
 
     try {
-      // studentGrade 추가
       const requestData = {
         ...formData,
-        studentGrade: studentInfo.grade, // 학생의 현재 학년 추가
+        studentGrade: studentInfo.grade,
       };
 
       await api.post("/api/break/application", requestData);
@@ -85,9 +84,9 @@ export default function BreakApplication() {
 
   if (loading) {
     return (
-      <div className="page-container">
-        <div className="loading-container">
-          <div className="spinner"></div>
+      <div className="mypage-container">
+        <div className="mypage-loading-container">
+          <div className="mypage-spinner"></div>
           <p>로딩 중...</p>
         </div>
       </div>
@@ -96,8 +95,8 @@ export default function BreakApplication() {
 
   if (error) {
     return (
-      <div className="page-container">
-        <div className="error-container">
+      <div className="mypage-container">
+        <div className="mypage-error-container">
           <p>{error}</p>
           <button onClick={() => navigate("/student/break/list")}>
             휴학 내역으로 이동
@@ -113,43 +112,46 @@ export default function BreakApplication() {
   ).padStart(2, "0")}월 ${String(today.getDate()).padStart(2, "0")}일`;
 
   return (
-    <div className="my-page-container">
-      <aside className="side-menu">
-        <div className="side-menu-header">
+    <div className="mypage-container">
+      <aside className="mypage-side-menu">
+        <div className="mypage-side-menu-header">
           <h2>MY</h2>
         </div>
-        <nav className="side-menu-nav">
-          <Link to="/student/info" className="menu-item">
+        <nav className="mypage-side-menu-nav">
+          <Link to="/student/info" className="mypage-menu-item">
             내 정보 조회
           </Link>
-          <Link to="/student/password" className="menu-item">
+          <Link to="/student/password" className="mypage-menu-item">
             비밀번호 변경
           </Link>
-          <Link to="/student/break/application" className="menu-item active">
+          <Link
+            to="/student/break/application"
+            className="mypage-menu-item active"
+          >
             휴학 신청
           </Link>
-          <Link to="/student/break/list" className="menu-item">
+          <Link to="/student/break/list" className="mypage-menu-item">
             휴학 내역 조회
           </Link>
-          <Link to="/student/tuition/list" className="menu-item">
+          <Link to="/student/tuition/list" className="mypage-menu-item">
             등록금 내역 조회
           </Link>
-          <Link to="/student/tuition/payment" className="menu-item">
+          <Link to="/student/tuition/payment" className="mypage-menu-item">
             등록금 납부 고지서
           </Link>
         </nav>
       </aside>
 
-      <main className="main-content">
+      <main className="mypage-main-content">
         <h1>휴학 신청</h1>
-        <div className="divider"></div>
+        <div className="mypage-divider"></div>
 
         {studentInfo && (
-          <div className="document-container">
+          <div className="break-document-container">
             <form onSubmit={handleSubmit}>
-              <div className="document-layout">
+              <div className="break-document-layout">
                 <h3>휴학 신청서</h3>
-                <table className="document-table" border="1">
+                <table className="break-document-table" border="1">
                   <tbody>
                     <tr>
                       <th>단 과 대</th>
@@ -275,7 +277,7 @@ export default function BreakApplication() {
                   </tbody>
                 </table>
               </div>
-              <button type="submit" className="btn btn-dark submit-button">
+              <button type="submit" className="break-submit-button">
                 신청하기
               </button>
             </form>

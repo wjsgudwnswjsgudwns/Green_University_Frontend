@@ -1,5 +1,95 @@
-/* Register Form Styles - 학생/교수/직원 등록 */
+/* Register Form Styles - 학생/교수/직원 등록 - 접두사: register- */
 
+/* 공통 레이아웃 (adminManagement와 동일) */
+.my-page-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f5f7fa;
+  padding: 40px 20px;
+  gap: 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.side-menu {
+  min-width: 240px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  height: fit-content;
+  position: sticky;
+  top: 20px;
+}
+
+.side-menu-header {
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  color: #ffffff;
+  padding: 24px 20px;
+  text-align: center;
+}
+
+.side-menu-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.side-menu-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 0;
+}
+
+.menu-item {
+  display: block;
+  padding: 14px 20px;
+  color: #2c3e50;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  border-left: 3px solid transparent;
+}
+
+.menu-item:hover {
+  background-color: #f8f9fa;
+  color: #216d30;
+  border-left-color: #216d30;
+}
+
+.menu-item.active {
+  background-color: rgba(33, 109, 48, 0.1);
+  color: #216d30;
+  border-left-color: #216d30;
+  font-weight: 600;
+}
+
+.main-content {
+  flex: 1;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 40px;
+  min-height: 600px;
+  min-width: 1000px;
+}
+
+.main-content h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0 0 20px 0;
+}
+
+.divider {
+  height: 2px;
+  background: linear-gradient(90deg, #216d30 0%, rgba(33, 109, 48, 0.2) 100%);
+  margin-bottom: 30px;
+}
+
+/* Register Form */
 .register-form {
   width: 100%;
   max-width: 800px;
@@ -181,8 +271,65 @@
   font-style: italic;
 }
 
+/* 폼 검증 스타일 */
+.input-field:invalid:not(:placeholder-shown) {
+  border-color: #e74c3c;
+}
+
+.input-field:valid:not(:placeholder-shown) {
+  border-color: #27ae60;
+}
+
+/* 로딩 상태 */
+.submit-button:disabled::after {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-left: 8px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: register-spinner 0.6s linear infinite;
+}
+
+@keyframes register-spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Focus 스타일 강화 */
+.input-field:focus,
+.radio-group input[type="radio"]:focus {
+  outline: 2px solid #216d30;
+  outline-offset: 2px;
+}
+
+/* 테이블 hover 효과 */
+.form-table tbody tr:hover {
+  background-color: #f8f9fa;
+  transition: background-color 0.2s ease;
+}
+
 /* 반응형 디자인 */
 @media (max-width: 1024px) {
+  .my-page-container {
+    flex-direction: column;
+    padding: 20px 15px;
+  }
+
+  .side-menu {
+    position: static;
+    width: 100%;
+    min-width: auto;
+  }
+
+  .main-content {
+    padding: 30px 20px;
+    min-width: auto;
+  }
+
   .register-form {
     max-width: 100%;
   }
@@ -193,6 +340,10 @@
 }
 
 @media (max-width: 768px) {
+  .main-content {
+    padding: 24px 16px;
+  }
+
   .form-table th,
   .form-table td {
     padding: 12px 16px;
@@ -250,45 +401,4 @@
   .button-container {
     flex-direction: column;
   }
-}
-
-/* 폼 검증 스타일 */
-.input-field:invalid:not(:placeholder-shown) {
-  border-color: #e74c3c;
-}
-
-.input-field:valid:not(:placeholder-shown) {
-  border-color: #27ae60;
-}
-
-/* 로딩 상태 */
-.submit-button:disabled::after {
-  content: "";
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  margin-left: 8px;
-  border: 2px solid #ffffff;
-  border-radius: 50%;
-  border-top-color: transparent;
-  animation: spinner 0.6s linear infinite;
-}
-
-@keyframes spinner {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Focus 스타일 강화 */
-.input-field:focus,
-.radio-group input[type="radio"]:focus {
-  outline: 2px solid #216d30;
-  outline-offset: 2px;
-}
-
-/* 테이블 hover 효과 */
-.form-table tbody tr:hover {
-  background-color: #f8f9fa;
-  transition: background-color 0.2s ease;
 }

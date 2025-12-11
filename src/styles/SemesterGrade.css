@@ -1,0 +1,316 @@
+/* 학기별 성적 조회 페이지 스타일 - sg (SemesterGrade) prefix */
+
+/* 전체 레이아웃 */
+.semester-grade-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-width: 100em;
+  gap: 30px;
+  padding: 20px;
+}
+
+/* 사이드 메뉴 */
+.sg-sub-menu {
+  min-width: 240px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  height: fit-content;
+  position: sticky;
+  top: 20px;
+}
+
+.sg-sub-menu-top {
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  color: #ffffff;
+  padding: 24px 20px;
+  text-align: center;
+}
+
+.sg-sub-menu-top h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.sg-sub-menu-mid {
+  padding: 0;
+}
+
+.sg-sub-menu-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.sg-sub-menu-table tbody {
+  display: block;
+}
+
+.sg-sub-menu-table tr {
+  display: block;
+  border-bottom: 1px solid #e0e6ed;
+}
+
+.sg-sub-menu-table tr:last-child {
+  border-bottom: none;
+}
+
+.sg-sub-menu-table td {
+  display: block;
+  padding: 0;
+}
+
+.sg-sub-menu-table a {
+  display: block;
+  padding: 14px 20px;
+  color: #2c3e50;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  border-left: 3px solid transparent;
+}
+
+.sg-sub-menu-table a:hover {
+  background-color: #f8f9fa;
+  color: #216d30;
+  border-left-color: #216d30;
+}
+
+.sg-selected-menu {
+  background-color: rgba(33, 109, 48, 0.1) !important;
+  color: #216d30 !important;
+  border-left-color: #216d30 !important;
+  font-weight: 600 !important;
+}
+
+/* 메인 컨텐츠 */
+.sg-main {
+  flex: 1;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 40px;
+  min-height: 600px;
+  min-width: 1050px;
+}
+
+.sg-main h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0 0 20px 0;
+}
+
+.sg-split-div {
+  height: 2px;
+  background: linear-gradient(90deg, #216d30 0%, rgba(33, 109, 48, 0.2) 100%);
+  margin-bottom: 30px;
+}
+
+/* 검색 필터 */
+.sg-filter {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  border: 1px solid #e0e6ed;
+}
+
+.sg-filter-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.sg-select {
+  padding: 8px 12px;
+  border: 2px solid #e0e6ed;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #2c3e50;
+  min-width: 120px;
+  transition: all 0.3s ease;
+  background-color: #ffffff;
+}
+
+.sg-select:focus {
+  outline: none;
+  border-color: #216d30;
+  box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
+}
+
+.sg-search-btn {
+  padding: 8px 20px;
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(33, 109, 48, 0.3);
+  margin-left: auto;
+}
+
+.sg-search-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1a5524 0%, #0e2b14 100%);
+  box-shadow: 0 4px 12px rgba(33, 109, 48, 0.4);
+  transform: translateY(-1px);
+}
+
+.sg-search-btn:disabled {
+  background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+.sg-btn-content {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.sg-btn-text {
+  height: 24px;
+  line-height: 24px;
+}
+
+.sg-btn-icon {
+  height: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.sg-btn-icon .material-symbols-outlined {
+  font-size: 18px;
+}
+
+/* 섹션 타이틀 */
+.sg-section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 16px;
+  margin-top: 20px;
+}
+
+/* 테이블 */
+.sg-list-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 30px;
+  font-size: 0.9rem;
+  background-color: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.sg-list-table thead {
+  background-color: #f8f9fa;
+}
+
+.sg-list-table th {
+  padding: 12px 25px;
+  text-align: center;
+  font-weight: 600;
+  color: #2c3e50;
+  border-bottom: 2px solid #e0e6ed;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.sg-list-table td {
+  padding: 10px 8px;
+  text-align: center;
+  border-bottom: 1px solid #f0f0f0;
+  color: #5a6c7d;
+  vertical-align: middle;
+}
+
+.sg-list-table tbody tr:hover {
+  background-color: #f8f9fa;
+  transition: background-color 0.2s ease;
+}
+
+.sg-list-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* 결과 없음 메시지 */
+.sg-no-list-p {
+  text-align: center;
+  padding: 60px 20px;
+  color: #95a5a6;
+  font-size: 1.1rem;
+  background-color: #f8f9fa;
+  border: 1px solid #e0e6ed;
+  border-radius: 8px;
+  margin-top: 20px;
+  font-weight: 500;
+  font-style: italic;
+}
+
+/* 반응형 */
+@media (max-width: 1200px) {
+  .sg-main {
+    min-width: auto;
+  }
+}
+
+@media (max-width: 1024px) {
+  .semester-grade-container {
+    flex-direction: column;
+    min-width: auto;
+  }
+
+  .sg-sub-menu {
+    position: static;
+    width: 100%;
+    min-width: auto;
+  }
+
+  .sg-main {
+    min-width: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .sg-main {
+    padding: 24px 16px;
+  }
+
+  .sg-filter-content {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sg-select {
+    width: 100%;
+  }
+
+  .sg-search-btn {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .sg-list-table {
+    font-size: 0.8rem;
+  }
+
+  .sg-list-table th,
+  .sg-list-table td {
+    padding: 8px 4px;
+  }
+}

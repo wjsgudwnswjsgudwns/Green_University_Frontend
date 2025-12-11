@@ -50,11 +50,8 @@ export default function TuitionPaymentPage() {
 
   if (loading) {
     return (
-      <div
-        className="d-flex justify-content-center align-items-start"
-        style={{ minWidth: "100em" }}
-      >
-        <main>
+      <div className="tp-container">
+        <main className="tp-main">
           <p>로딩 중...</p>
         </main>
       </div>
@@ -63,31 +60,34 @@ export default function TuitionPaymentPage() {
 
   if (error) {
     return (
-      <div
-        className="d-flex justify-content-center align-items-start"
-        style={{ minWidth: "100em" }}
-      >
-        <main>
+      <div className="tp-container">
+        <main className="tp-main">
           <h1>등록금 납부 고지서</h1>
-          <div className="split--div"></div>
-          <p className="no--list--p">{error}</p>
+          <div className="tp-split-div"></div>
+          <p
+            className="tp-complete-msg"
+            style={{
+              color: "red",
+              borderColor: "red",
+              backgroundColor: "#fff0f0",
+            }}
+          >
+            {error}
+          </p>
         </main>
       </div>
     );
   }
 
   return (
-    <div
-      className="d-flex justify-content-center align-items-start"
-      style={{ minWidth: "100em" }}
-    >
+    <div className="tp-container">
       {/* 세부 메뉴 */}
-      <div className="sub--menu">
-        <div className="sub--menu--top">
+      <div className="tp-sub-menu">
+        <div className="tp-sub-menu-top">
           <h2>MY</h2>
         </div>
-        <div className="sub--menu--mid">
-          <table className="sub--menu--table">
+        <div className="tp-sub-menu-mid">
+          <table className="tp-sub-menu-table">
             <tbody>
               <tr>
                 <td>
@@ -116,7 +116,10 @@ export default function TuitionPaymentPage() {
               </tr>
               <tr>
                 <td>
-                  <a href="/student/tuition/payment" className="selected--menu">
+                  <a
+                    href="/student/tuition/payment"
+                    className="tp-selected-menu"
+                  >
                     등록금 납부 고지서
                   </a>
                 </td>
@@ -127,21 +130,25 @@ export default function TuitionPaymentPage() {
       </div>
 
       {/* 메인 */}
-      <main>
+      <main className="tp-main">
         <h1>등록금 납부 고지서</h1>
-        <div className="split--div"></div>
+        <div className="tp-split-div"></div>
 
         <div
-          className="d-flex flex-column align-items-center"
-          style={{ width: "100%" }}
+          style={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
         >
-          <div className="document--layout">
+          <div className="tp-document-layout">
             <h3>등록금 고지서</h3>
             <p>
               {tuition?.id?.tuiYear}년도 {tuition?.id?.semester}학기
             </p>
 
-            <table className="tuition--payment--table" border="1">
+            <table className="tp-payment-table">
               <thead>
                 <tr>
                   <th>단 과 대</th>
@@ -197,13 +204,13 @@ export default function TuitionPaymentPage() {
           </div>
 
           {tuition?.status ? (
-            <p className="no--list--p">
+            <p className="tp-complete-msg">
               이번 학기 등록금 납부가 완료되었습니다.
             </p>
           ) : (
             <button
               type="button"
-              className="btn btn-dark"
+              className="tp-btn-pay"
               onClick={handlePayment}
             >
               납부하기

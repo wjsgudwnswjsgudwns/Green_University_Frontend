@@ -16,7 +16,6 @@ export default function ProfessorListStaff() {
   const [currentPage, setCurrentPage] = useState(parseInt(urlPage) || 1);
   const [totalPages, setTotalPages] = useState(1);
 
-  // 검색 필터
   const [filters, setFilters] = useState({
     deptId: "",
     professorId: "",
@@ -34,7 +33,6 @@ export default function ProfessorListStaff() {
     try {
       setLoading(true);
 
-      // 쿼리 파라미터 구성
       const params = new URLSearchParams();
       if (filters.deptId) params.append("deptId", filters.deptId);
       if (filters.professorId)
@@ -84,9 +82,9 @@ export default function ProfessorListStaff() {
 
   if (loading && professorList.length === 0) {
     return (
-      <div className="page-container">
-        <div className="loading-container">
-          <div className="spinner"></div>
+      <div className="mypage-container">
+        <div className="mypage-loading-container">
+          <div className="mypage-spinner"></div>
           <p>로딩 중...</p>
         </div>
       </div>
@@ -94,47 +92,46 @@ export default function ProfessorListStaff() {
   }
 
   return (
-    <div className="my-page-container">
-      <aside className="side-menu">
-        <div className="side-menu-header">
+    <div className="mypage-container">
+      <aside className="mypage-side-menu">
+        <div className="mypage-side-menu-header">
           <h2>학사관리</h2>
         </div>
-        <nav className="side-menu-nav">
-          <Link to="/staff/student-list" className="menu-item">
+        <nav className="mypage-side-menu-nav">
+          <Link to="/staff/student-list" className="mypage-menu-item">
             학생 명단 조회
           </Link>
-          <Link to="/staff/professor-list" className="menu-item active">
+          <Link to="/staff/professor-list" className="mypage-menu-item active">
             교수 명단 조회
           </Link>
-          <Link to="/staff/register-student" className="menu-item">
+          <Link to="/staff/register-student" className="mypage-menu-item">
             학생 등록
           </Link>
-          <Link to="/staff/register-professor" className="menu-item">
+          <Link to="/staff/register-professor" className="mypage-menu-item">
             교수 등록
           </Link>
-          <Link to="/staff/register-staff" className="menu-item">
+          <Link to="/staff/register-staff" className="mypage-menu-item">
             직원 등록
           </Link>
-          <Link to="/staff/tuition/bill" className="menu-item">
+          <Link to="/staff/tuition/bill" className="mypage-menu-item">
             등록금 고지서 발송
           </Link>
-          <Link to="/staff/break/list" className="menu-item">
+          <Link to="/staff/break/list" className="mypage-menu-item">
             휴학 처리
           </Link>
-          <Link to="/staff/course-period" className="menu-item">
+          <Link to="/staff/course-period" className="mypage-menu-item">
             수강 신청 기간 설정
           </Link>
         </nav>
       </aside>
 
-      <main className="main-content">
+      <main className="mypage-main-content">
         <h1>교수 명단 조회</h1>
-        <div className="divider"></div>
+        <div className="mypage-divider"></div>
 
-        {/* 검색 필터 */}
-        <div className="filter-container">
-          <form onSubmit={handleSearch} className="filter-form">
-            <div className="filter-group">
+        <div className="stafflist-filter-container">
+          <form onSubmit={handleSearch} className="stafflist-filter-form">
+            <div className="stafflist-filter-group">
               <label htmlFor="deptId">학과 번호</label>
               <input
                 type="text"
@@ -155,7 +152,7 @@ export default function ProfessorListStaff() {
                 placeholder="사번"
               />
 
-              <button type="submit" className="search-button">
+              <button type="submit" className="stafflist-search-button">
                 <span>조회</span>
                 <span className="material-symbols-outlined">search</span>
               </button>
@@ -163,13 +160,13 @@ export default function ProfessorListStaff() {
           </form>
         </div>
 
-        {error && <div className="error-message">{error}</div>}
+        {error && <div className="mypage-error-message">{error}</div>}
 
         {professorList.length > 0 ? (
           <>
-            <h4 className="list-title">교수 목록</h4>
-            <div className="table-container">
-              <table className="data-table">
+            <h4 className="stafflist-list-title">교수 목록</h4>
+            <div className="stafflist-table-container">
+              <table className="stafflist-data-table">
                 <thead>
                   <tr>
                     <th>사번</th>
@@ -201,15 +198,14 @@ export default function ProfessorListStaff() {
               </table>
             </div>
 
-            {/* 페이지네이션 */}
             {totalPages > 1 && (
-              <div className="pagination">
+              <div className="stafflist-pagination">
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(
                   (page) => (
                     <button
                       key={page}
                       onClick={() => handlePageChange(page)}
-                      className={`page-button ${
+                      className={`stafflist-page-button ${
                         page === currentPage ? "active" : ""
                       }`}
                     >
@@ -221,7 +217,7 @@ export default function ProfessorListStaff() {
             )}
           </>
         ) : (
-          !loading && <p className="no-list-p">검색 결과가 없습니다.</p>
+          !loading && <p className="mypage-no-list-p">검색 결과가 없습니다.</p>
         )}
       </main>
     </div>

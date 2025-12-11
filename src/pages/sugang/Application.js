@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/axiosConfig";
-// import "../../styles/sugang.css";
 import "../../styles/Application.css";
 
 const Application = () => {
@@ -14,6 +13,9 @@ const Application = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
 
+  // 표시 모드: 'pre' = 예비 신청 목록, 'all' = 전체 목록
+  const [viewMode, setViewMode] = useState("pre");
+
   // 검색 필터
   const [searchParams, setSearchParams] = useState({
     type: "전체",
@@ -21,21 +23,99 @@ const Application = () => {
     name: "",
   });
 
-  // 컴포넌트 마운트 시 1페이지 로드
+  // 컴포넌트 마운트 시 예비 신청 목록 로드
   useEffect(() => {
-    fetchSubjectList(1);
+    fetchPreSubjectList();
   }, []);
 
-  // 강의 목록 조회
-  const fetchSubjectList = async (page) => {
+  // 예비 수강 신청한 과목 목록 조회 (수정됨)
+  const fetchPreSubjectList = async () => {
     try {
       setLoading(true);
-      console.log(`페이지 ${page} 요청 중...`);
+      console.log("예비 수강 신청 목록 조회 중...");
+
+      // 예비 신청 목록 조회
+      const preAppResponse = await api.get("/api/sugang/preAppList", {
+        params: { type: 1 },
+      });
+      const preAppData = preAppResponse.data;
+      console.log("예비 신청 목록 API 응답:", preAppData);
+
+      // 전체 과목 목록 조회 (한 번만)
+      const allSubjectsResponse = await api.get("/api/sugang/application/1");
+      const allSubjects = allSubjectsResponse.data.subjectList || [];
+
+      // subjectId를 key로 하는 Map 생성 (빠른 검색)
+      const subjectMap = new Map(allSubjects.map((s) => [s.id, s]));
+
+      // 신청 미완료 목록 (preStuSubList) 매핑
+      const preList = (preAppData.preStuSubList || []).map((item) => {
+        const subjectDetail = subjectMap.get(item.subjectId);
+
+        return {
+          subjectId: item.subjectId,
+          id: item.subjectId,
+          subjectName: item.subjectName,
+          name: item.subjectName,
+          professorName: item.professorName,
+          grades: item.grades,
+          subDay: item.subDay,
+          startTime: item.startTime,
+          endTime: item.endTime,
+          numOfStudent: item.numOfStudent,
+          capacity: item.capacity,
+          roomId: item.roomId,
+          status: false, // 아직 본 수강 신청 안 함
+          // 상세 정보에서 가져온 필드들
+          collName: subjectDetail?.collName || "",
+          deptName: subjectDetail?.deptName || "",
+          type: subjectDetail?.type || "",
+        };
+      });
+
+      setSubjectList(preList);
+      setSubjectCount(preList.length);
+      setPageCount(0); // 페이징 없음
+      setViewMode("pre");
+
+      // 5. 필터용 데이터 설정
+      setDeptList(allSubjectsResponse.data.deptList || []);
+      setSubNameList(allSubjectsResponse.data.subNameList || []);
+    } catch (error) {
+      console.error("예비 신청 목록 조회 실패:", error);
+      if (error.response?.status === 400) {
+        alert(error.response.data.message || "수강 신청 기간이 아닙니다.");
+      } else {
+        alert("목록을 불러오는데 실패했습니다.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✅ 필터용 데이터 가져오기
+  const fetchFilterData = async () => {
+    try {
+      const response = await api.get("/api/sugang/application/1");
+      const data = response.data;
+
+      setDeptList(data.deptList || []);
+      setSubNameList(data.subNameList || []);
+    } catch (error) {
+      console.error("필터 데이터 조회 실패:", error);
+    }
+  };
+
+  // ✅ 전체 강의 목록 조회
+  const fetchAllSubjectList = async (page) => {
+    try {
+      setLoading(true);
+      console.log(`전체 목록 페이지 ${page} 요청 중...`);
 
       const response = await api.get(`/api/sugang/application/${page}`);
       const data = response.data;
 
-      console.log("API 응답:", data);
+      console.log("전체 목록 API 응답:", data);
 
       setSubjectList(data.subjectList || []);
       setDeptList(data.deptList || []);
@@ -43,8 +123,9 @@ const Application = () => {
       setSubjectCount(data.subjectCount || 0);
       setPageCount(data.pageCount || 0);
       setCurrentPage(page);
+      setViewMode("all");
     } catch (error) {
-      console.error("강의 목록 조회 실패:", error);
+      console.error("전체 목록 조회 실패:", error);
       if (error.response?.status === 400) {
         alert(error.response.data.message || "수강 신청 기간이 아닙니다.");
       } else {
@@ -73,7 +154,8 @@ const Application = () => {
       setSubjectCount(data.subjectCount || 0);
       setDeptList(data.deptList || []);
       setSubNameList(data.subNameList || []);
-      setPageCount(0); // 검색 결과는 페이징 없음
+      setPageCount(0);
+      setViewMode("all");
     } catch (error) {
       console.error("강의 검색 실패:", error);
       if (error.response?.status === 400) {
@@ -98,8 +180,19 @@ const Application = () => {
   // 페이지 이동
   const handlePageChange = (page) => {
     console.log(`페이지 ${page}로 이동`);
-    fetchSubjectList(page);
+    if (viewMode === "all") {
+      fetchAllSubjectList(page);
+    }
     window.scrollTo(0, 0);
+  };
+
+  // ✅ 모드 전환
+  const toggleViewMode = () => {
+    if (viewMode === "pre") {
+      fetchAllSubjectList(1);
+    } else {
+      fetchPreSubjectList();
+    }
   };
 
   // 수강 신청
@@ -109,8 +202,15 @@ const Application = () => {
         params: { type: 0 },
       });
       alert("수강 신청이 완료되었습니다.");
-      // 현재 페이지 새로고침
-      fetchSubjectList(currentPage);
+
+      // 현재 모드에 따라 새로고침
+      if (viewMode === "pre") {
+        fetchPreSubjectList();
+      } else if (pageCount > 0) {
+        fetchAllSubjectList(currentPage);
+      } else {
+        handleSearch({ preventDefault: () => {} });
+      }
     } catch (error) {
       console.error("수강 신청 실패:", error);
       if (error.response?.data?.message) {
@@ -132,8 +232,15 @@ const Application = () => {
         params: { type: 0 },
       });
       alert("수강신청이 취소되었습니다.");
-      // 현재 페이지 새로고침
-      fetchSubjectList(currentPage);
+
+      // 현재 모드에 따라 새로고침
+      if (viewMode === "pre") {
+        fetchPreSubjectList();
+      } else if (pageCount > 0) {
+        fetchAllSubjectList(currentPage);
+      } else {
+        handleSearch({ preventDefault: () => {} });
+      }
     } catch (error) {
       console.error("수강 신청 취소 실패:", error);
       if (error.response?.data?.message) {
@@ -251,24 +358,25 @@ const Application = () => {
                     style={{ margin: 0 }}
                   >
                     <li style={{ height: "24px", marginRight: "2px" }}>조회</li>
-                    <li style={{ height: "24px" }}>
-                      <span
-                        className="material-symbols-outlined"
-                        style={{ fontSize: "18px", paddingTop: "4px" }}
-                      >
-                        search
-                      </span>
-                    </li>
                   </ul>
                 </button>
               </div>
             </form>
           </div>
 
-          {/* 수강 신청 내역으로 가기 */}
-          <a href="/sugang/preAppList?type=1">
-            <button className="preStuSubList--button">수강 신청 내역</button>
-          </a>
+          {/* ✅ 우측 버튼 그룹 */}
+          <div style={{ display: "flex", gap: "10px" }}>
+            {/* 모드 전환 버튼 */}
+            <button
+              className="preStuSubList--button"
+              onClick={toggleViewMode}
+              style={{
+                backgroundColor: viewMode === "pre" ? "#548AC2" : "#6c757d",
+              }}
+            >
+              {viewMode === "pre" ? "전체 강의 검색" : "예비 신청 목록"}
+            </button>
+          </div>
         </div>
 
         {/* 강의 목록 */}
@@ -277,9 +385,14 @@ const Application = () => {
         ) : subjectList.length > 0 ? (
           <>
             <h4>
-              <span style={{ fontWeight: 600 }}>강의 목록</span>&nbsp;
+              <span style={{ fontWeight: 600 }}>
+                {viewMode === "pre"
+                  ? "예비 수강 신청한 강의 (신청 미완료)"
+                  : "강의 목록"}
+              </span>
+              &nbsp;
               <span style={{ color: "gray", fontSize: "18px" }}>
-                [총 {subjectCount}건]
+                [이 {subjectCount}건]
               </span>
             </h4>
 
@@ -301,12 +414,14 @@ const Application = () => {
               </thead>
               <tbody>
                 {subjectList.map((subject) => (
-                  <tr key={subject.id}>
+                  <tr key={subject.subjectId || subject.id}>
                     <td>{subject.collName}</td>
                     <td>{subject.deptName}</td>
-                    <td>{subject.id}</td>
+                    <td>{subject.subjectId || subject.id}</td>
                     <td>{subject.type}</td>
-                    <td className="sub--list--name">{subject.name}</td>
+                    <td className="sub--list--name">
+                      {subject.subjectName || subject.name}
+                    </td>
                     <td>{subject.professorName}</td>
                     <td>{subject.grades}</td>
                     <td>
@@ -319,14 +434,18 @@ const Application = () => {
                     <td className="sub--list--button--row">
                       {subject.status ? (
                         <button
-                          onClick={() => handleCancel(subject.id)}
+                          onClick={() =>
+                            handleCancel(subject.subjectId || subject.id)
+                          }
                           style={{ backgroundColor: "#a7a7a7" }}
                         >
                           취소
                         </button>
                       ) : (
                         <button
-                          onClick={() => handleApply(subject.id)}
+                          onClick={() =>
+                            handleApply(subject.subjectId || subject.id)
+                          }
                           style={{ backgroundColor: "#548AC2" }}
                         >
                           신청
@@ -338,8 +457,8 @@ const Application = () => {
               </tbody>
             </table>
 
-            {/* 페이징 */}
-            {pageCount > 0 && (
+            {/* 페이징 (전체 목록일 때만) */}
+            {viewMode === "all" && pageCount > 0 && (
               <ul className="page--list">
                 {Array.from({ length: pageCount }, (_, i) => i + 1).map(
                   (page) => (
@@ -365,7 +484,11 @@ const Application = () => {
             )}
           </>
         ) : (
-          <p className="no--list--p">검색 결과가 없습니다.</p>
+          <p className="no--list--p">
+            {viewMode === "pre"
+              ? "예비 수강 신청한 과목이 없습니다."
+              : "검색 결과가 없습니다."}
+          </p>
         )}
       </main>
     </div>
