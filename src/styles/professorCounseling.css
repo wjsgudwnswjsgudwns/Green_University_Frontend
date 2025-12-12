@@ -206,7 +206,201 @@
   line-height: 1.5;
 }
 
-/* Subjects Grid */
+/* Subjects List (Accordion Style) */
+.pc-subjects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pc-subject-item {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.pc-subject-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.pc-subject-row {
+  padding: 20px 24px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.pc-subject-row:hover {
+  background-color: #f8f9fa;
+}
+
+.pc-subject-info-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pc-subject-info h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.pc-subject-details {
+  font-size: 0.9rem;
+  color: #666;
+  display: block;
+}
+
+/* Students Container */
+.pc-students-container {
+  border-top: 1px solid #e0e0e0;
+  background-color: #fafafa;
+  padding: 20px;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 2000px;
+  }
+}
+
+.pc-students-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  gap: 16px;
+}
+
+.pc-students-loading .pc-loading-spinner {
+  width: 40px;
+  height: 40px;
+}
+
+/* Students Table */
+.pc-students-table {
+  width: 100%;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-collapse: collapse;
+}
+
+.pc-students-table thead {
+  background-color: #216d30;
+  color: white;
+}
+
+.pc-students-table th {
+  padding: 14px 12px;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pc-students-table tbody tr {
+  border-bottom: 1px solid #e0e0e0;
+  transition: background-color 0.2s ease;
+}
+
+.pc-students-table tbody tr:hover {
+  background-color: #f5f5f5;
+}
+
+.pc-students-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.pc-students-table td {
+  padding: 14px 12px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+/* Status Badges in Table */
+.pc-status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pc-status-normal {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.pc-status-caution {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.pc-status-risk {
+  background-color: #ffe0b2;
+  color: #d84315;
+}
+
+.pc-status-critical {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+/* Counseling Button */
+.pc-counseling-btn {
+  padding: 8px 16px;
+  background-color: #216d30;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.pc-counseling-btn:hover {
+  background-color: #1a5a26;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(33, 109, 48, 0.3);
+}
+
+.pc-counseling-btn:active {
+  transform: translateY(0);
+}
+
+/* Empty Students State */
+.pc-empty-students {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background: white;
+  border-radius: 8px;
+}
+
+.pc-empty-students p {
+  font-size: 1rem;
+  color: #999;
+  margin: 0;
+}
+
+/* Subjects Grid (기존 스타일 유지) */
 .pc-subjects-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -259,7 +453,7 @@
   margin-bottom: 16px;
 }
 
-.pc-subject-info {
+.pc-subject-body .pc-subject-info {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -267,7 +461,7 @@
   color: #555;
 }
 
-.pc-subject-info .material-symbols-outlined {
+.pc-subject-body .pc-subject-info .material-symbols-outlined {
   font-size: 20px;
   color: #666;
 }
@@ -330,6 +524,17 @@
 }
 
 /* Responsive Design */
+@media (max-width: 1200px) {
+  .pc-students-table {
+    font-size: 0.85rem;
+  }
+
+  .pc-students-table th,
+  .pc-students-table td {
+    padding: 10px 8px;
+  }
+}
+
 @media (max-width: 768px) {
   .pc-page-container {
     padding: 20px 16px;
@@ -348,5 +553,32 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
+  }
+
+  .pc-students-container {
+    padding: 12px;
+    overflow-x: auto;
+  }
+
+  .pc-students-table {
+    min-width: 900px;
+  }
+
+  .pc-counseling-btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .pc-students-table th,
+  .pc-students-table td {
+    padding: 8px 6px;
+    font-size: 0.75rem;
+  }
+
+  .pc-status-badge {
+    font-size: 0.7rem;
+    padding: 3px 8px;
   }
 }

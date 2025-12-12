@@ -56,7 +56,7 @@ export default function Header() {
         menuItems = [
           { label: "수업", path: "/subject/list/:page" },
           { label: "학사정보", path: "/board/notice" },
-          { label: "상담", path: "/professor/counseling" },
+          { label: "상담", path: "/aiprofessor/counseling" },
         ];
         break;
       case "staff":

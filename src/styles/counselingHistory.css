@@ -1,0 +1,294 @@
+/* counselingHistory.css */
+
+.ch-page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+/* Header */
+.ch-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.ch-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #495057;
+  transition: all 0.2s;
+}
+
+.ch-back-btn:hover {
+  background-color: #f8f9fa;
+  border-color: #adb5bd;
+}
+
+.ch-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #212529;
+  margin: 0;
+}
+
+/* Loading */
+.ch-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+}
+
+.ch-loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #e9ecef;
+  border-top-color: #0066ff;
+  border-radius: 50%;
+  animation: ch-spin 0.8s linear infinite;
+}
+
+@keyframes ch-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error Message */
+.ch-error-message {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  color: #856404;
+  margin-bottom: 24px;
+}
+
+/* Student Info */
+.ch-student-info {
+  background-color: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.ch-student-info h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #212529;
+  margin: 0 0 20px 0;
+}
+
+.ch-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.ch-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ch-info-label {
+  font-size: 13px;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.ch-info-value {
+  font-size: 16px;
+  color: #212529;
+  font-weight: 600;
+}
+
+/* Counseling Section */
+.ch-counseling-section {
+  background-color: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.ch-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.ch-section-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #212529;
+  margin: 0;
+}
+
+.ch-count-badge {
+  padding: 6px 14px;
+  background-color: #e7f3ff;
+  color: #0066ff;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Empty State */
+.ch-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #adb5bd;
+}
+
+.ch-empty-state .material-symbols-outlined {
+  font-size: 64px;
+  margin-bottom: 16px;
+}
+
+.ch-empty-state p {
+  font-size: 16px;
+  margin: 0;
+}
+
+/* Counseling Table */
+.ch-counseling-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+}
+
+.ch-counseling-table thead {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.ch-counseling-table th {
+  padding: 14px 12px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: #495057;
+  white-space: nowrap;
+}
+
+.ch-counseling-table tbody tr {
+  border-bottom: 1px solid #dee2e6;
+  transition: background-color 0.2s;
+}
+
+.ch-counseling-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.ch-counseling-table td {
+  padding: 14px 12px;
+  font-size: 14px;
+  color: #212529;
+  vertical-align: top;
+}
+
+.ch-subject-cell {
+  font-weight: 600;
+  color: #0066ff;
+}
+
+.ch-content-cell {
+  max-width: 400px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Status Badges */
+.ch-status-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ch-status-completed {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.ch-status-pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+/* Risk Badges */
+.ch-risk-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ch-risk-normal {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.ch-risk-caution {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.ch-risk-warning {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.ch-risk-critical {
+  background-color: #721c24;
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .ch-page-container {
+    padding: 16px;
+  }
+
+  .ch-title {
+    font-size: 22px;
+  }
+
+  .ch-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ch-counseling-table {
+    font-size: 12px;
+  }
+
+  .ch-counseling-table th,
+  .ch-counseling-table td {
+    padding: 10px 8px;
+  }
+
+  .ch-content-cell {
+    max-width: 200px;
+  }
+}

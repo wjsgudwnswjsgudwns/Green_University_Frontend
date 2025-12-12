@@ -64,10 +64,10 @@ import ChatbotButton from "./components/ChatbotButton";
 import ProfessorCounselingPage from "./pages/ProfessorCounselingPage";
 import StudentCounselingPage from "./pages/StudentCounselingPage";
 import StaffCounselingPage from "./pages/ai/StaffCounselingPage";
-import ProfessorCounselingSubjectPage from "./pages/ai/ProfessorCounselingSubjectPage";
-import ProfessorCounselingStudentDetailPage from "./pages/ai/ProfessorCounselingStudentDetailPage";
 import StaffAllStudentsPage from "./pages/ai/StaffAllStudentsPage";
 import StaffStudentDetailPage from "./pages/ai/StaffStudentDetailPage";
+import AIProfessorCounselingPage from "./pages/ai/AIProfessorCounselingPage";
+import CounselingHistoryPage from "./pages/ai/CounselingHistoryPage";
 
 function PrivateRoute({ children, role }) {
   const { user } = useAuth();
@@ -566,16 +566,12 @@ function Layout() {
 
         {/* 교수 상담 페이지 */}
         <Route
-          path="/professor/counseling"
-          element={<ProfessorCounselingPage />}
+          path="/aiprofessor/counseling"
+          element={<AIProfessorCounselingPage />}
         />
         <Route
-          path="/professor/counseling/subject/:subjectId"
-          element={<ProfessorCounselingSubjectPage />}
-        />
-        <Route
-          path="/professor/counseling/subject/:subjectId/student/:studentId"
-          element={<ProfessorCounselingStudentDetailPage />}
+          path="/aiprofessor/counseling/history/:studentId"
+          element={<CounselingHistoryPage />}
         />
 
         {/* 스태프 상담 페이지 */}

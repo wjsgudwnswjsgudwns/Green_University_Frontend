@@ -1,0 +1,352 @@
+/* Counseling Form Modal Styles */
+
+.cfm-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: cfm-fadeIn 0.3s ease;
+}
+
+@keyframes cfm-fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.cfm-modal-container {
+  background: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: cfm-slideUp 0.3s ease;
+}
+
+@keyframes cfm-slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Modal Header */
+.cfm-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 28px;
+  border-bottom: 2px solid #e0e0e0;
+  background-color: #f8f9fa;
+}
+
+.cfm-modal-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #216d30;
+  margin: 0;
+}
+
+.cfm-modal-header .material-symbols-outlined {
+  font-size: 32px;
+}
+
+.cfm-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.cfm-close-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.cfm-close-btn .material-symbols-outlined {
+  font-size: 28px;
+  color: #666;
+}
+
+/* Modal Body */
+.cfm-modal-body {
+  padding: 28px;
+}
+
+/* Info Section */
+.cfm-info-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+}
+
+.cfm-info-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cfm-info-item .material-symbols-outlined {
+  font-size: 28px;
+  color: #216d30;
+}
+
+.cfm-info-item div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cfm-info-item label {
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: 600;
+}
+
+.cfm-info-item span {
+  font-size: 1rem;
+  color: #333;
+  font-weight: 600;
+}
+
+/* Form Group */
+.cfm-form-group {
+  margin-bottom: 24px;
+}
+
+.cfm-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.cfm-label .material-symbols-outlined {
+  font-size: 22px;
+  color: #216d30;
+}
+
+.cfm-required {
+  color: #dc2626;
+  font-size: 1.1rem;
+  margin-left: 4px;
+}
+
+/* Input Fields */
+.cfm-input,
+.cfm-textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.cfm-input:focus,
+.cfm-textarea:focus {
+  outline: none;
+  border-color: #216d30;
+  box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
+}
+
+.cfm-input-error {
+  border-color: #dc2626 !important;
+}
+
+.cfm-input-error:focus {
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
+}
+
+.cfm-textarea {
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.6;
+}
+
+/* Error Message */
+.cfm-error-message {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: #dc2626;
+  font-weight: 500;
+}
+
+/* Checkbox Group */
+.cfm-checkbox-group {
+  padding: 16px;
+  background-color: #fffbeb;
+  border: 1px solid #fef3c7;
+  border-radius: 8px;
+}
+
+.cfm-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.cfm-checkbox {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #216d30;
+}
+
+.cfm-checkbox-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.cfm-help-text {
+  margin: 8px 0 0 32px;
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.5;
+}
+
+/* Modal Footer */
+.cfm-modal-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.cfm-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cfm-btn .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.cfm-btn-cancel {
+  background-color: #f3f4f6;
+  color: #666;
+}
+
+.cfm-btn-cancel:hover {
+  background-color: #e5e7eb;
+  color: #333;
+}
+
+.cfm-btn-submit {
+  background-color: #216d30;
+  color: white;
+}
+
+.cfm-btn-submit:hover {
+  background-color: #1a5a26;
+  box-shadow: 0 4px 12px rgba(33, 109, 48, 0.3);
+  transform: translateY(-2px);
+}
+
+.cfm-btn-submit:active {
+  transform: translateY(0);
+}
+
+/* Scrollbar Styles */
+.cfm-modal-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.cfm-modal-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.cfm-modal-container::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.cfm-modal-container::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .cfm-modal-container {
+    width: 95%;
+    max-height: 95vh;
+  }
+
+  .cfm-modal-header {
+    padding: 20px;
+  }
+
+  .cfm-modal-header h2 {
+    font-size: 1.3rem;
+  }
+
+  .cfm-modal-body {
+    padding: 20px;
+  }
+
+  .cfm-info-section {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+
+  .cfm-btn {
+    padding: 10px 20px;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .cfm-modal-footer {
+    flex-direction: column-reverse;
+  }
+
+  .cfm-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
