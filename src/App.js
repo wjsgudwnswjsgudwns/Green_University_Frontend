@@ -60,16 +60,13 @@ import MyEvaluation from "./pages/evaluation/MyEvaluation";
 import EvaluationForm from "./pages/evaluation/EvaluationForm";
 import ChatbotPage from "./pages/chatbot/ChatbotPage";
 import ChatbotButton from "./components/ChatbotButton";
-import StudentCounselingList from "./pages/ai/StudentCounselingList";
-import StudentCounselingDetail from "./pages/ai/StudentCounselingDetail";
-import ProfessorCounselingList from "./pages/ai/ProfessorCounselingList";
-import ProfessorCounselingForm from "./pages/ai/ProfessorCounselingForm";
-import ProfessorCounselingDetail from "./pages/ai/ProfessorCounselingDetail";
-import StaffCounselingStudentDetail from "./pages/ai/StaffCounselingStudentDetail";
-import StaffCounselingStatistics from "./pages/ai/StaffCounselingStatistics";
-import StaffCounselingDashboard from "./pages/ai/StaffCounselingDashboard";
 import ProfessorCounselingPage from "./pages/ProfessorCounselingPage";
 import StudentCounselingPage from "./pages/StudentCounselingPage";
+import StaffCounselingPage from "./pages/ai/StaffCounselingPage";
+import ProfessorCounselingSubjectPage from "./pages/ai/ProfessorCounselingSubjectPage";
+import ProfessorCounselingStudentDetailPage from "./pages/ai/ProfessorCounselingStudentDetailPage";
+import StaffAllStudentsPage from "./pages/ai/StaffAllStudentsPage";
+import StaffStudentDetailPage from "./pages/ai/StaffStudentDetailPage";
 
 function PrivateRoute({ children, role }) {
   const { user } = useAuth();
@@ -555,74 +552,31 @@ function Layout() {
           }
         />
 
+        {/* 학생 상담 페이지 */}
+        <Route path="/student/counseling" element={<StudentCounselingPage />} />
+
+        {/* 교수 상담 페이지 */}
         <Route
-          path="/student/counseling/list"
-          element={
-            <PrivateRoute role="student">
-              <StudentCounselingList />
-            </PrivateRoute>
-          }
+          path="/professor/counseling"
+          element={<ProfessorCounselingPage />}
         />
         <Route
-          path="/student/counseling/:id"
-          element={
-            <PrivateRoute role="student">
-              <StudentCounselingDetail />
-            </PrivateRoute>
-          }
+          path="/professor/counseling/subject/:subjectId"
+          element={<ProfessorCounselingSubjectPage />}
+        />
+        <Route
+          path="/professor/counseling/subject/:subjectId/student/:studentId"
+          element={<ProfessorCounselingStudentDetailPage />}
         />
 
-        {/* Professor Counseling routes */}
+        {/* 스태프 상담 페이지 */}
+        <Route path="/staff/counseling" element={<StaffCounselingPage />} />
+        <Route path="/staff/students/all" element={<StaffAllStudentsPage />} />
         <Route
-          path="/professor/counseling/list"
-          element={
-            <PrivateRoute role="professor">
-              <ProfessorCounselingList />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/professor/counseling/form"
-          element={
-            <PrivateRoute role="professor">
-              <ProfessorCounselingForm />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/professor/counseling/:id"
-          element={
-            <PrivateRoute role="professor">
-              <ProfessorCounselingDetail />
-            </PrivateRoute>
-          }
+          path="/staff/student/:studentId"
+          element={<StaffStudentDetailPage />}
         />
 
-        {/* Staff Counseling routes */}
-        <Route
-          path="/staff/counseling/dashboard"
-          element={
-            <PrivateRoute role="staff">
-              <StaffCounselingDashboard />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/staff/counseling/statistics"
-          element={
-            <PrivateRoute role="staff">
-              <StaffCounselingStatistics />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/staff/counseling/student/:studentId"
-          element={
-            <PrivateRoute role="staff">
-              <StaffCounselingStudentDetail />
-            </PrivateRoute>
-          }
-        />
         {/* Catch-all route for undefined paths */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

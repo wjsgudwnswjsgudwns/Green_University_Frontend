@@ -43,31 +43,28 @@ export default function Header() {
     switch (user.userRole) {
       case "student":
         menuItems = [
-          // { label: "홈", path: "/" },
-          // { label: "MY", path: "/student/info" }, // MY는 드롭다운으로 이동
           { label: "수업", path: "/subject/list/1" },
           { label: "수강신청", path: "/sugang/subjectlist" },
           { label: "성적", path: "/grade/thisSemester" },
           { label: "챗봇", path: "/chatbot" },
           { label: "학사정보", path: "/board/notice" },
+          { label: "상담", path: "/student/counseling/list" },
         ];
         break;
       case "professor":
         menuItems = [
-          // { label: "홈", path: "/" },
-          // { label: "MY", path: "/professor/info" }, // MY는 드롭다운으로 이동
           { label: "수업", path: "/subject/list/:page" },
           { label: "학사정보", path: "/board/notice" },
+          { label: "상담", path: "/professor/counseling" },
         ];
         break;
       case "staff":
       default:
         menuItems = [
-          // { label: "홈", path: "/" },
-          // { label: "MY", path: "/staff/info" }, // MY는 드롭다운으로 이동
           { label: "학사관리", path: "/staff/student-list/" },
           { label: "등록", path: "/staff/admin/college" },
           { label: "학사정보", path: "/board/notice" },
+          { label: "상담", path: "/staff/students/all" },
         ];
         break;
     }

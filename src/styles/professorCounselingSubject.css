@@ -1,0 +1,458 @@
+/* Professor Counseling Subject Page Styles */
+
+.pcs-page-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  min-height: calc(100vh - 200px);
+}
+
+/* Header */
+.pcs-header {
+  margin-bottom: 32px;
+}
+
+.pcs-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 16px;
+}
+
+.pcs-back-btn:hover {
+  background-color: #f5f5f5;
+  border-color: #216d30;
+  color: #216d30;
+}
+
+.pcs-back-btn .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.pcs-header-content {
+  padding-bottom: 20px;
+  border-bottom: 2px solid #216d30;
+}
+
+.pcs-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #216d30;
+  margin: 0 0 12px 0;
+}
+
+.pcs-subject-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.95rem;
+  color: #666;
+}
+
+.pcs-divider {
+  color: #ccc;
+}
+
+/* Loading */
+.pcs-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+}
+
+.pcs-loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #216d30;
+  border-radius: 50%;
+  animation: pcs-spin 1s linear infinite;
+}
+
+@keyframes pcs-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.pcs-loading p {
+  color: #666;
+  font-size: 1rem;
+}
+
+/* Error Message */
+.pcs-error-message {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background-color: #fee;
+  border: 1px solid #fcc;
+  border-radius: 8px;
+  color: #c33;
+  margin-bottom: 24px;
+}
+
+.pcs-error-message .material-symbols-outlined {
+  font-size: 24px;
+}
+
+/* Risk Summary */
+.pcs-risk-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.pcs-summary-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  border: 2px solid;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.pcs-summary-card .material-symbols-outlined {
+  font-size: 40px;
+}
+
+.pcs-summary-card > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pcs-summary-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #666;
+}
+
+.pcs-summary-count {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.pcs-summary-critical {
+  border-color: #f44336;
+  background: linear-gradient(135deg, #fff 0%, #ffebee 100%);
+}
+
+.pcs-summary-critical .material-symbols-outlined {
+  color: #f44336;
+}
+
+.pcs-summary-critical .pcs-summary-count {
+  color: #c62828;
+}
+
+.pcs-summary-risk {
+  border-color: #ff9800;
+  background: linear-gradient(135deg, #fff 0%, #fff3e0 100%);
+}
+
+.pcs-summary-risk .material-symbols-outlined {
+  color: #ff9800;
+}
+
+.pcs-summary-risk .pcs-summary-count {
+  color: #e65100;
+}
+
+.pcs-summary-caution {
+  border-color: #ffeb3b;
+  background: linear-gradient(135deg, #fff 0%, #fffde7 100%);
+}
+
+.pcs-summary-caution .material-symbols-outlined {
+  color: #fbc02d;
+}
+
+.pcs-summary-caution .pcs-summary-count {
+  color: #f57f17;
+}
+
+/* Tabs */
+.pcs-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.pcs-tab {
+  position: relative;
+  padding: 12px 24px;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pcs-tab:hover {
+  color: #216d30;
+}
+
+.pcs-tab-active {
+  color: #216d30;
+  border-bottom: 3px solid #216d30;
+  margin-bottom: -2px;
+}
+
+.pcs-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 8px;
+  background-color: #e0e0e0;
+  color: #666;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: 12px;
+}
+
+.pcs-tab-active .pcs-tab-count {
+  background-color: #216d30;
+  color: white;
+}
+
+/* Students Section */
+.pcs-students-section {
+  margin-top: 24px;
+}
+
+.pcs-students-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+/* Student Card */
+.pcs-student-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.pcs-student-card:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+}
+
+.pcs-student-card-risk {
+  border: 2px solid #ff9800;
+  background: linear-gradient(135deg, #fff 0%, #fff3e0 100%);
+}
+
+.pcs-student-card-risk:hover {
+  box-shadow: 0 8px 16px rgba(255, 152, 0, 0.2);
+}
+
+.pcs-student-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.pcs-student-info-basic {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pcs-student-info-basic .material-symbols-outlined {
+  font-size: 40px;
+  color: #216d30;
+}
+
+.pcs-student-info-basic h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 4px 0;
+}
+
+.pcs-student-id {
+  font-size: 0.85rem;
+  color: #888;
+}
+
+/* Risk Badge */
+.pcs-risk-badge {
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.pcs-risk-normal {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.pcs-risk-caution {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.pcs-risk-warning {
+  background-color: #ffe0b2;
+  color: #d84315;
+}
+
+.pcs-risk-critical {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+/* Student Body */
+.pcs-student-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.pcs-student-detail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.pcs-student-detail .material-symbols-outlined {
+  font-size: 20px;
+  color: #666;
+}
+
+/* Student Footer */
+.pcs-student-footer {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.pcs-view-detail-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  background-color: #216d30;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pcs-view-detail-btn:hover {
+  background-color: #1a5a26;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(33, 109, 48, 0.3);
+}
+
+.pcs-view-detail-btn .material-symbols-outlined {
+  font-size: 20px;
+}
+
+/* Empty State */
+.pcs-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  border: 2px dashed #ddd;
+}
+
+.pcs-empty-state .material-symbols-outlined {
+  font-size: 64px;
+  color: #ccc;
+  margin-bottom: 16px;
+}
+
+.pcs-empty-state p {
+  font-size: 1.1rem;
+  color: #999;
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .pcs-page-container {
+    padding: 20px 16px;
+  }
+
+  .pcs-title {
+    font-size: 1.5rem;
+  }
+
+  .pcs-subject-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .pcs-divider {
+    display: none;
+  }
+
+  .pcs-risk-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .pcs-students-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pcs-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .pcs-tab {
+    white-space: nowrap;
+  }
+}

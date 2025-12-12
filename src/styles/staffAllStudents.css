@@ -1,0 +1,561 @@
+/* Staff All Students Page Styles */
+
+.sas-page-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  min-height: calc(100vh - 200px);
+}
+
+/* Header */
+.sas-header {
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #216d30;
+}
+
+.sas-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #216d30;
+  margin: 0 0 8px 0;
+}
+
+.sas-subtitle {
+  font-size: 1rem;
+  color: #666;
+  margin: 0;
+}
+
+/* Loading */
+.sas-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+}
+
+.sas-loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #216d30;
+  border-radius: 50%;
+  animation: sas-spin 1s linear infinite;
+}
+
+@keyframes sas-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.sas-loading p {
+  color: #666;
+  font-size: 1rem;
+}
+
+/* Error Message */
+.sas-error-message {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background-color: #fee;
+  border: 1px solid #fcc;
+  border-radius: 8px;
+  color: #c33;
+  margin-bottom: 24px;
+}
+
+.sas-error-message .material-symbols-outlined {
+  font-size: 24px;
+}
+
+/* Statistics Summary */
+.sas-statistics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.sas-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  border: 2px solid;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.sas-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.sas-stat-icon {
+  flex-shrink: 0;
+}
+
+.sas-stat-icon .material-symbols-outlined {
+  font-size: 40px;
+}
+
+.sas-stat-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sas-stat-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #666;
+}
+
+.sas-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+/* Stat Card Variants */
+.sas-stat-total {
+  border-color: #216d30;
+  background: linear-gradient(135deg, #fff 0%, #e8f5e9 100%);
+}
+
+.sas-stat-total .material-symbols-outlined {
+  color: #216d30;
+}
+
+.sas-stat-total .sas-stat-value {
+  color: #1a5524;
+}
+
+.sas-stat-normal {
+  border-color: #4caf50;
+  background: linear-gradient(135deg, #fff 0%, #e8f5e9 100%);
+}
+
+.sas-stat-normal .material-symbols-outlined {
+  color: #4caf50;
+}
+
+.sas-stat-normal .sas-stat-value {
+  color: #2e7d32;
+}
+
+.sas-stat-caution {
+  border-color: #ffeb3b;
+  background: linear-gradient(135deg, #fff 0%, #fffde7 100%);
+}
+
+.sas-stat-caution .material-symbols-outlined {
+  color: #fbc02d;
+}
+
+.sas-stat-caution .sas-stat-value {
+  color: #f57f17;
+}
+
+.sas-stat-risk {
+  border-color: #ff9800;
+  background: linear-gradient(135deg, #fff 0%, #fff3e0 100%);
+}
+
+.sas-stat-risk .material-symbols-outlined {
+  color: #ff9800;
+}
+
+.sas-stat-risk .sas-stat-value {
+  color: #e65100;
+}
+
+.sas-stat-critical {
+  border-color: #f44336;
+  background: linear-gradient(135deg, #fff 0%, #ffebee 100%);
+}
+
+.sas-stat-critical .material-symbols-outlined {
+  color: #f44336;
+}
+
+.sas-stat-critical .sas-stat-value {
+  color: #c62828;
+}
+
+/* Filters */
+.sas-filters {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  padding: 24px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
+}
+
+.sas-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.sas-filter-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.sas-filter-group select {
+  padding: 10px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #333;
+  background-color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sas-filter-group select:focus {
+  outline: none;
+  border-color: #216d30;
+  box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
+}
+
+.sas-filter-group select:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.sas-reset-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background-color: #f5f5f5;
+  color: #666;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.sas-reset-btn:hover {
+  background-color: #e0e0e0;
+  border-color: #ccc;
+}
+
+.sas-reset-btn .material-symbols-outlined {
+  font-size: 20px;
+}
+
+/* Results Info */
+.sas-results-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 16px 20px;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+.sas-results-count {
+  font-size: 1rem;
+  color: #666;
+}
+
+.sas-results-count strong {
+  color: #216d30;
+  font-size: 1.2rem;
+}
+
+/* Students Section */
+.sas-students-section {
+  margin-top: 24px;
+}
+
+.sas-students-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+/* Student Card */
+.sas-student-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.sas-student-card:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+}
+
+.sas-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.sas-student-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sas-student-info .material-symbols-outlined {
+  font-size: 40px;
+  color: #216d30;
+}
+
+.sas-student-info h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 4px 0;
+}
+
+.sas-student-id {
+  font-size: 0.85rem;
+  color: #888;
+}
+
+/* Risk Badge */
+.sas-risk-badge {
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.sas-risk-normal {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.sas-risk-caution {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.sas-risk-warning {
+  background-color: #ffe0b2;
+  color: #d84315;
+}
+
+.sas-risk-critical {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+/* Card Body */
+.sas-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.sas-info-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.sas-info-row .material-symbols-outlined {
+  font-size: 20px;
+  color: #666;
+}
+
+/* Card Footer */
+.sas-card-footer {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.sas-view-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  background-color: #216d30;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sas-view-btn:hover {
+  background-color: #1a5a26;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(33, 109, 48, 0.3);
+}
+
+.sas-view-btn .material-symbols-outlined {
+  font-size: 20px;
+}
+
+/* Empty State */
+.sas-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  border: 2px dashed #ddd;
+}
+
+.sas-empty-state .material-symbols-outlined {
+  font-size: 64px;
+  color: #ccc;
+  margin-bottom: 16px;
+}
+
+.sas-empty-state p {
+  font-size: 1.1rem;
+  color: #999;
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .sas-filters {
+    flex-wrap: wrap;
+  }
+
+  .sas-filter-group {
+    min-width: 200px;
+  }
+
+  .sas-students-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .sas-page-container {
+    padding: 20px 16px;
+  }
+
+  .sas-title {
+    font-size: 1.5rem;
+  }
+
+  .sas-statistics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .sas-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sas-filter-group,
+  .sas-reset-btn {
+    width: 100%;
+  }
+
+  .sas-students-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sas-table-wrapper {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.sas-students-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.sas-students-table thead {
+  background: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.sas-students-table th {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sas-students-table tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 0.2s;
+}
+
+.sas-students-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.sas-students-table td {
+  padding: 1rem 1.5rem;
+  font-size: 0.875rem;
+  color: #111827;
+}
+
+.sas-detail-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #2563eb;
+  font-weight: 500;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.sas-detail-btn:hover {
+  color: #1e40af;
+  text-decoration: underline;
+}
+
+.sas-detail-btn .material-symbols-outlined {
+  font-size: 1rem;
+}

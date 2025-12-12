@@ -1,0 +1,416 @@
+/* Professor Counseling Student Detail Page Styles */
+
+.pcsd-page-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  min-height: calc(100vh - 200px);
+}
+
+/* Header */
+.pcsd-header {
+  margin-bottom: 32px;
+}
+
+.pcsd-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 16px;
+}
+
+.pcsd-back-btn:hover {
+  background-color: #f5f5f5;
+  border-color: #216d30;
+  color: #216d30;
+}
+
+.pcsd-back-btn .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.pcsd-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #216d30;
+}
+
+.pcsd-header-left {
+  flex: 1;
+}
+
+.pcsd-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #216d30;
+  margin: 0 0 8px 0;
+}
+
+.pcsd-subtitle {
+  font-size: 1rem;
+  color: #666;
+  margin: 0;
+}
+
+.pcsd-write-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background-color: #216d30;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pcsd-write-btn:hover {
+  background-color: #1a5a26;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(33, 109, 48, 0.3);
+}
+
+.pcsd-write-btn .material-symbols-outlined {
+  font-size: 24px;
+}
+
+/* Loading */
+.pcsd-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+}
+
+.pcsd-loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #216d30;
+  border-radius: 50%;
+  animation: pcsd-spin 1s linear infinite;
+}
+
+@keyframes pcsd-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.pcsd-loading p {
+  color: #666;
+  font-size: 1rem;
+}
+
+/* Error Message */
+.pcsd-error-message {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background-color: #fee;
+  border: 1px solid #fcc;
+  border-radius: 8px;
+  color: #c33;
+  margin-bottom: 24px;
+}
+
+.pcsd-error-message .material-symbols-outlined {
+  font-size: 24px;
+}
+
+/* Overall Risk Status */
+.pcsd-overall-risk {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 32px;
+  border-radius: 16px;
+  margin-bottom: 32px;
+  border: 3px solid;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.pcsd-risk-icon {
+  flex-shrink: 0;
+}
+
+.pcsd-risk-icon .material-symbols-outlined {
+  font-size: 64px;
+}
+
+.pcsd-risk-content h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  opacity: 0.8;
+}
+
+.pcsd-risk-level {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+}
+
+.pcsd-risk-detail {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0;
+  opacity: 0.9;
+}
+
+/* Status Colors */
+.pcsd-status-normal {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border-color: #4caf50;
+  color: #2e7d32;
+}
+
+.pcsd-status-normal .material-symbols-outlined {
+  color: #4caf50;
+}
+
+.pcsd-status-caution {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  border-color: #ff9800;
+  color: #e65100;
+}
+
+.pcsd-status-caution .material-symbols-outlined {
+  color: #ff9800;
+}
+
+.pcsd-status-risk {
+  background: linear-gradient(135deg, #ffe0b2 0%, #ffcc80 100%);
+  border-color: #f57c00;
+  color: #d84315;
+}
+
+.pcsd-status-risk .material-symbols-outlined {
+  color: #f57c00;
+}
+
+.pcsd-status-critical {
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  border-color: #f44336;
+  color: #c62828;
+}
+
+.pcsd-status-critical .material-symbols-outlined {
+  color: #f44336;
+}
+
+/* Analysis Grid */
+.pcsd-analysis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.pcsd-analysis-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.pcsd-analysis-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+}
+
+.pcsd-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.pcsd-card-header .material-symbols-outlined {
+  font-size: 32px;
+  color: #216d30;
+}
+
+.pcsd-card-header h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.pcsd-card-status {
+  padding: 12px 20px;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+/* Counseling Section */
+.pcsd-counseling-section {
+  margin-top: 40px;
+}
+
+.pcsd-section-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 24px 0;
+}
+
+.pcsd-section-title .material-symbols-outlined {
+  font-size: 32px;
+  color: #216d30;
+}
+
+.pcsd-counseling-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pcsd-counseling-item {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.pcsd-counseling-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.pcsd-counseling-date {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  color: #666;
+  font-weight: 600;
+}
+
+.pcsd-counseling-date .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.pcsd-counseling-badge {
+  padding: 6px 16px;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.pcsd-badge-completed {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.pcsd-badge-scheduled {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.pcsd-counseling-content {
+  padding: 16px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  border-left: 4px solid #216d30;
+}
+
+.pcsd-counseling-content p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #333;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+/* Empty State */
+.pcsd-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  border: 2px dashed #ddd;
+}
+
+.pcsd-empty-state .material-symbols-outlined {
+  font-size: 64px;
+  color: #ccc;
+  margin-bottom: 16px;
+}
+
+.pcsd-empty-state p {
+  font-size: 1.1rem;
+  color: #999;
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .pcsd-page-container {
+    padding: 20px 16px;
+  }
+
+  .pcsd-title {
+    font-size: 1.5rem;
+  }
+
+  .pcsd-header-content {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .pcsd-write-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .pcsd-overall-risk {
+    flex-direction: column;
+    text-align: center;
+    padding: 24px;
+  }
+
+  .pcsd-analysis-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pcsd-counseling-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
