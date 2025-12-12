@@ -140,6 +140,8 @@
   border-radius: 8px;
   transition: all 0.3s ease;
   cursor: pointer;
+  text-decoration: none;
+  color: inherit;
 }
 
 .main-page .notice-item:hover {
@@ -178,6 +180,8 @@
   border-radius: 8px;
   transition: all 0.3s ease;
   cursor: pointer;
+  text-decoration: none;
+  color: inherit;
 }
 
 .main-page .schedule-item:hover {
@@ -229,6 +233,19 @@
   margin: 0;
   font-size: 0.85rem;
   color: #666;
+}
+
+/* 로딩 및 빈 상태 스타일 */
+.main-page .loading-text,
+.main-page .empty-text {
+  text-align: center;
+  padding: 40px 20px;
+  color: #888;
+  font-size: 0.95rem;
+}
+
+.main-page .loading-text {
+  color: #216d30;
 }
 
 /* 프로필 카드 */

@@ -152,3 +152,9 @@ export function approveReservation(reservationId, { title, description }) {
         }
     );
 }
+
+export function cancelReservationByProfessor(reservationId) {
+    return api.post(
+        `/api/counseling/professor/reservations/${reservationId}/cancel`
+    );
+}

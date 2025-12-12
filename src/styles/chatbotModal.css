@@ -253,6 +253,39 @@
   cursor: not-allowed;
 }
 
+/* 시간표 강의 버튼 */
+.schedule-subject-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  margin-bottom: 8px;
+}
+
+.schedule-subject-btn {
+  padding: 8px 16px;
+  background: white;
+  border: 2px solid #216d30;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #216d30;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.schedule-subject-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(33, 109, 48, 0.3);
+  transform: translateY(-1px);
+}
+
+.schedule-subject-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* 입력 영역 */
 .chatbot-modal-input-form {
   display: flex;

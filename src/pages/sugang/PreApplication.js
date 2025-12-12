@@ -172,6 +172,11 @@ const PreApplication = () => {
               </tr>
               <tr>
                 <td>
+                  <a href="/sugang/schedule">나의 시간표</a>
+                </td>
+              </tr>
+              <tr>
+                <td>
                   <a href="/sugang/pre" className="selected--menu">
                     예비 수강 신청
                   </a>

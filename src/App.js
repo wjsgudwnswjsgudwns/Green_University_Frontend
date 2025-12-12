@@ -50,6 +50,7 @@ import PreApplication from "./pages/sugang/PreApplication";
 import AppList from "./pages/sugang/AppList";
 import Application from "./pages/sugang/Application";
 import UpdatePeriodPage from "./pages/sugang/UpdatePeriodPage";
+import SchedulePage from "./pages/sugang/SchedulePage";
 import CreateTuitionBillPage from "./pages/tuition/CreateTuitionBillPage";
 import TuitionListPage from "./pages/tuition/TuitionListPage";
 import TuitionPaymentPage from "./pages/tuition/TuitionPaymentPage";
@@ -207,6 +208,14 @@ function Layout() {
           element={
             <PrivateRoute>
               <AppList />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/sugang/schedule"
+          element={
+            <PrivateRoute role="student">
+              <SchedulePage />
             </PrivateRoute>
           }
         />

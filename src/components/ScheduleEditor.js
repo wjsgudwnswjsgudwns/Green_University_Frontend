@@ -263,9 +263,6 @@ function ScheduleEditor({
     // ====== 렌더링 ======
     return (
         <div>
-            {error && <div style={{ color: "red" }}>{error}</div>}
-            {loading && <div>로딩 중...</div>}
-
             {/* 주간 그리드 */}
             <section style={{ marginBottom: "16px" }}>
                 <div
