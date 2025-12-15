@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../api/axiosConfig";
-import "../../styles/schedule.css";
+import "../../styles/scheduleInfo.css";
 
 export default function ScheduleListPage() {
   const { user } = useAuth();
@@ -75,9 +75,9 @@ export default function ScheduleListPage() {
 
   if (loading) {
     return (
-      <div className="page-container">
-        <div className="loading-container">
-          <div className="spinner"></div>
+      <div className="sch-page-container">
+        <div className="sch-loading-container">
+          <div className="sch-spinner"></div>
           <p>로딩 중...</p>
         </div>
       </div>
@@ -85,53 +85,53 @@ export default function ScheduleListPage() {
   }
 
   return (
-    <div className="schedule-container">
-      <aside className="side-menu">
-        <div className="side-menu-header">
+    <div className="sch-container">
+      <aside className="sch-side-menu">
+        <div className="sch-side-menu-header">
           <h2>학사정보</h2>
         </div>
-        <nav className="side-menu-nav">
-          <Link to="/board/notice" className="menu-item">
+        <nav className="sch-side-menu-nav">
+          <Link to="/board/notice" className="sch-menu-item">
             공지사항
           </Link>
-          <Link to="/schedule" className="menu-item active">
+          <Link to="/schedule" className="sch-menu-item active">
             학사일정
           </Link>
           {user?.userRole === "staff" && (
-            <Link to="/schedule/manage" className="menu-item">
+            <Link to="/schedule/manage" className="sch-menu-item">
               학사일정 등록
             </Link>
           )}
         </nav>
       </aside>
 
-      <main className="schedule-main">
+      <main className="sch-main">
         <h1>학사일정</h1>
-        <div className="divider"></div>
+        <div className="sch-divider"></div>
 
-        {error && <div className="error-message">{error}</div>}
+        {error && <div className="sch-error-message">{error}</div>}
 
         {Object.keys(groupedSchedules).length > 0 ? (
-          <div className="schedule-table-container">
-            <table className="schedule-table">
+          <div className="sch-table-container">
+            <table className="sch-table">
               <tbody>
                 {Object.keys(groupedSchedules)
                   .sort((a, b) => parseInt(a) - parseInt(b))
                   .map((month) => (
                     <React.Fragment key={month}>
-                      <tr className="month-row">
+                      <tr className="sch-month-row">
                         <td
-                          className="month-cell"
+                          className="sch-month-cell"
                           rowSpan={groupedSchedules[month].length}
                         >
                           {month}월
                         </td>
-                        <td className="date-cell">
+                        <td className="sch-date-cell">
                           {groupedSchedules[month][0].startDay}~
                           {groupedSchedules[month][0].endDay}
                         </td>
                         <td
-                          className="info-cell clickable"
+                          className="sch-info-cell clickable"
                           onClick={() =>
                             handleScheduleClick(groupedSchedules[month][0].id)
                           }
@@ -141,11 +141,11 @@ export default function ScheduleListPage() {
                       </tr>
                       {groupedSchedules[month].slice(1).map((schedule) => (
                         <tr key={schedule.id}>
-                          <td className="date-cell">
+                          <td className="sch-date-cell">
                             {schedule.startDay}~{schedule.endDay}
                           </td>
                           <td
-                            className="info-cell clickable"
+                            className="sch-info-cell clickable"
                             onClick={() => handleScheduleClick(schedule.id)}
                           >
                             {schedule.information}
@@ -158,7 +158,7 @@ export default function ScheduleListPage() {
             </table>
           </div>
         ) : (
-          <div className="no-data">등록된 학사일정이 없습니다.</div>
+          <div className="sch-no-data">등록된 학사일정이 없습니다.</div>
         )}
       </main>
     </div>

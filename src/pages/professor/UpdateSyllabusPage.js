@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../api/axiosConfig";
-import "../../styles/syllabus.css";
+import "../../styles/update-syllabus.css";
 
 export default function UpdateSyllabusPage() {
   const { subjectId } = useParams();
@@ -23,9 +23,9 @@ export default function UpdateSyllabusPage() {
   useEffect(() => {
     if (user?.userRole !== "professor") {
       alert("접근 권한이 없습니다.");
-      window.close();
+      navigate(-1);
     }
-  }, [user]);
+  }, [user, navigate]);
 
   // 기존 강의계획서 조회
   useEffect(() => {
@@ -87,7 +87,7 @@ export default function UpdateSyllabusPage() {
     try {
       await api.put(`/api/professor/syllabus/update/${subjectId}`, formData);
       alert("강의 계획서가 수정되었습니다.");
-      window.close();
+      navigate(-1);
     } catch (error) {
       console.error("수정 실패:", error);
       alert(error.response?.data?.message || "수정에 실패했습니다.");
@@ -98,79 +98,91 @@ export default function UpdateSyllabusPage() {
 
   if (loading) {
     return (
-      <div className="syllabus-page">
-        <p style={{ textAlign: "center", padding: "40px" }}>로딩 중...</p>
+      <div className="update-syllabus-container">
+        <div className="update-syllabus-loading">
+          <p>로딩 중...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="syllabus-page">
-      <header>
-        <div className="header--top"></div>
-      </header>
+    <div className="update-syllabus-container">
+      <div className="update-syllabus-content">
+        <h1 className="update-syllabus-title">강의 계획서 수정</h1>
 
-      <section>
-        <h2>강의 계획서 수정</h2>
-        <br />
+        <form onSubmit={handleSubmit} className="update-syllabus-form">
+          <div className="update-syllabus-form-group">
+            <label className="update-syllabus-label">강의 개요</label>
+            <textarea
+              name="overview"
+              value={formData.overview}
+              onChange={handleChange}
+              required
+              className="update-syllabus-textarea"
+              rows="5"
+              placeholder="강의의 전반적인 내용을 입력하세요"
+            />
+          </div>
 
-        <form onSubmit={handleSubmit}>
-          <label>강의 개요</label>
-          <br />
-          <textarea
-            rows="5"
-            cols="50"
-            name="overview"
-            value={formData.overview}
-            onChange={handleChange}
-            required
-          />
-          <br />
+          <div className="update-syllabus-form-group">
+            <label className="update-syllabus-label">수업 목표</label>
+            <textarea
+              name="objective"
+              value={formData.objective}
+              onChange={handleChange}
+              required
+              className="update-syllabus-textarea"
+              rows="5"
+              placeholder="수업을 통해 달성할 목표를 입력하세요"
+            />
+          </div>
 
-          <label>수업 목표</label>
-          <br />
-          <textarea
-            rows="5"
-            cols="50"
-            name="objective"
-            value={formData.objective}
-            onChange={handleChange}
-            required
-          />
-          <br />
+          <div className="update-syllabus-form-group">
+            <label className="update-syllabus-label">교재</label>
+            <input
+              type="text"
+              name="textbook"
+              value={formData.textbook}
+              onChange={handleChange}
+              required
+              className="update-syllabus-input"
+              placeholder="사용할 교재를 입력하세요 (예: 없음, 또는 교재명)"
+            />
+          </div>
 
-          <label>교재</label>
-          <br />
-          <input
-            type="text"
-            name="textbook"
-            value={formData.textbook}
-            onChange={handleChange}
-            required
-          />
-          <br />
+          <div className="update-syllabus-form-group">
+            <label className="update-syllabus-label">주별 계획</label>
+            <textarea
+              name="program"
+              value={formData.program}
+              onChange={handleChange}
+              required
+              className="update-syllabus-textarea"
+              rows="12"
+              placeholder="주차별 강의 내용을 입력하세요"
+            />
+          </div>
 
-          <label>주별 계획</label>
-          <br />
-          <textarea
-            rows="10"
-            cols="50"
-            name="program"
-            value={formData.program}
-            onChange={handleChange}
-            required
-          />
-          <br />
-
-          <button
-            type="submit"
-            className="submit--button"
-            disabled={submitting}
-          >
-            {submitting ? "제출 중..." : "제출"}
-          </button>
+          <div className="update-syllabus-button-group">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="update-syllabus-cancel-btn"
+              disabled={submitting}
+            >
+              취소
+            </button>
+            <button
+              type="submit"
+              className="update-syllabus-submit-btn"
+              disabled={submitting}
+            >
+              {submitting ? "제출 중..." : "수정 완료"}
+            </button>
+          </div>
         </form>
-      </section>
+      </div>
     </div>
   );
 }

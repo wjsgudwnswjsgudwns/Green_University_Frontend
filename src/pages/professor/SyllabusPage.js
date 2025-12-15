@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import api from "../../api/axiosConfig";
 import "../../styles/subject.css";
 
 export default function SyllabusPage() {
   const { subjectId } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
   const [syllabus, setSyllabus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [canEdit, setCanEdit] = useState(false);
 
   useEffect(() => {
     fetchSyllabus();
@@ -17,12 +22,24 @@ export default function SyllabusPage() {
     try {
       const response = await api.get(`/api/subject/syllabus/${subjectId}`);
       setSyllabus(response.data.syllabus);
+
+      // 교수이고, 본인의 강의인지 확인
+      if (
+        user?.userRole === "professor" &&
+        response.data.syllabus.professorId === user.id
+      ) {
+        setCanEdit(true);
+      }
     } catch (err) {
       console.error("강의계획서 조회 실패:", err);
       setError("강의계획서를 불러오는데 실패했습니다.");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEdit = () => {
+    navigate(`/professor/syllabus/edit/${subjectId}`);
   };
 
   if (loading) {
@@ -50,10 +67,16 @@ export default function SyllabusPage() {
     <div className="syllabus-page">
       <div className="syllabus-header">
         <h1>강의계획서</h1>
-        <button onClick={() => window.print()} className="print-button">
-          <span className="material-symbols-outlined">print</span>
-          인쇄
-        </button>
+        <div style={{ display: "flex", gap: "10px" }}>
+          {canEdit && (
+            <button onClick={handleEdit} className="edit-button">
+              수정하기
+            </button>
+          )}
+          <button onClick={() => window.print()} className="print-button">
+            인쇄
+          </button>
+        </div>
       </div>
 
       <div className="syllabus-content">

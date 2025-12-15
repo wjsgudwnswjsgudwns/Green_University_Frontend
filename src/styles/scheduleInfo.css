@@ -1,0 +1,582 @@
+/* 학사일정 페이지 전용 스타일 - scheduleInfo.css */
+
+.sch-page-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+.sch-container {
+  display: flex;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  background: white;
+  min-height: 100vh;
+}
+
+/* 사이드 메뉴 */
+.sch-side-menu {
+  width: 250px;
+  background: #ffffff;
+  border-right: 1px solid #e0e6ed;
+  padding: 20px 0;
+}
+
+.sch-side-menu-header {
+  padding: 0 20px 20px;
+  border-bottom: 2px solid #216d30;
+}
+
+.sch-side-menu-header h2 {
+  font-size: 24px;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.sch-side-menu-nav {
+  margin-top: 20px;
+}
+
+.sch-menu-item {
+  display: block;
+  padding: 12px 20px;
+  color: #4a5568;
+  text-decoration: none;
+  transition: all 0.2s;
+  border-left: 3px solid transparent;
+}
+
+.sch-menu-item:hover {
+  background: #f8f9fa;
+  color: #216d30;
+}
+
+.sch-menu-item.active {
+  background: #e8f5e9;
+  color: #216d30;
+  border-left-color: #216d30;
+  font-weight: 600;
+}
+
+/* 메인 컨텐츠 */
+.sch-main {
+  flex: 1;
+  padding: 40px;
+  min-width: 800px;
+}
+
+.sch-main h1 {
+  font-size: 28px;
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+.sch-divider {
+  height: 2px;
+  background: linear-gradient(to right, #216d30, transparent);
+  margin-bottom: 30px;
+}
+
+/* 로딩 */
+.sch-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+}
+
+.sch-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e0e6ed;
+  border-top-color: #216d30;
+  border-radius: 50%;
+  animation: sch-spin 0.8s linear infinite;
+}
+
+@keyframes sch-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.sch-loading-container p {
+  margin-top: 20px;
+  color: #666;
+  font-size: 16px;
+}
+
+/* 에러 메시지 */
+.sch-error-message {
+  padding: 12px 16px;
+  background: #fee;
+  border: 1px solid #fcc;
+  border-radius: 6px;
+  color: #c33;
+  margin-bottom: 20px;
+}
+
+.sch-error-container {
+  text-align: center;
+  padding: 40px;
+}
+
+.sch-error-container p {
+  margin-bottom: 20px;
+  color: #666;
+}
+
+/* 학사일정 테이블 */
+.sch-table-container {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.sch-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.sch-month-row {
+  border-top: 2px solid #e0e6ed;
+}
+
+.sch-month-row:first-child {
+  border-top: none;
+}
+
+.sch-month-cell {
+  width: 100px;
+  text-align: center;
+  background: #216d30;
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  padding: 20px 10px;
+  vertical-align: middle;
+  border-right: 2px solid #1a5524;
+}
+
+.sch-date-cell {
+  width: 200px;
+  padding: 16px 20px;
+  text-align: center;
+  background: #f8f9fa;
+  font-weight: 500;
+  color: #2c3e50;
+  border-right: 1px solid #e0e6ed;
+  border-bottom: 1px solid #e0e6ed;
+}
+
+.sch-info-cell {
+  padding: 16px 24px;
+  color: #4a5568;
+  line-height: 1.6;
+  border-bottom: 1px solid #e0e6ed;
+}
+
+.sch-info-cell.clickable {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.sch-info-cell.clickable:hover {
+  background: #f8f9fa;
+  color: #216d30;
+}
+
+/* 데이터 없음 */
+.sch-no-data {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  font-size: 16px;
+}
+
+/* 관리 페이지 */
+.sch-manage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.sch-register-button {
+  padding: 10px 24px;
+  background: #216d30;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sch-register-button:hover {
+  background: #1a5524;
+}
+
+.sch-manage-table-container {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.sch-manage-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.sch-manage-table thead {
+  background: #216d30;
+  color: white;
+}
+
+.sch-manage-table th {
+  padding: 14px 16px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.sch-manage-table tbody tr {
+  border-bottom: 1px solid #e0e6ed;
+  transition: background 0.2s;
+}
+
+.sch-manage-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.sch-manage-table td {
+  padding: 14px 16px;
+  text-align: center;
+  color: #4a5568;
+}
+
+.sch-no-data-cell {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+}
+
+.sch-delete-button-small {
+  padding: 6px 16px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sch-delete-button-small:hover {
+  background: #c82333;
+}
+
+/* 등록/수정 폼 */
+.sch-register-form,
+.sch-form {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.sch-form-group-vertical,
+.sch-form-group {
+  margin-bottom: 24px;
+}
+
+.sch-form-group-vertical label,
+.sch-form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 15px;
+}
+
+.sch-required {
+  color: #dc3545;
+  margin-left: 2px;
+}
+
+.sch-form-group-vertical input,
+.sch-form-group input,
+.sch-form-group textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 15px;
+  transition: border-color 0.2s;
+}
+
+.sch-form-group-vertical input:focus,
+.sch-form-group input:focus,
+.sch-form-group textarea:focus {
+  outline: none;
+  border-color: #216d30;
+  box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
+}
+
+.sch-form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.sch-form-group-vertical input:disabled,
+.sch-form-group input:disabled,
+.sch-form-group textarea:disabled {
+  background: #f3f4f6;
+  cursor: not-allowed;
+}
+
+/* 버튼 그룹 */
+.sch-form-buttons-center,
+.sch-form-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.sch-form-buttons-center {
+  justify-content: center;
+}
+
+.sch-form-buttons {
+  justify-content: flex-end;
+}
+
+.sch-cancel-button-large,
+.sch-cancel-button {
+  padding: 10px 24px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sch-cancel-button-large:hover,
+.sch-cancel-button:hover {
+  background: #5a6268;
+}
+
+.sch-submit-button-large,
+.sch-submit-button {
+  padding: 10px 24px;
+  background: #216d30;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sch-submit-button-large:hover,
+.sch-submit-button:hover {
+  background: #1a5524;
+}
+
+.sch-cancel-button-large:disabled,
+.sch-cancel-button:disabled,
+.sch-submit-button-large:disabled,
+.sch-submit-button:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+}
+
+/* 상세 페이지 */
+.sch-page {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.sch-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.sch-back-button {
+  padding: 8px 20px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sch-back-button:hover {
+  background: #5a6268;
+}
+
+.sch-detail {
+  background: white;
+  border: 1px solid #e0e6ed;
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.sch-detail-row {
+  display: flex;
+  padding: 16px 0;
+  border-bottom: 1px solid #e0e6ed;
+}
+
+.sch-detail-row:last-child {
+  border-bottom: none;
+}
+
+.sch-detail-label {
+  width: 150px;
+  font-weight: 600;
+  color: #2c3e50;
+  flex-shrink: 0;
+}
+
+.sch-detail-value {
+  flex: 1;
+  color: #4a5568;
+  line-height: 1.6;
+}
+
+.sch-detail-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e0e6ed;
+}
+
+.sch-edit-button {
+  padding: 10px 24px;
+  background: #216d30;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sch-edit-button:hover {
+  background: #1a5524;
+}
+
+.sch-delete-button {
+  padding: 10px 24px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sch-delete-button:hover {
+  background: #c82333;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1200px) {
+  .sch-container {
+    flex-direction: column;
+  }
+
+  .sch-side-menu {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e0e6ed;
+  }
+
+  .sch-side-menu-nav {
+    display: flex;
+    overflow-x: auto;
+  }
+
+  .sch-menu-item {
+    flex-shrink: 0;
+    border-left: none;
+    border-bottom: 3px solid transparent;
+  }
+
+  .sch-menu-item.active {
+    border-left: none;
+    border-bottom-color: #216d30;
+  }
+
+  .sch-main {
+    min-width: auto;
+    padding: 30px 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .sch-main {
+    padding: 20px 16px;
+  }
+
+  .sch-main h1 {
+    font-size: 24px;
+  }
+
+  .sch-month-cell {
+    width: 70px;
+    font-size: 16px;
+    padding: 12px 8px;
+  }
+
+  .sch-date-cell {
+    width: 140px;
+    padding: 12px 10px;
+    font-size: 14px;
+  }
+
+  .sch-info-cell {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  .sch-manage-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .sch-detail-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .sch-detail-label {
+    width: 100%;
+  }
+
+  .sch-form-buttons-center,
+  .sch-form-buttons,
+  .sch-detail-buttons {
+    flex-direction: column;
+  }
+}

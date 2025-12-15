@@ -1,0 +1,167 @@
+/* 상담 관리 레이아웃 전용 스타일 - counselingLayout.css */
+
+.counseling-layout {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding: 20px;
+}
+
+/* 사이드 메뉴 */
+.counseling-sidebar {
+  min-width: 240px;
+  max-width: 240px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  height: fit-content;
+  position: sticky;
+  top: 20px;
+  margin-right: 30px;
+}
+
+.sidebar-header {
+  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  color: #ffffff;
+  padding: 24px 20px;
+  text-align: center;
+}
+
+.sidebar-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+/* 사이드바 네비게이션 */
+.sidebar-nav {
+  padding: 12px 0;
+}
+
+.sidebar-menu-item {
+  display: block;
+  width: 100%;
+  padding: 14px 20px;
+  background: transparent;
+  border: none;
+  border-left: 3px solid transparent;
+  color: #2c3e50;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  text-align: left;
+}
+
+.sidebar-menu-item:hover {
+  background-color: #f8f9fa;
+  color: #216d30;
+  border-left-color: #216d30;
+}
+
+.sidebar-menu-item.active {
+  background-color: rgba(33, 109, 48, 0.1);
+  color: #216d30;
+  border-left-color: #216d30;
+  font-weight: 600;
+}
+
+/* 메인 콘텐츠 */
+.counseling-main {
+  flex: 1;
+  max-width: 1200px;
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  min-height: 600px;
+}
+
+/* 페이지 컨테이너 */
+.counseling-main .pc-page-container {
+  padding: 40px;
+  max-width: 100%;
+  margin: 0;
+  background: transparent;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .counseling-layout {
+    flex-direction: column;
+    padding: 15px;
+  }
+
+  .counseling-sidebar {
+    position: static;
+    width: 100%;
+    max-width: 100%;
+    min-width: auto;
+    margin-right: 0;
+    margin-bottom: 20px;
+  }
+
+  .counseling-main {
+    max-width: 100%;
+  }
+
+  .counseling-main .pc-page-container {
+    padding: 30px 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .counseling-layout {
+    padding: 10px;
+  }
+
+  .counseling-sidebar {
+    margin-bottom: 15px;
+  }
+
+  .sidebar-header {
+    padding: 20px 15px;
+  }
+
+  .sidebar-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .sidebar-menu-item {
+    padding: 12px 20px;
+    font-size: 0.9rem;
+  }
+
+  .counseling-main .pc-page-container {
+    padding: 20px 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .counseling-layout {
+    padding: 5px;
+  }
+
+  .counseling-sidebar {
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+
+  .sidebar-header {
+    padding: 18px 15px;
+  }
+
+  .sidebar-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .sidebar-menu-item {
+    padding: 10px 15px;
+    font-size: 0.85rem;
+  }
+}

@@ -155,12 +155,7 @@ export default function StaffStudentDetailPage() {
         </div>
       </div>
 
-      {error && (
-        <div className="ssd-error-message">
-          <span className="material-symbols-outlined">error</span>
-          {error}
-        </div>
-      )}
+      {error && <div className="ssd-error-message">{error}</div>}
 
       {/* Student Info Summary */}
       <div className="ssd-summary-section">

@@ -49,14 +49,14 @@ export default function Header() {
           { label: "성적", path: "/grade/thisSemester" },
           { label: "챗봇", path: "/chatbot" },
           { label: "학사정보", path: "/board/notice" },
-          { label: "상담", path: "/student/counseling/list" },
+          { label: "상담", path: "/student/counseling" },
         ];
         break;
       case "professor":
         menuItems = [
           { label: "수업", path: "/subject/list/:page" },
           { label: "학사정보", path: "/board/notice" },
-          { label: "상담", path: "/aiprofessor/counseling" },
+          { label: "상담", path: "/aiprofessor/counseling/risk" },
         ];
         break;
       case "staff":
@@ -65,7 +65,7 @@ export default function Header() {
           { label: "학사관리", path: "/staff/student-list/" },
           { label: "등록", path: "/staff/admin/college" },
           { label: "학사정보", path: "/board/notice" },
-          { label: "상담", path: "/staff/students/all" },
+          { label: "상담", path: "/staff/students/all/risk" },
         ];
         break;
     }
