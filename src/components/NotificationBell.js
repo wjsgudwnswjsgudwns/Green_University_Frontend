@@ -33,11 +33,82 @@ export default function NotificationBell() {
     }
   };
 
-  // 컴포넌트 마운트 시 및 주기적으로 알림 조회
+  // 컴포넌트 마운트 시 및 주기적으로 알림 조회 (페이지 포커스 시에만)
   useEffect(() => {
+    // 초기 로드 시 한 번 조회
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 30000); // 30초마다 갱신
-    return () => clearInterval(interval);
+
+    let interval = null;
+
+    // 페이지 포커스 상태 확인 함수
+    const isPageFocused = () => {
+      return document.hasFocus() && !document.hidden;
+    };
+
+    // 폴링 시작/중지 함수
+    const startPolling = () => {
+      if (!interval && isPageFocused()) {
+        interval = setInterval(() => {
+          // 폴링 전에 다시 포커스 확인
+          if (isPageFocused()) {
+            fetchNotifications();
+          } else {
+            // 포커스가 없으면 interval 정리
+            if (interval) {
+              clearInterval(interval);
+              interval = null;
+            }
+          }
+        }, 30000); // 30초마다 갱신
+      }
+    };
+
+    const stopPolling = () => {
+      if (interval) {
+        clearInterval(interval);
+        interval = null;
+      }
+    };
+
+    // 페이지 포커스/블러 핸들러
+    const handleFocus = () => {
+      if (isPageFocused()) {
+        fetchNotifications(); // 포커스 시 즉시 조회
+        startPolling();
+      }
+    };
+
+    const handleBlur = () => {
+      stopPolling();
+    };
+
+    // 페이지 가시성 변경 핸들러
+    const handleVisibilityChange = () => {
+      if (isPageFocused()) {
+        fetchNotifications();
+        startPolling();
+      } else {
+        stopPolling();
+      }
+    };
+
+    // 초기 상태 확인
+    if (isPageFocused()) {
+      startPolling();
+    }
+
+    // 이벤트 리스너 등록
+    window.addEventListener("focus", handleFocus);
+    window.addEventListener("blur", handleBlur);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    // cleanup
+    return () => {
+      stopPolling();
+      window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("blur", handleBlur);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, []);
 
   // 외부 클릭 시 알림 목록 닫기
