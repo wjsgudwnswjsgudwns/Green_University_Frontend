@@ -612,3 +612,26 @@
     padding: 10px 8px;
   }
 }
+
+/* subject.css에 추가 */
+.edit-button {
+  padding: 10px 20px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.edit-button:hover {
+  background-color: #218838;
+}
+
+.syllabus-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}

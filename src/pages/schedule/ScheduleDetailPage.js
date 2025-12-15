@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams, Link, useLocation } from "react-router-dom"; // Link, useLocation 추가
+import { useNavigate, useParams, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../api/axiosConfig";
-import "../../styles/schedule.css";
-// ScheduleDetailPage.css 파일이 있다면 import 해주세요. (여기서는 schedule.css만 가정)
+import "../../styles/scheduleInfo.css";
 
 export default function ScheduleDetailPage() {
   const { user } = useAuth();
   const { id } = useParams();
   const navigate = useNavigate();
-  const location = useLocation(); // 현재 경로를 가져오기 위해 useLocation 훅 추가
+  const location = useLocation();
 
   const [schedule, setSchedule] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -117,26 +116,21 @@ export default function ScheduleDetailPage() {
     }
   };
 
-  // 현재 경로에 따라 'active' 클래스를 적용하는 함수
-  // '/schedule/:id' 경로는 상세 페이지이므로, '/schedule' 메뉴를 활성화합니다.
   const getMenuItemClass = (path) => {
-    // '/schedule/:id'도 '/schedule' 메뉴를 활성화하도록 처리
     if (path === "/schedule" && location.pathname.startsWith("/schedule/")) {
-      return "menu-item active";
+      return "sch-menu-item active";
     }
-    return `menu-item${location.pathname === path ? " active" : ""}`;
+    return `sch-menu-item${location.pathname === path ? " active" : ""}`;
   };
 
   if (loading) {
     return (
-      <div className="schedule-container">
-        {" "}
-        {/* 전체 레이아웃을 위해 schedule-container 추가 */}
-        <aside className="side-menu">
-          <div className="side-menu-header">
+      <div className="sch-container">
+        <aside className="sch-side-menu">
+          <div className="sch-side-menu-header">
             <h2>학사정보</h2>
           </div>
-          <nav className="side-menu-nav">
+          <nav className="sch-side-menu-nav">
             <Link
               to="/board/notice"
               className={getMenuItemClass("/board/notice")}
@@ -156,9 +150,9 @@ export default function ScheduleDetailPage() {
             )}
           </nav>
         </aside>
-        <main className="schedule-main">
-          <div className="loading-container">
-            <div className="spinner"></div>
+        <main className="sch-main">
+          <div className="sch-loading-container">
+            <div className="sch-spinner"></div>
             <p>로딩 중...</p>
           </div>
         </main>
@@ -168,12 +162,12 @@ export default function ScheduleDetailPage() {
 
   if (!schedule) {
     return (
-      <div className="schedule-container">
-        <aside className="side-menu">
-          <div className="side-menu-header">
+      <div className="sch-container">
+        <aside className="sch-side-menu">
+          <div className="sch-side-menu-header">
             <h2>학사정보</h2>
           </div>
-          <nav className="side-menu-nav">
+          <nav className="sch-side-menu-nav">
             <Link
               to="/board/notice"
               className={getMenuItemClass("/board/notice")}
@@ -193,8 +187,8 @@ export default function ScheduleDetailPage() {
             )}
           </nav>
         </aside>
-        <main className="schedule-main">
-          <div className="error-container">
+        <main className="sch-main">
+          <div className="sch-error-container">
             <p>학사일정을 찾을 수 없습니다.</p>
             <button onClick={() => navigate("/schedule")}>목록으로</button>
           </div>
@@ -204,12 +198,12 @@ export default function ScheduleDetailPage() {
   }
 
   return (
-    <div className="schedule-container">
-      <aside className="side-menu">
-        <div className="side-menu-header">
+    <div className="sch-container">
+      <aside className="sch-side-menu">
+        <div className="sch-side-menu-header">
           <h2>학사정보</h2>
         </div>
-        <nav className="side-menu-nav">
+        <nav className="sch-side-menu-nav">
           <Link
             to="/board/notice"
             className={getMenuItemClass("/board/notice")}
@@ -230,27 +224,27 @@ export default function ScheduleDetailPage() {
         </nav>
       </aside>
 
-      <main className="schedule-main">
-        <div className="schedule-page">
-          <div className="schedule-header">
+      <main className="sch-main">
+        <div className="sch-page">
+          <div className="sch-header">
             <h1>학사일정 상세</h1>
             <button
-              className="back-button"
+              className="sch-back-button"
               onClick={() => navigate("/schedule")}
             >
               목록으로
             </button>
           </div>
 
-          <div className="divider"></div>
+          <div className="sch-divider"></div>
 
-          {error && <div className="error-message">{error}</div>}
+          {error && <div className="sch-error-message">{error}</div>}
 
           {isEditing ? (
-            <form onSubmit={handleUpdate} className="schedule-form">
-              <div className="form-group">
+            <form onSubmit={handleUpdate} className="sch-form">
+              <div className="sch-form-group">
                 <label htmlFor="startDay">
-                  시작 날짜 <span className="required">*</span>
+                  시작 날짜 <span className="sch-required">*</span>
                 </label>
                 <input
                   type="date"
@@ -263,9 +257,9 @@ export default function ScheduleDetailPage() {
                 />
               </div>
 
-              <div className="form-group">
+              <div className="sch-form-group">
                 <label htmlFor="endDay">
-                  종료 날짜 <span className="required">*</span>
+                  종료 날짜 <span className="sch-required">*</span>
                 </label>
                 <input
                   type="date"
@@ -278,9 +272,9 @@ export default function ScheduleDetailPage() {
                 />
               </div>
 
-              <div className="form-group">
+              <div className="sch-form-group">
                 <label htmlFor="information">
-                  일정 내용 <span className="required">*</span>
+                  일정 내용 <span className="sch-required">*</span>
                 </label>
                 <textarea
                   id="information"
@@ -293,10 +287,10 @@ export default function ScheduleDetailPage() {
                 />
               </div>
 
-              <div className="form-buttons">
+              <div className="sch-form-buttons">
                 <button
                   type="button"
-                  className="cancel-button"
+                  className="sch-cancel-button"
                   onClick={handleCancelEdit}
                   disabled={isSubmitting}
                 >
@@ -304,7 +298,7 @@ export default function ScheduleDetailPage() {
                 </button>
                 <button
                   type="submit"
-                  className="submit-button"
+                  className="sch-submit-button"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? "수정 중..." : "수정"}
@@ -312,25 +306,25 @@ export default function ScheduleDetailPage() {
               </div>
             </form>
           ) : (
-            <div className="schedule-detail">
-              <div className="detail-row">
-                <div className="detail-label">기간</div>
-                <div className="detail-value">
+            <div className="sch-detail">
+              <div className="sch-detail-row">
+                <div className="sch-detail-label">기간</div>
+                <div className="sch-detail-value">
                   {schedule.startDay} ~ {schedule.endDay}
                 </div>
               </div>
 
-              <div className="detail-row">
-                <div className="detail-label">일정 내용</div>
-                <div className="detail-value">{schedule.information}</div>
+              <div className="sch-detail-row">
+                <div className="sch-detail-label">일정 내용</div>
+                <div className="sch-detail-value">{schedule.information}</div>
               </div>
 
               {user?.userRole === "staff" && (
-                <div className="detail-buttons">
-                  <button className="edit-button" onClick={handleEdit}>
+                <div className="sch-detail-buttons">
+                  <button className="sch-edit-button" onClick={handleEdit}>
                     수정
                   </button>
-                  <button className="delete-button" onClick={handleDelete}>
+                  <button className="sch-delete-button" onClick={handleDelete}>
                     삭제
                   </button>
                 </div>

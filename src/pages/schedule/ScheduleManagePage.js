@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../api/axiosConfig";
-import "../../styles/schedule.css";
+import "../../styles/scheduleInfo.css";
 
 export default function ScheduleManagePage() {
   const { user } = useAuth();
@@ -49,9 +49,9 @@ export default function ScheduleManagePage() {
 
   if (loading) {
     return (
-      <div className="page-container">
-        <div className="loading-container">
-          <div className="spinner"></div>
+      <div className="sch-page-container">
+        <div className="sch-loading-container">
+          <div className="sch-spinner"></div>
           <p>로딩 중...</p>
         </div>
       </div>
@@ -59,41 +59,41 @@ export default function ScheduleManagePage() {
   }
 
   return (
-    <div className="schedule-container">
-      <aside className="side-menu">
-        <div className="side-menu-header">
+    <div className="sch-container">
+      <aside className="sch-side-menu">
+        <div className="sch-side-menu-header">
           <h2>학사정보</h2>
         </div>
-        <nav className="side-menu-nav">
-          <Link to="/board/notice" className="menu-item">
+        <nav className="sch-side-menu-nav">
+          <Link to="/board/notice" className="sch-menu-item">
             공지사항
           </Link>
-          <Link to="/schedule" className="menu-item">
+          <Link to="/schedule" className="sch-menu-item">
             학사일정
           </Link>
-          <Link to="/schedule/manage" className="menu-item active">
+          <Link to="/schedule/manage" className="sch-menu-item active">
             학사일정 등록
           </Link>
         </nav>
       </aside>
 
-      <main className="schedule-main">
-        <div className="manage-header">
+      <main className="sch-main">
+        <div className="sch-manage-header">
           <h1>학사일정 등록</h1>
           <button
-            className="register-button"
+            className="sch-register-button"
             onClick={() => navigate("/schedule/register")}
           >
             등록
           </button>
         </div>
 
-        <div className="divider"></div>
+        <div className="sch-divider"></div>
 
-        {error && <div className="error-message">{error}</div>}
+        {error && <div className="sch-error-message">{error}</div>}
 
-        <div className="manage-table-container">
-          <table className="manage-table">
+        <div className="sch-manage-table-container">
+          <table className="sch-manage-table">
             <thead>
               <tr>
                 <th>ID</th>
@@ -114,7 +114,7 @@ export default function ScheduleManagePage() {
                     <td>{schedule.information}</td>
                     <td>
                       <button
-                        className="delete-button-small"
+                        className="sch-delete-button-small"
                         onClick={() => handleDelete(schedule.id)}
                       >
                         삭제
@@ -124,7 +124,7 @@ export default function ScheduleManagePage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="4" className="no-data-cell">
+                  <td colSpan="4" className="sch-no-data-cell">
                     등록된 학사일정이 없습니다.
                   </td>
                 </tr>
