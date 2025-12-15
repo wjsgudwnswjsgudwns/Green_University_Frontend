@@ -32,6 +32,16 @@ export default function MeetingChatPanel({ meetingId, joinInfo, terminated }) {
         setIsAtBottom(v);
     }, []);
 
+    const myUserId = joinInfo?.userId ?? null;
+
+    function formatTime(ts) {
+        if (!ts) return "";
+        return new Date(ts).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+        });
+    }
+
     // ====== 초기 DB 히스토리 로딩 (최근 N개) ======
     useEffect(() => {
         if (!meetingId) return;
@@ -205,14 +215,17 @@ export default function MeetingChatPanel({ meetingId, joinInfo, terminated }) {
                 client.subscribe(`/sub/meetings/${meetingId}/chat`, (frame) => {
                     console.log("[Chat] incoming:", frame.body);
                     try {
-                        const body = JSON.parse(frame.body);
+                        const raw = JSON.parse(frame.body);
 
-                        // 공통: 전체 메시지에는 추가
-                        setChatMessages((prev) => [...prev, body]);
+                        const msg = {
+                            type: raw.type || "CHAT",
+                            ...raw,
+                        };
 
-                        // 내가 아래에 "없을 때"만 새 메시지 미리보기로 쌓기
+                        setChatMessages((prev) => [...prev, msg]);
+
                         if (!isAtBottomRef.current) {
-                            setPendingMessages((prev) => [...prev, body]);
+                            setPendingMessages((prev) => [...prev, msg]);
                         }
                     } catch (e) {
                         console.error("채팅 메시지 파싱 실패", e);
@@ -266,7 +279,6 @@ export default function MeetingChatPanel({ meetingId, joinInfo, terminated }) {
             meetingId: Number(meetingId),
             userId: joinInfo?.userId,
             displayName,
-            type: "CHAT",
             message: text,
         };
 
@@ -316,31 +328,67 @@ export default function MeetingChatPanel({ meetingId, joinInfo, terminated }) {
                                 이전 채팅 불러오는 중...
                             </div>
                         )}
-                        {chatMessages.map((m, idx) => (
-                            <div
-                                key={m.messageId ?? idx}
-                                className="meeting-side__chat-message"
-                            >
-                                <div className="meeting-side__chat-meta">
-                                    <span className="meeting-side__chat-name">
-                                        {m.displayName || "참가자"}
-                                    </span>
-                                    {m.sentAt && (
-                                        <span className="meeting-side__chat-time">
-                                            {new Date(
-                                                m.sentAt
-                                            ).toLocaleTimeString([], {
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                            })}
+                        {chatMessages.map((m, idx) => {
+                            const key = m.messageId ?? idx;
+
+                            const isSystem = m.type === "SYSTEM";
+                            const isMine =
+                                !isSystem &&
+                                myUserId != null &&
+                                m.userId != null &&
+                                Number(m.userId) === Number(myUserId);
+
+                            // 1) 시스템 메시지
+                            if (isSystem) {
+                                return (
+                                    <div
+                                        key={key}
+                                        className="chat-msg chat-msg--system"
+                                    >
+                                        <span className="chat-msg__system-text">
+                                            {m.message}
                                         </span>
-                                    )}
+                                    </div>
+                                );
+                            }
+
+                            // 2) 내 메시지 (오른쪽)
+                            if (isMine) {
+                                return (
+                                    <div
+                                        key={key}
+                                        className="chat-msg chat-msg--mine"
+                                    >
+                                        <div className="chat-msg__bubble chat-msg__bubble--mine">
+                                            {m.message}
+                                        </div>
+                                        <div className="chat-msg__time chat-msg__time--mine">
+                                            {formatTime(m.sentAt)}
+                                        </div>
+                                    </div>
+                                );
+                            }
+
+                            // 3) 상대 메시지 (왼쪽)
+                            return (
+                                <div
+                                    key={key}
+                                    className="chat-msg chat-msg--other"
+                                >
+                                    <div className="chat-msg__meta">
+                                        <span className="chat-msg__name">
+                                            {m.displayName || "참가자"}
+                                        </span>
+                                        <span className="chat-msg__time">
+                                            {formatTime(m.sentAt)}
+                                        </span>
+                                    </div>
+                                    <div className="chat-msg__bubble chat-msg__bubble--other">
+                                        {m.message}
+                                    </div>
                                 </div>
-                                <div className="meeting-side__chat-text">
-                                    {m.message}
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </>
                 )}
             </div>
