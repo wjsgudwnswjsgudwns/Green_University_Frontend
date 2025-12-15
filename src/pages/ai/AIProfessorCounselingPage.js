@@ -74,8 +74,9 @@ export default function AIProfessorCounselingPage() {
     try {
       setLoadingStudents((prev) => ({ ...prev, [subjectId]: true }));
 
+      // 실제 수강신청한 학생만 조회 (stu_sub_tb 기준)
       const studentsResponse = await api.get(
-        `/api/professor/subject/${subjectId}`
+        `/api/professor/subject/${subjectId}/enrolled`
       );
 
       if (!studentsResponse.data) {
@@ -88,14 +89,14 @@ export default function AIProfessorCounselingPage() {
 
       if (students.length === 0) return;
 
-      // ✅ 수정: 학생의 전체 분석 결과를 가져온 후 해당 과목만 필터링
+      // 학생의 전체 분석 결과를 가져온 후 해당 과목만 필터링
       const analysisPromises = students.map(async (student) => {
         const sid = student?.studentId ?? student?.id;
         if (!sid) {
           return { sid: null, subjectId, data: null };
         }
         try {
-          // ✅ 학생의 모든 과목 분석 조회
+          // 학생의 모든 과목 분석 조회 (DB에 저장된 결과)
           const analysisResponse = await api.get(
             `/api/ai-analysis/student/${sid}`
           );
@@ -132,8 +133,74 @@ export default function AIProfessorCounselingPage() {
       setStudentAnalysis((prev) => ({ ...prev, ...newAnalysisMap }));
     } catch (err) {
       console.error("학생 목록 조회 실패:", err);
+      // 새 엔드포인트가 없으면 기존 방식 fallback
+      if (err.response?.status === 404) {
+        console.warn("enrolled 엔드포인트 없음. 기존 방식 사용");
+        await fetchSubjectStudentsLegacy(subjectId);
+      }
     } finally {
       setLoadingStudents((prev) => ({ ...prev, [subjectId]: false }));
+    }
+  };
+
+  // 기존 방식 (fallback용)
+  const fetchSubjectStudentsLegacy = async (subjectId) => {
+    try {
+      const studentsResponse = await api.get(
+        `/api/professor/subject/${subjectId}`
+      );
+
+      if (!studentsResponse.data) {
+        setSubjectStudents((prev) => ({ ...prev, [subjectId]: [] }));
+        return;
+      }
+
+      const students = studentsResponse.data.studentList || [];
+      setSubjectStudents((prev) => ({ ...prev, [subjectId]: students }));
+
+      if (students.length === 0) return;
+
+      const analysisPromises = students.map(async (student) => {
+        const sid = student?.studentId ?? student?.id;
+        if (!sid) {
+          return { sid: null, subjectId, data: null };
+        }
+        try {
+          const analysisResponse = await api.get(
+            `/api/ai-analysis/student/${sid}`
+          );
+
+          if (analysisResponse.data?.code === 1) {
+            const allResults = analysisResponse.data.data || [];
+            const subjectAnalysis = allResults.find(
+              (result) => result.subjectId === subjectId
+            );
+            return { sid, subjectId, data: subjectAnalysis || null };
+          } else {
+            return { sid, subjectId, data: null };
+          }
+        } catch (err) {
+          console.error(
+            `분석 조회 실패 studentId=${sid} subjectId=${subjectId}`,
+            err
+          );
+          return { sid, subjectId, data: null };
+        }
+      });
+
+      const analysisResults = await Promise.all(analysisPromises);
+
+      const newAnalysisMap = {};
+      analysisResults.forEach((res) => {
+        if (res && res.sid) {
+          const key = `${res.sid}-${res.subjectId}`;
+          newAnalysisMap[key] = res.data;
+        }
+      });
+
+      setStudentAnalysis((prev) => ({ ...prev, ...newAnalysisMap }));
+    } catch (err) {
+      console.error("학생 목록 조회 실패 (legacy):", err);
     }
   };
 
@@ -290,9 +357,9 @@ export default function AIProfessorCounselingPage() {
                     <div className="pc-subject-info">
                       <h3>{subject.name}</h3>
                       <span className="pc-subject-details">
-                        {subject.subYear}학년 {subject.semester}학기 |
+                        {subject.subYear}학년 {subject.semester}학기 |{" "}
                         {subject.subDay} {subject.startTime}교시 -{" "}
-                        {subject.endTime}교시 |
+                        {subject.endTime}교시 |{" "}
                         {subject.room?.name || "강의실 미정"} | 수강인원:{" "}
                         {subject.numOfStudent || 0}/{subject.capacity}
                       </span>
