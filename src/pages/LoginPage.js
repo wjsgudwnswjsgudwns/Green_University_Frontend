@@ -151,14 +151,15 @@ export default function LoginPage() {
                 <span className="material-symbols-outlined">person</span>
               </label>
               <input
-                type="number"
+                type="text"
                 id="id"
                 placeholder="아이디를 입력하세요"
                 value={id}
                 onChange={(e) => setId(e.target.value)}
                 disabled={isLoading}
                 required
-                max={2147483647}
+                inputMode="numeric"
+                pattern="[0-9]*"
               />
             </div>
 
