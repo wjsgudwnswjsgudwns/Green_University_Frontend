@@ -1,0 +1,135 @@
+/* AI 교수 상담 페이지 추가 스타일 - AIProfessorCounseling.css */
+
+/* 학생 행 확장 관련 */
+.apc-student-row {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.apc-student-row:hover {
+  background: #f0f7f0 !important;
+}
+
+.apc-student-row.apc-expanded {
+  background: #e8f5e9 !important;
+  font-weight: 600;
+}
+
+/* 확장된 상세 정보 */
+.expanded-details {
+  background: #f8f9fa !important;
+}
+
+.expanded-details td {
+  padding: 0 !important;
+  border-bottom: 2px solid #e0e6ed !important;
+}
+
+.subject-details-container {
+  padding: 24px;
+}
+
+.subject-details-container h3 {
+  font-size: 18px;
+  color: #2c3e50;
+  margin: 0 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e0b960;
+}
+
+/* 과목 상세 테이블 */
+.subject-details-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.subject-details-table thead {
+  background: #f8f9fa;
+}
+
+.subject-details-table th {
+  padding: 12px 10px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 13px;
+  color: #2c3e50;
+  border-bottom: 2px solid #e0e6ed;
+}
+
+.subject-details-table td {
+  padding: 12px 10px;
+  text-align: center;
+  font-size: 14px;
+  border-bottom: 1px solid #e0e6ed;
+}
+
+.subject-row {
+  transition: background 0.2s;
+}
+
+.subject-row:hover {
+  background: #f8f9fa;
+}
+
+.subject-name {
+  font-weight: 500;
+  color: #216d30;
+  text-align: left !important;
+}
+
+/* AI 분석 상세 */
+.ai-detail-row {
+  background: #fffbf0 !important;
+}
+
+.ai-analysis-detail {
+  padding: 16px;
+  background: white;
+  border: 1px solid #e0b960;
+  border-radius: 6px;
+  margin: 8px;
+}
+
+.ai-analysis-detail h5 {
+  font-size: 14px;
+  color: #2c3e50;
+  margin: 0 0 8px 0;
+  font-weight: 600;
+}
+
+.ai-analysis-detail p {
+  font-size: 14px;
+  color: #4a5568;
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.analyzed-date {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e0e6ed;
+  font-size: 12px;
+  color: #6c757d;
+  text-align: right;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .subject-details-container {
+    padding: 16px;
+  }
+
+  .subject-details-table {
+    font-size: 12px;
+  }
+
+  .subject-details-table th,
+  .subject-details-table td {
+    padding: 8px 6px;
+  }
+}

@@ -80,139 +80,142 @@ export default function NoticeListPage() {
   };
 
   return (
-    <div
-      className="d-flex justify-content-center align-items-start"
-      style={{ minWidth: "100em" }}
-    >
-      {/* 사이드 메뉴 */}
-      <div className="sub--menu">
-        <div className="sub--menu--top">
-          <h2>학사정보</h2>
-        </div>
-        <div className="sub--menu--mid">
-          <table className="sub--menu--table">
-            <tbody>
-              <tr>
-                <td>
-                  <a href="/board/notice" className="selected--menu">
-                    공지사항
-                  </a>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <a href="/schedule">학사일정</a>
-                </td>
-              </tr>
-              {user?.userRole === "staff" && (
+    <div className="notice-page-wrapper">
+      <div className="notice-container">
+        {/* 사이드 메뉴 */}
+        <div className="notice-sidebar">
+          <div className="notice-sidebar-header">
+            <h2>학사정보</h2>
+          </div>
+          <div className="notice-sidebar-nav">
+            <table className="notice-menu-table">
+              <tbody>
                 <tr>
                   <td>
-                    <a href="/schedule/list">학사일정 등록</a>
+                    <a
+                      href="/board/notice"
+                      className="notice-menu-link notice-menu-active"
+                    >
+                      공지사항
+                    </a>
                   </td>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* 메인 컨텐츠 */}
-      <main>
-        <h1>공지사항</h1>
-        <div className="split--div"></div>
-
-        {/* 검색 폼 */}
-        <form onSubmit={handleSearch} className="form--container">
-          <select
-            className="input--box"
-            value={searchType}
-            onChange={(e) => setSearchType(e.target.value)}
-          >
-            <option value="title">제목</option>
-            <option value="keyword">제목+내용</option>
-          </select>
-          <input
-            type="text"
-            className="input--box"
-            placeholder="검색어를 입력하세요"
-            value={searchKeyword}
-            onChange={(e) => setSearchKeyword(e.target.value)}
-          />
-          <button type="submit" className="button">
-            검색
-          </button>
-        </form>
-
-        {/* 공지사항 테이블 */}
-        {loading ? (
-          <p className="no--list--p">로딩 중...</p>
-        ) : noticeList.length > 0 ? (
-          <table className="table">
-            <thead>
-              <tr className="first--tr">
-                <td>번호</td>
-                <td>말머리</td>
-                <td>제목</td>
-                <td>작성일</td>
-                <td>조회수</td>
-              </tr>
-            </thead>
-            <tbody>
-              {noticeList.map((notice) => (
-                <tr
-                  key={notice.id}
-                  className="second--tr"
-                  onClick={() => navigate(`/board/notice/${notice.id}`)}
-                  style={{ cursor: "pointer" }}
-                >
-                  <td>{notice.id}</td>
-                  <td>{notice.category}</td>
-                  <td>{notice.title}</td>
-                  <td>{formatDate(notice.createdTime)}</td>
-                  <td>{notice.views}</td>
+                <tr>
+                  <td>
+                    <a href="/schedule" className="notice-menu-link">
+                      학사일정
+                    </a>
+                  </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p className="no--list--p">
-            {activeKeyword
-              ? "해당 키워드로 작성된 공지글이 없습니다."
-              : "공지사항이 없습니다."}
-          </p>
-        )}
+                {user?.userRole === "staff" && (
+                  <tr>
+                    <td>
+                      <a href="/schedule/list" className="notice-menu-link">
+                        학사일정 등록
+                      </a>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-        {/* 페이징 */}
-        <div className="paging--container">
-          {Array.from({ length: totalPages }, (_, i) => (
-            <React.Fragment key={i}>
+        {/* 메인 컨텐츠 */}
+        <div className="notice-main">
+          <h1 className="notice-title">공지사항</h1>
+          <div className="notice-divider"></div>
+
+          {/* 검색 폼 */}
+          <form onSubmit={handleSearch} className="notice-search-form">
+            <select
+              className="notice-select"
+              value={searchType}
+              onChange={(e) => setSearchType(e.target.value)}
+            >
+              <option value="title">제목</option>
+              <option value="keyword">제목+내용</option>
+            </select>
+            <input
+              type="text"
+              className="notice-input"
+              placeholder="검색어를 입력하세요"
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+            />
+            <button type="submit" className="notice-btn">
+              검색
+            </button>
+          </form>
+
+          {/* 공지사항 테이블 */}
+          {loading ? (
+            <p className="notice-empty">로딩 중...</p>
+          ) : noticeList.length > 0 ? (
+            <div className="notice-table-container">
+              <table className="notice-table">
+                <thead>
+                  <tr>
+                    <th>번호</th>
+                    <th>말머리</th>
+                    <th>제목</th>
+                    <th>작성일</th>
+                    <th>조회수</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {noticeList.map((notice) => (
+                    <tr
+                      key={notice.id}
+                      onClick={() => navigate(`/board/notice/${notice.id}`)}
+                    >
+                      <td>{notice.id}</td>
+                      <td>{notice.category}</td>
+                      <td>{notice.title}</td>
+                      <td>{formatDate(notice.createdTime)}</td>
+                      <td>{notice.views}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="notice-empty">
+              {activeKeyword
+                ? "해당 키워드로 작성된 공지글이 없습니다."
+                : "공지사항이 없습니다."}
+            </p>
+          )}
+
+          {/* 페이징 */}
+          <div className="notice-pagination">
+            {Array.from({ length: totalPages }, (_, i) => (
               <a
+                key={i}
                 href="#"
                 onClick={(e) => {
                   e.preventDefault();
                   handlePageChange(i);
                 }}
-                style={{
-                  fontWeight: currentPage === i ? "bold" : "normal",
-                  color: currentPage === i ? "#007bff" : "#000",
-                }}
+                className={`notice-page-link ${
+                  currentPage === i ? "active" : ""
+                }`}
               >
                 {i + 1}
               </a>
-              &nbsp;&nbsp;
-            </React.Fragment>
-          ))}
-          {user?.userRole === "staff" && (
-            <button
-              className="button"
-              onClick={() => navigate("/board/notice/write")}
-              style={{ marginLeft: "20px" }}
-            >
-              등록
-            </button>
-          )}
+            ))}
+            {user?.userRole === "staff" && (
+              <button
+                className="notice-btn"
+                onClick={() => navigate("/board/notice/write")}
+                style={{ marginLeft: "20px" }}
+              >
+                등록
+              </button>
+            )}
+          </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

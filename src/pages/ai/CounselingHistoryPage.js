@@ -132,7 +132,6 @@ export default function CounselingHistoryPage() {
 
         {counselings.length === 0 ? (
           <div className="ch-empty-state">
-            <span className="material-symbols-outlined">description</span>
             <p>상담 이력이 없습니다.</p>
           </div>
         ) : (

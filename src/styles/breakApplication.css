@@ -1,66 +1,68 @@
-/* BreakApplication 전용 스타일 - 접두사: break- */
+/* 휴학 신청 페이지 전용 스타일 - breakApplication.css */
 
+/* 휴학 신청서 컨테이너 */
 .break-document-container {
-  background: #ffffff;
-  padding: 30px;
+  background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
 }
 
 .break-document-layout {
-  max-width: 900px;
-  margin: 0 auto;
+  margin-bottom: 30px;
 }
 
 .break-document-layout h3 {
-  text-align: center;
-  font-size: 1.8rem;
-  font-weight: 700;
+  font-size: 24px;
   color: #2c3e50;
+  text-align: center;
   margin-bottom: 30px;
-  padding-bottom: 16px;
-  border-bottom: 3px solid #216d30;
+  font-weight: 700;
 }
 
+/* 휴학 신청서 테이블 */
 .break-document-table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 30px;
-  border: 2px solid #2c3e50;
+  background: white;
+}
+
+.break-document-table th,
+.break-document-table td {
+  padding: 14px 16px;
+  border: 1px solid #d1d5db;
+  vertical-align: middle;
 }
 
 .break-document-table th {
   background-color: #f8f9fa;
-  padding: 14px 16px;
-  text-align: center;
   font-weight: 600;
   color: #2c3e50;
-  border: 1px solid #2c3e50;
-  font-size: 0.95rem;
+  text-align: center;
+  width: 150px;
 }
 
 .break-document-table td {
-  padding: 14px 16px;
-  color: #5a6c7d;
-  border: 1px solid #2c3e50;
-  font-size: 0.95rem;
-  text-align: center;
+  color: #4a5568;
 }
 
 .break-document-table select {
-  padding: 6px 10px;
-  border: 1px solid #e0e6ed;
-  border-radius: 4px;
-  font-size: 0.9rem;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 15px;
   color: #2c3e50;
   background-color: #ffffff;
-  cursor: pointer;
+  transition: all 0.2s;
   margin: 0 4px;
 }
 
 .break-document-table select:focus {
   outline: none;
   border-color: #216d30;
+  box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
 }
 
 .break-document-table input[type="radio"] {
@@ -70,42 +72,17 @@
 
 .break-document-table label {
   cursor: pointer;
-  display: inline-flex;
-  align-items: center;
+  color: #4a5568;
+  font-weight: 500;
 }
 
 .break-document-table p {
   margin: 8px 0;
+  color: #4a5568;
   line-height: 1.6;
-  text-align: left;
 }
 
-.break-submit-button {
-  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  padding: 14px 40px;
-  font-size: 1.05rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(33, 109, 48, 0.3);
-  display: block;
-  margin: 30px auto 0;
-}
-
-.break-submit-button:hover {
-  background: linear-gradient(135deg, #1a5524 0%, #0e2b14 100%);
-  box-shadow: 0 6px 16px rgba(33, 109, 48, 0.4);
-  transform: translateY(-2px);
-}
-
-.break-submit-button:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(33, 109, 48, 0.3);
-}
-
+/* 버튼 컨테이너 */
 .break-button-container {
   display: flex;
   justify-content: center;
@@ -114,37 +91,54 @@
 
 .break-button-group {
   display: flex;
-  gap: 16px;
+  gap: 10px;
 }
 
-/* 반응형 디자인 */
+/* 제출 버튼 */
+.break-submit-button {
+  padding: 12px 32px;
+  background-color: #216d30;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.break-submit-button:hover {
+  background-color: #1a5524;
+}
+
+.break-submit-button:disabled {
+  background-color: #d1d5db;
+  cursor: not-allowed;
+}
+
+/* 반응형 */
 @media (max-width: 768px) {
   .break-document-container {
-    padding: 20px 16px;
+    padding: 16px;
   }
 
   .break-document-layout h3 {
-    font-size: 1.5rem;
-  }
-
-  .break-document-table {
-    font-size: 0.85rem;
+    font-size: 20px;
   }
 
   .break-document-table th,
   .break-document-table td {
-    padding: 10px 12px;
-    font-size: 0.85rem;
+    padding: 10px 8px;
+    font-size: 14px;
+  }
+
+  .break-document-table th {
+    width: 100px;
   }
 
   .break-document-table select {
-    font-size: 0.85rem;
-    padding: 4px 8px;
-  }
-
-  .break-submit-button {
-    width: 100%;
-    padding: 12px;
+    padding: 6px 8px;
+    font-size: 14px;
   }
 
   .break-button-group {
@@ -152,29 +146,7 @@
     width: 100%;
   }
 
-  .break-button-group .break-submit-button {
-    margin-left: 0 !important;
-  }
-}
-
-@media (max-width: 480px) {
-  .break-document-container {
-    padding: 16px 12px;
-  }
-
-  .break-document-layout h3 {
-    font-size: 1.3rem;
-    margin-bottom: 20px;
-  }
-
-  .break-document-table {
-    display: block;
-    overflow-x: auto;
-  }
-
-  .break-document-table th,
-  .break-document-table td {
-    padding: 8px 10px;
-    font-size: 0.8rem;
+  .break-submit-button {
+    width: 100%;
   }
 }

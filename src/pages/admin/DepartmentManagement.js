@@ -41,7 +41,6 @@ export default function DepartmentManagement() {
       setDepartmentList(response.data.departmentList || []);
       setCollegeList(response.data.collegeList || []);
 
-      // 수정 모드일 때 첫 번째 학과를 기본값으로 설정
       if (crud === "update" && response.data.departmentList?.length > 0) {
         setFormData((prev) => ({
           ...prev,
@@ -153,9 +152,9 @@ export default function DepartmentManagement() {
 
   if (loading) {
     return (
-      <div className="page-container">
-        <div className="loading-container">
-          <div className="spinner"></div>
+      <div className="admin-page-wrapper">
+        <div className="admin-loading-container">
+          <div className="admin-spinner"></div>
           <p>로딩 중...</p>
         </div>
       </div>
@@ -163,66 +162,66 @@ export default function DepartmentManagement() {
   }
 
   return (
-    <div className="my-page-container">
-      <aside className="side-menu">
-        <div className="side-menu-header">
+    <div className="admin-page-container">
+      <aside className="admin-side-menu">
+        <div className="admin-side-menu-header">
           <h2>등록</h2>
         </div>
-        <nav className="side-menu-nav">
-          <Link to="/staff/admin/college" className="menu-item">
+        <nav className="admin-side-menu-nav">
+          <Link to="/staff/admin/college" className="admin-menu-item">
             단과대학
           </Link>
-          <Link to="/staff/admin/department" className="menu-item active">
+          <Link to="/staff/admin/department" className="admin-menu-item active">
             학과
           </Link>
-          <Link to="/staff/admin/room" className="menu-item">
+          <Link to="/staff/admin/room" className="admin-menu-item">
             강의실
           </Link>
-          <Link to="/staff/admin/subject" className="menu-item">
+          <Link to="/staff/admin/subject" className="admin-menu-item">
             강의
           </Link>
-          <Link to="/staff/admin/tuition" className="menu-item">
+          <Link to="/staff/admin/tuition" className="admin-menu-item">
             단대별 등록금
           </Link>
         </nav>
       </aside>
 
-      <main className="main-content">
+      <main className="admin-main-content">
         <h1>학과</h1>
-        <div className="divider"></div>
+        <div className="admin-divider"></div>
 
         {/* CRUD 버튼 */}
-        <div className="crud-buttons">
+        <div className="admin-crud-buttons">
           <button
             onClick={() => handleCrudChange("insert")}
-            className={`crud-button ${crud === "insert" ? "active" : ""}`}
+            className={`admin-crud-button ${crud === "insert" ? "active" : ""}`}
           >
             등록
           </button>
           <button
             onClick={() => handleCrudChange("update")}
-            className={`crud-button ${crud === "update" ? "active" : ""}`}
+            className={`admin-crud-button ${crud === "update" ? "active" : ""}`}
           >
             수정
           </button>
           <button
             onClick={() => handleCrudChange("delete")}
-            className={`crud-button ${crud === "delete" ? "active" : ""}`}
+            className={`admin-crud-button ${crud === "delete" ? "active" : ""}`}
           >
             삭제
           </button>
         </div>
 
-        {error && <div className="error-message">{error}</div>}
+        {error && <div className="admin-error-message">{error}</div>}
 
         {/* 등록 폼 */}
         {crud === "insert" && (
           <form onSubmit={handleSubmit} className="admin-form">
-            <div className="form-header">
+            <div className="admin-form-header">
               <span className="material-symbols-outlined">school</span>
-              <span className="form-title">등록하기</span>
+              <span className="admin-form-title">등록하기</span>
             </div>
-            <div className="form-content">
+            <div className="admin-form-content">
               <input
                 type="text"
                 name="name"
@@ -255,11 +254,11 @@ export default function DepartmentManagement() {
         {/* 수정 폼 */}
         {crud === "update" && (
           <form onSubmit={handleUpdate} className="admin-form">
-            <div className="form-header">
+            <div className="admin-form-header">
               <span className="material-symbols-outlined">school</span>
-              <span className="form-title">수정하기</span>
+              <span className="admin-form-title">수정하기</span>
             </div>
-            <div className="form-content">
+            <div className="admin-form-content">
               <select
                 name="id"
                 value={formData.id}
@@ -291,7 +290,7 @@ export default function DepartmentManagement() {
 
         {/* 삭제 안내 */}
         {crud === "delete" && (
-          <p className="delete-notice">삭제할 학과 이름을 클릭해주세요</p>
+          <p className="admin-delete-notice">삭제할 학과 이름을 클릭해주세요</p>
         )}
 
         {/* 학과 목록 */}
@@ -313,7 +312,7 @@ export default function DepartmentManagement() {
                       {crud === "delete" ? (
                         <button
                           onClick={() => handleDelete(dept.id, dept.name)}
-                          className="delete-link"
+                          className="admin-delete-link"
                         >
                           {dept.name}
                         </button>
@@ -326,7 +325,7 @@ export default function DepartmentManagement() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="3" className="no-data">
+                  <td colSpan="3" className="admin-no-data">
                     등록된 학과가 없습니다.
                   </td>
                 </tr>

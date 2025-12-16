@@ -84,53 +84,57 @@ export default function NoticeWritePage() {
   };
 
   return (
-    <div
-      className="d-flex justify-content-center align-items-start"
-      style={{ minWidth: "100em" }}
-    >
-      {/* 사이드 메뉴 */}
-      <div className="sub--menu">
-        <div className="sub--menu--top">
-          <h2>학사정보</h2>
+    <div className="notice-page-wrapper">
+      <div className="notice-container">
+        {/* 사이드 메뉴 */}
+        <div className="notice-sidebar">
+          <div className="notice-sidebar-header">
+            <h2>학사정보</h2>
+          </div>
+          <div className="notice-sidebar-nav">
+            <table className="notice-menu-table">
+              <tbody>
+                <tr>
+                  <td>
+                    <a
+                      href="/board/notice"
+                      className="notice-menu-link notice-menu-active"
+                    >
+                      공지사항
+                    </a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="/schedule" className="notice-menu-link">
+                      학사일정
+                    </a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="/schedule/list" className="notice-menu-link">
+                      학사일정 등록
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-        <div className="sub--menu--mid">
-          <table className="sub--menu--table">
-            <tbody>
-              <tr>
-                <td>
-                  <a href="/board/notice" className="selected--menu">
-                    공지사항
-                  </a>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <a href="/schedule">학사일정</a>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <a href="/schedule/list">학사일정 등록</a>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
 
-      {/* 메인 컨텐츠 */}
-      <main>
-        <h1>공지사항 등록</h1>
-        <div className="split--div"></div>
+        {/* 메인 컨텐츠 */}
+        <div className="notice-main">
+          <h1 className="notice-title">공지사항 등록</h1>
+          <div className="notice-divider"></div>
 
-        <div className="write--div">
-          <form onSubmit={handleSubmit}>
-            {/* 제목 영역 */}
-            <div className="title--container">
-              <div className="category">
+          <div className="notice-write-container">
+            <form onSubmit={handleSubmit}>
+              {/* 제목 영역 */}
+              <div className="notice-write-header">
                 <select
                   name="category"
-                  className="input--box"
+                  className="notice-category-select"
                   value={formData.category}
                   onChange={handleChange}
                 >
@@ -138,26 +142,21 @@ export default function NoticeWritePage() {
                   <option value="[학사]">[학사]</option>
                   <option value="[장학]">[장학]</option>
                 </select>
-              </div>
-              <div className="title">
                 <input
                   type="text"
-                  className="form-control form-control-sm"
+                  className="notice-title-input"
                   name="title"
                   placeholder="제목을 입력하세요"
                   value={formData.title}
                   onChange={handleChange}
                   required
-                  style={{ width: "900px" }}
                 />
               </div>
-            </div>
 
-            {/* 내용 영역 */}
-            <div className="content--container">
+              {/* 내용 영역 */}
               <textarea
                 name="content"
-                className="form-control"
+                className="notice-content-textarea"
                 cols="100"
                 rows="20"
                 placeholder="내용을 입력하세요"
@@ -165,43 +164,38 @@ export default function NoticeWritePage() {
                 onChange={handleChange}
                 required
               />
-            </div>
 
-            {/* 파일 업로드 */}
-            <div className="custom-file">
-              <input
-                type="file"
-                className="custom-file-input"
-                id="customFile"
-                accept=".jpg, .jpeg, .png"
-                onChange={handleFileChange}
-              />
-              <label className="custom-file-label" htmlFor="customFile">
-                {fileName}
-              </label>
-            </div>
+              {/* 파일 업로드 */}
+              <div className="notice-file-upload">
+                <input
+                  type="file"
+                  className="notice-file-input"
+                  id="noticeFile"
+                  accept=".jpg, .jpeg, .png"
+                  onChange={handleFileChange}
+                />
+                <label className="notice-file-label" htmlFor="noticeFile">
+                  {fileName}
+                </label>
+              </div>
 
-            {/* 버튼 */}
-            <div style={{ marginTop: "20px" }}>
-              <button
-                type="button"
-                className="button"
-                onClick={() => navigate("/board/notice")}
-              >
-                목록
-              </button>
-              <button
-                type="submit"
-                className="button"
-                disabled={loading}
-                style={{ marginLeft: "10px" }}
-              >
-                {loading ? "등록 중..." : "등록"}
-              </button>
-            </div>
-          </form>
+              {/* 버튼 */}
+              <div className="notice-btn-group">
+                <button
+                  type="button"
+                  className="notice-btn-secondary"
+                  onClick={() => navigate("/board/notice")}
+                >
+                  목록
+                </button>
+                <button type="submit" className="notice-btn" disabled={loading}>
+                  {loading ? "등록 중..." : "등록"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

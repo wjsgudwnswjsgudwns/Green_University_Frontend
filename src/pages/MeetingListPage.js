@@ -105,9 +105,6 @@ function MeetingListPage() {
       {/* 빈 상태 */}
       {!loading && !error && meetings.length === 0 && (
         <div className="mlp-empty-state">
-          <span className="material-symbols-outlined">
-            video_camera_front_off
-          </span>
           <p>생성하거나 예약한 회의가 없습니다.</p>
         </div>
       )}

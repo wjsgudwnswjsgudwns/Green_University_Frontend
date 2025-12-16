@@ -91,9 +91,9 @@ export default function SubjectListPage() {
 
   if (loading) {
     return (
-      <div className="page-container">
-        <div className="loading-container">
-          <div className="spinner"></div>
+      <div className="subject-page-container">
+        <div className="subject-loading-container">
+          <div className="subject-spinner"></div>
           <p>로딩 중...</p>
         </div>
       </div>
@@ -102,20 +102,20 @@ export default function SubjectListPage() {
 
   return (
     <div className="subject-container">
-      <aside className="side-menu">
-        <div className="side-menu-header">
+      <aside className="subject-side-menu">
+        <div className="subject-side-menu-header">
           <h2>수업</h2>
         </div>
-        <nav className="side-menu-nav">
-          <Link to="/subject/list/1" className="menu-item active">
+        <nav className="subject-side-menu-nav">
+          <Link to="/subject/list/1" className="subject-menu-item active">
             전체 강의 조회
           </Link>
           {user?.userRole === "professor" && (
             <>
-              <Link to="/professor/subject" className="menu-item">
+              <Link to="/professor/subject" className="subject-menu-item">
                 내 강의 조회
               </Link>
-              <Link to="/evaluation/read" className="menu-item">
+              <Link to="/evaluation/read" className="subject-menu-item">
                 내 강의 평가
               </Link>
             </>
@@ -125,13 +125,13 @@ export default function SubjectListPage() {
 
       <main className="subject-main">
         <h1>전체 강의 조회</h1>
-        <div className="divider"></div>
+        <div className="subject-divider"></div>
 
-        {error && <div className="error-message">{error}</div>}
+        {error && <div className="subject-error-message">{error}</div>}
 
         {/* 검색 필터 */}
         <form onSubmit={handleSearch} className="subject-filter">
-          <div className="filter-group">
+          <div className="subject-filter-group">
             <label htmlFor="subYear">연도</label>
             <input
               type="number"
@@ -144,7 +144,7 @@ export default function SubjectListPage() {
             />
           </div>
 
-          <div className="filter-group">
+          <div className="subject-filter-group">
             <label htmlFor="semester">학기</label>
             <select
               id="semester"
@@ -157,7 +157,7 @@ export default function SubjectListPage() {
             </select>
           </div>
 
-          <div className="filter-group">
+          <div className="subject-filter-group">
             <label htmlFor="deptId">개설학과</label>
             <select
               id="deptId"
@@ -174,7 +174,7 @@ export default function SubjectListPage() {
             </select>
           </div>
 
-          <div className="filter-group">
+          <div className="subject-filter-group">
             <label htmlFor="name">강의명</label>
             <input
               type="text"
@@ -192,7 +192,7 @@ export default function SubjectListPage() {
             </datalist>
           </div>
 
-          <button type="submit" className="search-button">
+          <button type="submit" className="subject-search-button">
             조회
           </button>
         </form>
@@ -200,12 +200,12 @@ export default function SubjectListPage() {
         {/* 강의 목록 */}
         {subjects.length > 0 ? (
           <>
-            <h4 className="list-title">
+            <h4 className="subject-list-title">
               <span>강의 목록</span>
-              <span className="count">[총 {subjectCount}건]</span>
+              <span className="subject-count">[이 {subjectCount}건]</span>
             </h4>
 
-            <div className="table-container">
+            <div className="subject-table-container">
               <table className="subject-table">
                 <thead>
                   <tr>
@@ -214,7 +214,7 @@ export default function SubjectListPage() {
                     <th>개설학과</th>
                     <th>학수번호</th>
                     <th>강의구분</th>
-                    <th className="subject-name">강의명</th>
+                    <th className="subject-name-cell">강의명</th>
                     <th>담당교수</th>
                     <th>학점</th>
                     <th>수강인원</th>
@@ -232,14 +232,14 @@ export default function SubjectListPage() {
                       <td>{subject.deptName}</td>
                       <td>{subject.id}</td>
                       <td>{subject.type}</td>
-                      <td className="name-cell">{subject.name}</td>
+                      <td className="subject-name-cell">{subject.name}</td>
                       <td>{subject.professorName}</td>
                       <td>{subject.grades}</td>
                       <td>{subject.numOfStudent}</td>
                       <td>{subject.capacity}</td>
                       <td>
                         <button
-                          className="syllabus-button"
+                          className="subject-syllabus-button"
                           onClick={() => handleSyllabusClick(subject.id)}
                         >
                           조회
@@ -253,7 +253,7 @@ export default function SubjectListPage() {
 
             {/* 페이징 */}
             {pageCount > 0 && (
-              <div className="pagination">
+              <div className="subject-pagination">
                 {Array.from({ length: pageCount }, (_, i) => i + 1).map(
                   (pageNum) => (
                     <Link
@@ -269,7 +269,7 @@ export default function SubjectListPage() {
             )}
           </>
         ) : (
-          <div className="no-data">검색 결과가 없습니다.</div>
+          <div className="subject-no-data">검색 결과가 없습니다.</div>
         )}
       </main>
     </div>

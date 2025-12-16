@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../api/axiosConfig";
-import "../../styles/subject.css";
+import "../../styles/syllabus.css";
 
 export default function SyllabusPage() {
   const { subjectId } = useParams();
@@ -45,8 +45,8 @@ export default function SyllabusPage() {
   if (loading) {
     return (
       <div className="syllabus-page">
-        <div className="loading-container">
-          <div className="spinner"></div>
+        <div className="syllabus-loading-container">
+          <div className="syllabus-spinner"></div>
           <p>로딩 중...</p>
         </div>
       </div>
@@ -56,7 +56,7 @@ export default function SyllabusPage() {
   if (error || !syllabus) {
     return (
       <div className="syllabus-page">
-        <div className="error-container">
+        <div className="syllabus-error-container">
           <p>{error || "강의계획서를 찾을 수 없습니다."}</p>
         </div>
       </div>
@@ -69,11 +69,14 @@ export default function SyllabusPage() {
         <h1>강의계획서</h1>
         <div style={{ display: "flex", gap: "10px" }}>
           {canEdit && (
-            <button onClick={handleEdit} className="edit-button">
+            <button onClick={handleEdit} className="syllabus-edit-button">
               수정하기
             </button>
           )}
-          <button onClick={() => window.print()} className="print-button">
+          <button
+            onClick={() => window.print()}
+            className="syllabus-print-button"
+          >
             인쇄
           </button>
         </div>

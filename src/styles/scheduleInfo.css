@@ -27,7 +27,7 @@
 
 .sch-side-menu-header {
   padding: 0 20px 20px;
-  border-bottom: 2px solid #216d30;
+  border-bottom: 2px solid #e0b960;
 }
 
 .sch-side-menu-header h2 {
@@ -76,7 +76,7 @@
 
 .sch-divider {
   height: 2px;
-  background: linear-gradient(to right, #216d30, transparent);
+  background: linear-gradient(to right, #e0b960, transparent);
   margin-bottom: 30px;
 }
 

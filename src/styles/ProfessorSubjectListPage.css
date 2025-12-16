@@ -1,341 +1,72 @@
-/* Professor Subject List Page Styles */
+/* 교수 강의 목록 페이지 추가 스타일 - ProfessorSubjectListPage.css */
 
-/* 레이아웃 */
-.d-flex {
+/* 페이지 컨테이너 */
+.professor-subject-page-container {
   display: flex;
-}
-
-.justify-content-center {
   justify-content: center;
-}
-
-.align-items-start {
   align-items: flex-start;
+  min-height: 100vh;
+  background: #f5f5f5;
 }
 
-/* 사이드 메뉴 */
-.sub--menu {
-  min-width: 240px;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-  height: fit-content;
-  position: sticky;
-  top: 20px;
-  margin: 40px 20px;
-}
-
-.sub--menu--top {
-  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
-  color: #ffffff;
-  padding: 24px 20px;
-  text-align: center;
-}
-
-.sub--menu--top h2 {
-  margin: 0;
-  font-size: 1.4rem;
-  font-weight: 700;
-  letter-spacing: 1px;
-}
-
-.sub--menu--mid {
-  padding: 12px 0;
-}
-
-.sub--menu--table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.sub--menu--table tbody tr {
-  border-bottom: 1px solid #e0e6ed;
-}
-
-.sub--menu--table tbody tr:last-child {
-  border-bottom: none;
-}
-
-.sub--menu--table td {
-  padding: 0;
-}
-
-.sub--menu--table a {
-  display: block;
-  padding: 14px 20px;
-  color: #2c3e50;
-  text-decoration: none;
-  font-weight: 500;
-  font-size: 0.95rem;
-  transition: all 0.3s ease;
-  border-left: 3px solid transparent;
-}
-
-.sub--menu--table a:hover {
-  background-color: #f8f9fa;
-  color: #216d30;
-  border-left-color: #216d30;
-}
-
-.sub--menu--table a.selected--menu {
-  background-color: rgba(33, 109, 48, 0.1);
-  color: #216d30;
-  border-left-color: #216d30;
-  font-weight: 600;
-}
-
-/* 메인 컨텐츠 */
-main {
-  flex: 1;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  padding: 40px;
-  margin: 40px 20px;
-  min-height: 600px;
-}
-
-main h1 {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #2c3e50;
-  margin: 0 0 20px 0;
-}
-
-main h4 {
-  font-size: 1.1rem;
-  color: #2c3e50;
-  margin: 24px 0 16px 0;
-}
-
-.split--div {
-  height: 2px;
-  background: linear-gradient(90deg, #216d30 0%, rgba(33, 109, 48, 0.2) 100%);
-  margin-bottom: 30px;
-}
-
-/* 필터 */
-.sub--filter {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 30px;
-}
-
-.sub--filter form {
-  display: flex;
-  align-items: center;
-}
-
-.sub--filter form > div {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.sub--filter select {
-  padding: 8px 12px;
-  border: 2px solid #e0e6ed;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  color: #2c3e50;
-  background-color: #ffffff;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  min-width: 200px;
-}
-
-.sub--filter select:focus {
-  outline: none;
-  border-color: #216d30;
-  box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
-}
-
-.sub--filter button {
-  display: flex;
-  align-items: center;
-  padding: 8px 20px;
-  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
-  color: #ffffff;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(33, 109, 48, 0.3);
-}
-
-.sub--filter button:hover {
-  background: linear-gradient(135deg, #1a5524 0%, #0e2b14 100%);
-  box-shadow: 0 4px 12px rgba(33, 109, 48, 0.4);
-  transform: translateY(-1px);
-}
-
-.sub--filter button ul {
-  display: flex;
-  align-items: center;
-  gap: 4px;
+/* 강의 계획서 조회 버튼 */
+.professor-subject-plan-view {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-/* 테이블 */
-.sub--list--table {
-  width: 100%;
-  border-collapse: collapse;
-  border: 1px solid #e0e6ed;
-  font-size: 0.9rem;
-}
-
-.sub--list--table thead {
-  background-color: #f8f9fa;
-}
-
-.sub--list--table th {
-  padding: 12px 16px;
-  text-align: center;
-  font-weight: 600;
-  color: #2c3e50;
-  border: 1px solid #e0e6ed;
-}
-
-.sub--list--table tbody tr {
-  transition: background-color 0.2s ease;
-}
-
-.sub--list--table tbody tr:hover {
-  background-color: #f8f9fa;
-}
-
-.sub--list--table td {
-  padding: 12px 16px;
-  color: #5a6c7d;
-  text-align: center;
-  border: 1px solid #e0e6ed;
-}
-
-/* 링크 스타일 */
-.sub--plan--view {
+.professor-subject-plan-view li {
+  height: 24px;
   display: flex;
+  align-items: center;
   justify-content: center;
-  align-items: center;
-  gap: 8px;
+}
+
+.professor-subject-plan-view a {
+  display: inline-block;
+  padding: 6px 16px;
+  background: #216d30;
+  color: white;
+  border-radius: 4px;
+  font-size: 13px;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.professor-subject-plan-view a:hover {
+  background: #1a5524;
+}
+
+/* 조회 버튼 스타일 */
+.professor-subject-filter button ul {
   list-style: none;
   padding: 0;
   margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.sub--plan--view li {
+.professor-subject-filter button ul li {
+  height: 24px;
   display: flex;
   align-items: center;
 }
 
-.sub--plan--view a {
-  color: #216d30;
-  text-decoration: none;
+/* 강의 목록 제목 */
+.professor-subject-main h4 span {
   font-weight: 600;
-  padding: 4px 12px;
-  border-radius: 4px;
-  transition: all 0.3s ease;
+  color: #2c3e50;
 }
 
-.sub--plan--view a:hover {
-  background-color: rgba(33, 109, 48, 0.1);
-  color: #1a5524;
-}
-
-/* 메시지 */
-.no--list--p {
-  text-align: center;
-  padding: 60px 20px;
-  color: #95a5a6;
-  font-size: 1.1rem;
-  background: #f8f9fa;
-  border: 1px solid #e0e6ed;
-  border-radius: 12px;
-  margin: 24px 0;
-}
-
-/* Material Icons */
-.material-symbols-outlined {
-  font-family: "Material Symbols Outlined";
-  font-weight: normal;
-  font-style: normal;
-  font-size: 24px;
-  line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
-  display: inline-block;
-  white-space: nowrap;
-  word-wrap: normal;
-  direction: ltr;
-  -webkit-font-feature-settings: "liga";
-  -webkit-font-smoothing: antialiased;
-}
-
-/* 반응형 */
-@media (max-width: 1024px) {
-  .d-flex[style*="min-width"] {
-    flex-direction: column;
-    min-width: auto !important;
-  }
-
-  .sub--menu {
-    position: static;
-    width: 100%;
-    min-width: auto;
-    margin: 20px 15px;
-  }
-
-  main {
-    margin: 20px 15px;
-    padding: 30px 20px;
-  }
-}
-
+/* 반응형 디자인 */
 @media (max-width: 768px) {
-  main {
-    padding: 24px 16px;
-  }
-
-  main h1 {
-    font-size: 1.5rem;
-  }
-
-  .sub--filter form > div {
+  .professor-subject-page-container {
     flex-direction: column;
-    width: 100%;
   }
 
-  .sub--filter select,
-  .sub--filter button {
-    width: 100%;
-  }
-
-  .sub--list--table {
-    font-size: 0.8rem;
-  }
-
-  .sub--list--table th,
-  .sub--list--table td {
-    padding: 8px 4px;
-  }
-
-  /* 테이블 가로 스크롤 */
-  .sub--list--table {
-    display: block;
-    overflow-x: auto;
-    white-space: nowrap;
-  }
-
-  .sub--list--table thead,
-  .sub--list--table tbody,
-  .sub--list--table tr {
-    display: table;
-    width: 100%;
-    table-layout: fixed;
+  .professor-subject-plan-view li {
+    height: auto;
   }
 }

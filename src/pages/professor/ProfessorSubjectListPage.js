@@ -72,17 +72,14 @@ export default function ProfessorSubjectListPage() {
   };
 
   return (
-    <div
-      className="d-flex justify-content-center align-items-start"
-      style={{ minWidth: "100em" }}
-    >
+    <div className="professor-subject-page-container">
       {/* 사이드 메뉴 */}
-      <div className="sub--menu">
-        <div className="sub--menu--top">
+      <div className="subject-sub-menu">
+        <div className="subject-sub-menu-top">
           <h2>수업</h2>
         </div>
-        <div className="sub--menu--mid">
-          <table className="sub--menu--table">
+        <div className="subject-sub-menu-mid">
+          <table className="subject-sub-menu-table">
             <tbody>
               <tr>
                 <td>
@@ -91,7 +88,10 @@ export default function ProfessorSubjectListPage() {
               </tr>
               <tr>
                 <td>
-                  <a href="/professor/subject" className="selected--menu">
+                  <a
+                    href="/professor/subject"
+                    className="subject-selected-menu"
+                  >
                     내 강의 조회
                   </a>
                 </td>
@@ -107,12 +107,12 @@ export default function ProfessorSubjectListPage() {
       </div>
 
       {/* 메인 컨텐츠 */}
-      <main>
+      <main className="subject-main">
         <h1>내 강의 조회</h1>
-        <div className="split--div"></div>
+        <div className="subject-split-div"></div>
 
         {/* 학기 선택 필터 */}
-        <div className="sub--filter">
+        <div className="subject-sub-filter">
           <form onSubmit={handleSearch}>
             <div>
               <select
@@ -130,10 +130,7 @@ export default function ProfessorSubjectListPage() {
                 ))}
               </select>
               <button type="submit">
-                <ul
-                  className="d-flex justify-content-center"
-                  style={{ margin: 0 }}
-                >
+                <ul className="professor-subject-filter button ul">
                   <li style={{ height: "24px", marginRight: "2px" }}>조회</li>
                 </ul>
               </button>
@@ -146,9 +143,9 @@ export default function ProfessorSubjectListPage() {
         </h4>
 
         {loading ? (
-          <p className="no--list--p">로딩 중...</p>
+          <p className="subject-no-list-p">로딩 중...</p>
         ) : subjectList.length > 0 ? (
-          <table border="1" className="sub--list--table">
+          <table border="1" className="subject-list-table">
             <thead>
               <tr>
                 <th>학수번호</th>
@@ -172,10 +169,7 @@ export default function ProfessorSubjectListPage() {
                     {subject.endTime}:00 ({subject.room.id})
                   </td>
                   <td>
-                    <ul
-                      className="d-flex justify-content-center sub--plan--view"
-                      style={{ margin: 0 }}
-                    >
+                    <ul className="professor-subject-plan-view">
                       <li style={{ height: "24px" }}>
                         <a
                           href="#"
@@ -190,10 +184,7 @@ export default function ProfessorSubjectListPage() {
                     </ul>
                   </td>
                   <td>
-                    <ul
-                      className="d-flex justify-content-center sub--plan--view"
-                      style={{ margin: 0 }}
-                    >
+                    <ul className="professor-subject-plan-view">
                       <li style={{ height: "24px" }}>
                         <a
                           href="#"
@@ -212,7 +203,7 @@ export default function ProfessorSubjectListPage() {
             </tbody>
           </table>
         ) : (
-          <p className="no--list--p">해당 학기에 강의가 없습니다.</p>
+          <p className="subject-no-list-p">해당 학기에 강의가 없습니다.</p>
         )}
       </main>
     </div>

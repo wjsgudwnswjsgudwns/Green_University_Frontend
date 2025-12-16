@@ -309,9 +309,14 @@ export default function StaffRiskStudentsPage() {
     try {
       setAnalyzing(true);
 
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth() + 1; // 0-based이므로 +1
+      const currentSemester = currentMonth <= 6 ? 1 : 2;
+
       const response = await api.post("/api/ai-analysis/analyze-all", {
-        year: new Date().getFullYear(),
-        semester: 1, // 또는 CURRENT_SEMESTER에 맞게
+        year: currentYear,
+        semester: currentSemester,
       });
 
       if (response.data.code === 1) {
@@ -466,7 +471,7 @@ export default function StaffRiskStudentsPage() {
           <div className="srs-empty-state">
             <p>
               {allRiskStudents.length === 0
-                ? "현재 위험 학생이 없습니다. 🎉"
+                ? "현재 위험 학생이 없습니다."
                 : "검색 조건에 맞는 학생이 없습니다."}
             </p>
           </div>

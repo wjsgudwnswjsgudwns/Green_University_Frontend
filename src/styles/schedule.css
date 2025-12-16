@@ -110,7 +110,7 @@
   min-height: 60px;
 }
 
-.subject-name {
+.sch-subject-name {
   font-size: 13px;
   font-weight: 600;
   margin-bottom: 4px;
@@ -150,19 +150,19 @@
   .schedule-main {
     padding: 30px 20px;
     min-width: auto;
-}
+  }
 
   .schedule-table-wrapper {
     overflow-x: auto;
-}
+  }
 
   .schedule-cell {
     min-width: 120px;
-}
+  }
 
   .subject-name {
     font-size: 12px;
-}
+  }
 
   .subject-details {
     font-size: 10px;
@@ -181,15 +181,15 @@
   .time-cell {
     font-size: 11px;
     padding: 6px 4px;
-}
+  }
 
   .schedule-cell {
     min-width: 100px;
-}
+  }
 
   .subject-name {
     font-size: 11px;
-}
+  }
 
   .subject-details {
     font-size: 9px;

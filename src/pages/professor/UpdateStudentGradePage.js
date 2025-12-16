@@ -95,31 +95,25 @@ export default function UpdateStudentGradePage() {
 
   if (loading) {
     return (
-      <div
-        className="d-flex justify-content-center align-items-start"
-        style={{ minWidth: "100em" }}
-      >
-        <main>
+      <div className="professor-subject-page-container">
+        <main className="subject-main">
           <h1>학생 성적 기입</h1>
-          <div className="split--div"></div>
-          <p className="no--list--p">로딩 중...</p>
+          <div className="subject-split-div"></div>
+          <p className="subject-no-list-p">로딩 중...</p>
         </main>
       </div>
     );
   }
 
   return (
-    <div
-      className="d-flex justify-content-center align-items-start"
-      style={{ minWidth: "100em" }}
-    >
+    <div className="professor-subject-page-container">
       {/* 사이드 메뉴 */}
-      <div className="sub--menu">
-        <div className="sub--menu--top">
+      <div className="subject-sub-menu">
+        <div className="subject-sub-menu-top">
           <h2>수업</h2>
         </div>
-        <div className="sub--menu--mid">
-          <table className="sub--menu--table">
+        <div className="subject-sub-menu-mid">
+          <table className="subject-sub-menu-table">
             <tbody>
               <tr>
                 <td>
@@ -128,7 +122,10 @@ export default function UpdateStudentGradePage() {
               </tr>
               <tr>
                 <td>
-                  <a href="/professor/subject" className="selected--menu">
+                  <a
+                    href="/professor/subject"
+                    className="subject-selected-menu"
+                  >
                     내 강의 조회
                   </a>
                 </td>
@@ -144,12 +141,12 @@ export default function UpdateStudentGradePage() {
       </div>
 
       {/* 메인 컨텐츠 */}
-      <main>
+      <main className="subject-main">
         <h1>학생 성적 기입</h1>
-        <div className="split--div"></div>
+        <div className="subject-split-div"></div>
 
         {/* 학생 정보 */}
-        <table border="1" className="sub--list--table">
+        <table border="1" className="subject-list-table">
           <thead>
             <tr>
               <th>학생 번호</th>
@@ -168,7 +165,7 @@ export default function UpdateStudentGradePage() {
 
         {/* 성적 입력 폼 */}
         <form onSubmit={handleSubmit}>
-          <table className="form--table">
+          <table className="subject-form-table">
             <tbody>
               <tr>
                 <td>
@@ -289,7 +286,7 @@ export default function UpdateStudentGradePage() {
                 <td colSpan="2">
                   <button
                     type="button"
-                    className="btn btn-secondary"
+                    className="subject-btn subject-btn-secondary"
                     onClick={() => navigate(`/professor/subject/${subjectId}`)}
                     style={{ marginRight: "10px" }}
                   >
@@ -297,7 +294,7 @@ export default function UpdateStudentGradePage() {
                   </button>
                   <button
                     type="submit"
-                    className="btn btn-dark update--button"
+                    className="subject-btn subject-btn-dark subject-update-button"
                     disabled={submitting}
                   >
                     {submitting ? "제출 중..." : "제출하기"}

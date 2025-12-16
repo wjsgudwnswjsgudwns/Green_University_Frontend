@@ -1,51 +1,126 @@
 /* Styles for the admin registration pages */
 
+.admin-page-wrapper {
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
 .admin-layout {
   display: flex;
-  gap: 24px;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  background: white;
+  min-height: 100vh;
 }
 
 .admin-sidebar {
-  width: 200px;
+  width: 250px;
+  background: #ffffff;
+  border-right: 1px solid #e0e6ed;
+  padding: 20px 0;
   flex-shrink: 0;
-  background-color: #ffffff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 16px;
 }
 
 .admin-sidebar h2 {
-  margin-top: 0;
-  margin-bottom: 16px;
-  font-size: 1.4rem;
-  color: #2a8fbd;
+  font-size: 24px;
+  color: #2c3e50;
+  margin: 0;
+  padding: 0 20px 20px;
+  border-bottom: 2px solid #e0b960;
 }
 
 .admin-sidebar nav ul {
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: 20px 0 0 0;
 }
 
 .admin-sidebar nav li {
-  margin-bottom: 12px;
-}
-
-.admin-sidebar nav li.selected a {
-  font-weight: bold;
-  color: #2a8fbd;
+  margin: 0;
 }
 
 .admin-sidebar nav a {
+  display: block;
   text-decoration: none;
-  color: #333;
+  color: #4a5568;
   font-size: 0.95rem;
+  padding: 12px 20px;
+  transition: all 0.2s;
+  border-left: 3px solid transparent;
+}
+
+.admin-sidebar nav a:hover {
+  background: #f8f9fa;
+  color: #216d30;
+}
+
+.admin-sidebar nav li.selected a {
+  background: #e8f5e9;
+  color: #216d30;
+  border-left-color: #216d30;
+  font-weight: 600;
 }
 
 .admin-main {
   flex: 1;
-  background-color: #ffffff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 24px;
+  padding: 40px;
+  min-width: 800px;
+}
+
+.admin-main h1 {
+  font-size: 28px;
+  color: #2c3e50;
+  margin: 0 0 20px 0;
+}
+
+.admin-main > hr {
+  border: none;
+  height: 2px;
+  background: linear-gradient(to right, #e0b960, transparent);
+  margin: 0 0 30px 0;
+}
+
+@media (max-width: 1200px) {
+  .admin-layout {
+    flex-direction: column;
+  }
+
+  .admin-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e0e6ed;
+  }
+
+  .admin-sidebar nav ul {
+    display: flex;
+    overflow-x: auto;
+  }
+
+  .admin-sidebar nav li {
+    flex-shrink: 0;
+  }
+
+  .admin-sidebar nav a {
+    border-left: none;
+    border-bottom: 3px solid transparent;
+  }
+
+  .admin-sidebar nav li.selected a {
+    border-left: none;
+    border-bottom-color: #216d30;
+  }
+
+  .admin-main {
+    min-width: auto;
+    padding: 30px 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-main {
+    padding: 20px 16px;
+  }
 }

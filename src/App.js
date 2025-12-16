@@ -93,6 +93,7 @@ function Layout() {
     "/login",
     "/find-id",
     "/find-password",
+    "/evaluation",
     "/professor/syllabus/:subjectId",
   ];
   const shouldHideHeaderFooter =

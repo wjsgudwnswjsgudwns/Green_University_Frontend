@@ -301,9 +301,9 @@ export default function SubjectManagement() {
 
   if (loading) {
     return (
-      <div className="page-container">
-        <div className="loading-container">
-          <div className="spinner"></div>
+      <div className="admin-page-wrapper">
+        <div className="admin-loading-container">
+          <div className="admin-spinner"></div>
           <p>로딩 중...</p>
         </div>
       </div>
@@ -311,70 +311,70 @@ export default function SubjectManagement() {
   }
 
   return (
-    <div className="my-page-container">
-      <aside className="side-menu">
-        <div className="side-menu-header">
+    <div className="admin-page-container">
+      <aside className="admin-side-menu">
+        <div className="admin-side-menu-header">
           <h2>등록</h2>
         </div>
-        <nav className="side-menu-nav">
-          <Link to="/staff/admin/college" className="menu-item">
+        <nav className="admin-side-menu-nav">
+          <Link to="/staff/admin/college" className="admin-menu-item">
             단과대학
           </Link>
-          <Link to="/staff/admin/department" className="menu-item">
+          <Link to="/staff/admin/department" className="admin-menu-item">
             학과
           </Link>
-          <Link to="/staff/admin/room" className="menu-item">
+          <Link to="/staff/admin/room" className="admin-menu-item">
             강의실
           </Link>
-          <Link to="/staff/admin/subject" className="menu-item active">
+          <Link to="/staff/admin/subject" className="admin-menu-item active">
             강의
           </Link>
-          <Link to="/staff/admin/tuition" className="menu-item">
+          <Link to="/staff/admin/tuition" className="admin-menu-item">
             단대별 등록금
           </Link>
         </nav>
       </aside>
 
-      <main className="main-content">
+      <main className="admin-main-content">
         <h1>강의</h1>
-        <div className="divider"></div>
+        <div className="admin-divider"></div>
 
         {/* CRUD 버튼 */}
-        <div className="crud-buttons">
+        <div className="admin-crud-buttons">
           <button
             onClick={() => handleCrudChange("insert")}
-            className={`crud-button ${crud === "insert" ? "active" : ""}`}
+            className={`admin-crud-button ${crud === "insert" ? "active" : ""}`}
           >
             등록
           </button>
           <button
             onClick={() => handleCrudChange("update")}
-            className={`crud-button ${crud === "update" ? "active" : ""}`}
+            className={`admin-crud-button ${crud === "update" ? "active" : ""}`}
           >
             수정
           </button>
           <button
             onClick={() => handleCrudChange("delete")}
-            className={`crud-button ${crud === "delete" ? "active" : ""}`}
+            className={`admin-crud-button ${crud === "delete" ? "active" : ""}`}
           >
             삭제
           </button>
         </div>
 
-        {error && <div className="error-message">{error}</div>}
+        {error && <div className="admin-error-message">{error}</div>}
 
         {/* 검색 바 (조회/삭제 모드) */}
         {(crud === "select" || crud === "delete") && (
-          <div className="search-bar">
+          <div className="admin-search-bar">
             <input
               type="text"
               value={searchKeyword}
               onChange={(e) => setSearchKeyword(e.target.value)}
               onKeyPress={handleSearchKeyPress}
               placeholder="강의명으로 검색..."
-              className="search-input"
+              className="admin-search-input"
             />
-            <button onClick={handleSearch} className="search-button">
+            <button onClick={handleSearch} className="admin-search-button">
               검색
             </button>
             {searchKeyword && (
@@ -384,7 +384,7 @@ export default function SubjectManagement() {
                   setCurrentPage(0);
                   fetchData();
                 }}
-                className="search-clear-button"
+                className="admin-search-clear-button"
               >
                 초기화
               </button>
@@ -398,11 +398,11 @@ export default function SubjectManagement() {
             onSubmit={handleSubmit}
             className="admin-form admin-form-vertical"
           >
-            <div className="form-header">
+            <div className="admin-form-header">
               <span className="material-symbols-outlined">school</span>
-              <span className="form-title">등록하기</span>
+              <span className="admin-form-title">등록하기</span>
             </div>
-            <div className="form-content">
+            <div className="admin-form-content">
               <input
                 type="text"
                 name="name"
@@ -439,7 +439,7 @@ export default function SubjectManagement() {
                 className="admin-input"
                 required
               />
-              <div className="radio-group-inline">
+              <div className="admin-radio-group-inline">
                 <label>
                   <input
                     type="radio"
@@ -546,13 +546,13 @@ export default function SubjectManagement() {
             onSubmit={handleUpdate}
             className="admin-form admin-form-vertical"
           >
-            <div className="form-header">
+            <div className="admin-form-header">
               <span className="material-symbols-outlined">school</span>
-              <span className="form-title">수정하기</span>
+              <span className="admin-form-title">수정하기</span>
             </div>
-            <div className="form-content">
+            <div className="admin-form-content">
               {/* 검색 입력 */}
-              <div className="search-select-wrapper">
+              <div className="admin-search-select-wrapper">
                 <input
                   type="text"
                   value={updateSearchKeyword}
@@ -564,16 +564,20 @@ export default function SubjectManagement() {
 
                 {/* 검색 결과 드롭다운 */}
                 {searchResults.length > 0 && (
-                  <div className="search-results-dropdown">
+                  <div className="admin-search-results-dropdown">
                     {searchResults.map((subject) => (
                       <div
                         key={subject.id}
-                        className="search-result-item"
+                        className="admin-search-result-item"
                         onClick={() => handleSelectSubject(subject)}
                       >
-                        <span className="result-id">ID: {subject.id}</span>
-                        <span className="result-name">{subject.name}</span>
-                        <span className="result-info">
+                        <span className="admin-result-id">
+                          ID: {subject.id}
+                        </span>
+                        <span className="admin-result-name">
+                          {subject.name}
+                        </span>
+                        <span className="admin-result-info">
                           {subject.subYear}년 {subject.semester}학기
                         </span>
                       </div>
@@ -584,7 +588,7 @@ export default function SubjectManagement() {
 
               {formData.id && (
                 <>
-                  <div className="selected-subject-info">
+                  <div className="admin-selected-subject-info">
                     선택된 강의: ID {formData.id} - {formData.name}
                   </div>
 
@@ -632,7 +636,7 @@ export default function SubjectManagement() {
                     <option value="목">목</option>
                     <option value="금">금</option>
                   </select>
-                  <div className="form-row">
+                  <div className="admin-form-row">
                     <label>변경 시작시간</label>
                     <select
                       name="startTime"
@@ -650,7 +654,7 @@ export default function SubjectManagement() {
                       )}
                     </select>
                   </div>
-                  <div className="form-row">
+                  <div className="admin-form-row">
                     <label>변경 종료시간</label>
                     <select
                       name="endTime"
@@ -695,12 +699,12 @@ export default function SubjectManagement() {
 
         {/* 삭제 안내 */}
         {crud === "delete" && (
-          <p className="delete-notice">삭제할 강의명을 클릭해주세요</p>
+          <p className="admin-delete-notice">삭제할 강의명을 클릭해주세요</p>
         )}
 
         {/* 강의 목록 */}
         <div className="admin-table-container">
-          <table className="admin-table subject-table">
+          <table className="admin-table admin-subject-table">
             <thead>
               <tr>
                 <th>ID</th>
@@ -726,7 +730,7 @@ export default function SubjectManagement() {
                       {crud === "delete" ? (
                         <button
                           onClick={() => handleDelete(subject.id, subject.name)}
-                          className="delete-link"
+                          className="admin-delete-link"
                         >
                           {subject.name}
                         </button>
@@ -748,7 +752,7 @@ export default function SubjectManagement() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="12" className="no-data">
+                  <td colSpan="12" className="admin-no-data">
                     등록된 강의가 없습니다.
                   </td>
                 </tr>
@@ -758,18 +762,18 @@ export default function SubjectManagement() {
 
           {/* 페이징 컨트롤 */}
           {totalPages > 0 && (
-            <div className="pagination">
+            <div className="admin-pagination">
               <button
                 onClick={() => handlePageChange(0)}
                 disabled={currentPage === 0}
-                className="pagination-button"
+                className="admin-pagination-button"
               >
                 처음
               </button>
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 0}
-                className="pagination-button"
+                className="admin-pagination-button"
               >
                 이전
               </button>
@@ -778,7 +782,7 @@ export default function SubjectManagement() {
                 <button
                   key={pageNum}
                   onClick={() => handlePageChange(pageNum)}
-                  className={`pagination-button ${
+                  className={`admin-pagination-button ${
                     currentPage === pageNum ? "active" : ""
                   }`}
                 >
@@ -789,19 +793,19 @@ export default function SubjectManagement() {
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage >= totalPages - 1}
-                className="pagination-button"
+                className="admin-pagination-button"
               >
                 다음
               </button>
               <button
                 onClick={() => handlePageChange(totalPages - 1)}
                 disabled={currentPage >= totalPages - 1}
-                className="pagination-button"
+                className="admin-pagination-button"
               >
                 마지막
               </button>
 
-              <span className="pagination-info">
+              <span className="admin-pagination-info">
                 {currentPage + 1} / {totalPages} 페이지 (전체 {totalElements}개)
               </span>
             </div>

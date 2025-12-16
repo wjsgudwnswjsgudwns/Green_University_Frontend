@@ -49,23 +49,23 @@ export default function ReadSyllabusPage() {
   return (
     <div className="syllabus-page">
       <header>
-        <div className="header--top"></div>
+        <div className="syllabus-header-top"></div>
       </header>
 
       <section>
-        <div className="section--header">
+        <div className="syllabus-section-header">
           <h2>강의 계획서 조회</h2>
           <br />
         </div>
 
         {/* 교과목 정보 */}
-        <table border="1" className="syllabus--table">
+        <table border="1" className="syllabus-table">
           <colgroup>
-            <col className="col1" />
-            <col className="col2" />
-            <col className="col3" />
-            <col className="col4" />
-            <col className="col5" />
+            <col className="syllabus-col1" />
+            <col className="syllabus-col2" />
+            <col className="syllabus-col3" />
+            <col className="syllabus-col4" />
+            <col className="syllabus-col5" />
           </colgroup>
           <tbody>
             <tr>
@@ -104,13 +104,13 @@ export default function ReadSyllabusPage() {
         <br />
 
         {/* 교강사 정보 */}
-        <table border="1" className="syllabus--table">
+        <table border="1" className="syllabus-table">
           <colgroup>
-            <col className="col1" />
-            <col className="col2" />
-            <col className="col3" />
-            <col className="col4" />
-            <col className="col5" />
+            <col className="syllabus-col1" />
+            <col className="syllabus-col2" />
+            <col className="syllabus-col3" />
+            <col className="syllabus-col4" />
+            <col className="syllabus-col5" />
           </colgroup>
           <tbody>
             <tr>
@@ -132,7 +132,7 @@ export default function ReadSyllabusPage() {
         <br />
 
         {/* 강의 상세 정보 */}
-        <table border="1" className="syllabus--table">
+        <table border="1" className="syllabus-table">
           <colgroup>
             <col style={{ width: "14%" }} />
             <col />
@@ -140,19 +140,19 @@ export default function ReadSyllabusPage() {
           <tbody>
             <tr>
               <td>강의 개요</td>
-              <td className="align--left">{syllabus.overview}</td>
+              <td className="syllabus-align-left">{syllabus.overview}</td>
             </tr>
             <tr>
               <td>강의 목표</td>
-              <td className="align--left">{syllabus.objective}</td>
+              <td className="syllabus-align-left">{syllabus.objective}</td>
             </tr>
             <tr>
               <td>교재 정보</td>
-              <td className="align--left">{syllabus.textbook}</td>
+              <td className="syllabus-align-left">{syllabus.textbook}</td>
             </tr>
             <tr>
               <td>주간 계획</td>
-              <td className="align--left">{syllabus.program}</td>
+              <td className="syllabus-align-left">{syllabus.program}</td>
             </tr>
           </tbody>
         </table>

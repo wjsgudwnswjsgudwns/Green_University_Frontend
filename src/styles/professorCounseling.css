@@ -1,605 +1,226 @@
-/* Professor Counseling Page Styles */
+/* 교수 상담 페이지 스타일 - professorCounseling.css */
 
 .pc-page-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 40px 20px;
-  min-height: calc(100vh - 200px);
+  padding: 40px;
+  background: white;
+  border-radius: 8px;
 }
 
-/* Header */
+/* 헤더 */
 .pc-header {
-  margin-bottom: 32px;
-  padding-bottom: 20px;
-  border-bottom: 2px solid #216d30;
+  margin-bottom: 30px;
 }
 
 .pc-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #216d30;
-  margin: 0 0 8px 0;
+  font-size: 28px;
+  color: #2c3e50;
+  margin: 0 0 10px 0;
 }
 
 .pc-subtitle {
-  font-size: 1rem;
-  color: #666;
+  font-size: 16px;
+  color: #6c757d;
   margin: 0;
 }
 
-/* Loading */
+/* 로딩 */
 .pc-loading {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 400px;
-  gap: 16px;
+  padding: 80px 20px;
 }
 
 .pc-loading-spinner {
   width: 50px;
   height: 50px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #216d30;
+  border: 4px solid #e0e6ed;
+  border-top-color: #216d30;
   border-radius: 50%;
-  animation: pc-spin 1s linear infinite;
+  animation: pc-spin 0.8s linear infinite;
 }
 
 @keyframes pc-spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
+  to {
     transform: rotate(360deg);
   }
 }
 
 .pc-loading p {
+  margin-top: 20px;
   color: #666;
-  font-size: 1rem;
+  font-size: 16px;
 }
 
-/* Error Message */
+/* 에러 메시지 */
 .pc-error-message {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px 20px;
-  background-color: #fee;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #fee;
   border: 1px solid #fcc;
-  border-radius: 8px;
+  border-radius: 6px;
   color: #c33;
-  margin-bottom: 24px;
-}
-
-.pc-error-message .material-symbols-outlined {
-  font-size: 24px;
-}
-
-/* Section Styles */
-.pc-alerts-section,
-.pc-subjects-section {
-  margin-bottom: 40px;
-}
-
-.pc-section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   margin-bottom: 20px;
 }
 
-.pc-section-header h2 {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #333;
+/* 빈 상태 */
+.pc-empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: #999;
+}
+
+.pc-empty-state p {
+  font-size: 16px;
   margin: 0;
 }
 
-.pc-section-header h2 .material-symbols-outlined {
-  font-size: 28px;
-  color: #216d30;
-}
-
-.pc-alert-count,
-.pc-subject-count {
-  padding: 6px 16px;
-  background-color: #216d30;
-  color: white;
-  font-size: 0.9rem;
-  font-weight: 600;
-  border-radius: 20px;
-}
-
-/* Risk Alerts */
-.pc-alerts-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 16px;
-}
-
-.pc-alert-card {
-  background: white;
-  border: 2px solid #ffeb3b;
-  border-radius: 12px;
-  padding: 20px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(255, 235, 59, 0.2);
-}
-
-.pc-alert-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(255, 235, 59, 0.3);
-  border-color: #fdd835;
-}
-
-.pc-alert-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.pc-alert-student {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #333;
-}
-
-.pc-alert-student .material-symbols-outlined {
-  font-size: 24px;
-  color: #f57c00;
-}
-
-/* Risk Level Badges */
+/* 위험도 배지 */
 .pc-risk-badge {
+  display: inline-block;
   padding: 4px 12px;
   border-radius: 12px;
-  font-size: 0.85rem;
-  font-weight: 700;
-  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .pc-risk-normal {
-  background-color: #e8f5e9;
+  background: #e8f5e9;
   color: #2e7d32;
 }
 
 .pc-risk-caution {
-  background-color: #fff3e0;
-  color: #e65100;
+  background: #fff3e0;
+  color: #ef6c00;
 }
 
 .pc-risk-warning {
-  background-color: #ffe0b2;
-  color: #d84315;
+  background: #fce4ec;
+  color: #c2185b;
 }
 
 .pc-risk-critical {
-  background-color: #ffebee;
+  background: #ffebee;
   color: #c62828;
 }
 
-.pc-alert-body {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.pc-alert-subject {
-  font-size: 0.9rem;
-  color: #666;
+/* 상태 배지 */
+.pc-status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-size: 12px;
   font-weight: 600;
 }
 
-.pc-alert-reason {
-  font-size: 0.95rem;
-  color: #333;
-  line-height: 1.5;
+.pc-status-normal {
+  background: #e8f5e9;
+  color: #2e7d32;
 }
 
-/* Subjects List (Accordion Style) */
-.pc-subjects-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+.pc-status-caution {
+  background: #fff3e0;
+  color: #ef6c00;
 }
 
-.pc-subject-item {
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  overflow: hidden;
-  transition: all 0.3s ease;
+.pc-status-risk {
+  background: #fce4ec;
+  color: #c2185b;
 }
 
-.pc-subject-item:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+.pc-status-critical {
+  background: #ffebee;
+  color: #c62828;
 }
 
-.pc-subject-row {
-  padding: 20px 24px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.pc-subject-row:hover {
-  background-color: #f8f9fa;
-}
-
-.pc-subject-info-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.pc-subject-info h3 {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #333;
-  margin: 0 0 8px 0;
-}
-
-.pc-subject-details {
-  font-size: 0.9rem;
-  color: #666;
-  display: block;
-}
-
-/* Students Container */
-.pc-students-container {
-  border-top: 1px solid #e0e0e0;
-  background-color: #fafafa;
-  padding: 20px;
-  animation: slideDown 0.3s ease-out;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    max-height: 0;
-  }
-  to {
-    opacity: 1;
-    max-height: 2000px;
-  }
-}
-
-.pc-students-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px;
-  gap: 16px;
-}
-
-.pc-students-loading .pc-loading-spinner {
-  width: 40px;
-  height: 40px;
-}
-
-/* Students Table */
+/* 테이블 */
 .pc-students-table {
   width: 100%;
+  border-collapse: collapse;
   background: white;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  border-collapse: collapse;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .pc-students-table thead {
-  background-color: #216d30;
+  background: #216d30;
   color: white;
 }
 
 .pc-students-table th {
   padding: 14px 12px;
   text-align: center;
-  font-size: 0.9rem;
   font-weight: 600;
+  font-size: 14px;
   white-space: nowrap;
-}
-
-.pc-students-table tbody tr {
-  border-bottom: 1px solid #e0e0e0;
-  transition: background-color 0.2s ease;
-}
-
-.pc-students-table tbody tr:hover {
-  background-color: #f5f5f5;
-}
-
-.pc-students-table tbody tr:last-child {
-  border-bottom: none;
 }
 
 .pc-students-table td {
   padding: 14px 12px;
   text-align: center;
-  font-size: 0.9rem;
-  color: #333;
+  border-bottom: 1px solid #e0e6ed;
+  color: #4a5568;
+  font-size: 14px;
 }
 
-/* Status Badges in Table */
-.pc-status-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  white-space: nowrap;
+.pc-students-table tbody tr {
+  transition: background 0.2s;
 }
 
-.pc-status-normal {
-  background-color: #e8f5e9;
-  color: #2e7d32;
+.pc-students-table tbody tr:hover {
+  background: #f8f9fa;
 }
 
-.pc-status-caution {
-  background-color: #fff3e0;
-  color: #e65100;
+.pc-students-table tbody tr:last-child td {
+  border-bottom: none;
 }
 
-.pc-status-risk {
-  background-color: #ffe0b2;
-  color: #d84315;
-}
-
-.pc-status-critical {
-  background-color: #ffebee;
-  color: #c62828;
-}
-
-/* Counseling Button */
+/* 상담 버튼 */
 .pc-counseling-btn {
-  padding: 8px 16px;
-  background-color: #216d30;
+  padding: 6px 14px;
+  background: #216d30;
   color: white;
   border: none;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 600;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
+  transition: all 0.2s;
 }
 
 .pc-counseling-btn:hover {
-  background-color: #1a5a26;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(33, 109, 48, 0.3);
+  background: #1a5524;
+  transform: translateY(-1px);
 }
 
-.pc-counseling-btn:active {
-  transform: translateY(0);
-}
-
-/* Empty Students State */
-.pc-empty-students {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px;
-  background: white;
-  border-radius: 8px;
-}
-
-.pc-empty-students p {
-  font-size: 1rem;
-  color: #999;
-  margin: 0;
-}
-
-/* Subjects Grid (기존 스타일 유지) */
-.pc-subjects-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 20px;
-}
-
-.pc-subject-card {
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  padding: 24px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.pc-subject-card:hover {
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-  transform: translateY(-4px);
-  border-color: #216d30;
-}
-
-.pc-subject-header {
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 2px solid #f0f0f0;
-}
-
-.pc-subject-header h3 {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #333;
-  margin: 0 0 8px 0;
-}
-
-.pc-subject-year {
-  display: inline-block;
-  padding: 4px 12px;
-  background-color: #e8f5e9;
-  color: #2e7d32;
-  font-size: 0.85rem;
-  font-weight: 600;
-  border-radius: 12px;
-}
-
-.pc-subject-body {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.pc-subject-body .pc-subject-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.95rem;
-  color: #555;
-}
-
-.pc-subject-body .pc-subject-info .material-symbols-outlined {
-  font-size: 20px;
-  color: #666;
-}
-
-.pc-subject-footer {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #f0f0f0;
-}
-
-.pc-view-students-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  padding: 12px 16px;
-  background-color: #216d30;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.pc-view-students-btn:hover {
-  background-color: #1a5a26;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(33, 109, 48, 0.3);
-}
-
-.pc-view-students-btn .material-symbols-outlined {
-  font-size: 20px;
-}
-
-/* Empty State */
-.pc-empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 80px 20px;
-  background-color: #f9f9f9;
-  border-radius: 12px;
-  border: 2px dashed #ddd;
-}
-
-.pc-empty-state .material-symbols-outlined {
-  font-size: 64px;
-  color: #ccc;
-  margin-bottom: 16px;
-}
-
-.pc-empty-state p {
-  font-size: 1.1rem;
-  color: #999;
-  margin: 0;
-}
-
-/* Responsive Design */
-@media (max-width: 1200px) {
-  .pc-students-table {
-    font-size: 0.85rem;
-  }
-
-  .pc-students-table th,
-  .pc-students-table td {
-    padding: 10px 8px;
-  }
-}
-
+/* 반응형 디자인 */
 @media (max-width: 768px) {
   .pc-page-container {
     padding: 20px 16px;
   }
 
   .pc-title {
-    font-size: 1.5rem;
-  }
-
-  .pc-alerts-list,
-  .pc-subjects-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .pc-section-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .pc-students-container {
-    padding: 12px;
-    overflow-x: auto;
+    font-size: 24px;
   }
 
   .pc-students-table {
-    min-width: 900px;
+    font-size: 12px;
+  }
+
+  .pc-students-table th,
+  .pc-students-table td {
+    padding: 10px 8px;
+    font-size: 12px;
   }
 
   .pc-counseling-btn {
-    padding: 6px 12px;
-    font-size: 0.8rem;
+    padding: 4px 10px;
+    font-size: 12px;
   }
-}
-
-@media (max-width: 480px) {
-  .pc-students-table th,
-  .pc-students-table td {
-    padding: 8px 6px;
-    font-size: 0.75rem;
-  }
-
-  .pc-status-badge {
-    font-size: 0.7rem;
-    padding: 3px 8px;
-  }
-}
-
-.pc-search-bar {
-  padding: 15px;
-  background: #f8f9fa;
-  border-bottom: 1px solid #e9ecef;
-}
-
-.pc-search-input {
-  width: 100%;
-  padding: 10px 15px;
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
-  font-size: 14px;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.pc-search-input:focus {
-  border-color: #0066ff;
-  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
 }

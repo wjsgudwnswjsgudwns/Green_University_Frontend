@@ -1,4 +1,4 @@
-/* Counseling Form Modal Styles */
+/* 상담 폼 모달 스타일 - counselingFormModal.css */
 
 .cfm-modal-overlay {
   position: fixed;
@@ -6,116 +6,80 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  animation: cfm-fadeIn 0.3s ease;
-}
-
-@keyframes cfm-fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  padding: 20px;
 }
 
 .cfm-modal-container {
   background: white;
-  border-radius: 16px;
-  width: 90%;
+  border-radius: 12px;
+  width: 100%;
   max-width: 600px;
   max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  animation: cfm-slideUp 0.3s ease;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
 }
 
-@keyframes cfm-slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Modal Header */
+/* 모달 헤더 */
 .cfm-modal-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 24px 28px;
-  border-bottom: 2px solid #e0e0e0;
-  background-color: #f8f9fa;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 2px solid #e0b960;
+  background: #f8f9fa;
 }
 
 .cfm-modal-header h2 {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #216d30;
+  font-size: 20px;
+  color: #2c3e50;
   margin: 0;
-}
-
-.cfm-modal-header .material-symbols-outlined {
-  font-size: 32px;
+  font-weight: 600;
 }
 
 .cfm-close-btn {
   background: none;
   border: none;
+  color: #6c757d;
+  font-size: 24px;
   cursor: pointer;
-  padding: 8px;
-  border-radius: 50%;
+  padding: 0;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.2s ease;
+  border-radius: 4px;
+  transition: all 0.2s;
 }
 
 .cfm-close-btn:hover {
-  background-color: #e0e0e0;
+  background: #e0e6ed;
+  color: #2c3e50;
 }
 
-.cfm-close-btn .material-symbols-outlined {
-  font-size: 28px;
-  color: #666;
-}
-
-/* Modal Body */
+/* 모달 바디 */
 .cfm-modal-body {
-  padding: 28px;
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
 }
 
-/* Info Section */
+/* 정보 섹션 */
 .cfm-info-section {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
   margin-bottom: 24px;
-  padding: 20px;
-  background-color: #f8f9fa;
-  border-radius: 12px;
-  border: 1px solid #e0e0e0;
-}
-
-.cfm-info-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.cfm-info-item .material-symbols-outlined {
-  font-size: 28px;
-  color: #216d30;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
 }
 
 .cfm-info-item div {
@@ -125,204 +89,179 @@
 }
 
 .cfm-info-item label {
-  font-size: 0.85rem;
-  color: #666;
+  font-size: 13px;
+  color: #6c757d;
   font-weight: 600;
 }
 
 .cfm-info-item span {
-  font-size: 1rem;
-  color: #333;
-  font-weight: 600;
+  font-size: 16px;
+  color: #2c3e50;
+  font-weight: 500;
 }
 
-/* Form Group */
+/* 폼 그룹 */
 .cfm-form-group {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .cfm-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 1rem;
+  display: block;
+  font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: #2c3e50;
   margin-bottom: 8px;
 }
 
-.cfm-label .material-symbols-outlined {
-  font-size: 22px;
-  color: #216d30;
-}
-
 .cfm-required {
-  color: #dc2626;
-  font-size: 1.1rem;
-  margin-left: 4px;
+  color: #dc3545;
+  margin-left: 2px;
 }
 
-/* Input Fields */
 .cfm-input,
-.cfm-textarea {
+.cfm-textarea,
+.cfm-select {
   width: 100%;
-  padding: 12px 16px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 1rem;
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 15px;
+  color: #2c3e50;
+  transition: all 0.2s;
   font-family: inherit;
-  transition: all 0.2s ease;
-  box-sizing: border-box;
 }
 
 .cfm-input:focus,
-.cfm-textarea:focus {
+.cfm-textarea:focus,
+.cfm-select:focus {
   outline: none;
   border-color: #216d30;
   box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
 }
 
-.cfm-input-error {
-  border-color: #dc2626 !important;
-}
-
-.cfm-input-error:focus {
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
-}
-
 .cfm-textarea {
   resize: vertical;
   min-height: 120px;
-  line-height: 1.6;
 }
 
-/* Error Message */
+.cfm-input-error {
+  border-color: #dc3545;
+}
+
 .cfm-error-message {
   display: block;
-  margin-top: 8px;
-  font-size: 0.85rem;
-  color: #dc2626;
-  font-weight: 500;
+  margin-top: 6px;
+  font-size: 13px;
+  color: #dc3545;
 }
 
-/* Checkbox Group */
-.cfm-checkbox-group {
-  padding: 16px;
-  background-color: #fffbeb;
-  border: 1px solid #fef3c7;
-  border-radius: 8px;
+/* 예약 목록 */
+.cfm-reservation-list {
+  margin-top: 12px;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #e0e6ed;
+  border-radius: 6px;
 }
 
-.cfm-checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.cfm-reservation-item {
+  padding: 12px 16px;
   cursor: pointer;
+  transition: background 0.2s;
+  border-bottom: 1px solid #e0e6ed;
 }
 
-.cfm-checkbox {
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-  accent-color: #216d30;
+.cfm-reservation-item:last-child {
+  border-bottom: none;
 }
 
-.cfm-checkbox-text {
-  font-size: 1rem;
+.cfm-reservation-item:hover {
+  background: #f8f9fa;
+}
+
+.cfm-reservation-item.selected {
+  background: #e8f5e9;
+  border-left: 3px solid #216d30;
+}
+
+.cfm-reservation-date {
+  font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: #2c3e50;
+  margin-bottom: 4px;
 }
 
-.cfm-help-text {
-  margin: 8px 0 0 32px;
-  font-size: 0.85rem;
-  color: #666;
-  line-height: 1.5;
+.cfm-reservation-subject {
+  font-size: 13px;
+  color: #6c757d;
 }
 
-/* Modal Footer */
+.cfm-no-reservations {
+  padding: 20px;
+  text-align: center;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+/* 모달 푸터 */
 .cfm-modal-footer {
   display: flex;
   gap: 12px;
   justify-content: flex-end;
-  margin-top: 32px;
-  padding-top: 24px;
-  border-top: 1px solid #e0e0e0;
+  padding-top: 20px;
+  border-top: 1px solid #e0e6ed;
+  margin-top: 20px;
 }
 
 .cfm-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 24px;
+  padding: 10px 24px;
   border: none;
-  border-radius: 8px;
-  font-size: 1rem;
+  border-radius: 6px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.cfm-btn .material-symbols-outlined {
-  font-size: 20px;
+  transition: all 0.2s;
 }
 
 .cfm-btn-cancel {
-  background-color: #f3f4f6;
-  color: #666;
+  background: #6c757d;
+  color: white;
 }
 
 .cfm-btn-cancel:hover {
-  background-color: #e5e7eb;
-  color: #333;
+  background: #5a6268;
 }
 
 .cfm-btn-submit {
-  background-color: #216d30;
+  background: #216d30;
   color: white;
 }
 
 .cfm-btn-submit:hover {
-  background-color: #1a5a26;
-  box-shadow: 0 4px 12px rgba(33, 109, 48, 0.3);
-  transform: translateY(-2px);
+  background: #1a5524;
 }
 
-.cfm-btn-submit:active {
-  transform: translateY(0);
+.cfm-btn:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
 }
 
-/* Scrollbar Styles */
-.cfm-modal-container::-webkit-scrollbar {
-  width: 8px;
-}
-
-.cfm-modal-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-.cfm-modal-container::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
-}
-
-.cfm-modal-container::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
-/* Responsive Design */
+/* 반응형 디자인 */
 @media (max-width: 768px) {
+  .cfm-modal-overlay {
+    padding: 10px;
+  }
+
   .cfm-modal-container {
-    width: 95%;
     max-height: 95vh;
   }
 
   .cfm-modal-header {
-    padding: 20px;
+    padding: 16px 20px;
   }
 
   .cfm-modal-header h2 {
-    font-size: 1.3rem;
+    font-size: 18px;
   }
 
   .cfm-modal-body {
@@ -331,22 +270,13 @@
 
   .cfm-info-section {
     grid-template-columns: 1fr;
-    padding: 16px;
   }
 
-  .cfm-btn {
-    padding: 10px 20px;
-    font-size: 0.95rem;
-  }
-}
-
-@media (max-width: 480px) {
   .cfm-modal-footer {
     flex-direction: column-reverse;
   }
 
   .cfm-btn {
     width: 100%;
-    justify-content: center;
   }
 }

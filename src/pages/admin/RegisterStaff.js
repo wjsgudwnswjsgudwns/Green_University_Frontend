@@ -43,7 +43,6 @@ export default function RegisterStaff() {
     try {
       await api.post("/api/user/staff", formData);
       alert("직원이 등록되었습니다.");
-      // 직원 목록 페이지가 없으므로 학생 목록으로 이동
       navigate("/staff/student-list");
     } catch (err) {
       console.error("직원 등록 실패:", err);
@@ -58,47 +57,47 @@ export default function RegisterStaff() {
   };
 
   return (
-    <div className="my-page-container">
-      <aside className="side-menu">
-        <div className="side-menu-header">
+    <div className="admin-page-container">
+      <aside className="admin-side-menu">
+        <div className="admin-side-menu-header">
           <h2>학사관리</h2>
         </div>
-        <nav className="side-menu-nav">
-          <Link to="/staff/student-list" className="menu-item">
+        <nav className="admin-side-menu-nav">
+          <Link to="/staff/student-list" className="admin-menu-item">
             학생 명단 조회
           </Link>
-          <Link to="/staff/professor-list" className="menu-item">
+          <Link to="/staff/professor-list" className="admin-menu-item">
             교수 명단 조회
           </Link>
-          <Link to="/staff/register-student" className="menu-item">
+          <Link to="/staff/register-student" className="admin-menu-item">
             학생 등록
           </Link>
-          <Link to="/staff/register-professor" className="menu-item">
+          <Link to="/staff/register-professor" className="admin-menu-item">
             교수 등록
           </Link>
-          <Link to="/staff/register-staff" className="menu-item active">
+          <Link to="/staff/register-staff" className="admin-menu-item active">
             직원 등록
           </Link>
-          <Link to="/staff/tuition/bill" className="menu-item">
+          <Link to="/staff/tuition/bill" className="admin-menu-item">
             등록금 고지서 발송
           </Link>
-          <Link to="/staff/break/list" className="menu-item">
+          <Link to="/staff/break/list" className="admin-menu-item">
             휴학 처리
           </Link>
-          <Link to="/staff/course-period" className="menu-item">
+          <Link to="/staff/course-period" className="admin-menu-item">
             수강 신청 기간 설정
           </Link>
         </nav>
       </aside>
 
-      <main className="main-content">
+      <main className="admin-main-content">
         <h1>직원 등록</h1>
-        <div className="divider"></div>
+        <div className="admin-divider"></div>
 
-        {error && <div className="error-message">{error}</div>}
+        {error && <div className="register-error-message">{error}</div>}
 
         <form onSubmit={handleSubmit} className="register-form">
-          <table className="form-table">
+          <table className="register-form-table">
             <tbody>
               <tr>
                 <th>
@@ -111,7 +110,7 @@ export default function RegisterStaff() {
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    className="input-field"
+                    className="register-input-field"
                     required
                   />
                 </td>
@@ -127,7 +126,7 @@ export default function RegisterStaff() {
                     name="birthDate"
                     value={formData.birthDate}
                     onChange={handleChange}
-                    className="input-field"
+                    className="register-input-field"
                     required
                   />
                 </td>
@@ -136,7 +135,7 @@ export default function RegisterStaff() {
                 <th>
                   <label>성별</label>
                 </th>
-                <td className="radio-group">
+                <td className="register-radio-group">
                   <label>
                     <input
                       type="radio"
@@ -170,7 +169,7 @@ export default function RegisterStaff() {
                     name="address"
                     value={formData.address}
                     onChange={handleChange}
-                    className="input-field"
+                    className="register-input-field"
                     required
                   />
                 </td>
@@ -186,7 +185,7 @@ export default function RegisterStaff() {
                     name="tel"
                     value={formData.tel}
                     onChange={handleChange}
-                    className="input-field"
+                    className="register-input-field"
                     placeholder="010-1234-5678"
                     required
                   />
@@ -203,7 +202,7 @@ export default function RegisterStaff() {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className="input-field"
+                    className="register-input-field"
                     placeholder="example@email.com"
                     required
                   />
@@ -212,8 +211,12 @@ export default function RegisterStaff() {
             </tbody>
           </table>
 
-          <div className="button-container">
-            <button type="submit" className="submit-button" disabled={loading}>
+          <div className="register-button-container">
+            <button
+              type="submit"
+              className="register-submit-button"
+              disabled={loading}
+            >
               {loading ? "등록 중..." : "등록"}
             </button>
           </div>

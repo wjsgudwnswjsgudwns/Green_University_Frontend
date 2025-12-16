@@ -10,13 +10,11 @@ export default function AIProfessorRiskStudentsPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [riskStudents, setRiskStudents] = useState([]);
-  const [subjects, setSubjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   // 필터 상태
-  const [selectedRiskLevel, setSelectedRiskLevel] = useState("ALL"); // ALL, CRITICAL, RISK
-  const [selectedSubject, setSelectedSubject] = useState("ALL");
+  const [selectedRiskLevel, setSelectedRiskLevel] = useState("ALL");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState({
     field: "overallRisk",
@@ -38,66 +36,33 @@ export default function AIProfessorRiskStudentsPage() {
       setLoading(true);
       setError("");
 
-      // 담당 과목 조회
-      const subjectsResponse = await api.get(`/api/professor/subject`);
-      const subjectList = subjectsResponse.data?.subjectList || [];
-      setSubjects(subjectList);
+      // 담당 지도학생들의 AI 분석 결과 조회
+      const response = await api.get(
+        `/api/ai-analysis/advisor/${user.id}/students`
+      );
 
-      // 모든 과목의 학생들을 조회하고 위험도 분석
-      const allRiskStudents = [];
+      if (response.data?.code === 1) {
+        const analysisResults = response.data.data || [];
 
-      for (const subject of subjectList) {
-        try {
-          // 해당 과목의 수강 학생 조회
-          const studentsResponse = await api.get(
-            `/api/professor/subject/${subject.id}/enrolled`
-          );
-          const students = studentsResponse.data?.studentList || [];
+        // RISK 또는 CRITICAL인 학생만 필터링
+        const riskStudentsData = analysisResults
+          .filter(
+            (result) =>
+              result.overallRisk === "RISK" || result.overallRisk === "CRITICAL"
+          )
+          .map((result) => ({
+            studentId: result.studentId,
+            studentName: result.student?.name || "-",
+            deptName: result.student?.department?.name || "-",
+            subjectId: result.subjectId,
+            subjectName: result.subject?.name || "-",
+            subYear: result.subject?.subYear || "-",
+            semester: result.subject?.semester || "-",
+            analysis: result,
+          }));
 
-          // 각 학생의 분석 결과 조회
-          for (const student of students) {
-            const sid = student?.studentId ?? student?.id;
-            if (!sid) continue;
-
-            try {
-              const analysisResponse = await api.get(
-                `/api/ai-analysis/student/${sid}`
-              );
-
-              if (analysisResponse.data?.code === 1) {
-                const allResults = analysisResponse.data.data || [];
-                const subjectAnalysis = allResults.find(
-                  (result) => result.subjectId === subject.id
-                );
-
-                // 위험도가 RISK 또는 CRITICAL인 학생만 추가
-                if (
-                  subjectAnalysis &&
-                  (subjectAnalysis.overallRisk === "RISK" ||
-                    subjectAnalysis.overallRisk === "CRITICAL")
-                ) {
-                  allRiskStudents.push({
-                    studentId: sid,
-                    studentName: student.studentName || student.name,
-                    deptName: student.deptName,
-                    subjectId: subject.id,
-                    subjectName: subject.name,
-                    subYear: subject.subYear,
-                    semester: subject.semester,
-                    analysis: subjectAnalysis,
-                  });
-                }
-              }
-            } catch (err) {
-              console.error(`분석 조회 실패 studentId=${sid}`, err);
-            }
-          }
-        } catch (err) {
-          console.error(`과목 ${subject.id} 학생 조회 실패:`, err);
-        }
+        setRiskStudents(riskStudentsData);
       }
-
-      setRiskStudents(allRiskStudents);
     } catch (err) {
       console.error("데이터 조회 실패:", err);
       setError("데이터를 불러오는데 실패했습니다.");
@@ -114,13 +79,6 @@ export default function AIProfessorRiskStudentsPage() {
     if (selectedRiskLevel !== "ALL") {
       filtered = filtered.filter(
         (s) => s.analysis.overallRisk === selectedRiskLevel
-      );
-    }
-
-    // 과목 필터
-    if (selectedSubject !== "ALL") {
-      filtered = filtered.filter(
-        (s) => s.subjectId === parseInt(selectedSubject)
       );
     }
 
@@ -211,7 +169,6 @@ export default function AIProfessorRiskStudentsPage() {
   };
 
   const handleModalSubmit = async () => {
-    // 데이터 새로고침
     await fetchData();
   };
 
@@ -269,9 +226,10 @@ export default function AIProfessorRiskStudentsPage() {
   return (
     <div className="pc-page-container">
       <div className="pc-header">
-        <h1 className="pc-title">중도 이탈 위험 학생 관리</h1>
+        <h1 className="pc-title">담당 지도학생 중도 이탈 위험 관리</h1>
         <p className="pc-subtitle">
-          종합 위험도가 높은 학생들을 집중적으로 관리합니다.
+          내가 지도하는 학생 중 종합 위험도가 높은 학생들을 집중적으로
+          관리합니다.
         </p>
       </div>
 
@@ -319,22 +277,6 @@ export default function AIProfessorRiskStudentsPage() {
           </select>
         </div>
 
-        <div className="pc-risk-filter-group">
-          <label>과목</label>
-          <select
-            value={selectedSubject}
-            onChange={(e) => setSelectedSubject(e.target.value)}
-            className="pc-risk-filter-select"
-          >
-            <option value="ALL">전체 과목</option>
-            {subjects.map((subject) => (
-              <option key={subject.id} value={subject.id}>
-                {subject.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
         <div className="pc-risk-filter-group pc-risk-search-group">
           <label>검색</label>
           <input
@@ -358,7 +300,7 @@ export default function AIProfessorRiskStudentsPage() {
           <div className="pc-empty-state">
             <p>
               {riskStudents.length === 0
-                ? "현재 위험 학생이 없습니다."
+                ? "현재 담당 지도학생 중 위험 학생이 없습니다."
                 : "검색 조건에 맞는 학생이 없습니다."}
             </p>
           </div>
@@ -440,7 +382,7 @@ export default function AIProfessorRiskStudentsPage() {
                   >
                     <td>{student.studentId}</td>
                     <td>{student.studentName}</td>
-                    <td>{student.deptName || "-"}</td>
+                    <td>{student.deptName}</td>
                     <td>{student.subjectName}</td>
                     <td>
                       {student.subYear}학년 {student.semester}학기
@@ -460,15 +402,17 @@ export default function AIProfessorRiskStudentsPage() {
                         상담입력
                       </button>
                     </td>
-                    <td
-                      onClick={() =>
-                        navigate(
-                          `/aiprofessor/counseling/history/${student.studentId}`
-                        )
-                      }
-                      style={{ cursor: "pointer", color: "#0066ff" }}
-                    >
-                      상담이력
+                    <td>
+                      <button
+                        className="pc-counseling-btn"
+                        onClick={() =>
+                          navigate(
+                            `/aiprofessor/counseling/history/${student.studentId}`
+                          )
+                        }
+                      >
+                        상담이력
+                      </button>
                     </td>
                   </tr>
                 ))}

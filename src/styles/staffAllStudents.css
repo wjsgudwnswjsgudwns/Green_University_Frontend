@@ -1,189 +1,148 @@
-/* Staff All Students Page Styles */
+/* 전체 학생 관리 페이지 전용 스타일 - staffAllStudents.css */
 
+/* 페이지 컨테이너 */
 .sas-page-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 40px 20px;
-  min-height: calc(100vh - 200px);
+  padding: 40px;
+  min-width: 800px;
 }
 
-/* Header */
 .sas-header {
-  margin-bottom: 32px;
-  padding-bottom: 20px;
-  border-bottom: 2px solid #216d30;
+  margin-bottom: 20px;
 }
 
 .sas-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #216d30;
-  margin: 0 0 8px 0;
+  font-size: 28px;
+  color: #2c3e50;
+  margin: 0 0 20px 0;
 }
 
 .sas-subtitle {
-  font-size: 1rem;
-  color: #666;
-  margin: 0;
+  font-size: 16px;
+  color: #6c757d;
+  margin: 0 0 20px 0;
 }
 
-/* Loading */
+/* 로딩 */
 .sas-loading {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 400px;
-  gap: 16px;
+  padding: 60px 20px;
 }
 
 .sas-loading-spinner {
   width: 50px;
   height: 50px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #216d30;
+  border: 4px solid #e0e6ed;
+  border-top-color: #216d30;
   border-radius: 50%;
-  animation: sas-spin 1s linear infinite;
+  animation: sas-spin 0.8s linear infinite;
 }
 
 @keyframes sas-spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
+  to {
     transform: rotate(360deg);
   }
 }
 
 .sas-loading p {
+  margin-top: 20px;
   color: #666;
-  font-size: 1rem;
+  font-size: 16px;
 }
 
-/* Error Message */
+/* 에러 메시지 */
 .sas-error-message {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px 20px;
-  background-color: #fee;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #fee;
   border: 1px solid #fcc;
-  border-radius: 8px;
+  border-radius: 6px;
   color: #c33;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
-.sas-error-message .material-symbols-outlined {
-  font-size: 24px;
-}
-
-/* Statistics Summary */
+/* 통계 카드 */
 .sas-statistics {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  display: flex;
   gap: 16px;
-  margin-bottom: 32px;
+  margin-bottom: 30px;
 }
 
 .sas-stat-card {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 20px;
+  flex: 1;
   background: white;
-  border-radius: 12px;
-  border: 2px solid;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #216d30;
+  transition: transform 0.2s;
 }
 
 .sas-stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.sas-stat-card.sas-stat-total {
+  border-left-color: #216d30;
+}
+
+.sas-stat-card.sas-stat-normal {
+  border-left-color: #28a745;
+}
+
+.sas-stat-card.sas-stat-caution {
+  border-left-color: #ffc107;
+}
+
+.sas-stat-card.sas-stat-risk {
+  border-left-color: #fd7e14;
+}
+
+.sas-stat-card.sas-stat-critical {
+  border-left-color: #dc3545;
 }
 
 .sas-stat-content {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
 }
 
 .sas-stat-label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #666;
+  font-size: 14px;
+  color: #6c757d;
+  font-weight: 500;
 }
 
 .sas-stat-value {
-  font-size: 1.5rem;
+  font-size: 28px;
   font-weight: 700;
+  color: #2c3e50;
 }
 
-/* Stat Card Variants */
-.sas-stat-total {
-  border-color: #216d30;
-  background: linear-gradient(135deg, #fff 0%, #e8f5e9 100%);
-}
-
-.sas-stat-total .sas-stat-value {
-  color: #1a5524;
-}
-
-.sas-stat-normal {
-  border-color: #4caf50;
-  background: linear-gradient(135deg, #fff 0%, #e8f5e9 100%);
-}
-
-.sas-stat-normal .sas-stat-value {
-  color: #2e7d32;
-}
-
-.sas-stat-caution {
-  border-color: #ffeb3b;
-  background: linear-gradient(135deg, #fff 0%, #fffde7 100%);
-}
-
-.sas-stat-caution .sas-stat-value {
-  color: #f57f17;
-}
-
-.sas-stat-risk {
-  border-color: #ff9800;
-  background: linear-gradient(135deg, #fff 0%, #fff3e0 100%);
-}
-
-.sas-stat-risk .sas-stat-value {
-  color: #e65100;
-}
-
-.sas-stat-critical {
-  border-color: #f44336;
-  background: linear-gradient(135deg, #fff 0%, #ffebee 100%);
-}
-
-.sas-stat-critical .sas-stat-value {
-  color: #c62828;
-}
-
-/* Filters */
+/* 필터 */
 .sas-filters {
   display: flex;
-  gap: 15px;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 24px;
   padding: 20px;
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  margin-bottom: 20px;
+  border-radius: 8px;
+  border: 1px solid #e0e6ed;
   flex-wrap: wrap;
-  align-items: flex-end;
 }
 
 .sas-filter-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  min-width: 180px;
-  flex: 0 1 auto;
+  gap: 6px;
+  min-width: 150px;
 }
 
 .sas-filter-group label {
@@ -193,16 +152,17 @@
 }
 
 .sas-filter-group select {
-  padding: 10px 15px;
+  padding: 10px 14px;
   border: 1px solid #d1d5db;
   border-radius: 6px;
-  font-size: 14px;
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  background: white;
+  font-size: 15px;
+  color: #2c3e50;
+  background-color: #ffffff;
+  transition: all 0.2s;
 }
 
 .sas-filter-group select:focus {
+  outline: none;
   border-color: #216d30;
   box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
 }
@@ -210,195 +170,193 @@
 .sas-filter-group select:disabled {
   background-color: #f3f4f6;
   cursor: not-allowed;
-  opacity: 0.6;
 }
 
 .sas-reset-btn {
   padding: 10px 24px;
-  background: #6c757d;
-  color: white;
+  background-color: #6c757d;
+  color: #ffffff;
   border: none;
   border-radius: 6px;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
-  align-self: flex-end;
-  flex-shrink: 0;
-  height: 42px;
-  white-space: nowrap;
+  margin-left: auto;
 }
 
 .sas-reset-btn:hover {
-  background: #5a6268;
+  background-color: #5a6268;
 }
 
-/* Results Info */
+/* 결과 정보 */
 .sas-results-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding: 16px 20px;
-  background: #f9f9f9;
-  border-radius: 8px;
+  margin-bottom: 16px;
 }
 
 .sas-results-count {
-  font-size: 1rem;
-  color: #666;
+  font-size: 16px;
+  color: #4a5568;
 }
 
 .sas-results-count strong {
   color: #216d30;
-  font-size: 1.2rem;
+  font-weight: 700;
 }
 
-/* Students Section */
+/* 학생 섹션 */
 .sas-students-section {
-  margin-top: 24px;
-}
-
-/* Table */
-.sas-table-wrapper {
   background: white;
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+.sas-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  font-size: 16px;
+}
+
+.sas-table-wrapper {
+  overflow-x: auto;
+}
+
+/* 학생 테이블 */
 .sas-students-table {
   width: 100%;
   border-collapse: collapse;
 }
 
 .sas-students-table thead {
-  background: #f9fafb;
-  border-bottom: 2px solid #e5e7eb;
+  background-color: #216d30;
+  color: white;
 }
 
 .sas-students-table th {
-  padding: 1rem 1.5rem;
-  text-align: left;
-  font-size: 0.875rem;
+  padding: 14px 16px;
+  text-align: center;
   font-weight: 600;
-  color: #ffffff;
-  background-color: #216d30;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.sas-students-table tbody tr {
-  border-bottom: 1px solid #e5e7eb;
-  transition: background-color 0.2s;
-}
-
-.sas-students-table tbody tr:hover {
-  background-color: #f9fafb;
+  font-size: 15px;
+  white-space: nowrap;
+  vertical-align: middle;
 }
 
 .sas-students-table td {
-  padding: 1rem 1.5rem;
-  font-size: 0.875rem;
-  color: #111827;
+  padding: 14px 16px;
+  text-align: center;
+  border-bottom: 1px solid #e0e6ed;
+  color: #4a5568;
+  vertical-align: middle;
 }
 
-.sas-detail-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  color: #2563eb;
-  font-weight: 500;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
+.sas-students-table tbody tr {
+  transition: background 0.2s;
 }
 
-.sas-detail-btn:hover {
-  color: #1e40af;
-  text-decoration: underline;
+.sas-students-table tbody tr:hover {
+  background-color: #f8f9fa;
 }
 
-/* Risk Badge */
+.sas-students-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* 위험도 배지 */
 .sas-risk-badge {
-  padding: 6px 14px;
-  border-radius: 16px;
-  font-size: 0.85rem;
-  font-weight: 700;
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
   white-space: nowrap;
 }
 
-.sas-risk-normal {
-  background-color: #e8f5e9;
-  color: #2e7d32;
+.sas-risk-badge.sas-risk-normal {
+  background-color: #d4edda;
+  color: #155724;
 }
 
-.sas-risk-caution {
-  background-color: #fff3e0;
-  color: #e65100;
+.sas-risk-badge.sas-risk-caution {
+  background-color: #fff3cd;
+  color: #856404;
 }
 
-.sas-risk-warning {
-  background-color: #ffe0b2;
-  color: #d84315;
+.sas-risk-badge.sas-risk-warning {
+  background-color: #ffe5cc;
+  color: #cc5200;
 }
 
-.sas-risk-critical {
-  background-color: #ffebee;
-  color: #c62828;
+.sas-risk-badge.sas-risk-critical {
+  background-color: #f8d7da;
+  color: #721c24;
 }
 
-/* Empty State */
-.sas-empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 80px 20px;
-  background-color: #f9f9f9;
-  border-radius: 12px;
-  border: 2px dashed #ddd;
+/* 상세보기 버튼 */
+.sas-detail-btn {
+  padding: 6px 16px;
+  background-color: #216d30;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.sas-empty-state p {
-  font-size: 1.1rem;
-  color: #999;
-  margin: 0;
+.sas-detail-btn:hover {
+  background-color: #1a5524;
+  transform: translateY(-1px);
 }
 
-/* Responsive Design */
+/* 반응형 */
 @media (max-width: 1024px) {
-  .sas-filters {
+  .sas-statistics {
     flex-wrap: wrap;
   }
 
-  .sas-filter-group {
-    min-width: 200px;
+  .sas-stat-card {
+    min-width: calc(33.333% - 11px);
   }
 }
 
 @media (max-width: 768px) {
   .sas-page-container {
-    padding: 20px 16px;
+    padding: 30px 20px;
+    min-width: auto;
   }
 
   .sas-title {
-    font-size: 1.5rem;
+    font-size: 24px;
   }
 
   .sas-statistics {
-    grid-template-columns: repeat(2, 1fr);
+    flex-direction: column;
+  }
+
+  .sas-stat-card {
+    min-width: 100%;
   }
 
   .sas-filters {
     flex-direction: column;
     align-items: stretch;
-    gap: 12px;
   }
 
-  .sas-filter-group,
+  .sas-filter-group {
+    min-width: 100%;
+  }
+
   .sas-reset-btn {
+    margin-left: 0;
     width: 100%;
+  }
+
+  .sas-students-table th,
+  .sas-students-table td {
+    padding: 8px 4px;
+    font-size: 13px;
   }
 }

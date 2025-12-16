@@ -1,404 +1,218 @@
-/* Register Form Styles - 학생/교수/직원 등록 - 접두사: register- */
+/* 사용자 등록 폼 전용 스타일 - registerForm.css */
 
-/* 공통 레이아웃 (adminManagement와 동일) */
-.my-page-container {
-  display: flex;
-  min-height: 100vh;
-  background-color: #f5f7fa;
-  padding: 40px 20px;
-  gap: 30px;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-.side-menu {
-  min-width: 240px;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-  height: fit-content;
-  position: sticky;
-  top: 20px;
-}
-
-.side-menu-header {
-  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
-  color: #ffffff;
-  padding: 24px 20px;
-  text-align: center;
-}
-
-.side-menu-header h2 {
-  margin: 0;
-  font-size: 1.4rem;
-  font-weight: 700;
-  letter-spacing: 1px;
-}
-
-.side-menu-nav {
-  display: flex;
-  flex-direction: column;
-  padding: 12px 0;
-}
-
-.menu-item {
-  display: block;
-  padding: 14px 20px;
-  color: #2c3e50;
-  text-decoration: none;
-  font-weight: 500;
-  font-size: 0.95rem;
-  transition: all 0.3s ease;
-  border-left: 3px solid transparent;
-}
-
-.menu-item:hover {
-  background-color: #f8f9fa;
-  color: #216d30;
-  border-left-color: #216d30;
-}
-
-.menu-item.active {
-  background-color: rgba(33, 109, 48, 0.1);
-  color: #216d30;
-  border-left-color: #216d30;
-  font-weight: 600;
-}
-
-.main-content {
-  flex: 1;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  padding: 40px;
-  min-height: 600px;
-  min-width: 1000px;
-}
-
-.main-content h1 {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #2c3e50;
-  margin: 0 0 20px 0;
-}
-
-.divider {
-  height: 2px;
-  background: linear-gradient(90deg, #216d30 0%, rgba(33, 109, 48, 0.2) 100%);
-  margin-bottom: 30px;
-}
-
-/* Register Form */
+/* 등록 폼 */
 .register-form {
-  width: 100%;
   max-width: 800px;
   margin: 0 auto;
 }
 
-.form-table {
+.register-form-table {
   width: 100%;
   border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 30px;
-  border: 1px solid #e0e6ed;
-  background: #ffffff;
 }
 
-.form-table tbody tr {
-  border-bottom: 1px solid #e0e6ed;
-}
-
-.form-table tbody tr:last-child {
-  border-bottom: none;
-}
-
-.form-table th {
-  background-color: #f8f9fa;
+.register-form-table th {
+  width: 200px;
   padding: 16px 20px;
   text-align: left;
+  background: #f8f9fa;
   font-weight: 600;
   color: #2c3e50;
-  border-right: 1px solid #e0e6ed;
-  width: 30%;
+  border-bottom: 1px solid #e0e6ed;
+  font-size: 15px;
   vertical-align: middle;
 }
 
-.form-table td {
+.register-form-table td {
   padding: 16px 20px;
-  color: #2c3e50;
+  border-bottom: 1px solid #e0e6ed;
 }
 
-/* Input 필드 */
-.input-field {
+.register-form-table tr:last-child th,
+.register-form-table tr:last-child td {
+  border-bottom: none;
+}
+
+.register-form-table label {
+  display: block;
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 15px;
+}
+
+/* 입력 필드 */
+.register-input-field {
   width: 100%;
   padding: 10px 14px;
-  border: 2px solid #e0e6ed;
+  border: 1px solid #d1d5db;
   border-radius: 6px;
-  font-size: 0.95rem;
+  font-size: 15px;
   color: #2c3e50;
-  transition: all 0.3s ease;
+  transition: all 0.2s;
   background-color: #ffffff;
-  font-family: inherit;
 }
 
-.input-field:focus {
+.register-input-field:focus {
   outline: none;
   border-color: #216d30;
   box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
 }
 
-.input-field::placeholder {
-  color: #95a5a6;
+.register-input-field:disabled {
+  background: #f3f4f6;
+  cursor: not-allowed;
+  color: #9ca3af;
 }
 
-.input-field:disabled {
-  background-color: #f8f9fa;
-  cursor: not-allowed;
-  opacity: 0.6;
+.register-input-field::placeholder {
+  color: #9ca3af;
 }
 
 /* 라디오 버튼 그룹 */
-.radio-group {
+.register-radio-group {
   display: flex;
-  gap: 24px;
-  align-items: center;
+  gap: 20px;
+  padding: 10px 0;
 }
 
-.radio-group label {
+.register-radio-group label {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: 15px;
   color: #2c3e50;
-  font-weight: 500;
-  transition: color 0.3s ease;
+  font-weight: normal;
 }
 
-.radio-group label:hover {
-  color: #216d30;
-}
-
-.radio-group input[type="radio"] {
+.register-radio-group input[type="radio"] {
+  cursor: pointer;
   width: 18px;
   height: 18px;
-  cursor: pointer;
-  accent-color: #216d30;
-  margin: 0;
 }
 
 /* 버튼 컨테이너 */
-.button-container {
+.register-button-container {
   display: flex;
   justify-content: center;
   gap: 12px;
   margin-top: 30px;
 }
 
-/* Submit 버튼 */
-.submit-button {
-  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
-  color: #ffffff;
+.register-submit-button {
+  padding: 12px 32px;
+  background: #216d30;
+  color: white;
   border: none;
-  border-radius: 8px;
-  padding: 14px 48px;
-  font-size: 1.05rem;
+  border-radius: 6px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(33, 109, 48, 0.3);
-  min-width: 150px;
+  transition: all 0.2s;
+  min-width: 120px;
 }
 
-.submit-button:hover:not(:disabled) {
-  background: linear-gradient(135deg, #1a5524 0%, #0e2b14 100%);
-  box-shadow: 0 6px 16px rgba(33, 109, 48, 0.4);
-  transform: translateY(-2px);
+.register-submit-button:hover:not(:disabled) {
+  background: #1a5524;
+  transform: translateY(-1px);
 }
 
-.submit-button:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(33, 109, 48, 0.3);
-}
-
-.submit-button:disabled {
-  background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+.register-submit-button:disabled {
+  background: #d1d5db;
   cursor: not-allowed;
-  box-shadow: none;
-  opacity: 0.6;
+  transform: none;
+}
+
+.register-cancel-button {
+  padding: 12px 32px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 120px;
+}
+
+.register-cancel-button:hover {
+  background: #5a6268;
+  transform: translateY(-1px);
 }
 
 /* 에러 메시지 */
-.error-message {
-  padding: 14px 16px;
-  margin-bottom: 20px;
-  background: linear-gradient(135deg, #fee 0%, #fdd 100%);
-  border: 1px solid #faa;
-  border-radius: 8px;
+.register-error-message {
+  padding: 12px 16px;
+  background: #fee;
+  border: 1px solid #fcc;
+  border-radius: 6px;
   color: #c33;
-  font-size: 0.9rem;
-  font-weight: 500;
-  box-shadow: 0 2px 8px rgba(255, 102, 102, 0.1);
-  text-align: center;
-}
-
-/* 성공 메시지 */
-.success-message {
-  padding: 14px 16px;
   margin-bottom: 20px;
-  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-  border: 1px solid #81c784;
-  border-radius: 8px;
+  font-size: 15px;
+}
+
+.register-success-message {
+  padding: 12px 16px;
+  background: #e8f5e9;
+  border: 1px solid #a5d6a7;
+  border-radius: 6px;
   color: #2e7d32;
-  font-size: 0.9rem;
-  font-weight: 500;
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.1);
-  text-align: center;
-}
-
-/* 필수 입력 표시 */
-.required-mark {
-  color: #e74c3c;
-  margin-left: 4px;
-  font-weight: 600;
-}
-
-/* 도움말 텍스트 */
-.help-text {
-  font-size: 0.85rem;
-  color: #7f8c8d;
-  margin-top: 6px;
-  font-style: italic;
-}
-
-/* 폼 검증 스타일 */
-.input-field:invalid:not(:placeholder-shown) {
-  border-color: #e74c3c;
-}
-
-.input-field:valid:not(:placeholder-shown) {
-  border-color: #27ae60;
-}
-
-/* 로딩 상태 */
-.submit-button:disabled::after {
-  content: "";
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  margin-left: 8px;
-  border: 2px solid #ffffff;
-  border-radius: 50%;
-  border-top-color: transparent;
-  animation: register-spinner 0.6s linear infinite;
-}
-
-@keyframes register-spinner {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Focus 스타일 강화 */
-.input-field:focus,
-.radio-group input[type="radio"]:focus {
-  outline: 2px solid #216d30;
-  outline-offset: 2px;
-}
-
-/* 테이블 hover 효과 */
-.form-table tbody tr:hover {
-  background-color: #f8f9fa;
-  transition: background-color 0.2s ease;
+  margin-bottom: 20px;
+  font-size: 15px;
 }
 
 /* 반응형 디자인 */
-@media (max-width: 1024px) {
-  .my-page-container {
-    flex-direction: column;
-    padding: 20px 15px;
-  }
-
-  .side-menu {
-    position: static;
-    width: 100%;
-    min-width: auto;
-  }
-
-  .main-content {
-    padding: 30px 20px;
-    min-width: auto;
-  }
-
-  .register-form {
-    max-width: 100%;
-  }
-
-  .form-table th {
-    width: 35%;
-  }
-}
-
 @media (max-width: 768px) {
-  .main-content {
-    padding: 24px 16px;
+  .register-form {
+    padding: 0;
   }
 
-  .form-table th,
-  .form-table td {
-    padding: 12px 16px;
-    font-size: 0.9rem;
+  .register-form-table {
+    display: block;
   }
 
-  .input-field {
-    padding: 8px 12px;
-    font-size: 0.9rem;
+  .register-form-table tbody {
+    display: block;
   }
 
-  .radio-group {
+  .register-form-table tr {
+    display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+    margin-bottom: 16px;
+    border: 1px solid #e0e6ed;
+    border-radius: 6px;
+    overflow: hidden;
   }
 
-  .submit-button {
+  .register-form-table th {
     width: 100%;
-    padding: 12px 32px;
-    font-size: 1rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .form-table {
-    display: block;
-  }
-
-  .form-table tbody,
-  .form-table tr,
-  .form-table th,
-  .form-table td {
-    display: block;
-    width: 100%;
-  }
-
-  .form-table th {
-    border-right: none;
     border-bottom: 1px solid #e0e6ed;
-    padding: 12px 16px 8px;
-    background-color: transparent;
-    font-size: 0.85rem;
+    background: #216d30;
+    color: white;
   }
 
-  .form-table td {
-    padding: 8px 16px 16px;
+  .register-form-table td {
+    width: 100%;
+    border-bottom: none;
   }
 
-  .form-table tr {
-    margin-bottom: 8px;
-    border-bottom: 2px solid #e0e6ed;
-  }
-
-  .button-container {
+  .register-button-container {
     flex-direction: column;
+  }
+
+  .register-submit-button,
+  .register-cancel-button {
+    width: 100%;
+  }
+
+  .register-radio-group {
+    flex-direction: column;
+    gap: 12px;
   }
 }

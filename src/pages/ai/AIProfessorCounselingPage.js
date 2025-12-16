@@ -1,52 +1,47 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import api from "../../api/axiosConfig";
-import CounselingFormModal from "./CounselingFormModal";
-import "../../styles/professorCounseling.css";
+import "../../styles/staffAllStudents.css";
+import "../../styles/AIProfessorCounseling.css";
 
 export default function AIProfessorCounselingPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [subjects, setSubjects] = useState([]);
-  const [expandedSubjects, setExpandedSubjects] = useState(new Set());
-  const [subjectStudents, setSubjectStudents] = useState({});
-  const [studentAnalysis, setStudentAnalysis] = useState({});
-  const [riskAlerts, setRiskAlerts] = useState([]);
+
+  const [allStudents, setAllStudents] = useState([]);
+  const [filteredStudents, setFilteredStudents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [loadingStudents, setLoadingStudents] = useState({});
   const [error, setError] = useState("");
+  const [expandedStudentId, setExpandedStudentId] = useState(null);
 
-  // 검색 및 정렬 상태
-  const [searchTerms, setSearchTerms] = useState({});
-  const [sortConfig, setSortConfig] = useState({});
-
-  // 모달 관련 상태
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [selectedRiskLevel, setSelectedRiskLevel] = useState("");
 
   useEffect(() => {
-    if (user && user.id) {
-      fetchData();
-    }
-  }, [user]);
+    fetchInitialData();
+  }, []);
 
-  const fetchData = async () => {
+  useEffect(() => {
+    filterStudents();
+  }, [selectedRiskLevel, allStudents]);
+
+  const fetchInitialData = async () => {
     try {
       setLoading(true);
       setError("");
 
-      const subjectsResponse = await api.get(`/api/professor/subject`);
-      const alertsResponse = await api.get(
-        `/api/ai-risk-alert/professor/${user.id}/unchecked`
+      // 교수의 담당 학생 조회
+      const response = await api.get(
+        `/api/ai-analysis/advisor/${user.id}/students`
       );
 
-      if (subjectsResponse.data) {
-        setSubjects(subjectsResponse.data.subjectList || []);
-      }
-
-      if (alertsResponse.data?.code === 1) {
-        setRiskAlerts(alertsResponse.data.data || []);
+      if (response.data.code === 1) {
+        // 학생별로 그룹화
+        const groupedStudents = groupStudentsByStudent(
+          response.data.data || []
+        );
+        setAllStudents(groupedStudents);
+        setFilteredStudents(groupedStudents);
       }
     } catch (err) {
       console.error("데이터 조회 실패:", err);
@@ -56,652 +51,341 @@ export default function AIProfessorCounselingPage() {
     }
   };
 
-  const toggleSubject = async (subjectId) => {
-    const newExpanded = new Set(expandedSubjects);
+  // 학생별로 그룹화하고 최고 위험도 계산
+  const groupStudentsByStudent = (analysisResults) => {
+    const studentMap = new Map();
 
-    if (newExpanded.has(subjectId)) {
-      newExpanded.delete(subjectId);
-      setExpandedSubjects(newExpanded);
-      return;
-    }
+    analysisResults.forEach((result) => {
+      const studentId = result.studentId;
 
-    newExpanded.add(subjectId);
-    setExpandedSubjects(newExpanded);
-
-    if (!subjectStudents[subjectId]) {
-      await fetchSubjectStudents(subjectId);
-    }
-  };
-
-  const fetchSubjectStudents = async (subjectId) => {
-    try {
-      setLoadingStudents((prev) => ({ ...prev, [subjectId]: true }));
-
-      const studentsResponse = await api.get(
-        `/api/professor/subject/${subjectId}/enrolled`
-      );
-
-      if (!studentsResponse.data) {
-        setSubjectStudents((prev) => ({ ...prev, [subjectId]: [] }));
-        return;
+      if (!studentMap.has(studentId)) {
+        studentMap.set(studentId, {
+          studentId: studentId,
+          student: result.student,
+          subjects: [],
+          highestRisk: "NORMAL",
+          riskPriority: 0,
+        });
       }
 
-      const students = studentsResponse.data.studentList || [];
-      setSubjectStudents((prev) => ({ ...prev, [subjectId]: students }));
+      const studentData = studentMap.get(studentId);
+      studentData.subjects.push(result);
 
-      if (students.length === 0) return;
-
-      const analysisPromises = students.map(async (student) => {
-        const sid = student?.studentId ?? student?.id;
-        if (!sid) {
-          return { sid: null, subjectId, data: null };
-        }
-        try {
-          const analysisResponse = await api.get(
-            `/api/ai-analysis/student/${sid}`
-          );
-
-          if (analysisResponse.data?.code === 1) {
-            const allResults = analysisResponse.data.data || [];
-            const subjectAnalysis = allResults.find(
-              (result) => result.subjectId === subjectId
-            );
-            return { sid, subjectId, data: subjectAnalysis || null };
-          } else {
-            return { sid, subjectId, data: null };
-          }
-        } catch (err) {
-          console.error(
-            `분석 조회 실패 studentId=${sid} subjectId=${subjectId}`,
-            err
-          );
-          return { sid, subjectId, data: null };
-        }
-      });
-
-      const analysisResults = await Promise.all(analysisPromises);
-
-      const newAnalysisMap = {};
-      analysisResults.forEach((res) => {
-        if (res && res.sid) {
-          const key = `${res.sid}-${res.subjectId}`;
-          newAnalysisMap[key] = res.data;
-        }
-      });
-
-      setStudentAnalysis((prev) => ({ ...prev, ...newAnalysisMap }));
-    } catch (err) {
-      console.error("학생 목록 조회 실패:", err);
-      if (err.response?.status === 404) {
-        console.warn("enrolled 엔드포인트 없음. 기존 방식 사용");
-        await fetchSubjectStudentsLegacy(subjectId);
+      // 최고 위험도 업데이트
+      const riskPriority = getRiskPriority(result.overallRisk);
+      if (riskPriority > studentData.riskPriority) {
+        studentData.highestRisk = result.overallRisk;
+        studentData.riskPriority = riskPriority;
       }
-    } finally {
-      setLoadingStudents((prev) => ({ ...prev, [subjectId]: false }));
-    }
-  };
-
-  const fetchSubjectStudentsLegacy = async (subjectId) => {
-    try {
-      const studentsResponse = await api.get(
-        `/api/professor/subject/${subjectId}`
-      );
-
-      if (!studentsResponse.data) {
-        setSubjectStudents((prev) => ({ ...prev, [subjectId]: [] }));
-        return;
-      }
-
-      const students = studentsResponse.data.studentList || [];
-      setSubjectStudents((prev) => ({ ...prev, [subjectId]: students }));
-
-      if (students.length === 0) return;
-
-      const analysisPromises = students.map(async (student) => {
-        const sid = student?.studentId ?? student?.id;
-        if (!sid) {
-          return { sid: null, subjectId, data: null };
-        }
-        try {
-          const analysisResponse = await api.get(
-            `/api/ai-analysis/student/${sid}`
-          );
-
-          if (analysisResponse.data?.code === 1) {
-            const allResults = analysisResponse.data.data || [];
-            const subjectAnalysis = allResults.find(
-              (result) => result.subjectId === subjectId
-            );
-            return { sid, subjectId, data: subjectAnalysis || null };
-          } else {
-            return { sid, subjectId, data: null };
-          }
-        } catch (err) {
-          console.error(
-            `분석 조회 실패 studentId=${sid} subjectId=${subjectId}`,
-            err
-          );
-          return { sid, subjectId, data: null };
-        }
-      });
-
-      const analysisResults = await Promise.all(analysisPromises);
-
-      const newAnalysisMap = {};
-      analysisResults.forEach((res) => {
-        if (res && res.sid) {
-          const key = `${res.sid}-${res.subjectId}`;
-          newAnalysisMap[key] = res.data;
-        }
-      });
-
-      setStudentAnalysis((prev) => ({ ...prev, ...newAnalysisMap }));
-    } catch (err) {
-      console.error("학생 목록 조회 실패 (legacy):", err);
-    }
-  };
-
-  const handleCounselingClick = (studentId, subjectId) => {
-    if (!studentId) {
-      console.error("handleCounselingClick: studentId가 없습니다.", {
-        studentId,
-        subjectId,
-      });
-      setError("학생 식별자가 없어 상담페이지로 이동할 수 없습니다.");
-      return;
-    }
-
-    const students = subjectStudents[subjectId] || [];
-    const student = students.find((s) => (s?.studentId ?? s?.id) === studentId);
-    const subject = subjects.find((s) => s.id === subjectId);
-
-    setSelectedStudent({
-      studentId: studentId,
-      studentName: student?.studentName || student?.name || "학생",
-      subjectId: subjectId,
-      subjectName: subject?.name || "과목명",
     });
-    setIsModalOpen(true);
+
+    return Array.from(studentMap.values());
   };
 
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-    setSelectedStudent(null);
-  };
-
-  const handleModalSubmit = async () => {
-    if (selectedStudent?.subjectId) {
-      await fetchSubjectStudents(selectedStudent.subjectId);
-    }
-  };
-
-  const handleAlertClick = (alert) => {
-    if (alert.studentId && alert.subjectId) {
-      navigate(
-        `/aiprofessor/counseling/subject/${alert.subjectId}/student/${alert.studentId}`
-      );
-    } else {
-      console.warn("handleAlertClick: alert에 studentId/subjectId 없음", alert);
-    }
-  };
-
-  // 검색어 변경 핸들러
-  const handleSearchChange = (subjectId, value) => {
-    setSearchTerms((prev) => ({
-      ...prev,
-      [subjectId]: value,
-    }));
-  };
-
-  // 정렬 핸들러
-  const handleSort = (subjectId, field) => {
-    setSortConfig((prev) => {
-      const currentSort = prev[subjectId];
-      const newDirection =
-        currentSort?.field === field && currentSort?.direction === "asc"
-          ? "desc"
-          : "asc";
-
-      return {
-        ...prev,
-        [subjectId]: { field, direction: newDirection },
-      };
-    });
-  };
-
-  // 상태값을 숫자로 변환 (정렬용)
-  const getStatusValue = (status) => {
-    const statusMap = {
+  const getRiskPriority = (risk) => {
+    const priorities = {
       CRITICAL: 4,
       RISK: 3,
       CAUTION: 2,
       NORMAL: 1,
     };
-    return statusMap[status] || 0;
+    return priorities[risk] || 0;
   };
 
-  // 학생 목록 필터링 및 정렬
-  const getFilteredAndSortedStudents = (subjectId) => {
-    const students = subjectStudents[subjectId] || [];
-    const searchTerm = searchTerms[subjectId]?.toLowerCase() || "";
-    const sortCfg = sortConfig[subjectId];
+  const filterStudents = () => {
+    let filtered = [...allStudents];
 
-    // 검색 필터링
-    let filtered = students;
-    if (searchTerm) {
-      filtered = students.filter((student) => {
-        const sid = student?.studentId ?? student?.id;
-        const name = student?.studentName || student?.name || "";
-        const dept = student?.deptName || "";
-
-        return (
-          String(sid).toLowerCase().includes(searchTerm) ||
-          name.toLowerCase().includes(searchTerm) ||
-          dept.toLowerCase().includes(searchTerm)
-        );
-      });
+    if (selectedRiskLevel) {
+      filtered = filtered.filter(
+        (student) => student.highestRisk === selectedRiskLevel
+      );
     }
 
-    // 정렬
-    if (sortCfg?.field) {
-      filtered = [...filtered].sort((a, b) => {
-        const aId = a?.studentId ?? a?.id;
-        const bId = b?.studentId ?? b?.id;
-        const aAnalysis = studentAnalysis[`${aId}-${subjectId}`];
-        const bAnalysis = studentAnalysis[`${bId}-${subjectId}`];
-
-        let aValue, bValue;
-
-        switch (sortCfg.field) {
-          case "studentId":
-            aValue = aId;
-            bValue = bId;
-            break;
-          case "name":
-            aValue = a?.studentName || a?.name || "";
-            bValue = b?.studentName || b?.name || "";
-            break;
-          case "dept":
-            aValue = a?.deptName || "";
-            bValue = b?.deptName || "";
-            break;
-          case "attendance":
-            aValue = getStatusValue(aAnalysis?.attendanceStatus);
-            bValue = getStatusValue(bAnalysis?.attendanceStatus);
-            break;
-          case "homework":
-            aValue = getStatusValue(aAnalysis?.homeworkStatus);
-            bValue = getStatusValue(bAnalysis?.homeworkStatus);
-            break;
-          case "midterm":
-            aValue = getStatusValue(aAnalysis?.midtermStatus);
-            bValue = getStatusValue(bAnalysis?.midtermStatus);
-            break;
-          case "final":
-            aValue = getStatusValue(aAnalysis?.finalStatus);
-            bValue = getStatusValue(bAnalysis?.finalStatus);
-            break;
-          case "tuition":
-            aValue = getStatusValue(aAnalysis?.tuitionStatus);
-            bValue = getStatusValue(bAnalysis?.tuitionStatus);
-            break;
-          case "counseling":
-            aValue = getStatusValue(aAnalysis?.counselingStatus);
-            bValue = getStatusValue(bAnalysis?.counselingStatus);
-            break;
-          case "overallRisk":
-            aValue = getStatusValue(aAnalysis?.overallRisk);
-            bValue = getStatusValue(bAnalysis?.overallRisk);
-            break;
-          default:
-            return 0;
-        }
-
-        if (aValue < bValue) return sortCfg.direction === "asc" ? -1 : 1;
-        if (aValue > bValue) return sortCfg.direction === "asc" ? 1 : -1;
-        return 0;
-      });
-    }
-
-    return filtered;
+    setFilteredStudents(filtered);
   };
 
-  // 정렬 아이콘 표시
-  const getSortIcon = (subjectId, field) => {
-    const sortCfg = sortConfig[subjectId];
-    if (sortCfg?.field !== field) return "↕";
-    return sortCfg.direction === "asc" ? "↑" : "↓";
+  const handleReset = () => {
+    setSelectedRiskLevel("");
+  };
+
+  const toggleStudentExpand = (studentId) => {
+    setExpandedStudentId(expandedStudentId === studentId ? null : studentId);
   };
 
   const getRiskBadge = (riskLevel) => {
     const badges = {
-      NORMAL: { text: "정상", class: "pc-risk-normal" },
-      CAUTION: { text: "주의", class: "pc-risk-caution" },
-      RISK: { text: "위험", class: "pc-risk-warning" },
-      CRITICAL: { text: "심각", class: "pc-risk-critical" },
+      NORMAL: { text: "정상", class: "sas-risk-normal" },
+      CAUTION: { text: "주의", class: "sas-risk-caution" },
+      RISK: { text: "위험", class: "sas-risk-warning" },
+      CRITICAL: { text: "심각", class: "sas-risk-critical" },
     };
     const badge = badges[riskLevel] || badges.NORMAL;
-    return <span className={`pc-risk-badge ${badge.class}`}>{badge.text}</span>;
+    return (
+      <span className={`sas-risk-badge ${badge.class}`}>{badge.text}</span>
+    );
   };
 
-  const getStatusBadge = (status) => {
-    if (!status)
-      return <span className="pc-status-badge pc-status-normal">-</span>;
-
-    const badges = {
-      NORMAL: { text: "정상", class: "pc-status-normal" },
-      CAUTION: { text: "주의", class: "pc-status-caution" },
-      RISK: { text: "위험", class: "pc-status-risk" },
-      CRITICAL: { text: "심각", class: "pc-status-critical" },
+  const getStatusLabel = (status) => {
+    const labels = {
+      NORMAL: "정상",
+      CAUTION: "주의",
+      RISK: "위험",
+      CRITICAL: "심각",
     };
-    const badge = badges[status] || badges.NORMAL;
-    return (
-      <span className={`pc-status-badge ${badge.class}`}>{badge.text}</span>
-    );
+    return labels[status] || "정상";
+  };
+
+  // 전체 분석 결과에서 위험도별 카운트
+  const getTotalRiskCounts = () => {
+    return {
+      total: allStudents.length,
+      normal: allStudents.filter((s) => s.highestRisk === "NORMAL").length,
+      caution: allStudents.filter((s) => s.highestRisk === "CAUTION").length,
+      risk: allStudents.filter((s) => s.highestRisk === "RISK").length,
+      critical: allStudents.filter((s) => s.highestRisk === "CRITICAL").length,
+    };
   };
 
   if (loading) {
     return (
-      <div className="pc-page-container">
-        <div className="pc-loading">
-          <div className="pc-loading-spinner"></div>
+      <div className="sas-page-container">
+        <div className="sas-loading">
+          <div className="sas-loading-spinner"></div>
           <p>데이터를 불러오는 중...</p>
         </div>
       </div>
     );
   }
 
+  const riskCounts = getTotalRiskCounts();
+
   return (
-    <div className="pc-page-container">
-      <div className="pc-header">
-        <h1 className="pc-title">상담 관리</h1>
-        <p className="pc-subtitle">
-          담당 과목의 학생들을 관리하고 상담을 진행할 수 있습니다.
+    <div className="sas-page-container">
+      <div className="sas-header">
+        <h1 className="sas-title">담당 학생 관리</h1>
+        <p className="sas-subtitle">
+          담당 학생들의 분석 결과를 확인하고 관리할 수 있습니다.
         </p>
       </div>
 
       {error && (
-        <div className="pc-error-message">
+        <div className="sas-error-message">
           <span className="material-symbols-outlined">error</span>
           {error}
         </div>
       )}
 
-      {riskAlerts.length > 0 && (
-        <div className="pc-alerts-section">
-          <div className="pc-section-header">
-            <h2>중도 이탈 위험 학생</h2>
-            <span className="pc-alert-count">{riskAlerts.length}명</span>
-          </div>
-          <div className="pc-alerts-list">
-            {riskAlerts.map((alert) => (
-              <div
-                key={alert.id}
-                className="pc-alert-card"
-                onClick={() => handleAlertClick(alert)}
-              >
-                <div className="pc-alert-header">
-                  <div className="pc-alert-student">
-                    <span>{alert.student?.name || "학생"}</span>
-                  </div>
-                  {getRiskBadge(alert.riskLevel)}
-                </div>
-                <div className="pc-alert-body">
-                  <div className="pc-alert-subject">
-                    {alert.subject?.name || "과목명"}
-                  </div>
-                  <div className="pc-alert-reason">{alert.riskReason}</div>
-                </div>
-              </div>
-            ))}
+      <div className="sas-statistics">
+        <div className="sas-stat-card sas-stat-total">
+          <div className="sas-stat-content">
+            <span className="sas-stat-label">담당 학생</span>
+            <span className="sas-stat-value">{riskCounts.total}명</span>
           </div>
         </div>
-      )}
 
-      <div className="pc-subjects-section">
-        <div className="pc-section-header">
-          <h2>담당 과목</h2>
-          <span className="pc-subject-count">{subjects.length}개</span>
+        <div className="sas-stat-card sas-stat-normal">
+          <div className="sas-stat-content">
+            <span className="sas-stat-label">정상</span>
+            <span className="sas-stat-value">{riskCounts.normal}명</span>
+          </div>
         </div>
 
-        {subjects.length === 0 ? (
-          <div className="pc-empty-state">
-            <p>담당 과목이 없습니다.</p>
+        <div className="sas-stat-card sas-stat-caution">
+          <div className="sas-stat-content">
+            <span className="sas-stat-label">주의</span>
+            <span className="sas-stat-value">{riskCounts.caution}명</span>
+          </div>
+        </div>
+
+        <div className="sas-stat-card sas-stat-risk">
+          <div className="sas-stat-content">
+            <span className="sas-stat-label">위험</span>
+            <span className="sas-stat-value">{riskCounts.risk}명</span>
+          </div>
+        </div>
+
+        <div className="sas-stat-card sas-stat-critical">
+          <div className="sas-stat-content">
+            <span className="sas-stat-label">심각</span>
+            <span className="sas-stat-value">{riskCounts.critical}명</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="sas-filters">
+        <div className="sas-filter-group">
+          <label htmlFor="riskLevel">위험도</label>
+          <select
+            id="riskLevel"
+            value={selectedRiskLevel}
+            onChange={(e) => setSelectedRiskLevel(e.target.value)}
+          >
+            <option value="">전체</option>
+            <option value="NORMAL">정상</option>
+            <option value="CAUTION">주의</option>
+            <option value="RISK">위험</option>
+            <option value="CRITICAL">심각</option>
+          </select>
+        </div>
+
+        <button className="sas-reset-btn" onClick={handleReset}>
+          초기화
+        </button>
+      </div>
+
+      <div className="sas-results-info">
+        <span className="sas-results-count">
+          총 <strong>{filteredStudents.length}</strong>명의 학생
+        </span>
+      </div>
+
+      <div className="sas-students-section">
+        {filteredStudents.length === 0 ? (
+          <div className="sas-empty-state">
+            <p>검색 결과가 없습니다.</p>
           </div>
         ) : (
-          <div className="pc-subjects-list">
-            {subjects.map((subject) => (
-              <div key={subject.id} className="pc-subject-item">
-                <div
-                  className="pc-subject-row"
-                  onClick={() => toggleSubject(subject.id)}
-                >
-                  <div className="pc-subject-info-container">
-                    <div className="pc-subject-info">
-                      <h3>{subject.name}</h3>
-                      <span className="pc-subject-details">
-                        {subject.subYear}학년 {subject.semester}학기 |{" "}
-                        {subject.subDay} {subject.startTime}교시 -{" "}
-                        {subject.endTime}교시 |{" "}
-                        {subject.room?.name || "강의실 미정"} | 수강인원:{" "}
-                        {subject.numOfStudent || 0}/{subject.capacity}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+          <div className="sas-table-wrapper">
+            <table className="sas-students-table">
+              <thead>
+                <tr>
+                  <th>학번</th>
+                  <th>이름</th>
+                  <th>학과</th>
+                  <th>학년</th>
+                  <th>수강 과목 수</th>
+                  <th>최고 위험도</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredStudents.map((student) => (
+                  <React.Fragment key={student.studentId}>
+                    <tr
+                      className={`apc-student-row ${
+                        expandedStudentId === student.studentId
+                          ? "apc-expanded"
+                          : ""
+                      }`}
+                    >
+                      <td
+                        onClick={() => toggleStudentExpand(student.studentId)}
+                      >
+                        {student.studentId}
+                      </td>
+                      <td
+                        onClick={() => toggleStudentExpand(student.studentId)}
+                      >
+                        {student.student?.name || "학생"}
+                      </td>
+                      <td
+                        onClick={() => toggleStudentExpand(student.studentId)}
+                      >
+                        {student.student?.department?.name || "학과"}
+                      </td>
+                      <td
+                        onClick={() => toggleStudentExpand(student.studentId)}
+                      >
+                        {student.student?.grade}학년
+                      </td>
+                      <td
+                        onClick={() => toggleStudentExpand(student.studentId)}
+                      >
+                        {student.subjects.length}개
+                      </td>
+                      <td
+                        onClick={() => toggleStudentExpand(student.studentId)}
+                      >
+                        {getRiskBadge(student.highestRisk)}
+                      </td>
+                    </tr>
 
-                {expandedSubjects.has(subject.id) && (
-                  <div className="pc-students-container">
-                    {loadingStudents[subject.id] ? (
-                      <div className="pc-students-loading">
-                        <div className="pc-loading-spinner"></div>
-                        <p>학생 목록을 불러오는 중...</p>
-                      </div>
-                    ) : subjectStudents[subject.id] &&
-                      subjectStudents[subject.id].length > 0 ? (
-                      <>
-                        {/* 검색 바 */}
-                        <div className="pc-search-bar">
-                          <input
-                            type="text"
-                            placeholder="학번, 이름, 학과로 검색..."
-                            value={searchTerms[subject.id] || ""}
-                            onChange={(e) =>
-                              handleSearchChange(subject.id, e.target.value)
-                            }
-                            className="pc-search-input"
-                          />
-                        </div>
-
-                        <table className="pc-students-table">
-                          <thead>
-                            <tr>
-                              <th
-                                onClick={() =>
-                                  handleSort(subject.id, "studentId")
-                                }
-                                style={{ cursor: "pointer" }}
-                              >
-                                학번 {getSortIcon(subject.id, "studentId")}
-                              </th>
-                              <th
-                                onClick={() => handleSort(subject.id, "name")}
-                                style={{ cursor: "pointer" }}
-                              >
-                                이름 {getSortIcon(subject.id, "name")}
-                              </th>
-                              <th
-                                onClick={() => handleSort(subject.id, "dept")}
-                                style={{ cursor: "pointer" }}
-                              >
-                                학과 {getSortIcon(subject.id, "dept")}
-                              </th>
-                              <th
-                                onClick={() =>
-                                  handleSort(subject.id, "attendance")
-                                }
-                                style={{ cursor: "pointer" }}
-                              >
-                                출결 {getSortIcon(subject.id, "attendance")}
-                              </th>
-                              <th
-                                onClick={() =>
-                                  handleSort(subject.id, "homework")
-                                }
-                                style={{ cursor: "pointer" }}
-                              >
-                                과제 {getSortIcon(subject.id, "homework")}
-                              </th>
-                              <th
-                                onClick={() =>
-                                  handleSort(subject.id, "midterm")
-                                }
-                                style={{ cursor: "pointer" }}
-                              >
-                                중간 {getSortIcon(subject.id, "midterm")}
-                              </th>
-                              <th
-                                onClick={() => handleSort(subject.id, "final")}
-                                style={{ cursor: "pointer" }}
-                              >
-                                기말 {getSortIcon(subject.id, "final")}
-                              </th>
-                              <th
-                                onClick={() =>
-                                  handleSort(subject.id, "tuition")
-                                }
-                                style={{ cursor: "pointer" }}
-                              >
-                                등록금 {getSortIcon(subject.id, "tuition")}
-                              </th>
-                              <th
-                                onClick={() =>
-                                  handleSort(subject.id, "counseling")
-                                }
-                                style={{ cursor: "pointer" }}
-                              >
-                                상담 {getSortIcon(subject.id, "counseling")}
-                              </th>
-                              <th
-                                onClick={() =>
-                                  handleSort(subject.id, "overallRisk")
-                                }
-                                style={{ cursor: "pointer" }}
-                              >
-                                종합위험도{" "}
-                                {getSortIcon(subject.id, "overallRisk")}
-                              </th>
-                              <th>상담입력</th>
-                              <th>상담이력</th>
-                            </tr>
-                          </thead>
-
-                          <tbody>
-                            {getFilteredAndSortedStudents(subject.id).map(
-                              (student) => {
-                                const sid = student?.studentId ?? student?.id;
-                                const analysisKey = `${sid}-${subject.id}`;
-                                const analysis = studentAnalysis[analysisKey];
-
-                                return (
-                                  <tr key={sid}>
-                                    <td>{sid}</td>
-                                    <td>
-                                      {student.studentName || student.name}
-                                    </td>
-                                    <td>{student.deptName || "-"}</td>
-
-                                    <td>
-                                      {getStatusBadge(
-                                        analysis?.attendanceStatus
-                                      )}
-                                    </td>
-                                    <td>
-                                      {getStatusBadge(analysis?.homeworkStatus)}
-                                    </td>
-                                    <td>
-                                      {getStatusBadge(analysis?.midtermStatus)}
-                                    </td>
-                                    <td>
-                                      {getStatusBadge(analysis?.finalStatus)}
-                                    </td>
-                                    <td>
-                                      {getStatusBadge(analysis?.tuitionStatus)}
-                                    </td>
-                                    <td>
-                                      {getStatusBadge(
-                                        analysis?.counselingStatus
-                                      )}
-                                    </td>
-                                    <td>
-                                      {getRiskBadge(analysis?.overallRisk)}
-                                    </td>
-
-                                    <td>
-                                      <button
-                                        className="pc-counseling-btn"
-                                        onClick={() =>
-                                          handleCounselingClick(sid, subject.id)
-                                        }
-                                      >
-                                        상담입력
-                                      </button>
-                                    </td>
-
-                                    <td
-                                      onClick={() =>
-                                        navigate(
-                                          `/aiprofessor/counseling/history/${sid}`
-                                        )
-                                      }
-                                      style={{
-                                        cursor: "pointer",
-                                        color: "#0066ff",
-                                      }}
-                                    >
-                                      상담이력
-                                    </td>
-                                  </tr>
-                                );
-                              }
-                            )}
-                          </tbody>
-                        </table>
-
-                        {/* 검색 결과 없음 */}
-                        {getFilteredAndSortedStudents(subject.id).length ===
-                          0 && (
-                          <div className="pc-empty-students">
-                            <p>검색 결과가 없습니다.</p>
+                    {/* 펼쳐진 상세 정보 */}
+                    {expandedStudentId === student.studentId && (
+                      <tr className="expanded-details">
+                        <td colSpan="7">
+                          <div className="subject-details-container">
+                            <h3>수강 과목 상세 분석</h3>
+                            <table className="subject-details-table">
+                              <thead>
+                                <tr>
+                                  <th>과목명</th>
+                                  <th>학기</th>
+                                  <th>출결</th>
+                                  <th>과제</th>
+                                  <th>중간</th>
+                                  <th>기말</th>
+                                  <th>등록금</th>
+                                  <th>상담</th>
+                                  <th>종합</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {student.subjects.map((subject, index) => (
+                                  <React.Fragment key={index}>
+                                    <tr className="subject-row">
+                                      <td className="subject-name">
+                                        {subject.subject?.name || "과목명"}
+                                      </td>
+                                      <td>
+                                        {subject.analysisYear}년{" "}
+                                        {subject.semester}학기
+                                      </td>
+                                      <td>
+                                        {getRiskBadge(subject.attendanceStatus)}
+                                      </td>
+                                      <td>
+                                        {getRiskBadge(subject.homeworkStatus)}
+                                      </td>
+                                      <td>
+                                        {getRiskBadge(subject.midtermStatus)}
+                                      </td>
+                                      <td>
+                                        {getRiskBadge(subject.finalStatus)}
+                                      </td>
+                                      <td>
+                                        {getRiskBadge(subject.tuitionStatus)}
+                                      </td>
+                                      <td>
+                                        {getRiskBadge(subject.counselingStatus)}
+                                      </td>
+                                      <td>
+                                        {getRiskBadge(subject.overallRisk)}
+                                      </td>
+                                    </tr>
+                                    {/* AI 분석 상세 내용 (RISK, CRITICAL인 경우만) */}
+                                    {subject.analysisDetail && (
+                                      <tr className="ai-detail-row">
+                                        <td colSpan="9">
+                                          <div className="ai-analysis-detail">
+                                            <h5>AI 분석 상세</h5>
+                                            <p>{subject.analysisDetail}</p>
+                                            {subject.analyzedAt && (
+                                              <div className="analyzed-date">
+                                                분석 일시:{" "}
+                                                {new Date(
+                                                  subject.analyzedAt
+                                                ).toLocaleString("ko-KR")}
+                                              </div>
+                                            )}
+                                          </div>
+                                        </td>
+                                      </tr>
+                                    )}
+                                  </React.Fragment>
+                                ))}
+                              </tbody>
+                            </table>
                           </div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="pc-empty-students">
-                        <p>수강 학생이 없습니다.</p>
-                      </div>
+                        </td>
+                      </tr>
                     )}
-                  </div>
-                )}
-              </div>
-            ))}
+                  </React.Fragment>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
-
-      {/* Counseling Form Modal */}
-      {isModalOpen && selectedStudent && (
-        <CounselingFormModal
-          isOpen={isModalOpen}
-          onClose={handleModalClose}
-          onSubmit={handleModalSubmit}
-          studentName={selectedStudent.studentName}
-          subjectName={selectedStudent.subjectName}
-          studentId={selectedStudent.studentId}
-          subjectId={selectedStudent.subjectId}
-          professorId={user.id}
-        />
-      )}
     </div>
   );
 }
