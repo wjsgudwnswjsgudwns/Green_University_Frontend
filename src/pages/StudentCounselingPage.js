@@ -66,6 +66,29 @@ function StudentCounselingPage() {
         clearDetail();
     };
 
+    // 📌 이번 주로 리셋하기: 현재 날짜 기준 월~금 범위로 설정
+    const handleResetWeek = useCallback(() => {
+        const now = new Date();
+        // find monday
+        const day = now.getDay();
+        const diff = (day === 0 ? -6 : 1) - day;
+        const monday = new Date(now);
+        monday.setDate(now.getDate() + diff);
+        monday.setHours(0, 0, 0, 0);
+        const friday = new Date(monday);
+        friday.setDate(monday.getDate() + 4);
+
+        const ymd = (d) => {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, "0");
+            const da = String(d.getDate()).padStart(2, "0");
+            return `${y}-${m}-${da}`;
+        };
+        setFromDate(ymd(monday));
+        setToDate(ymd(friday));
+        clearDetail();
+    }, [setFromDate, setToDate, clearDetail]);
+
     // 초기: 내 학과 교수 목록
     useEffect(() => {
         let cancelled = false;
@@ -169,6 +192,11 @@ function StudentCounselingPage() {
     // 예약 생성
     const handleReserve = async () => {
         if (!selectedSlot) return;
+        // 확인 대화창 표시 후 예약 진행
+        const confirmReserve = window.confirm(
+            "선택한 시간에 상담을 예약하시겠습니까?"
+        );
+        if (!confirmReserve) return;
         try {
             setLoadingDetail(true);
             setDetailError("");
@@ -179,6 +207,8 @@ function StudentCounselingPage() {
 
             setSelectedSlot(null);
             setMemo("");
+
+            alert("예약이 완료되었습니다. 승인 여부를 기다려주세요.");
         } catch (e) {
             console.error(e);
             setDetailError("예약 처리 중 오류가 발생했습니다.");
@@ -187,19 +217,23 @@ function StudentCounselingPage() {
         }
     };
 
-    // 예약 취소
-    const handleCancel = async () => {
+    // 예약 취소: reason 매개변수 포함 (학생)
+    const handleCancel = async (reason = "") => {
         if (!selectedReservation) return;
+        const confirmCancel = window.confirm("예약을 취소하시겠습니까?");
+        if (!confirmCancel) return;
         try {
             setLoadingDetail(true);
             setDetailError("");
 
-            await cancelReservation(selectedReservation.reservationId);
+            await cancelReservation(selectedReservation.reservationId, reason);
 
             await reloadCurrentWeek();
 
             setSelectedReservation(null);
             setSelectedSlot(null);
+
+            alert("예약이 취소되었습니다.");
         } catch (e) {
             console.error(e);
             setDetailError("예약 취소 중 오류가 발생했습니다.");
@@ -207,6 +241,14 @@ function StudentCounselingPage() {
             setLoadingDetail(false);
         }
     };
+
+    // 📌 자동 새로고침: 5분마다 주간 데이터를 다시 불러옴
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            reloadCurrentWeek();
+        }, 5 * 60 * 1000); // 5분
+        return () => clearInterval(intervalId);
+    }, [reloadCurrentWeek]);
 
     return (
         <div style={{ padding: "16px" }}>
@@ -219,6 +261,7 @@ function StudentCounselingPage() {
                 onChangeTo={handleChangeToDate}
                 onPrevWeek={handlePrevWeek}
                 onNextWeek={handleNextWeek}
+                onResetWeek={handleResetWeek}
             />
 
             <section style={{ marginBottom: "16px" }}>
@@ -281,6 +324,7 @@ function StudentCounselingPage() {
                             slots={slots}
                             myReservedSlotIds={myReservedSlotIds}
                             onSelectSlot={handleSelectSlot}
+                            selectedSlotId={selectedSlot && selectedSlot.slotId}
                         />
                     </div>
 
@@ -301,6 +345,7 @@ function StudentCounselingPage() {
                             slot={selectedSlot}
                             reservation={selectedReservation}
                             error={detailError}
+                            loading={loadingDetail}
                             onReserve={handleReserve}
                             onCancel={handleCancel}
                             memo={memo}

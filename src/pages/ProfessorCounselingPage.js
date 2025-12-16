@@ -102,6 +102,28 @@ function ProfessorCounselingPage() {
         resetForWeekChange();
     };
 
+    // 📌 이번 주로 리셋하기: 현재 날짜 기준 월~금 범위로 설정
+    const handleResetWeek = useCallback(() => {
+        if (!confirmWeekChangeIfNeeded()) return;
+        const now = new Date();
+        const day = now.getDay();
+        const diff = (day === 0 ? -6 : 1) - day;
+        const monday = new Date(now);
+        monday.setDate(now.getDate() + diff);
+        monday.setHours(0, 0, 0, 0);
+        const friday = new Date(monday);
+        friday.setDate(monday.getDate() + 4);
+        const ymd = (d) => {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, "0");
+            const da = String(d.getDate()).padStart(2, "0");
+            return `${y}-${m}-${da}`;
+        };
+        setFromDate(ymd(monday));
+        setToDate(ymd(friday));
+        resetForWeekChange();
+    }, [confirmWeekChangeIfNeeded, setFromDate, setToDate]);
+
     // 편집 모드 토글 로직 (OFF 시에도 confirm)
     const handleToggleEditMode = () => {
         if (editMode) {
@@ -196,8 +218,8 @@ function ProfessorCounselingPage() {
         setDetailLoading(false);
     };
 
-    // 예약 수락
-    const handleReserve = async () => {
+    // 예약 수락: title, description을 매개변수로 받아 전달
+    const handleReserve = async (title = "", description = "") => {
         const reservation = selectedReservation;
 
         if (!reservation) {
@@ -213,9 +235,6 @@ function ProfessorCounselingPage() {
             alert("예약 ID를 찾을 수 없습니다.");
             return;
         }
-
-        const title = "";
-        const description = "";
 
         try {
             setDetailLoading(true);
@@ -249,8 +268,8 @@ function ProfessorCounselingPage() {
         }
     };
 
-    // 예약 취소 (교수 취소 API)
-    const handleCancel = async () => {
+    // 예약 취소 (교수 취소 API) : reason을 매개변수로 받아 전달
+    const handleCancel = async (reason = "") => {
         const reservation = selectedReservation;
 
         if (!reservation) return;
@@ -264,11 +283,13 @@ function ProfessorCounselingPage() {
             return;
         }
 
+        const confirmCancel = window.confirm("예약을 취소하시겠습니까?");
+        if (!confirmCancel) return;
         try {
             setDetailLoading(true);
             setDetailError("");
 
-            await cancelReservationByProfessor(reservationId);
+            await cancelReservationByProfessor(reservationId, reason);
 
             await reloadReservations();
 
@@ -276,6 +297,8 @@ function ProfessorCounselingPage() {
             setSelectedSlot(null);
 
             setReloadKey((prev) => prev + 1);
+
+            alert("예약이 취소되었습니다.");
         } catch (e) {
             console.error("예약 취소 실패", e);
             setDetailError("예약 취소 중 오류가 발생했습니다.");
@@ -283,6 +306,14 @@ function ProfessorCounselingPage() {
             setDetailLoading(false);
         }
     };
+
+    // 📌 자동 새로고침: 5분마다 예약 목록을 새로 조회
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            reloadReservations();
+        }, 5 * 60 * 1000);
+        return () => clearInterval(intervalId);
+    }, [reloadReservations]);
 
     return (
         <div style={{ padding: "16px" }}>
@@ -296,6 +327,7 @@ function ProfessorCounselingPage() {
                 onChangeTo={handleChangeToDate}
                 onPrevWeek={handlePrevWeek}
                 onNextWeek={handleNextWeek}
+                onResetWeek={handleResetWeek}
             />
 
             {/* 2) 예약 보기 (전체 폭) */}
@@ -377,6 +409,7 @@ function ProfessorCounselingPage() {
                             slot={selectedSlot}
                             reservation={selectedReservation}
                             error={detailError}
+                            loading={detailLoading}
                             onReserve={handleReserve}
                             onCancel={handleCancel}
                         />

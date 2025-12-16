@@ -4,7 +4,10 @@ import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
 import api from "../api/axiosConfig";
 
-const PAGE_SIZE = 30; // 한 번에 가져올 메시지 개수
+const PAGE_SIZE = 30;
+
+// ✅ 환경에 맞게 바꿔도 됨(일단 너 코드 기준 localhost)
+const WS_URL = "http://localhost:8881/ws-chat";
 
 export default function MeetingChatPanel({ meetingId, joinInfo, terminated }) {
     const [chatMessages, setChatMessages] = useState([]);
@@ -12,27 +15,25 @@ export default function MeetingChatPanel({ meetingId, joinInfo, terminated }) {
     const [chatConnected, setChatConnected] = useState(false);
 
     const [loadingInitial, setLoadingInitial] = useState(false);
-
     const [loadingOlder, setLoadingOlder] = useState(false);
     const loadingOlderRef = useRef(false);
 
     const [hasMoreBefore, setHasMoreBefore] = useState(true);
 
-    // 🔥 새로 추가된 '새 메시지 알림' 상태
+    // 새 메시지 알림
     const [isAtBottom, setIsAtBottom] = useState(true);
     const [pendingMessages, setPendingMessages] = useState([]);
-
-    const isAtBottomRef = useRef(true); // 구독 콜백에서 사용
+    const isAtBottomRef = useRef(true);
 
     const stompClientRef = useRef(null);
     const chatAreaRef = useRef(null);
+
+    const myUserId = joinInfo?.userId ?? null;
 
     const updateIsAtBottom = useCallback((v) => {
         isAtBottomRef.current = v;
         setIsAtBottom(v);
     }, []);
-
-    const myUserId = joinInfo?.userId ?? null;
 
     function formatTime(ts) {
         if (!ts) return "";
@@ -42,7 +43,7 @@ export default function MeetingChatPanel({ meetingId, joinInfo, terminated }) {
         });
     }
 
-    // ====== 초기 DB 히스토리 로딩 (최근 N개) ======
+    // ====== 초기 DB 히스토리 로딩(최근 PAGE_SIZE개) ======
     useEffect(() => {
         if (!meetingId) return;
 
@@ -51,20 +52,19 @@ export default function MeetingChatPanel({ meetingId, joinInfo, terminated }) {
         const fetchInitialMessages = async () => {
             setLoadingInitial(true);
             try {
-                // 세션 스토리지 사용 없이, 항상 서버 기준 최신 PAGE_SIZE개만 불러옴
                 const res = await api.get(
                     `/api/meetings/${meetingId}/chat/messages`,
-                    { params: { size: PAGE_SIZE } }
+                    {
+                        params: { size: PAGE_SIZE },
+                    }
                 );
                 if (cancelled) return;
 
                 const serverMessages = res.data || [];
                 setChatMessages(serverMessages);
-
-                // 과거 기록 더 있는지 대략 추정
                 setHasMoreBefore(serverMessages.length === PAGE_SIZE);
 
-                // 초기 진입 시 맨 아래로 스크롤
+                // 초기 진입: 맨 아래로
                 setTimeout(() => {
                     const el = chatAreaRef.current;
                     if (!el) return;
@@ -78,14 +78,11 @@ export default function MeetingChatPanel({ meetingId, joinInfo, terminated }) {
                     e
                 );
             } finally {
-                if (!cancelled) {
-                    setLoadingInitial(false);
-                }
+                if (!cancelled) setLoadingInitial(false);
             }
         };
 
         fetchInitialMessages();
-
         return () => {
             cancelled = true;
         };
@@ -93,7 +90,6 @@ export default function MeetingChatPanel({ meetingId, joinInfo, terminated }) {
 
     // ====== 위로 스크롤 시 과거 메시지 추가 로딩 ======
     const loadOlderMessages = useCallback(async () => {
-        // ✅ state 말고 ref로 먼저 막기 (동시 호출 방지)
         if (loadingOlderRef.current) return;
         if (!hasMoreBefore) return;
         if (!meetingId) return;
@@ -112,82 +108,64 @@ export default function MeetingChatPanel({ meetingId, joinInfo, terminated }) {
             const res = await api.get(
                 `/api/meetings/${meetingId}/chat/messages`,
                 {
-                    params: {
-                        beforeId: firstId,
-                        size: PAGE_SIZE,
-                    },
+                    params: { beforeId: firstId, size: PAGE_SIZE },
                 }
             );
-            const older = res.data || [];
 
+            const older = res.data || [];
             if (older.length === 0) {
                 setHasMoreBefore(false);
                 return;
             }
 
-            // ✅ 이미 있는 messageId는 걸러내기 (서버 중복 응답/동시 호출 대비)
             setChatMessages((prev) => {
                 const existingIds = new Set(
                     prev.map((m) => m.messageId).filter((id) => id != null)
                 );
-
                 const filteredOlder = older.filter(
                     (m) => m.messageId == null || !existingIds.has(m.messageId)
                 );
-
                 return [...filteredOlder, ...prev];
             });
 
-            // 스크롤 위치 유지 (위에 붙였으니 높이 차이만큼 내려줌)
+            // 스크롤 위치 유지
             setTimeout(() => {
                 if (!el) return;
                 const newScrollHeight = el.scrollHeight;
                 el.scrollTop = newScrollHeight - prevScrollHeight;
             }, 0);
 
-            if (older.length < PAGE_SIZE) {
-                setHasMoreBefore(false);
-            }
+            if (older.length < PAGE_SIZE) setHasMoreBefore(false);
         } catch (e) {
             console.error("[MeetingChatPanel] 과거 메시지 로딩 실패", e);
         } finally {
-            loadingOlderRef.current = false; // 🔥 ref 해제
+            loadingOlderRef.current = false;
             setLoadingOlder(false);
         }
     }, [chatMessages, hasMoreBefore, meetingId]);
 
-    // 스크롤 이벤트 감지
+    // ====== 스크롤 이벤트 감지 ======
     useEffect(() => {
         const el = chatAreaRef.current;
         if (!el) return;
 
         const handleScroll = () => {
-            // 위 근처면 과거 로딩
-            if (el.scrollTop < 40) {
-                loadOlderMessages();
-            }
+            if (el.scrollTop < 40) loadOlderMessages();
 
-            // 아래 근처인지 체크
             const distanceToBottom =
                 el.scrollHeight - el.scrollTop - el.clientHeight;
-
             if (distanceToBottom < 40) {
-                // 거의 맨 아래 도착 → 새 메시지 알림 초기화
                 if (!isAtBottomRef.current) {
                     updateIsAtBottom(true);
                     setPendingMessages([]);
                 }
             } else {
-                if (isAtBottomRef.current) {
-                    updateIsAtBottom(false);
-                }
+                if (isAtBottomRef.current) updateIsAtBottom(false);
             }
         };
 
         el.addEventListener("scroll", handleScroll);
-        return () => {
-            el.removeEventListener("scroll", handleScroll);
-        };
+        return () => el.removeEventListener("scroll", handleScroll);
     }, [loadOlderMessages, updateIsAtBottom]);
 
     // ====== WebSocket/STOMP 연결 ======
@@ -195,32 +173,26 @@ export default function MeetingChatPanel({ meetingId, joinInfo, terminated }) {
         if (!meetingId) return;
         if (terminated) return;
 
-        if (stompClientRef.current) {
-            console.log(
-                "[MeetingChatPanel] client already exists, skip connect"
-            );
-            return;
-        }
+        if (stompClientRef.current) return;
 
-        const client = Stomp.over(
-            () => new SockJS("http://localhost:8881/ws-chat")
-        );
+        const client = Stomp.over(() => new SockJS(WS_URL));
+        client.debug = () => {}; // 콘솔 지저분하면 끄기
+
+        // ✅ 토큰이 WS에서 필요하면 여기 주석 해제
+        const token = localStorage.getItem("token");
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
         client.connect(
-            {},
+            headers,
             () => {
-                console.log("[MeetingChatPanel] Chat STOMP connected");
                 setChatConnected(true);
 
                 client.subscribe(`/sub/meetings/${meetingId}/chat`, (frame) => {
-                    console.log("[Chat] incoming:", frame.body);
                     try {
                         const raw = JSON.parse(frame.body);
 
-                        const msg = {
-                            type: raw.type || "CHAT",
-                            ...raw,
-                        };
+                        // 서버가 type 안 주면 CHAT으로
+                        const msg = { type: raw.type || "CHAT", ...raw };
 
                         setChatMessages((prev) => [...prev, msg]);
 
@@ -228,7 +200,10 @@ export default function MeetingChatPanel({ meetingId, joinInfo, terminated }) {
                             setPendingMessages((prev) => [...prev, msg]);
                         }
                     } catch (e) {
-                        console.error("채팅 메시지 파싱 실패", e);
+                        console.error(
+                            "[MeetingChatPanel] 채팅 메시지 파싱 실패",
+                            e
+                        );
                     }
                 });
             },
@@ -241,30 +216,29 @@ export default function MeetingChatPanel({ meetingId, joinInfo, terminated }) {
         stompClientRef.current = client;
 
         return () => {
-            if (stompClientRef.current) {
-                console.log("[MeetingChatPanel] Chat STOMP disconnect");
-                try {
-                    stompClientRef.current.deactivate();
-                } catch (e) {
-                    console.error("STOMP deactivate 실패", e);
-                }
+            setChatConnected(false);
+            try {
+                stompClientRef.current?.deactivate();
+            } catch (e) {
+                console.error("[MeetingChatPanel] STOMP deactivate 실패", e);
             }
             stompClientRef.current = null;
         };
     }, [meetingId, terminated]);
 
-    // 새 메시지 들어올 때마다, 내가 맨 아래에 있을 때만 자동 스크롤
+    // ====== 새 메시지 들어올 때, 맨 아래면 자동 스크롤 ======
     useEffect(() => {
         if (!chatAreaRef.current) return;
         if (!isAtBottom) return;
-
         const el = chatAreaRef.current;
         el.scrollTop = el.scrollHeight;
     }, [chatMessages, isAtBottom]);
 
+    // ====== 전송 ======
     const handleSendChat = useCallback(() => {
         const client = stompClientRef.current;
         if (!client || !client.connected) return;
+        if (terminated) return;
 
         const text = chatInput.trim();
         if (!text) return;
@@ -288,12 +262,11 @@ export default function MeetingChatPanel({ meetingId, joinInfo, terminated }) {
         });
 
         setChatInput("");
-    }, [chatInput, meetingId, joinInfo]);
+    }, [chatInput, meetingId, joinInfo, terminated]);
 
     const handleClickNewMessagesBar = useCallback(() => {
         const el = chatAreaRef.current;
         if (!el) return;
-
         el.scrollTop = el.scrollHeight;
         setPendingMessages([]);
         updateIsAtBottom(true);
@@ -301,12 +274,7 @@ export default function MeetingChatPanel({ meetingId, joinInfo, terminated }) {
 
     return (
         <div className="meeting-side">
-            <div className="meeting-side__tabs">
-                <div className="meeting-side__tab meeting-side__tab--active">
-                    채팅
-                </div>
-                <div className="meeting-side__tab">참가자</div>
-            </div>
+            <div className="meeting-side__header">채팅</div>
 
             <div
                 id="chat-area"
@@ -328,6 +296,7 @@ export default function MeetingChatPanel({ meetingId, joinInfo, terminated }) {
                                 이전 채팅 불러오는 중...
                             </div>
                         )}
+
                         {chatMessages.map((m, idx) => {
                             const key = m.messageId ?? idx;
 
@@ -338,7 +307,6 @@ export default function MeetingChatPanel({ meetingId, joinInfo, terminated }) {
                                 m.userId != null &&
                                 Number(m.userId) === Number(myUserId);
 
-                            // 1) 시스템 메시지
                             if (isSystem) {
                                 return (
                                     <div
@@ -352,7 +320,6 @@ export default function MeetingChatPanel({ meetingId, joinInfo, terminated }) {
                                 );
                             }
 
-                            // 2) 내 메시지 (오른쪽)
                             if (isMine) {
                                 return (
                                     <div
@@ -369,7 +336,6 @@ export default function MeetingChatPanel({ meetingId, joinInfo, terminated }) {
                                 );
                             }
 
-                            // 3) 상대 메시지 (왼쪽)
                             return (
                                 <div
                                     key={key}

@@ -62,7 +62,39 @@ function MeetingListPage() {
                 }}
             >
                 <h2 style={{ margin: 0 }}>나의 회의 목록</h2>
-                {/* ➕ 여기 오른쪽에 나중에 '예약 회의 만들기' 버튼 같은 거 넣을 수 있음 */}
+                {/* 즉시 회의 시작 버튼 */}
+                <div style={{ display: "flex", gap: 8 }}>
+                    <button
+                        onClick={async (e) => {
+                            e.stopPropagation();
+                            try {
+                                const res = await api.post(
+                                    "/api/meetings/instant"
+                                );
+                                const meetingId = res.data?.meetingId;
+                                if (meetingId) {
+                                    navigate(`/meetings/${meetingId}/join`);
+                                }
+                            } catch (err) {
+                                console.error("즉시 회의 생성 실패", err);
+                                alert(
+                                    err.response?.data?.message ||
+                                        "즉시 회의 생성에 실패했습니다."
+                                );
+                            }
+                        }}
+                        style={{
+                            padding: "6px 12px",
+                            fontSize: 14,
+                            borderRadius: 4,
+                            border: "1px solid #d1d5db",
+                            background: "#f3f4f6",
+                            cursor: "pointer",
+                        }}
+                    >
+                        즉시 회의 시작
+                    </button>
+                </div>
             </div>
 
             {loading && <p>불러오는 중...</p>}
