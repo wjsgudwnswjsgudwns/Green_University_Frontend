@@ -195,47 +195,71 @@ html {
   margin-top: 24px;
 }
 
-/* 입력 그룹 */
-.form-group {
-  display: flex;
-  align-items: center;
-  background: #ffffff;
-  border: none;
-  border-radius: 8px;
-  padding: 16px 20px;
-  transition: all 0.3s ease;
-  position: relative;
+/* 입력 그룹 - 로그인 페이지와 동일한 스타일, 다른 CSS와 완전 격리 */
+.find-account-page-wrapper .find-account-form .form-group {
+  display: flex !important;
+  align-items: center !important;
+  background: #ffffff !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 16px 20px !important;
+  transition: all 0.3s ease !important;
+  position: relative !important;
+  box-shadow: none !important;
+  margin-bottom: 20px !important;
 }
 
-.form-group input {
-  flex: 1;
-  border: none;
-  outline: none;
-  background: transparent;
-  font-size: 1.1rem;
-  color: #123e25;
-  font-weight: 500;
+.find-account-page-wrapper .find-account-form .form-group label {
+  display: none !important;
 }
 
-.form-group select {
-  flex: 1;
-  border: none;
-  outline: none;
-  background: transparent;
-  font-size: 1.1rem;
-  color: #123e25;
-  font-weight: 500;
-  cursor: pointer;
-  padding-right: 8px;
+.find-account-page-wrapper .find-account-form .form-group input {
+  flex: 1 !important;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  font-size: 1.1rem !important;
+  color: #000000 !important;
+  font-weight: 500 !important;
+  -moz-appearance: textfield !important;
+  appearance: textfield !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+  height: auto !important;
 }
 
-.form-group input::placeholder {
+.find-account-page-wrapper .find-account-form .form-group input::-webkit-outer-spin-button,
+.find-account-page-wrapper .find-account-form .form-group input::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+}
+
+.find-account-page-wrapper .find-account-form .form-group select {
+  flex: 1 !important;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  font-size: 1.1rem !important;
+  color: #000000 !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  padding-right: 8px !important;
+  box-shadow: none !important;
+  padding-left: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+  height: auto !important;
+}
+
+.find-account-form .form-group input::placeholder {
   color: #7a7a7a;
   font-weight: 400;
 }
 
-.form-group input:disabled,
-.form-group select:disabled {
+.find-account-form .form-group input:disabled,
+.find-account-form .form-group select:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }

@@ -189,15 +189,15 @@ export default function FindPasswordPage() {
                     <span className="material-symbols-outlined">tag</span>
                   </label>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     id="id"
                     placeholder="ID를 입력하세요 (6자리 이상)"
                     value={id}
                     onChange={(e) => setId(e.target.value)}
                     disabled={isLoading}
                     required
-                    min="100000"
-                    max="2147483647"
                   />
                 </div>
 
