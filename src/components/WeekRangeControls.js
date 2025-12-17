@@ -8,6 +8,10 @@ function WeekRangeControls({
     onChangeTo,
     onPrevWeek,
     onNextWeek,
+    /**
+     * Optional callback to reset the week range to the current week (월~금).
+     */
+    onResetWeek,
 }) {
     return (
         <section style={{ marginBottom: "16px" }}>
@@ -42,6 +46,15 @@ function WeekRangeControls({
                 <button type="button" onClick={onNextWeek}>
                     다음 주
                 </button>
+                {onResetWeek && (
+                    <button
+                        type="button"
+                        onClick={onResetWeek}
+                        style={{ marginLeft: "8px" }}
+                    >
+                        이번 주
+                    </button>
+                )}
             </div>
         </section>
     );

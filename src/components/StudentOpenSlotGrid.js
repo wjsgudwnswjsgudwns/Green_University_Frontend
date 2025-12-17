@@ -35,6 +35,10 @@ function StudentOpenSlotGrid({
     slots,
     myReservedSlotIds = [],
     onSelectSlot,
+    /**
+     * Currently selected slotId to highlight on the grid. Optional.
+     */
+    selectedSlotId,
 }) {
     const dayList = useMemo(() => {
         const list = [];
@@ -155,6 +159,16 @@ function StudentOpenSlotGrid({
                                     border = "1px solid #ffa39e";
                                     clickable = false;
                                 }
+                            }
+
+                            // 🟡 선택된 슬롯 강조: 현재 선택된 slotId가 전달된 경우 배경 강조
+                            const isSelected =
+                                slot &&
+                                selectedSlotId &&
+                                Number(slot.slotId) === Number(selectedSlotId);
+                            if (isSelected) {
+                                bg = "#fffbe6"; // 연한 노랑
+                                border = "1px solid #d48806";
                             }
 
                             const cursor =
