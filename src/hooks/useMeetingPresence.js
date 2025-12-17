@@ -14,6 +14,8 @@ export function useMeetingPresence(
 
     const stompRef = useRef(null);
     const subRef = useRef(null);
+    const WS_URL =
+        process.env.REACT_APP_WS_URL || "http://localhost:8881/ws-chat";
 
     const upsert = useCallback((p) => {
         setParticipants((prev) => {
@@ -32,9 +34,7 @@ export function useMeetingPresence(
     useEffect(() => {
         if (!meetingId || !currentUserId || !joinInfo) return;
 
-        const stomp = Stomp.over(
-            () => new SockJS("http://localhost:8881/ws-chat")
-        );
+        const stomp = Stomp.over(() => new SockJS(WS_URL));
         stomp.debug = () => {};
         stompRef.current = stomp;
 

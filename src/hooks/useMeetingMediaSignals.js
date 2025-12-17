@@ -28,6 +28,8 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
     const stompRef = useRef(null);
     const subscriptionRef = useRef(null);
     const connectedRef = useRef(false);
+    const WS_URL =
+        process.env.REACT_APP_WS_URL || "http://localhost:8881/ws-chat";
 
     useEffect(() => {
         connectedRef.current = connected;
@@ -136,9 +138,7 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
     useEffect(() => {
         if (!meetingId || currentUserId == null) return;
 
-        const stomp = Stomp.over(
-            () => new SockJS("http://localhost:8881/ws-chat")
-        );
+        const stomp = Stomp.over(() => new SockJS(WS_URL));
         stomp.debug = () => {};
         stompRef.current = stomp;
 

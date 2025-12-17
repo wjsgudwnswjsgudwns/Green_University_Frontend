@@ -7,7 +7,7 @@ import api from "../api/axiosConfig";
 const PAGE_SIZE = 30;
 
 // ✅ 환경에 맞게 바꿔도 됨(일단 너 코드 기준 localhost)
-const WS_URL = "http://localhost:8881/ws-chat";
+const WS_URL = process.env.REACT_APP_WS_URL || "http://localhost:8881/ws-chat";
 
 export default function MeetingChatPanel({ meetingId, joinInfo, terminated }) {
     const [chatMessages, setChatMessages] = useState([]);
