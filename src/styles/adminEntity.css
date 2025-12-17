@@ -1,8 +1,93 @@
-/* Reusable styles for admin entity CRUD pages */
+/* Admin Entity Layout & Component Styles */
 
+/* --- 1. 레이아웃 (scheduleInfo.css 스타일 적용) --- */
+.admin-page-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+.admin-container {
+  display: flex;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  background: white;
+  min-height: 100vh;
+}
+
+/* --- 2. 사이드 메뉴 --- */
+.admin-side-menu {
+  width: 250px;
+  background: #ffffff;
+  border-right: 1px solid #e0e6ed;
+  padding: 20px 0;
+  flex-shrink: 0;
+}
+
+.admin-side-menu-header {
+  padding: 0 20px 20px;
+  border-bottom: 2px solid #e0b960;
+}
+
+.admin-side-menu-header h2 {
+  font-size: 24px;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.admin-side-menu-nav {
+  margin-top: 20px;
+}
+
+.admin-menu-item {
+  display: block;
+  padding: 12px 20px;
+  color: #4a5568;
+  text-decoration: none;
+  transition: all 0.2s;
+  border-left: 3px solid transparent;
+}
+
+.admin-menu-item:hover {
+  background: #f8f9fa;
+  color: #216d30;
+}
+
+.admin-menu-item.active {
+  background: #e8f5e9;
+  color: #216d30;
+  border-left-color: #216d30;
+  font-weight: 600;
+}
+
+/* --- 3. 메인 컨텐츠 영역 --- */
+.admin-main {
+  flex: 1;
+  padding: 40px;
+  min-width: 800px;
+}
+
+.admin-main h1 {
+  font-size: 28px;
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+.admin-divider {
+  height: 2px;
+  background: linear-gradient(to right, #e0b960, transparent);
+  margin-bottom: 30px;
+}
+
+/* --- 4. 기존 Admin Entity 컴포넌트 스타일 --- */
 .admin-entity h2 {
   margin-bottom: 16px;
-  color: #2a8fbd;
+  color: #2c3e50;
+  font-size: 1.5rem;
+  font-weight: 600;
 }
 
 .entity-actions {
@@ -10,7 +95,6 @@
   display: flex;
   gap: 8px;
 }
-
 .entity-actions button {
   background-color: #f5f5f5;
   border: 1px solid #e0e0e0;
@@ -18,89 +102,136 @@
   padding: 8px 12px;
   cursor: pointer;
   font-size: 0.875rem;
+  transition: all 0.2s ease;
 }
-
+.entity-actions button:hover {
+  background-color: #e8e8e8;
+}
 .entity-actions button.active {
-  background-color: #2a8fbd;
+  background-color: #216d30;
   color: #fff;
-  border-color: #2a8fbd;
+  border-color: #216d30;
 }
 
 .entity-table-wrapper {
   overflow-x: auto;
   background-color: #ffffff;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #e0e6ed;
   border-radius: 8px;
   padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
-
 .entity-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.875rem;
 }
-
-.entity-table th, .entity-table td {
-  padding: 8px;
-  border-bottom: 1px solid #f0f0f0;
+.entity-table th,
+.entity-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e0e6ed;
   text-align: left;
 }
-
 .entity-table th {
-  background-color: #f5f5f5;
+  background-color: #f8f9fa;
   font-weight: 600;
-  color: #333;
+  color: #2c3e50;
+}
+.entity-table tbody tr:hover {
+  background-color: #f8f9fa;
 }
 
 .entity-form {
   background-color: #ffffff;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #e0e6ed;
   border-radius: 8px;
-  padding: 16px;
+  padding: 20px;
   max-width: 500px;
 }
-
 .form-row {
   display: flex;
   flex-direction: column;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
-
 .form-row label {
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.9rem;
 }
-
 .form-row input {
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+.form-row input:focus {
+  outline: none;
+  border-color: #216d30;
+  box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
 }
 
 .entity-form button {
-  background-color: #2a8fbd;
+  background-color: #216d30;
   border: none;
   color: #fff;
-  padding: 8px 12px;
-  border-radius: 4px;
+  padding: 10px 16px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 0.875rem;
+  transition: background-color 0.2s ease;
 }
-
 .entity-form button:hover {
-  background-color: #226c8d;
+  background-color: #1a5524;
 }
-
 .entity-table button {
-  background-color: #2a8fbd;
+  background-color: #216d30;
   border: none;
   color: #fff;
-  padding: 4px 8px;
+  padding: 6px 12px;
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.8rem;
+  transition: background-color 0.2s ease;
+}
+.entity-table button:hover {
+  background-color: #1a5524;
 }
 
-.entity-table button:hover {
-  background-color: #226c8d;
+/* 반응형 (레이아웃) */
+@media (max-width: 1200px) {
+  .admin-container {
+    flex-direction: column;
+  }
+  .admin-side-menu {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e0e6ed;
+  }
+  .admin-side-menu-nav {
+    display: flex;
+    overflow-x: auto;
+  }
+  .admin-menu-item {
+    flex-shrink: 0;
+    border-left: none;
+    border-bottom: 3px solid transparent;
+  }
+  .admin-menu-item.active {
+    border-left: none;
+    border-bottom-color: #216d30;
+  }
+  .admin-main {
+    min-width: auto;
+    padding: 30px 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-main {
+    padding: 20px 16px;
+  }
+  .admin-main h1 {
+    font-size: 24px;
+  }
 }

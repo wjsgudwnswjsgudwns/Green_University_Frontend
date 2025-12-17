@@ -184,33 +184,40 @@ const PreAppList = () => {
     preStuSubList.length > 0 || stuSubList.length > 0 || stuSubListC.length > 0;
 
   return (
-    <div
-      className="d-flex justify-content-center align-items-start"
-      style={{ minWidth: "100em" }}
-    >
+    <div className="sugang-application-wrapper">
       {/* 사이드 메뉴 */}
-      <div className="sub--menu">
-        <div className="sub--menu--top">
+      <div className="sugang-application-sidebar">
+        <div className="sugang-application-sidebar-header">
           <h2>수강신청</h2>
         </div>
-        <div className="sub--menu--mid">
-          <table className="sub--menu--table">
+        <div className="sugang-application-menu-mid">
+          <table className="sugang-application-menu-table">
             <tbody>
               <tr>
                 <td>
-                  <a href="/sugang/subjectList">강의 시간표 조회</a>
+                  <a
+                    href="/sugang/subjectList"
+                    className="sugang-application-menu-link"
+                  >
+                    강의 시간표 조회
+                  </a>
                 </td>
               </tr>
               <tr>
                 <td>
-                  <a href="/sugang/schedule">나의 시간표</a>
+                  <a
+                    href="/sugang/schedule"
+                    className="sugang-application-menu-link"
+                  >
+                    나의 시간표
+                  </a>
                 </td>
               </tr>
               <tr>
                 <td>
                   <a
                     href="/sugang/pre"
-                    className={type === 0 ? "selected--menu" : ""}
+                    className="sugang-application-menu-link"
                   >
                     예비 수강 신청
                   </a>
@@ -220,7 +227,7 @@ const PreAppList = () => {
                 <td>
                   <a
                     href="/sugang/application"
-                    className={type === 1 ? "selected--menu" : ""}
+                    className="sugang-application-menu-link sugang-application-menu-active"
                   >
                     수강 신청
                   </a>
@@ -228,7 +235,12 @@ const PreAppList = () => {
               </tr>
               <tr>
                 <td>
-                  <a href="/sugang/list">수강 신청 내역 조회</a>
+                  <a
+                    href="/sugang/list"
+                    className="sugang-application-menu-link"
+                  >
+                    수강 신청 내역 조회
+                  </a>
                 </td>
               </tr>
             </tbody>

@@ -1,39 +1,37 @@
-/* 성적 조회 페이지 스타일 */
+/* 누계 성적 페이지 전용 스타일 - Grade.css */
 
-/* 전체 레이아웃 */
+/* 전체 페이지 래퍼 */
 .grade-container {
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  min-width: 100em;
-  gap: 30px;
-  padding: 20px;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  background: white;
+  min-height: 100vh;
 }
 
 /* 사이드 메뉴 */
 .grade-container .sub--menu {
-  min-width: 240px;
+  width: 250px;
   background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-  height: fit-content;
-  position: sticky;
-  top: 20px;
+  border-right: 1px solid #e0e6ed;
+  padding: 20px 0;
+  flex-shrink: 0;
 }
 
-.grade-container .sub--menu--top {
-  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
-  color: #ffffff;
-  padding: 24px 20px;
-  text-align: center;
+.grade-container .grade-sub--menu--top {
+  padding: 0 20px 20px;
+  border-bottom: 2px solid #e0b960;
 }
 
-.grade-container .sub--menu--top h2 {
+.grade-container .grade-sub--menu--top h2 {
+  font-size: 24px;
+  color: #2c3e50;
   margin: 0;
-  font-size: 1.4rem;
-  font-weight: 700;
-  letter-spacing: 1px;
+}
+
+.grade-container .sub--menu--mid {
+  margin-top: 20px;
 }
 
 .grade-container .sub--menu--table {
@@ -47,11 +45,6 @@
 
 .grade-container .sub--menu--table tr {
   display: block;
-  border-bottom: 1px solid #e0e6ed;
-}
-
-.grade-container .sub--menu--table tr:last-child {
-  border-bottom: none;
 }
 
 .grade-container .sub--menu--table td {
@@ -61,23 +54,20 @@
 
 .grade-container .sub--menu--table a {
   display: block;
-  padding: 14px 20px;
-  color: #2c3e50;
+  padding: 12px 20px;
+  color: #4a5568;
   text-decoration: none;
-  font-weight: 500;
-  font-size: 0.95rem;
-  transition: all 0.3s ease;
+  transition: all 0.2s;
   border-left: 3px solid transparent;
 }
 
 .grade-container .sub--menu--table a:hover {
-  background-color: #f8f9fa;
+  background: #f8f9fa;
   color: #216d30;
-  border-left-color: #216d30;
 }
 
 .grade-container .sub--menu--table a.selected--menu {
-  background-color: rgba(33, 109, 48, 0.1);
+  background: #e8f5e9;
   color: #216d30;
   border-left-color: #216d30;
   font-weight: 600;
@@ -86,230 +76,130 @@
 /* 메인 컨텐츠 */
 .grade-container main {
   flex: 1;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   padding: 40px;
-  min-height: 600px;
-  min-width: 1050px;
+  min-width: 800px;
 }
 
 .grade-container main h1 {
-  font-size: 1.8rem;
-  font-weight: 700;
+  font-size: 28px;
   color: #2c3e50;
   margin: 0 0 20px 0;
 }
 
 .grade-container .split--div {
   height: 2px;
-  background: linear-gradient(90deg, #216d30 0%, rgba(33, 109, 48, 0.2) 100%);
+  background: linear-gradient(to right, #e0b960, transparent);
   margin-bottom: 30px;
 }
 
-/* 검색 필터 */
-.grade-container .sub--filter {
-  background-color: #f8f9fa;
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 30px;
-  border: 1px solid #e0e6ed;
-}
-
-.grade-container .sub--filter form > div {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.grade-container .sub--filter select {
-  padding: 8px 12px;
-  border: 2px solid #e0e6ed;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  color: #2c3e50;
-  min-width: 120px;
-  transition: all 0.3s ease;
-  background-color: #ffffff;
-}
-
-.grade-container .sub--filter select:focus {
-  outline: none;
-  border-color: #216d30;
-  box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
-}
-
-.grade-container .sub--filter button {
-  padding: 8px 20px;
-  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
-  color: #ffffff;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(33, 109, 48, 0.3);
-  margin-left: auto;
-}
-
-.grade-container .sub--filter button:hover:not(:disabled) {
-  background: linear-gradient(135deg, #1a5524 0%, #0e2b14 100%);
-  box-shadow: 0 4px 12px rgba(33, 109, 48, 0.4);
-  transform: translateY(-1px);
-}
-
-.grade-container .sub--filter button:disabled {
-  background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
-  cursor: not-allowed;
-  box-shadow: none;
-  opacity: 0.6;
-}
-
-/* 성적 목록 헤더 */
 .grade-container main h4 {
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: 18px;
   color: #2c3e50;
-  margin-bottom: 16px;
-  margin-top: 20px;
+  margin: 0 0 16px 0;
 }
 
-/* 성적 목록 테이블 */
+/* 테이블 */
 .grade-container .sub--list--table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 30px;
-  font-size: 0.9rem;
   background-color: #ffffff;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
 }
 
 .grade-container .sub--list--table thead {
-  background-color: #f8f9fa;
+  background-color: #216d30;
+  color: white;
 }
 
 .grade-container .sub--list--table th {
-  padding: 12px 25px;
+  padding: 14px 16px;
   text-align: center;
   font-weight: 600;
-  color: #2c3e50;
-  border-bottom: 2px solid #e0e6ed;
+  font-size: 15px;
   white-space: nowrap;
-  vertical-align: middle;
 }
 
 .grade-container .sub--list--table td {
-  padding: 10px 8px;
+  padding: 14px 16px;
   text-align: center;
-  border-bottom: 1px solid #f0f0f0;
-  color: #5a6c7d;
+  border-bottom: 1px solid #e0e6ed;
+  color: #4a5568;
   vertical-align: middle;
+}
+
+.grade-container .sub--list--table tbody tr {
+  transition: background 0.2s;
 }
 
 .grade-container .sub--list--table tbody tr:hover {
   background-color: #f8f9fa;
-  transition: background-color 0.2s ease;
 }
 
 .grade-container .sub--list--table tbody tr:last-child td {
   border-bottom: none;
 }
 
-.grade-container .sub--list--name {
-  font-weight: 600;
-  color: #2c3e50;
-  text-align: left;
-  padding: 10px 20px 10px 9px !important;
-}
-
-/* 강의평가 링크 */
-.grade-container .sub--list--table a {
-  color: #216d30;
-  text-decoration: none;
-  font-weight: 600;
-  transition: color 0.3s ease;
-}
-
-.grade-container .sub--list--table a:hover {
-  color: #1a5524;
-  text-decoration: underline;
-}
-
-/* HR 스타일 */
-.grade-container hr {
-  border: none;
-  border-top: 1px solid #e0e6ed;
-  margin: 30px 0;
-}
-
-/* 결과 없음 메시지 */
+/* 빈 상태 */
 .grade-container .no--list--p {
   text-align: center;
   padding: 60px 20px;
-  color: #95a5a6;
-  font-size: 1.1rem;
-  background-color: #f8f9fa;
-  border: 1px solid #e0e6ed;
-  border-radius: 8px;
-  margin-top: 20px;
-  font-weight: 500;
-  font-style: italic;
+  color: #999;
+  font-size: 16px;
 }
 
 /* 반응형 */
 @media (max-width: 1200px) {
-  .grade-container main {
-    min-width: auto;
-  }
-}
-
-@media (max-width: 1024px) {
   .grade-container {
     flex-direction: column;
-    min-width: auto;
   }
 
   .grade-container .sub--menu {
-    position: static;
     width: 100%;
-    min-width: auto;
+    border-right: none;
+    border-bottom: 1px solid #e0e6ed;
+  }
+
+  .grade-container .sub--menu--mid {
+    display: flex;
+    overflow-x: auto;
+  }
+
+  .grade-container .sub--menu--table tbody {
+    display: flex;
+  }
+
+  .grade-container .sub--menu--table a {
+    border-left: none;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+  }
+
+  .grade-container .sub--menu--table a.selected--menu {
+    border-left: none;
+    border-bottom-color: #216d30;
   }
 
   .grade-container main {
     min-width: auto;
+    padding: 30px 20px;
   }
 }
 
 @media (max-width: 768px) {
   .grade-container main {
-    padding: 24px 16px;
+    padding: 20px 16px;
   }
 
-  .grade-container .sub--filter form > div {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .grade-container .sub--filter select {
-    width: 100%;
-  }
-
-  .grade-container .sub--filter button {
-    margin-left: 0;
-    width: 100%;
-    justify-content: center;
-  }
-
-  .grade-container .sub--list--table {
-    font-size: 0.8rem;
+  .grade-container main h1 {
+    font-size: 24px;
   }
 
   .grade-container .sub--list--table th,
   .grade-container .sub--list--table td {
-    padding: 8px 4px;
+    padding: 10px 8px;
+    font-size: 13px;
   }
 }

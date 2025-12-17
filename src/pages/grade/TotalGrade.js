@@ -33,7 +33,7 @@ const TotalGrade = () => {
     <div className="grade-container">
       {/* 사이드 메뉴 */}
       <div className="sub--menu">
-        <div className="sub--menu--top">
+        <div className="grade-sub--menu--top">
           <h2>성적</h2>
         </div>
         <div className="sub--menu--mid">

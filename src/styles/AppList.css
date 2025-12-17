@@ -1,235 +1,217 @@
-/* 수강 신청 내역 조회 페이지 스타일 */
+/* 수강 신청 내역 조회 페이지 전용 스타일 - AppList.css */
 
-/* 전체 레이아웃 */
-.app-list-container {
+.sugang-applist-wrapper {
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  min-width: 100em;
-  gap: 30px;
-  padding: 20px;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  background: white;
+  min-height: 100vh;
 }
 
-/* 사이드 메뉴 */
-.app-list-container .sub--menu {
-  min-width: 240px;
+/* 사이드바 */
+.sugang-applist-sidebar {
+  width: 250px;
   background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-  height: fit-content;
-  position: sticky;
-  top: 20px;
+  border-right: 1px solid #e0e6ed;
+  padding: 20px 0;
 }
 
-.app-list-container .sub--menu--top {
-  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
-  color: #ffffff;
-  padding: 24px 20px;
-  text-align: center;
+.sugang-applist-sidebar-header {
+  padding: 0 20px 20px;
+  border-bottom: 2px solid #e0b960;
 }
 
-.app-list-container .sub--menu--top h2 {
+.sugang-applist-sidebar-header h2 {
+  font-size: 24px;
+  color: #2c3e50;
   margin: 0;
-  font-size: 1.4rem;
-  font-weight: 700;
-  letter-spacing: 1px;
 }
 
-.app-list-container .sub--menu--table {
+.sugang-applist-menu-mid {
+  margin-top: 20px;
+}
+
+.sugang-applist-menu-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.app-list-container .sub--menu--table tbody {
-  display: block;
-}
-
-.app-list-container .sub--menu--table tr {
-  display: block;
-  border-bottom: 1px solid #e0e6ed;
-}
-
-.app-list-container .sub--menu--table tr:last-child {
-  border-bottom: none;
-}
-
-.app-list-container .sub--menu--table td {
-  display: block;
+.sugang-applist-menu-table td {
   padding: 0;
 }
 
-.app-list-container .sub--menu--table a {
+.sugang-applist-menu-link {
   display: block;
-  padding: 14px 20px;
-  color: #2c3e50;
+  padding: 12px 20px;
+  color: #4a5568;
   text-decoration: none;
-  font-weight: 500;
-  font-size: 0.95rem;
-  transition: all 0.3s ease;
+  transition: all 0.2s;
   border-left: 3px solid transparent;
 }
 
-.app-list-container .sub--menu--table a:hover {
-  background-color: #f8f9fa;
+.sugang-applist-menu-link:hover {
+  background: #f8f9fa;
   color: #216d30;
-  border-left-color: #216d30;
 }
 
-.app-list-container .sub--menu--table a.selected--menu {
-  background-color: rgba(33, 109, 48, 0.1);
+.sugang-applist-menu-link.sugang-applist-menu-active {
+  background: #e8f5e9;
   color: #216d30;
   border-left-color: #216d30;
   font-weight: 600;
 }
 
-/* 메인 컨텐츠 */
-.app-list-container main {
+/* 메인 */
+.sugang-applist-main {
   flex: 1;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   padding: 40px;
-  min-height: 600px;
-  min-width: 1050px;
+  min-width: 800px;
 }
 
-.app-list-container main h1 {
-  font-size: 1.8rem;
-  font-weight: 700;
+.sugang-applist-title {
+  font-size: 28px;
   color: #2c3e50;
-  margin: 0 0 20px 0;
+  margin-bottom: 20px;
 }
 
-.app-list-container .split--div {
+.sugang-applist-divider {
   height: 2px;
-  background: linear-gradient(90deg, #216d30 0%, rgba(33, 109, 48, 0.2) 100%);
+  background: linear-gradient(to right, #e0b960, transparent);
   margin-bottom: 30px;
 }
 
-/* 강의 목록 헤더 */
-.app-list-container main h4 {
-  font-size: 1.1rem;
-  font-weight: 600;
+/* 리스트 헤더 */
+.sugang-applist-list-header {
+  font-size: 18px;
   color: #2c3e50;
-  margin-bottom: 16px;
+  margin: 20px 0 16px;
 }
 
-/* 강의 목록 테이블 */
-.app-list-container .sub--list--table {
+.sugang-applist-list-header .title-text {
+  font-weight: 600;
+}
+
+.sugang-applist-list-header .count-text {
+  color: #666;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+/* 테이블 */
+.sugang-applist-table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 30px;
-  font-size: 0.9rem;
-  background-color: #ffffff;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.app-list-container .sub--list--table thead {
-  background-color: #f8f9fa;
+.sugang-applist-table thead {
+  background: #216d30;
+  color: white;
 }
 
-.app-list-container .sub--list--table th {
-  padding: 12px 10px;
+.sugang-applist-table th {
+  padding: 12px 14px;
   text-align: center;
   font-weight: 600;
-  color: #2c3e50;
-  border-bottom: 2px solid #e0e6ed;
+  font-size: 14px;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
   white-space: nowrap;
-  vertical-align: middle;
 }
 
-.app-list-container .sub--list--table td {
-  padding: 10px 8px;
-  text-align: center;
-  border-bottom: 1px solid #f0f0f0;
-  color: #5a6c7d;
-  vertical-align: middle;
+.sugang-applist-table th:last-child {
+  border-right: none;
 }
 
-.app-list-container .sub--list--table tbody tr:hover {
-  background-color: #f8f9fa;
-  transition: background-color 0.2s ease;
+.sugang-applist-table tbody tr {
+  border-bottom: 1px solid #e0e6ed;
+  transition: background 0.2s;
 }
 
-.app-list-container .sub--list--table tbody tr:last-child td {
+.sugang-applist-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.sugang-applist-table tbody tr:last-child {
   border-bottom: none;
 }
 
-.app-list-container .sub--list--name {
-  font-weight: 600;
-  color: #2c3e50;
-  text-align: left;
+.sugang-applist-table td {
+  padding: 12px 14px;
+  text-align: center;
+  color: #4a5568;
+  white-space: nowrap;
+  font-size: 14px;
 }
 
-/* 수강신청 취소 버튼 */
-.app-list-container .sub--list--button--row button {
+.sugang-applist-subject-name {
+  text-align: left;
+  font-weight: 500;
+  white-space: normal;
+}
+
+.sugang-applist-action-cell {
+  text-align: center;
+}
+
+.sugang-applist-cancel-btn {
   padding: 6px 16px;
+  background: #6c757d;
+  color: white;
   border: none;
   border-radius: 4px;
-  font-size: 0.85rem;
+  font-size: 13px;
   font-weight: 600;
-  color: #ffffff;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background 0.2s;
 }
 
-.app-list-container .sub--list--button--row button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+.sugang-applist-cancel-btn:hover {
+  background: #5a6268;
 }
 
-/* 결과 없음 메시지 */
-.app-list-container .no--list--p {
+/* 데이터 없음 */
+.sugang-applist-no-data {
   text-align: center;
   padding: 60px 20px;
-  color: #95a5a6;
-  font-size: 1.1rem;
-  background-color: #f8f9fa;
-  border: 1px solid #e0e6ed;
-  border-radius: 8px;
-  margin-top: 20px;
-  font-weight: 500;
-  font-style: italic;
+  color: #999;
+  font-size: 16px;
 }
 
 /* 반응형 */
 @media (max-width: 1200px) {
-  .app-list-container main {
-    min-width: auto;
-  }
-}
-
-@media (max-width: 1024px) {
-  .app-list-container {
+  .sugang-applist-wrapper {
     flex-direction: column;
-    min-width: auto;
   }
 
-  .app-list-container .sub--menu {
-    position: static;
+  .sugang-applist-sidebar {
     width: 100%;
-    min-width: auto;
+    border-right: none;
+    border-bottom: 1px solid #e0e6ed;
   }
 
-  .app-list-container main {
+  .sugang-applist-main {
     min-width: auto;
+    padding: 30px 20px;
   }
 }
 
 @media (max-width: 768px) {
-  .app-list-container main {
-    padding: 24px 16px;
+  .sugang-applist-main {
+    padding: 20px 16px;
   }
 
-  .app-list-container .sub--list--table {
-    font-size: 0.8rem;
+  .sugang-applist-title {
+    font-size: 24px;
   }
 
-  .app-list-container .sub--list--table th,
-  .app-list-container .sub--list--table td {
-    padding: 8px 4px;
+  .sugang-applist-table-container {
+    overflow-x: auto;
+  }
+
+  .sugang-applist-table th,
+  .sugang-applist-table td {
+    padding: 10px 8px;
+    font-size: 13px;
   }
 }

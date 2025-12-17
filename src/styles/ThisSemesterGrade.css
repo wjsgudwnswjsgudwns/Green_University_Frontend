@@ -1,43 +1,37 @@
-/* 금학기 성적 조회 페이지 스타일 - tsg (ThisSemesterGrade) prefix */
+/* 금학기 성적 페이지 전용 스타일 - ThisSemesterGrade.css */
 
-/* 전체 레이아웃 */
+/* 전체 페이지 래퍼 */
 .this-semester-grade-container {
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  min-width: 100em;
-  gap: 30px;
-  padding: 20px;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  background: white;
+  min-height: 100vh;
 }
 
 /* 사이드 메뉴 */
 .tsg-sub-menu {
-  min-width: 240px;
+  width: 250px;
   background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-  height: fit-content;
-  position: sticky;
-  top: 20px;
+  border-right: 1px solid #e0e6ed;
+  padding: 20px 0;
+  flex-shrink: 0;
 }
 
 .tsg-sub-menu-top {
-  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
-  color: #ffffff;
-  padding: 24px 20px;
-  text-align: center;
+  padding: 0 20px 20px;
+  border-bottom: 2px solid #e0b960;
 }
 
 .tsg-sub-menu-top h2 {
+  font-size: 24px;
+  color: #2c3e50;
   margin: 0;
-  font-size: 1.4rem;
-  font-weight: 700;
-  letter-spacing: 1px;
 }
 
 .tsg-sub-menu-mid {
-  padding: 0;
+  margin-top: 20px;
 }
 
 .tsg-sub-menu-table {
@@ -51,11 +45,6 @@
 
 .tsg-sub-menu-table tr {
   display: block;
-  border-bottom: 1px solid #e0e6ed;
-}
-
-.tsg-sub-menu-table tr:last-child {
-  border-bottom: none;
 }
 
 .tsg-sub-menu-table td {
@@ -65,98 +54,90 @@
 
 .tsg-sub-menu-table a {
   display: block;
-  padding: 14px 20px;
-  color: #2c3e50;
+  padding: 12px 20px;
+  color: #4a5568;
   text-decoration: none;
-  font-weight: 500;
-  font-size: 0.95rem;
-  transition: all 0.3s ease;
+  transition: all 0.2s;
   border-left: 3px solid transparent;
 }
 
 .tsg-sub-menu-table a:hover {
-  background-color: #f8f9fa;
+  background: #f8f9fa;
   color: #216d30;
-  border-left-color: #216d30;
 }
 
-.tsg-selected-menu {
-  background-color: rgba(33, 109, 48, 0.1) !important;
-  color: #216d30 !important;
-  border-left-color: #216d30 !important;
-  font-weight: 600 !important;
+.tsg-sub-menu-table a.tsg-selected-menu {
+  background: #e8f5e9;
+  color: #216d30;
+  border-left-color: #216d30;
+  font-weight: 600;
 }
 
 /* 메인 컨텐츠 */
 .tsg-main {
   flex: 1;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   padding: 40px;
-  min-height: 600px;
-  min-width: 1050px;
+  min-width: 800px;
 }
 
 .tsg-main h1 {
-  font-size: 1.8rem;
-  font-weight: 700;
+  font-size: 28px;
   color: #2c3e50;
   margin: 0 0 20px 0;
 }
 
 .tsg-split-div {
   height: 2px;
-  background: linear-gradient(90deg, #216d30 0%, rgba(33, 109, 48, 0.2) 100%);
+  background: linear-gradient(to right, #e0b960, transparent);
   margin-bottom: 30px;
 }
 
 /* 섹션 타이틀 */
 .tsg-section-title {
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: 18px;
   color: #2c3e50;
-  margin-bottom: 16px;
-  margin-top: 20px;
+  margin: 0 0 16px 0;
+  font-weight: 600;
 }
 
 /* 테이블 */
 .tsg-list-table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 30px;
-  font-size: 0.9rem;
   background-color: #ffffff;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
 }
 
 .tsg-list-table thead {
-  background-color: #f8f9fa;
+  background-color: #216d30;
+  color: white;
 }
 
 .tsg-list-table th {
-  padding: 12px 25px;
+  padding: 14px 16px;
   text-align: center;
   font-weight: 600;
-  color: #2c3e50;
-  border-bottom: 2px solid #e0e6ed;
+  font-size: 15px;
   white-space: nowrap;
-  vertical-align: middle;
 }
 
 .tsg-list-table td {
-  padding: 10px 8px;
+  padding: 14px 16px;
   text-align: center;
-  border-bottom: 1px solid #f0f0f0;
-  color: #5a6c7d;
+  border-bottom: 1px solid #e0e6ed;
+  color: #4a5568;
   vertical-align: middle;
+}
+
+.tsg-list-table tbody tr {
+  transition: background 0.2s;
 }
 
 .tsg-list-table tbody tr:hover {
   background-color: #f8f9fa;
-  transition: background-color 0.2s ease;
 }
 
 .tsg-list-table tbody tr:last-child td {
@@ -164,92 +145,101 @@
 }
 
 .tsg-list-name {
-  font-weight: 600;
-  color: #2c3e50;
   text-align: left;
-  padding: 10px 20px 10px 9px !important;
+  font-weight: 500;
 }
 
 /* 강의평가 링크 */
 .tsg-eval-link {
   color: #216d30;
-  text-decoration: none;
-  font-weight: 600;
-  transition: color 0.3s ease;
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 500;
+  transition: color 0.2s;
 }
 
 .tsg-eval-link:hover {
   color: #1a5524;
-  text-decoration: underline;
 }
 
 .tsg-eval-completed {
-  color: gray;
+  color: #6c757d;
+  font-weight: 500;
 }
 
 /* 안내 문구 */
 .tsg-notice {
-  color: #888;
-  margin-bottom: 40px;
-  font-size: 0.9rem;
+  color: #dc3545;
+  font-size: 14px;
+  margin: 10px 0 30px 0;
 }
 
 /* 구분선 */
 .tsg-divider {
+  height: 2px;
+  background: #e0e6ed;
   border: none;
-  border-top: 1px solid #e0e6ed;
-  margin: 30px 0;
+  margin: 40px 0 30px 0;
 }
 
-/* 결과 없음 메시지 */
+/* 빈 상태 */
 .tsg-no-list-p {
   text-align: center;
   padding: 60px 20px;
-  color: #95a5a6;
-  font-size: 1.1rem;
-  background-color: #f8f9fa;
-  border: 1px solid #e0e6ed;
-  border-radius: 8px;
-  margin-top: 20px;
-  font-weight: 500;
-  font-style: italic;
+  color: #999;
+  font-size: 16px;
 }
 
 /* 반응형 */
 @media (max-width: 1200px) {
-  .tsg-main {
-    min-width: auto;
-  }
-}
-
-@media (max-width: 1024px) {
   .this-semester-grade-container {
     flex-direction: column;
-    min-width: auto;
   }
 
   .tsg-sub-menu {
-    position: static;
     width: 100%;
-    min-width: auto;
+    border-right: none;
+    border-bottom: 1px solid #e0e6ed;
+  }
+
+  .tsg-sub-menu-mid {
+    display: flex;
+    overflow-x: auto;
+  }
+
+  .tsg-sub-menu-table tbody {
+    display: flex;
+  }
+
+  .tsg-sub-menu-table a {
+    border-left: none;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+  }
+
+  .tsg-sub-menu-table a.tsg-selected-menu {
+    border-left: none;
+    border-bottom-color: #216d30;
   }
 
   .tsg-main {
     min-width: auto;
+    padding: 30px 20px;
   }
 }
 
 @media (max-width: 768px) {
   .tsg-main {
-    padding: 24px 16px;
+    padding: 20px 16px;
   }
 
-  .tsg-list-table {
-    font-size: 0.8rem;
+  .tsg-main h1 {
+    font-size: 24px;
   }
 
   .tsg-list-table th,
   .tsg-list-table td {
-    padding: 8px 4px;
+    padding: 10px 8px;
+    font-size: 13px;
   }
 }

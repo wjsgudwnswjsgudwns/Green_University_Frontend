@@ -1,0 +1,560 @@
+/* 중도 이탈 위험 학생 관리 페이지 전용 스타일 - staffRiskStudents.css */
+
+/* 페이지 컨테이너 */
+.srs-page-container {
+  padding: 40px;
+  min-width: 800px;
+}
+
+.srs-header {
+  margin-bottom: 20px;
+}
+
+.srs-title {
+  font-size: 28px;
+  color: #2c3e50;
+  margin: 0 0 20px 0;
+}
+
+.srs-subtitle {
+  font-size: 16px;
+  color: #6c757d;
+  margin: 0 0 20px 0;
+}
+
+/* AI 분석 실행 버튼 */
+.srs-ai-run-btn {
+  padding: 10px 24px;
+  background-color: #216d30;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.srs-ai-run-btn:hover:not(:disabled) {
+  background-color: #1a5524;
+}
+
+.srs-ai-run-btn:disabled {
+  background-color: #d1d5db;
+  cursor: not-allowed;
+}
+
+/* 로딩 */
+.srs-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+}
+
+.srs-loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e0e6ed;
+  border-top-color: #216d30;
+  border-radius: 50%;
+  animation: srs-spin 0.8s linear infinite;
+}
+
+@keyframes srs-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.srs-loading p {
+  margin-top: 20px;
+  color: #666;
+  font-size: 16px;
+}
+
+/* 에러 메시지 */
+.srs-error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #fee;
+  border: 1px solid #fcc;
+  border-radius: 6px;
+  color: #c33;
+  margin-bottom: 20px;
+}
+
+/* 위험도 통계 */
+.srs-risk-statistics {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.srs-risk-stat-card {
+  flex: 1;
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #216d30;
+  transition: transform 0.2s;
+}
+
+.srs-risk-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.srs-risk-stat-card.srs-risk-stat-critical {
+  border-left-color: #dc3545;
+}
+
+.srs-risk-stat-card.srs-risk-stat-warning {
+  border-left-color: #fd7e14;
+}
+
+.srs-risk-stat-card.srs-risk-stat-total {
+  border-left-color: #216d30;
+}
+
+.srs-risk-stat-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.srs-risk-stat-label {
+  font-size: 14px;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.srs-risk-stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+/* 필터 */
+.srs-filters {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e0e6ed;
+  flex-wrap: wrap;
+}
+
+.srs-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 150px;
+}
+
+.srs-filter-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.srs-filter-group select,
+.srs-filter-group input {
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 15px;
+  color: #2c3e50;
+  background-color: #ffffff;
+  transition: all 0.2s;
+}
+
+.srs-filter-group select:focus,
+.srs-filter-group input:focus {
+  outline: none;
+  border-color: #216d30;
+  box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
+}
+
+.srs-filter-group select:disabled {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
+}
+
+.srs-search-group {
+  flex: 1;
+  min-width: 200px;
+}
+
+.srs-search-group input {
+  width: 100%;
+}
+
+.srs-reset-btn {
+  padding: 10px 24px;
+  background-color: #6c757d;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-left: auto;
+}
+
+.srs-reset-btn:hover {
+  background-color: #5a6268;
+}
+
+/* 결과 정보 */
+.srs-results-info {
+  margin-bottom: 16px;
+}
+
+.srs-results-count {
+  font-size: 16px;
+  color: #4a5568;
+}
+
+.srs-results-count strong {
+  color: #dc3545;
+  font-weight: 700;
+}
+
+/* 학생 섹션 */
+.srs-students-section {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.srs-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  font-size: 16px;
+}
+
+.srs-table-wrapper {
+  overflow-x: auto;
+}
+
+/* 학생 테이블 */
+.srs-students-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.srs-students-table thead {
+  background-color: #216d30;
+  color: white;
+}
+
+.srs-students-table th {
+  padding: 14px 8px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s;
+  vertical-align: middle;
+}
+
+.srs-students-table th:hover {
+  background-color: #1a5524;
+}
+
+.srs-students-table td {
+  padding: 14px 8px;
+  text-align: center;
+  border-bottom: 1px solid #e0e6ed;
+  color: #4a5568;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.srs-students-table tbody tr {
+  transition: background 0.2s;
+}
+
+.srs-students-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.srs-students-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* 위험도 배지 */
+.srs-risk-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.srs-risk-badge.srs-risk-normal {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.srs-risk-badge.srs-risk-caution {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.srs-risk-badge.srs-risk-warning {
+  background-color: #ffe5cc;
+  color: #cc5200;
+}
+
+.srs-risk-badge.srs-risk-critical {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* 과목 수 배지 */
+.srs-count-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 30px;
+}
+
+.srs-count-badge.srs-count-critical {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.srs-count-badge.srs-count-risk {
+  background-color: #ffe5cc;
+  color: #cc5200;
+}
+
+/* 버튼 */
+.srs-comment-btn {
+  padding: 6px 16px;
+  background-color: #007bff;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.srs-comment-btn:hover {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+}
+
+.srs-detail-btn {
+  padding: 6px 16px;
+  background-color: #216d30;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.srs-detail-btn:hover {
+  background-color: #1a5524;
+  transform: translateY(-1px);
+}
+
+/* 모달 */
+.srs-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.srs-modal-content {
+  background: white;
+  border-radius: 8px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.srs-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e0e6ed;
+}
+
+.srs-modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  color: #2c3e50;
+}
+
+.srs-modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #6c757d;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.srs-modal-close:hover {
+  color: #2c3e50;
+}
+
+.srs-modal-body {
+  padding: 24px;
+}
+
+.srs-student-info-box {
+  background: #f8f9fa;
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.srs-student-info-box p {
+  margin: 8px 0;
+  color: #4a5568;
+}
+
+.srs-student-info-box strong {
+  color: #2c3e50;
+  margin-right: 8px;
+}
+
+.srs-comment-box {
+  border-top: 1px solid #e0e6ed;
+  padding-top: 20px;
+}
+
+.srs-comment-box h4 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  color: #2c3e50;
+}
+
+.srs-comment-text {
+  color: #4a5568;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+.srs-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 24px;
+  border-top: 1px solid #e0e6ed;
+}
+
+.srs-modal-btn-primary {
+  padding: 10px 24px;
+  background-color: #216d30;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.srs-modal-btn-primary:hover {
+  background-color: #1a5524;
+}
+
+/* 반응형 */
+@media (max-width: 1024px) {
+  .srs-risk-statistics {
+    flex-wrap: wrap;
+  }
+
+  .srs-risk-stat-card {
+    min-width: calc(50% - 8px);
+  }
+}
+
+@media (max-width: 768px) {
+  .srs-page-container {
+    padding: 30px 20px;
+    min-width: auto;
+  }
+
+  .srs-title {
+    font-size: 24px;
+  }
+
+  .srs-risk-statistics {
+    flex-direction: column;
+  }
+
+  .srs-risk-stat-card {
+    min-width: 100%;
+  }
+
+  .srs-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .srs-filter-group {
+    min-width: 100%;
+  }
+
+  .srs-search-group {
+    min-width: 100%;
+  }
+
+  .srs-reset-btn {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .srs-students-table th,
+  .srs-students-table td {
+    padding: 8px 4px;
+    font-size: 13px;
+  }
+
+  .srs-modal-content {
+    max-width: 100%;
+  }
+}

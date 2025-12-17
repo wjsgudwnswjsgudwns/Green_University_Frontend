@@ -172,7 +172,6 @@ export default function StudentListStaff() {
 
               <button type="submit" className="stafflist-search-button">
                 <span>조회</span>
-                <span className="material-symbols-outlined">search</span>
               </button>
 
               <button

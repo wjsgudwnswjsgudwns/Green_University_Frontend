@@ -1,0 +1,166 @@
+/* 강의계획서 수정 페이지 전용 스타일 - update-syllabus.css */
+
+.update-syllabus-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding: 40px 20px;
+}
+
+.update-syllabus-content {
+  max-width: 800px;
+  width: 100%;
+  background: white;
+  border-radius: 8px;
+  padding: 40px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 로딩 */
+.update-syllabus-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+}
+
+.update-syllabus-loading p {
+  color: #666;
+  font-size: 16px;
+}
+
+/* 제목 */
+.update-syllabus-title {
+  font-size: 28px;
+  color: #2c3e50;
+  margin: 0 0 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e0b960;
+}
+
+/* 폼 */
+.update-syllabus-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.update-syllabus-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.update-syllabus-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.update-syllabus-input,
+.update-syllabus-textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 15px;
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.update-syllabus-input:focus,
+.update-syllabus-textarea:focus {
+  outline: none;
+  border-color: #216d30;
+  box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
+}
+
+.update-syllabus-textarea {
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.6;
+}
+
+.update-syllabus-input::placeholder,
+.update-syllabus-textarea::placeholder {
+  color: #9ca3af;
+}
+
+/* 버튼 그룹 */
+.update-syllabus-button-group {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #e0e6ed;
+}
+
+.update-syllabus-cancel-btn,
+.update-syllabus-submit-btn {
+  padding: 12px 32px;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.update-syllabus-cancel-btn {
+  background: #6c757d;
+  color: white;
+}
+
+.update-syllabus-cancel-btn:hover {
+  background: #5a6268;
+}
+
+.update-syllabus-submit-btn {
+  background: #216d30;
+  color: white;
+}
+
+.update-syllabus-submit-btn:hover {
+  background: #1a5524;
+}
+
+.update-syllabus-cancel-btn:disabled,
+.update-syllabus-submit-btn:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .update-syllabus-container {
+    padding: 20px 16px;
+  }
+
+  .update-syllabus-content {
+    padding: 24px 20px;
+  }
+
+  .update-syllabus-title {
+    font-size: 24px;
+    margin-bottom: 24px;
+  }
+
+  .update-syllabus-form {
+    gap: 20px;
+  }
+
+  .update-syllabus-button-group {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .update-syllabus-cancel-btn,
+  .update-syllabus-submit-btn {
+    width: 100%;
+  }
+}

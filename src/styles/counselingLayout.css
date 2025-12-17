@@ -1,0 +1,130 @@
+/* 상담 레이아웃 전용 스타일 - counselingLayout.css */
+
+.counseling-layout {
+  display: flex;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  background: white;
+  min-height: 100vh;
+}
+
+/* 사이드바 */
+.counseling-sidebar {
+  width: 250px;
+  background: #ffffff;
+  border-right: 1px solid #e0e6ed;
+  padding: 20px 0;
+  flex-shrink: 0;
+}
+
+.sidebar-header {
+  padding: 0 20px 20px;
+  border-bottom: 2px solid #e0b960;
+}
+
+.sidebar-header h2 {
+  font-size: 24px;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.sidebar-nav {
+  margin-top: 20px;
+}
+
+.sidebar-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  border-left: 3px solid transparent;
+  color: #4a5568;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 15px;
+}
+
+.sidebar-menu-item:hover {
+  background: #f8f9fa;
+  color: #216d30;
+}
+
+.sidebar-menu-item.active {
+  background: #e8f5e9;
+  color: #216d30;
+  border-left-color: #216d30;
+  font-weight: 600;
+}
+
+.menu-icon {
+  font-size: 20px;
+}
+
+.menu-content {
+  flex: 1;
+}
+
+.menu-label {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.menu-description {
+  font-size: 12px;
+  color: #6c757d;
+  margin-top: 2px;
+}
+
+/* 메인 콘텐츠 */
+.counseling-main {
+  flex: 1;
+  padding: 40px;
+  min-width: 800px;
+  background: #f5f5f5;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1200px) {
+  .counseling-layout {
+    flex-direction: column;
+  }
+
+  .counseling-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e0e6ed;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    overflow-x: auto;
+  }
+
+  .sidebar-menu-item {
+    flex-shrink: 0;
+    border-left: none;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+  }
+
+  .sidebar-menu-item.active {
+    border-left: none;
+    border-bottom-color: #216d30;
+  }
+
+  .counseling-main {
+    min-width: auto;
+    padding: 30px 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .counseling-main {
+    padding: 20px 16px;
+  }
+}

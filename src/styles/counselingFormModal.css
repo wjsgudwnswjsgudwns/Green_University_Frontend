@@ -1,0 +1,282 @@
+/* 상담 폼 모달 스타일 - counselingFormModal.css */
+
+.cfm-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.cfm-modal-container {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+/* 모달 헤더 */
+.cfm-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 2px solid #e0b960;
+  background: #f8f9fa;
+}
+
+.cfm-modal-header h2 {
+  font-size: 20px;
+  color: #2c3e50;
+  margin: 0;
+  font-weight: 600;
+}
+
+.cfm-close-btn {
+  background: none;
+  border: none;
+  color: #6c757d;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.cfm-close-btn:hover {
+  background: #e0e6ed;
+  color: #2c3e50;
+}
+
+/* 모달 바디 */
+.cfm-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* 정보 섹션 */
+.cfm-info-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.cfm-info-item div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cfm-info-item label {
+  font-size: 13px;
+  color: #6c757d;
+  font-weight: 600;
+}
+
+.cfm-info-item span {
+  font-size: 16px;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+/* 폼 그룹 */
+.cfm-form-group {
+  margin-bottom: 20px;
+}
+
+.cfm-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 8px;
+}
+
+.cfm-required {
+  color: #dc3545;
+  margin-left: 2px;
+}
+
+.cfm-input,
+.cfm-textarea,
+.cfm-select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 15px;
+  color: #2c3e50;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.cfm-input:focus,
+.cfm-textarea:focus,
+.cfm-select:focus {
+  outline: none;
+  border-color: #216d30;
+  box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
+}
+
+.cfm-textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.cfm-input-error {
+  border-color: #dc3545;
+}
+
+.cfm-error-message {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: #dc3545;
+}
+
+/* 예약 목록 */
+.cfm-reservation-list {
+  margin-top: 12px;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #e0e6ed;
+  border-radius: 6px;
+}
+
+.cfm-reservation-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-bottom: 1px solid #e0e6ed;
+}
+
+.cfm-reservation-item:last-child {
+  border-bottom: none;
+}
+
+.cfm-reservation-item:hover {
+  background: #f8f9fa;
+}
+
+.cfm-reservation-item.selected {
+  background: #e8f5e9;
+  border-left: 3px solid #216d30;
+}
+
+.cfm-reservation-date {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 4px;
+}
+
+.cfm-reservation-subject {
+  font-size: 13px;
+  color: #6c757d;
+}
+
+.cfm-no-reservations {
+  padding: 20px;
+  text-align: center;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+/* 모달 푸터 */
+.cfm-modal-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 20px;
+  border-top: 1px solid #e0e6ed;
+  margin-top: 20px;
+}
+
+.cfm-btn {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cfm-btn-cancel {
+  background: #6c757d;
+  color: white;
+}
+
+.cfm-btn-cancel:hover {
+  background: #5a6268;
+}
+
+.cfm-btn-submit {
+  background: #216d30;
+  color: white;
+}
+
+.cfm-btn-submit:hover {
+  background: #1a5524;
+}
+
+.cfm-btn:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .cfm-modal-overlay {
+    padding: 10px;
+  }
+
+  .cfm-modal-container {
+    max-height: 95vh;
+  }
+
+  .cfm-modal-header {
+    padding: 16px 20px;
+  }
+
+  .cfm-modal-header h2 {
+    font-size: 18px;
+  }
+
+  .cfm-modal-body {
+    padding: 20px;
+  }
+
+  .cfm-info-section {
+    grid-template-columns: 1fr;
+  }
+
+  .cfm-modal-footer {
+    flex-direction: column-reverse;
+  }
+
+  .cfm-btn {
+    width: 100%;
+  }
+}

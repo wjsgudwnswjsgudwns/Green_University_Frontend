@@ -1,0 +1,317 @@
+/* 학생 상담 페이지 전용 스타일 - studentCounseling.css */
+
+/* 페이지 컨테이너 */
+.sc-page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+.sc-header {
+  margin-bottom: 30px;
+}
+
+.sc-title {
+  font-size: 28px;
+  color: #2c3e50;
+  margin: 0 0 10px 0;
+}
+
+.sc-subtitle {
+  font-size: 16px;
+  color: #6c757d;
+  margin: 0;
+}
+
+/* 로딩 */
+.sc-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+}
+
+.sc-loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e0e6ed;
+  border-top-color: #216d30;
+  border-radius: 50%;
+  animation: sc-spin 0.8s linear infinite;
+}
+
+@keyframes sc-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.sc-loading p {
+  margin-top: 20px;
+  color: #666;
+  font-size: 16px;
+}
+
+/* 에러 메시지 */
+.sc-error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #fee;
+  border: 1px solid #fcc;
+  border-radius: 6px;
+  color: #c33;
+  margin-bottom: 20px;
+}
+
+/* 탭 메뉴 */
+.sc-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #e0e6ed;
+}
+
+.sc-tab {
+  padding: 12px 24px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #6c757d;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  margin-bottom: -2px;
+}
+
+.sc-tab:hover {
+  color: #216d30;
+}
+
+.sc-tab.sc-tab-active {
+  color: #216d30;
+  border-bottom-color: #216d30;
+}
+
+.sc-tab-count {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background: #216d30;
+  color: white;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.sc-tab.sc-tab-active .sc-tab-count {
+  background: #1a5524;
+}
+
+/* 상담 목록 */
+.sc-counseling-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 빈 상태 */
+.sc-empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.sc-empty-state .material-symbols-outlined {
+  font-size: 64px;
+  color: #d1d5db;
+  margin-bottom: 16px;
+}
+
+.sc-empty-state p {
+  color: #6c757d;
+  font-size: 16px;
+  margin: 0;
+}
+
+/* 상담 카드 */
+.sc-counseling-card {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.sc-counseling-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.sc-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e0e6ed;
+}
+
+.sc-card-subject {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.sc-card-subject .material-symbols-outlined {
+  font-size: 24px;
+  color: #216d30;
+}
+
+/* 상태 배지 */
+.sc-status-badge {
+  padding: 6px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.sc-status-badge.sc-status-completed {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.sc-status-badge.sc-status-upcoming {
+  background-color: #cce5ff;
+  color: #004085;
+}
+
+.sc-status-badge.sc-status-overdue {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* 카드 본문 */
+.sc-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sc-card-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.sc-card-info .material-symbols-outlined {
+  font-size: 20px;
+  color: #6c757d;
+  margin-top: 2px;
+}
+
+.sc-card-info > div {
+  flex: 1;
+}
+
+.sc-card-info label {
+  display: block;
+  font-size: 13px;
+  color: #6c757d;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.sc-card-info span {
+  display: block;
+  font-size: 15px;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+/* 상담 내용 */
+.sc-card-content {
+  background: #f8f9fa;
+  border-radius: 6px;
+  padding: 16px;
+  margin-top: 8px;
+}
+
+.sc-card-content label {
+  display: block;
+  font-size: 14px;
+  color: #2c3e50;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.sc-card-content p {
+  margin: 0;
+  color: #4a5568;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .sc-page-container {
+    padding: 20px 16px;
+  }
+
+  .sc-title {
+    font-size: 24px;
+  }
+
+  .sc-subtitle {
+    font-size: 14px;
+  }
+
+  .sc-tabs {
+    overflow-x: auto;
+    gap: 4px;
+  }
+
+  .sc-tab {
+    padding: 10px 16px;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .sc-counseling-card {
+    padding: 16px;
+  }
+
+  .sc-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .sc-card-subject {
+    font-size: 16px;
+  }
+
+  .sc-card-info {
+    gap: 8px;
+  }
+
+  .sc-card-info .material-symbols-outlined {
+    font-size: 18px;
+  }
+
+  .sc-card-info span {
+    font-size: 14px;
+  }
+}

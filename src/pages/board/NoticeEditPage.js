@@ -89,124 +89,129 @@ export default function NoticeEditPage() {
 
   if (loading) {
     return (
-      <div
-        className="d-flex justify-content-center align-items-start"
-        style={{ minWidth: "100em" }}
-      >
-        <main>
-          <h1>공지사항 수정</h1>
-          <div className="split--div"></div>
-          <p className="no--list--p">로딩 중...</p>
-        </main>
+      <div className="notice-page-wrapper">
+        <div className="notice-container">
+          <div className="notice-main">
+            <h1 className="notice-title">공지사항 수정</h1>
+            <div className="notice-divider"></div>
+            <p className="notice-loading">로딩 중...</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div
-      className="d-flex justify-content-center align-items-start"
-      style={{ minWidth: "100em" }}
-    >
-      {/* 사이드 메뉴 */}
-      <div className="sub--menu">
-        <div className="sub--menu--top">
-          <h2>학사정보</h2>
-        </div>
-        <div className="sub--menu--mid">
-          <table className="sub--menu--table" border="1">
-            <tbody>
-              <tr>
-                <td>
-                  <a href="/board/notice" className="selected--menu">
-                    공지사항
-                  </a>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <a href="/schedule">학사일정</a>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <a href="/schedule/list">학사일정 등록</a>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* 메인 컨텐츠 */}
-      <main>
-        <h1>공지사항 수정</h1>
-        <div className="split--div"></div>
-
-        <div className="container">
-          <form onSubmit={handleSubmit}>
-            <table className="table">
+    <div className="notice-page-wrapper">
+      <div className="notice-container">
+        {/* 사이드 메뉴 */}
+        <div className="notice-sidebar">
+          <div className="notice-sidebar-header">
+            <h2>학사정보</h2>
+          </div>
+          <div className="notice-sidebar-nav">
+            <table className="notice-menu-table">
               <tbody>
-                <tr className="title">
-                  <td className="type">제목</td>
+                <tr>
                   <td>
-                    <select
-                      name="category"
-                      className="input--box"
-                      value={formData.category}
-                      onChange={handleChange}
-                      style={{ marginRight: "10px" }}
+                    <a
+                      href="/board/notice"
+                      className="notice-menu-link notice-menu-active"
                     >
-                      <option value="[일반]">[일반]</option>
-                      <option value="[학사]">[학사]</option>
-                      <option value="[장학]">[장학]</option>
-                    </select>
-                    <input
-                      type="text"
-                      name="title"
-                      className="update--box"
-                      value={formData.title}
-                      onChange={handleChange}
-                      required
-                    />
+                      공지사항
+                    </a>
                   </td>
                 </tr>
-                <tr className="content--container">
-                  <td className="type">내용</td>
+                <tr>
                   <td>
-                    <textarea
-                      name="content"
-                      rows="20"
-                      cols="100"
-                      className="textarea"
-                      value={formData.content}
-                      onChange={handleChange}
-                      required
-                    />
+                    <a href="/schedule" className="notice-menu-link">
+                      학사일정
+                    </a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="/schedule/list" className="notice-menu-link">
+                      학사일정 등록
+                    </a>
                   </td>
                 </tr>
               </tbody>
             </table>
-
-            <div className="select--button">
-              <button
-                type="button"
-                className="button"
-                onClick={() => navigate(`/board/notice/${id}`)}
-              >
-                취소
-              </button>
-              <button
-                type="submit"
-                className="button"
-                disabled={submitting}
-                style={{ marginLeft: "10px" }}
-              >
-                {submitting ? "수정 중..." : "수정"}
-              </button>
-            </div>
-          </form>
+          </div>
         </div>
-      </main>
+
+        {/* 메인 컨텐츠 */}
+        <div className="notice-main">
+          <h1 className="notice-title">공지사항 수정</h1>
+          <div className="notice-divider"></div>
+
+          <div className="notice-write-container">
+            <form onSubmit={handleSubmit}>
+              <table className="notice-detail-table">
+                <tbody>
+                  <tr>
+                    <td className="notice-detail-label">제목</td>
+                    <td className="notice-detail-content">
+                      <div className="notice-edit-title-container">
+                        <select
+                          name="category"
+                          className="notice-category-select"
+                          value={formData.category}
+                          onChange={handleChange}
+                        >
+                          <option value="[일반]">[일반]</option>
+                          <option value="[학사]">[학사]</option>
+                          <option value="[장학]">[장학]</option>
+                        </select>
+                        <input
+                          type="text"
+                          name="title"
+                          className="notice-edit-title-input"
+                          value={formData.title}
+                          onChange={handleChange}
+                          required
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="notice-detail-label">내용</td>
+                    <td className="notice-detail-content">
+                      <textarea
+                        name="content"
+                        rows="20"
+                        cols="100"
+                        className="notice-content-textarea"
+                        value={formData.content}
+                        onChange={handleChange}
+                        required
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div className="notice-btn-group">
+                <button
+                  type="button"
+                  className="notice-btn-secondary"
+                  onClick={() => navigate(`/board/notice/${id}`)}
+                >
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  className="notice-btn"
+                  disabled={submitting}
+                >
+                  {submitting ? "수정 중..." : "수정"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

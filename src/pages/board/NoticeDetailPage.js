@@ -78,15 +78,14 @@ export default function NoticeDetailPage() {
 
   if (loading) {
     return (
-      <div
-        className="d-flex justify-content-center align-items-start"
-        style={{ minWidth: "100em" }}
-      >
-        <main>
-          <h1>공지사항</h1>
-          <div className="split--div"></div>
-          <p className="no--list--p">로딩 중...</p>
-        </main>
+      <div className="notice-page-wrapper">
+        <div className="notice-container">
+          <div className="notice-main">
+            <h1 className="notice-title">공지사항</h1>
+            <div className="notice-divider"></div>
+            <p className="notice-loading">로딩 중...</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -96,59 +95,63 @@ export default function NoticeDetailPage() {
   }
 
   return (
-    <div
-      className="d-flex justify-content-center align-items-start"
-      style={{ minWidth: "100em" }}
-    >
-      {/* 사이드 메뉴 */}
-      <div className="sub--menu">
-        <div className="sub--menu--top">
-          <h2>학사정보</h2>
-        </div>
-        <div className="sub--menu--mid">
-          <table className="sub--menu--table" border="1">
-            <tbody>
-              <tr>
-                <td>
-                  <a href="/board/notice" className="selected--menu">
-                    공지사항
-                  </a>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <a href="/schedule">학사일정</a>
-                </td>
-              </tr>
-              {user?.userRole === "staff" && (
+    <div className="notice-page-wrapper">
+      <div className="notice-container">
+        {/* 사이드 메뉴 */}
+        <div className="notice-sidebar">
+          <div className="notice-sidebar-header">
+            <h2>학사정보</h2>
+          </div>
+          <div className="notice-sidebar-nav">
+            <table className="notice-menu-table">
+              <tbody>
                 <tr>
                   <td>
-                    <a href="/schedule/list">학사일정 등록</a>
+                    <a
+                      href="/board/notice"
+                      className="notice-menu-link notice-menu-active"
+                    >
+                      공지사항
+                    </a>
                   </td>
                 </tr>
-              )}
-            </tbody>
-          </table>
+                <tr>
+                  <td>
+                    <a href="/schedule" className="notice-menu-link">
+                      학사일정
+                    </a>
+                  </td>
+                </tr>
+                {user?.userRole === "staff" && (
+                  <tr>
+                    <td>
+                      <a href="/schedule/list" className="notice-menu-link">
+                        학사일정 등록
+                      </a>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
 
-      {/* 메인 컨텐츠 */}
-      <main>
-        <h1>공지사항</h1>
-        <div className="split--div"></div>
+        {/* 메인 컨텐츠 */}
+        <div className="notice-main">
+          <h1 className="notice-title">공지사항</h1>
+          <div className="notice-divider"></div>
 
-        <div className="container">
-          <table className="table">
+          <table className="notice-detail-table">
             <tbody>
-              <tr className="title">
-                <td className="type">제목</td>
-                <td>
+              <tr>
+                <td className="notice-detail-label">제목</td>
+                <td className="notice-detail-content">
                   {notice.category} {notice.title}
                 </td>
               </tr>
-              <tr className="content--container">
-                <td className="type">내용</td>
-                <td>
+              <tr>
+                <td className="notice-detail-label">내용</td>
+                <td className="notice-detail-content-text">
                   <div dangerouslySetInnerHTML={{ __html: notice.content }} />
                   {notice.uuidFilename && (
                     <>
@@ -169,9 +172,9 @@ export default function NoticeDetailPage() {
             </tbody>
           </table>
 
-          <div className="select--button">
+          <div className="notice-btn-group">
             <button
-              className="button"
+              className="notice-btn-secondary"
               onClick={() => navigate("/board/notice")}
             >
               목록
@@ -179,24 +182,19 @@ export default function NoticeDetailPage() {
             {user?.userRole === "staff" && (
               <>
                 <button
-                  className="button"
+                  className="notice-btn"
                   onClick={() => navigate(`/board/notice/edit/${id}`)}
-                  style={{ marginLeft: "10px" }}
                 >
                   수정
                 </button>
-                <button
-                  className="button"
-                  onClick={handleDelete}
-                  style={{ marginLeft: "10px" }}
-                >
+                <button className="notice-btn-danger" onClick={handleDelete}>
                   삭제
                 </button>
               </>
             )}
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

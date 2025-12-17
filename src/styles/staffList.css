@@ -1,229 +1,144 @@
-/* StaffList 전용 스타일 - 접두사: stafflist- */
+/* staffList.css */
 
-/* 필터 컨테이너 */
 .stafflist-filter-container {
-  background: #ffffff;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
   border-radius: 8px;
   padding: 20px;
-  margin-bottom: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
 }
 
 .stafflist-filter-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .stafflist-filter-group {
   display: flex;
   align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .stafflist-filter-group label {
   font-weight: 600;
-  color: #2c3e50;
-  font-size: 0.95rem;
+  color: #333;
+  font-size: 0.875rem;
   min-width: 80px;
 }
 
 .stafflist-filter-group input {
-  padding: 10px 14px;
-  border: 2px solid #e0e6ed;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  color: #2c3e50;
-  transition: all 0.3s ease;
-  min-width: 180px;
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-size: 0.875rem;
 }
 
 .stafflist-filter-group input:focus {
   outline: none;
   border-color: #216d30;
-  box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
 }
 
 .stafflist-search-button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
+  background-color: #216d30;
   color: #ffffff;
   border: none;
-  border-radius: 8px;
-  padding: 10px 24px;
-  font-size: 0.95rem;
+  padding: 8px 20px;
+  font-size: 0.875rem;
   font-weight: 600;
+  border-radius: 4px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(33, 109, 48, 0.3);
+  transition: background-color 0.2s ease;
 }
 
 .stafflist-search-button:hover {
-  background: linear-gradient(135deg, #1a5524 0%, #0e2b14 100%);
-  box-shadow: 0 6px 16px rgba(33, 109, 48, 0.4);
-  transform: translateY(-2px);
+  background-color: #1b5e20;
 }
 
-.stafflist-semester-button {
-  background: linear-gradient(135deg, #2980b9 0%, #1f6391 100%);
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 24px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(41, 128, 185, 0.3);
-}
-
-.stafflist-semester-button:hover {
-  background: linear-gradient(135deg, #1f6391 0%, #174a6f 100%);
-  box-shadow: 0 6px 16px rgba(41, 128, 185, 0.4);
-  transform: translateY(-2px);
-}
-
-/* 리스트 타이틀 */
 .stafflist-list-title {
-  font-size: 1.2rem;
+  margin: 20px 0 12px 0;
+  font-size: 1rem;
   font-weight: 600;
-  color: #2c3e50;
-  margin: 24px 0 16px 0;
+  color: #333;
 }
 
-/* 테이블 컨테이너 */
 .stafflist-table-container {
-  overflow-x: auto;
-  background: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+  margin-bottom: 20px;
 }
 
 .stafflist-data-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 1200px;
+}
+
+.stafflist-data-table thead {
+  background-color: #2e7d32;
 }
 
 .stafflist-data-table thead th {
-  background-color: #216d30;
-  color: #ffffff;
-  padding: 14px 12px;
+  padding: 12px 8px;
   text-align: center;
   font-weight: 600;
-  border: 1px solid #1a5524;
-  font-size: 0.95rem;
-  white-space: nowrap;
+  color: #ffffff;
+  font-size: 0.875rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stafflist-data-table thead th:last-child {
+  border-right: none;
+}
+
+.stafflist-data-table tbody tr {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.stafflist-data-table tbody tr:last-child {
+  border-bottom: none;
 }
 
 .stafflist-data-table tbody td {
-  padding: 14px 12px;
+  padding: 12px 8px;
   text-align: center;
-  color: #5a6c7d;
-  border: 1px solid #e0e6ed;
-  font-size: 0.9rem;
-  white-space: nowrap;
+  color: #333;
+  font-size: 0.875rem;
 }
 
 .stafflist-data-table tbody td.text-left {
   text-align: left;
 }
 
-.stafflist-data-table tbody tr:hover {
-  background-color: #f8f9fa;
-}
-
-/* 페이지네이션 */
 .stafflist-pagination {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 8px;
-  margin-top: 32px;
-  padding: 20px 0;
+  gap: 4px;
+  margin-top: 20px;
 }
 
 .stafflist-page-button {
-  min-width: 40px;
-  height: 40px;
-  padding: 8px 12px;
-  border: 2px solid #e0e6ed;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
   background-color: #ffffff;
-  color: #2c3e50;
-  border-radius: 6px;
-  font-size: 0.95rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  color: #333;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .stafflist-page-button:hover {
+  background-color: #f8f9fa;
   border-color: #216d30;
-  color: #216d30;
-  background-color: #f0f7f2;
 }
 
 .stafflist-page-button.active {
-  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
-  color: #ffffff;
+  background-color: #216d30;
   border-color: #216d30;
-  box-shadow: 0 2px 8px rgba(33, 109, 48, 0.3);
-}
-
-/* 반응형 디자인 */
-@media (max-width: 1024px) {
-  .stafflist-filter-group {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .stafflist-filter-group label {
-    min-width: auto;
-  }
-
-  .stafflist-filter-group input {
-    width: 100%;
-  }
-
-  .stafflist-search-button,
-  .stafflist-semester-button {
-    width: 100%;
-    justify-content: center;
-  }
-}
-
-@media (max-width: 768px) {
-  .stafflist-filter-container {
-    padding: 16px;
-  }
-
-  .stafflist-table-container {
-    margin: 0 -16px;
-    border-radius: 0;
-  }
-
-  .stafflist-data-table {
-    font-size: 0.85rem;
-  }
-
-  .stafflist-data-table thead th,
-  .stafflist-data-table tbody td {
-    padding: 10px 8px;
-  }
-}
-
-@media (max-width: 480px) {
-  .stafflist-pagination {
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-
-  .stafflist-page-button {
-    min-width: 36px;
-    height: 36px;
-    font-size: 0.85rem;
-  }
+  color: #ffffff;
 }

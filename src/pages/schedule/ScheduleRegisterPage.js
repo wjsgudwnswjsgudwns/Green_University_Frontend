@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../api/axiosConfig";
-import "../../styles/schedule.css";
+import "../../styles/scheduleInfo.css";
 
 export default function ScheduleRegisterPage() {
   const { user } = useAuth();
@@ -72,34 +72,34 @@ export default function ScheduleRegisterPage() {
   };
 
   return (
-    <div className="schedule-container">
-      <aside className="side-menu">
-        <div className="side-menu-header">
+    <div className="sch-container">
+      <aside className="sch-side-menu">
+        <div className="sch-side-menu-header">
           <h2>학사정보</h2>
         </div>
-        <nav className="side-menu-nav">
-          <Link to="/board/notice" className="menu-item">
+        <nav className="sch-side-menu-nav">
+          <Link to="/board/notice" className="sch-menu-item">
             공지사항
           </Link>
-          <Link to="/schedule" className="menu-item">
+          <Link to="/schedule" className="sch-menu-item">
             학사일정
           </Link>
-          <Link to="/schedule/manage" className="menu-item">
+          <Link to="/schedule/manage" className="sch-menu-item">
             학사일정 등록
           </Link>
         </nav>
       </aside>
 
-      <main className="schedule-main">
+      <main className="sch-main">
         <h1>학사일정 등록</h1>
-        <div className="divider"></div>
+        <div className="sch-divider"></div>
 
-        {error && <div className="error-message">{error}</div>}
+        {error && <div className="sch-error-message">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="schedule-register-form">
-          <div className="form-group-vertical">
+        <form onSubmit={handleSubmit} className="sch-register-form">
+          <div className="sch-form-group-vertical">
             <label htmlFor="startDay">
-              시작날짜 <span className="required">*</span>
+              시작날짜 <span className="sch-required">*</span>
             </label>
             <input
               type="date"
@@ -112,9 +112,9 @@ export default function ScheduleRegisterPage() {
             />
           </div>
 
-          <div className="form-group-vertical">
+          <div className="sch-form-group-vertical">
             <label htmlFor="endDay">
-              종료날짜 <span className="required">*</span>
+              종료날짜 <span className="sch-required">*</span>
             </label>
             <input
               type="date"
@@ -127,9 +127,9 @@ export default function ScheduleRegisterPage() {
             />
           </div>
 
-          <div className="form-group-vertical">
+          <div className="sch-form-group-vertical">
             <label htmlFor="information">
-              내용 <span className="required">*</span>
+              내용 <span className="sch-required">*</span>
             </label>
             <input
               type="text"
@@ -143,10 +143,10 @@ export default function ScheduleRegisterPage() {
             />
           </div>
 
-          <div className="form-buttons-center">
+          <div className="sch-form-buttons-center">
             <button
               type="button"
-              className="cancel-button-large"
+              className="sch-cancel-button-large"
               onClick={handleCancel}
               disabled={isSubmitting}
             >
@@ -154,7 +154,7 @@ export default function ScheduleRegisterPage() {
             </button>
             <button
               type="submit"
-              className="submit-button-large"
+              className="sch-submit-button-large"
               disabled={isSubmitting}
             >
               {isSubmitting ? "등록 중..." : "등록"}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/axiosConfig";
-// import "../../styles/sugang.css";
+import "../../styles/sugang.css";
 import "../../styles/PreApplication.css";
 
 const PreApplication = () => {
@@ -14,28 +14,21 @@ const PreApplication = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  // 검색 필터
   const [searchParams, setSearchParams] = useState({
     type: "전체",
     deptId: "-1",
     name: "",
   });
 
-  // 컴포넌트 마운트 시 1페이지 로드
   useEffect(() => {
     fetchSubjectList(1);
   }, []);
 
-  // 강의 목록 조회
   const fetchSubjectList = async (page) => {
     try {
       setLoading(true);
-      console.log(`페이지 ${page} 요청 중...`);
-
       const response = await api.get(`/api/sugang/pre/${page}`);
       const data = response.data;
-
-      console.log("API 응답:", data);
 
       setSubjectList(data.subjectList || []);
       setDeptList(data.deptList || []);
@@ -55,25 +48,20 @@ const PreApplication = () => {
     }
   };
 
-  // 검색 처리
   const handleSearch = async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
-      console.log("검색 파라미터:", searchParams);
-
       const response = await api.get("/api/sugang/pre/search", {
         params: searchParams,
       });
       const data = response.data;
 
-      console.log("검색 API 응답:", data);
-
       setSubjectList(data.subjectList || []);
       setSubjectCount(data.subjectCount || 0);
       setDeptList(data.deptList || []);
       setSubNameList(data.subNameList || []);
-      setPageCount(0); // 검색 결과는 페이징 없음
+      setPageCount(0);
     } catch (error) {
       console.error("강의 검색 실패:", error);
       if (error.response?.status === 400) {
@@ -86,7 +74,6 @@ const PreApplication = () => {
     }
   };
 
-  // 검색 필터 변경
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setSearchParams((prev) => ({
@@ -95,14 +82,11 @@ const PreApplication = () => {
     }));
   };
 
-  // 페이지 이동
   const handlePageChange = (page) => {
-    console.log(`페이지 ${page}로 이동`);
     fetchSubjectList(page);
     window.scrollTo(0, 0);
   };
 
-  // 수강 신청
   const handleApply = async (subjectId) => {
     if (!window.confirm("해당 강의를 수강신청하시겠습니까?")) {
       return;
@@ -111,7 +95,6 @@ const PreApplication = () => {
     try {
       await api.post(`/api/sugang/pre/${subjectId}`);
       alert("예비 수강 신청이 완료되었습니다.");
-      // 현재 페이지 새로고침
       fetchSubjectList(currentPage);
     } catch (error) {
       console.error("수강 신청 실패:", error);
@@ -123,7 +106,6 @@ const PreApplication = () => {
     }
   };
 
-  // 수강 신청 취소
   const handleCancel = async (subjectId) => {
     if (!window.confirm("수강신청을 취소하시겠습니까?")) {
       return;
@@ -134,7 +116,6 @@ const PreApplication = () => {
         params: { type: 0 },
       });
       alert("예비 수강 신청이 취소되었습니다.");
-      // 현재 페이지 새로고침
       fetchSubjectList(currentPage);
     } catch (error) {
       console.error("수강 신청 취소 실패:", error);
@@ -146,50 +127,69 @@ const PreApplication = () => {
     }
   };
 
-  // 시간 포맷팅
   const formatTime = (startTime, endTime) => {
     const start = startTime < 10 ? `0${startTime}` : startTime;
     return `${start}:00-${endTime}:00`;
   };
 
   return (
-    <div
-      className="d-flex justify-content-center align-items-start"
-      style={{ minWidth: "100em" }}
-    >
+    <div className="sugang-application-wrapper">
       {/* 사이드 메뉴 */}
-      <div className="sub--menu">
-        <div className="sub--menu--top">
+      <div className="sugang-application-sidebar">
+        <div className="sugang-application-sidebar-header">
           <h2>수강신청</h2>
         </div>
-        <div className="sub--menu--mid">
-          <table className="sub--menu--table">
+        <div className="sugang-application-menu-mid">
+          <table className="sugang-application-menu-table">
             <tbody>
               <tr>
                 <td>
-                  <a href="/sugang/subjectList">강의 시간표 조회</a>
+                  <a
+                    href="/sugang/subjectList"
+                    className="sugang-application-menu-link"
+                  >
+                    강의 시간표 조회
+                  </a>
                 </td>
               </tr>
               <tr>
                 <td>
-                  <a href="/sugang/schedule">나의 시간표</a>
+                  <a
+                    href="/sugang/schedule"
+                    className="sugang-application-menu-link"
+                  >
+                    나의 시간표
+                  </a>
                 </td>
               </tr>
               <tr>
                 <td>
-                  <a href="/sugang/pre" className="selected--menu">
+                  <a
+                    href="/sugang/pre"
+                    className="sugang-application-menu-link"
+                  >
                     예비 수강 신청
                   </a>
                 </td>
               </tr>
               <tr>
                 <td>
-                  <a href="/sugang/application">수강 신청</a>
+                  <a
+                    href="/sugang/application"
+                    className="sugang-application-menu-link sugang-application-menu-active"
+                  >
+                    수강 신청
+                  </a>
                 </td>
               </tr>
               <tr>
                 <td>
-                  <a href="/sugang/list">수강 신청 내역 조회</a>
+                  <a
+                    href="/sugang/list"
+                    className="sugang-application-menu-link"
+                  >
+                    수강 신청 내역 조회
+                  </a>
                 </td>
               </tr>
             </tbody>
@@ -207,7 +207,6 @@ const PreApplication = () => {
           <div className="sub--filter">
             <form onSubmit={handleSearch}>
               <div>
-                {/* 강의구분 */}
                 <label htmlFor="type">강의구분</label>
                 <select
                   name="type"
@@ -220,7 +219,6 @@ const PreApplication = () => {
                   <option value="교양">교양</option>
                 </select>
 
-                {/* 개설학과 */}
                 <label htmlFor="deptId">개설학과</label>
                 <select
                   name="deptId"
@@ -236,7 +234,6 @@ const PreApplication = () => {
                   ))}
                 </select>
 
-                {/* 강의명 */}
                 <label htmlFor="name">강의명</label>
                 <input
                   type="text"
@@ -251,7 +248,6 @@ const PreApplication = () => {
                   ))}
                 </datalist>
 
-                {/* 검색 버튼 */}
                 <button type="submit" disabled={loading}>
                   <ul
                     className="d-flex justify-content-center"
@@ -279,7 +275,7 @@ const PreApplication = () => {
             <h4>
               <span style={{ fontWeight: 600 }}>강의 목록</span>&nbsp;
               <span style={{ color: "gray", fontSize: "18px" }}>
-                [총 {subjectCount}건]
+                [이 {subjectCount}건]
               </span>
             </h4>
 

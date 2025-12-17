@@ -1,0 +1,485 @@
+/* Staff Counseling Page Styles */
+
+.stc-page-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  min-height: calc(100vh - 200px);
+}
+
+/* Header */
+.stc-header {
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #216d30;
+}
+
+.stc-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #216d30;
+  margin: 0 0 8px 0;
+}
+
+.stc-subtitle {
+  font-size: 1rem;
+  color: #666;
+  margin: 0;
+}
+
+/* Loading */
+.stc-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+}
+
+.stc-loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #216d30;
+  border-radius: 50%;
+  animation: stc-spin 1s linear infinite;
+}
+
+@keyframes stc-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.stc-loading p {
+  color: #666;
+  font-size: 1rem;
+}
+
+/* Error Message */
+.stc-error-message {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background-color: #fee;
+  border: 1px solid #fcc;
+  border-radius: 8px;
+  color: #c33;
+  margin-bottom: 24px;
+}
+
+.stc-error-message .material-symbols-outlined {
+  font-size: 24px;
+}
+
+/* Statistics Summary */
+.stc-statistics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.stc-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  background: white;
+  border-radius: 12px;
+  border: 2px solid;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.stc-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stc-stat-icon {
+  flex-shrink: 0;
+}
+
+.stc-stat-icon .material-symbols-outlined {
+  font-size: 48px;
+}
+
+.stc-stat-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stc-stat-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #666;
+}
+
+.stc-stat-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+/* Stat Card Variants */
+.stc-stat-total {
+  border-color: #216d30;
+  background: linear-gradient(135deg, #fff 0%, #e8f5e9 100%);
+}
+
+.stc-stat-total .material-symbols-outlined {
+  color: #216d30;
+}
+
+.stc-stat-total .stc-stat-value {
+  color: #1a5524;
+}
+
+.stc-stat-critical {
+  border-color: #f44336;
+  background: linear-gradient(135deg, #fff 0%, #ffebee 100%);
+}
+
+.stc-stat-critical .material-symbols-outlined {
+  color: #f44336;
+}
+
+.stc-stat-critical .stc-stat-value {
+  color: #c62828;
+}
+
+.stc-stat-risk {
+  border-color: #ff9800;
+  background: linear-gradient(135deg, #fff 0%, #fff3e0 100%);
+}
+
+.stc-stat-risk .material-symbols-outlined {
+  color: #ff9800;
+}
+
+.stc-stat-risk .stc-stat-value {
+  color: #e65100;
+}
+
+.stc-stat-caution {
+  border-color: #ffeb3b;
+  background: linear-gradient(135deg, #fff 0%, #fffde7 100%);
+}
+
+.stc-stat-caution .material-symbols-outlined {
+  color: #fbc02d;
+}
+
+.stc-stat-caution .stc-stat-value {
+  color: #f57f17;
+}
+
+/* Filters */
+.stc-filters {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  padding: 24px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
+}
+
+.stc-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.stc-filter-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.stc-filter-group select {
+  padding: 10px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #333;
+  background-color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.stc-filter-group select:focus {
+  outline: none;
+  border-color: #216d30;
+  box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
+}
+
+.stc-filter-group select:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.stc-reset-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background-color: #f5f5f5;
+  color: #666;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.stc-reset-btn:hover {
+  background-color: #e0e0e0;
+  border-color: #ccc;
+}
+
+.stc-reset-btn .material-symbols-outlined {
+  font-size: 20px;
+}
+
+/* Results Info */
+.stc-results-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 16px 20px;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+.stc-results-count {
+  font-size: 1rem;
+  color: #666;
+}
+
+.stc-results-count strong {
+  color: #216d30;
+  font-size: 1.2rem;
+}
+
+/* Students Section */
+.stc-students-section {
+  margin-top: 24px;
+}
+
+.stc-students-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+/* Student Card */
+.stc-student-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.stc-student-card:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+}
+
+.stc-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.stc-student-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stc-student-info .material-symbols-outlined {
+  font-size: 40px;
+  color: #216d30;
+}
+
+.stc-student-info h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 4px 0;
+}
+
+.stc-student-id {
+  font-size: 0.85rem;
+  color: #888;
+}
+
+/* Risk Badge */
+.stc-risk-badge {
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.stc-risk-normal {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.stc-risk-caution {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.stc-risk-warning {
+  background-color: #ffe0b2;
+  color: #d84315;
+}
+
+.stc-risk-critical {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+/* Card Body */
+.stc-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.stc-info-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.stc-info-row .material-symbols-outlined {
+  font-size: 20px;
+  color: #666;
+}
+
+/* Card Footer */
+.stc-card-footer {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.stc-view-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  background-color: #216d30;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.stc-view-btn:hover {
+  background-color: #1a5a26;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(33, 109, 48, 0.3);
+}
+
+.stc-view-btn .material-symbols-outlined {
+  font-size: 20px;
+}
+
+/* Empty State */
+.stc-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  border: 2px dashed #ddd;
+}
+
+.stc-empty-state .material-symbols-outlined {
+  font-size: 64px;
+  color: #ccc;
+  margin-bottom: 16px;
+}
+
+.stc-empty-state p {
+  font-size: 1.1rem;
+  color: #999;
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .stc-filters {
+    flex-wrap: wrap;
+  }
+
+  .stc-filter-group {
+    min-width: 200px;
+  }
+
+  .stc-students-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .stc-page-container {
+    padding: 20px 16px;
+  }
+
+  .stc-title {
+    font-size: 1.5rem;
+  }
+
+  .stc-statistics {
+    grid-template-columns: 1fr;
+  }
+
+  .stc-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .stc-filter-group,
+  .stc-reset-btn {
+    width: 100%;
+  }
+
+  .stc-students-grid {
+    grid-template-columns: 1fr;
+  }
+}

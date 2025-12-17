@@ -61,16 +61,17 @@ import MyEvaluation from "./pages/evaluation/MyEvaluation";
 import EvaluationForm from "./pages/evaluation/EvaluationForm";
 import ChatbotPage from "./pages/chatbot/ChatbotPage";
 import ChatbotButton from "./components/ChatbotButton";
-import StudentCounselingList from "./pages/ai/StudentCounselingList";
-import StudentCounselingDetail from "./pages/ai/StudentCounselingDetail";
-import ProfessorCounselingList from "./pages/ai/ProfessorCounselingList";
-import ProfessorCounselingForm from "./pages/ai/ProfessorCounselingForm";
-import ProfessorCounselingDetail from "./pages/ai/ProfessorCounselingDetail";
-import StaffCounselingStudentDetail from "./pages/ai/StaffCounselingStudentDetail";
-import StaffCounselingStatistics from "./pages/ai/StaffCounselingStatistics";
-import StaffCounselingDashboard from "./pages/ai/StaffCounselingDashboard";
 import ProfessorCounselingPage from "./pages/ProfessorCounselingPage";
 import StudentCounselingPage from "./pages/StudentCounselingPage";
+import StaffAllStudentsPage from "./pages/ai/StaffAllStudentsPage";
+import StaffStudentDetailPage from "./pages/ai/StaffStudentDetailPage";
+import AIProfessorCounselingPage from "./pages/ai/AIProfessorCounselingPage";
+import CounselingHistoryPage from "./pages/ai/CounselingHistoryPage";
+import AIProfessorRiskStudentsPage from "./pages/ai/AIProfessorRiskStudentsPage";
+import AIProfessorCounselingLayout from "./pages/ai/AIProfessorCounselingLayout";
+import StaffStudentManagementLayout from "./pages/ai/StaffStudentManagementLayout";
+import StaffRiskStudentsPage from "./pages/ai/StaffRiskStudentsPage";
+import AssignAdvisorPage from "./pages/AssignAdvisorPage";
 
 function PrivateRoute({ children, role }) {
   const { user } = useAuth();
@@ -88,10 +89,17 @@ function Layout() {
   const location = useLocation();
 
   // 헤더와 푸터를 숨길 경로들
-  const hideHeaderFooterPaths = ["/login", "/find-id", "/find-password"];
-  const shouldHideHeaderFooter = hideHeaderFooterPaths.includes(
-    location.pathname
-  );
+  const hideHeaderFooterPaths = [
+    "/login",
+    "/find-id",
+    "/find-password",
+    "/evaluation",
+    "/professor/syllabus/:subjectId",
+  ];
+  const shouldHideHeaderFooter =
+    hideHeaderFooterPaths.includes(location.pathname) ||
+    location.pathname.startsWith("/subject/syllabus/") ||
+    location.pathname.startsWith("/professor/syllabus/edit/");
 
   return (
     <>
@@ -102,6 +110,15 @@ function Layout() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/find-id" element={<FindIdPage />} />
         <Route path="/find-password" element={<FindPasswordPage />} />
+
+        <Route
+          path="/subject/syllabus/:subjectId"
+          element={
+            <PrivateRoute>
+              <SyllabusPage />
+            </PrivateRoute>
+          }
+        />
 
         {/* 홈 */}
 
@@ -145,24 +162,6 @@ function Layout() {
           element={
             <PrivateRoute>
               <ScheduleDetailPage />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/professor/syllabus/:subjectId"
-          element={
-            <PrivateRoute>
-              <ReadSyllabusPage />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/subject/syllabus/:subjectId"
-          element={
-            <PrivateRoute>
-              <SyllabusPage />
             </PrivateRoute>
           }
         />
@@ -531,22 +530,8 @@ function Layout() {
           }
         />
 
-        {/* 상담 */}
-        <Route
-          path="/professor/counseling"
-          element={<ProfessorCounselingPage />}
-        />
-        <Route path="/student/counseling" element={<StudentCounselingPage />} />
-
         {/* Web Chatting */}
-        <Route
-          path="/meetings"
-          element={
-            <PrivateRoute>
-              <MeetingListPage />
-            </PrivateRoute>
-          }
-        />
+
         <Route
           path="/meetings/:meetingId"
           element={
@@ -564,74 +549,60 @@ function Layout() {
           }
         />
 
+        {/* 학생 상담 페이지 */}
+        <Route path="/student/counseling" element={<StudentCounselingPage />} />
+
         <Route
-          path="/student/counseling/list"
-          element={
-            <PrivateRoute role="student">
-              <StudentCounselingList />
-            </PrivateRoute>
-          }
+          path="/aiprofessor/counseling"
+          element={<AIProfessorCounselingLayout />}
+        >
+          {/* 전체 학생 관리 (기본 페이지) */}
+          <Route index element={<AIProfessorCounselingPage />} />
+
+          {/* 위험 학생 관리 */}
+          <Route path="risk" element={<AIProfessorRiskStudentsPage />} />
+
+          <Route path="schedule" element={<ProfessorCounselingPage />} />
+
+          <Route
+            path="meetings"
+            element={
+              <PrivateRoute>
+                <MeetingListPage />
+              </PrivateRoute>
+            }
+          />
+        </Route>
+
+        <Route
+          path="/aiprofessor/counseling/history/:studentId"
+          element={<CounselingHistoryPage />}
         />
+
+        {/* 스태프 상담 페이지 */}
+
         <Route
-          path="/student/counseling/:id"
+          path="/staff/students/all"
+          element={<StaffStudentManagementLayout />}
+        >
+          <Route index element={<StaffAllStudentsPage />} />
+          <Route path="risk" element={<StaffRiskStudentsPage />} />
+        </Route>
+
+        <Route
+          path="/staff/student/:studentId"
+          element={<StaffStudentDetailPage />}
+        />
+
+        <Route
+          path="/staff/admin/assign-advisor"
           element={
-            <PrivateRoute role="student">
-              <StudentCounselingDetail />
+            <PrivateRoute role="staff">
+              <AssignAdvisorPage />
             </PrivateRoute>
           }
         />
 
-        {/* Professor Counseling routes */}
-        <Route
-          path="/professor/counseling/list"
-          element={
-            <PrivateRoute role="professor">
-              <ProfessorCounselingList />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/professor/counseling/form"
-          element={
-            <PrivateRoute role="professor">
-              <ProfessorCounselingForm />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/professor/counseling/:id"
-          element={
-            <PrivateRoute role="professor">
-              <ProfessorCounselingDetail />
-            </PrivateRoute>
-          }
-        />
-
-        {/* Staff Counseling routes */}
-        <Route
-          path="/staff/counseling/dashboard"
-          element={
-            <PrivateRoute role="staff">
-              <StaffCounselingDashboard />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/staff/counseling/statistics"
-          element={
-            <PrivateRoute role="staff">
-              <StaffCounselingStatistics />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/staff/counseling/student/:studentId"
-          element={
-            <PrivateRoute role="staff">
-              <StaffCounselingStudentDetail />
-            </PrivateRoute>
-          }
-        />
         {/* Catch-all route for undefined paths */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

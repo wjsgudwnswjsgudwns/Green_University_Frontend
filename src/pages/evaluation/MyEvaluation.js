@@ -85,7 +85,7 @@ const MyEvaluation = () => {
             <tbody>
               <tr>
                 <td>
-                  <a href="/subject/list">전체 강의 조회</a>
+                  <a href="/subject/list/1">전체 강의 조회</a>
                 </td>
               </tr>
               <tr>
@@ -135,11 +135,6 @@ const MyEvaluation = () => {
                   >
                     <ul className="me-btn-content">
                       <li className="me-btn-text">조회</li>
-                      <li className="me-btn-icon">
-                        <span className="material-symbols-outlined">
-                          search
-                        </span>
-                      </li>
                     </ul>
                   </button>
                 </div>

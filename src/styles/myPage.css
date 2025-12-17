@@ -1,364 +1,100 @@
-/* MyPage 전용 스타일 - 접두사: mypage- */
+/* 마이페이지 전용 스타일 - myPage.css */
 
+/* 전체 페이지 래퍼 */
+.mypage-page-wrapper {
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+/* 전체 컨테이너 */
 .mypage-container {
   display: flex;
-  min-height: 100vh;
-  background-color: #f5f7fa;
-  padding: 40px 20px;
-  gap: 30px;
   max-width: 1400px;
+  width: 100%;
   margin: 0 auto;
+  background: white;
+  min-height: 100vh;
 }
 
 /* 사이드 메뉴 */
 .mypage-side-menu {
-  min-width: 240px;
+  width: 250px;
   background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-  height: fit-content;
-  position: sticky;
-  top: 20px;
+  border-right: 1px solid #e0e6ed;
+  padding: 20px 0;
+  flex-shrink: 0;
 }
 
 .mypage-side-menu-header {
-  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
-  color: #ffffff;
-  padding: 24px 20px;
-  text-align: center;
+  padding: 0 20px 20px;
+  border-bottom: 2px solid #e0b960;
 }
 
 .mypage-side-menu-header h2 {
+  font-size: 24px;
+  color: #2c3e50;
   margin: 0;
-  font-size: 1.4rem;
-  font-weight: 700;
-  letter-spacing: 1px;
 }
 
 .mypage-side-menu-nav {
-  display: flex;
-  flex-direction: column;
-  padding: 12px 0;
+  margin-top: 20px;
 }
 
 .mypage-menu-item {
   display: block;
-  padding: 14px 20px;
-  color: #2c3e50;
+  padding: 12px 20px;
+  color: #4a5568;
   text-decoration: none;
-  font-weight: 500;
-  font-size: 0.95rem;
-  transition: all 0.3s ease;
+  transition: all 0.2s;
   border-left: 3px solid transparent;
 }
 
 .mypage-menu-item:hover {
-  background-color: #f8f9fa;
+  background: #f8f9fa;
   color: #216d30;
-  border-left-color: #216d30;
 }
 
 .mypage-menu-item.active {
-  background-color: rgba(33, 109, 48, 0.1);
+  background: #e8f5e9;
   color: #216d30;
   border-left-color: #216d30;
   font-weight: 600;
 }
 
-/* 메인 콘텐츠 */
+/* 메인 컨텐츠 */
 .mypage-main-content {
   flex: 1;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   padding: 40px;
-  min-height: 600px;
-  min-width: 1000px;
+  min-width: 800px;
 }
 
 .mypage-main-content h1 {
-  font-size: 1.8rem;
-  font-weight: 700;
+  font-size: 28px;
   color: #2c3e50;
   margin: 0 0 20px 0;
 }
 
 .mypage-divider {
   height: 2px;
-  background: linear-gradient(90deg, #216d30 0%, rgba(33, 109, 48, 0.2) 100%);
+  background: linear-gradient(to right, #e0b960, transparent);
   margin-bottom: 30px;
 }
 
-.mypage-section-divider {
-  height: 1px;
-  background-color: #e0e6ed;
-  margin: 40px 0 30px 0;
-}
-
-.mypage-section-title {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #2c3e50;
-  margin-bottom: 16px;
-}
-
-/* 정보 테이블 */
-.mypage-info-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 20px;
-  border: 1px solid #e0e6ed;
-  background: #ffffff;
-}
-
-.mypage-info-table th {
-  background-color: #f8f9fa;
-  padding: 14px 16px;
-  text-align: left;
-  font-weight: 600;
-  color: #2c3e50;
-  border: 1px solid #e0e6ed;
-  width: 25%;
-}
-
-.mypage-info-table td {
-  padding: 14px 16px;
-  color: #5a6c7d;
-  border: 1px solid #e0e6ed;
-  width: 25%;
-}
-
-/* 학점 변동 테이블 */
-.mypage-stat-table {
-  width: 100%;
-  border-collapse: collapse;
-  border: 1px solid #e0e6ed;
-  background: #ffffff;
-}
-
-.mypage-stat-table thead th {
-  background-color: #216d30;
-  color: #ffffff;
-  padding: 14px 12px;
-  text-align: center;
-  font-weight: 600;
-  border: 1px solid #1a5524;
-  font-size: 1rem;
-}
-
-.mypage-stat-table tbody td {
-  padding: 16px;
-  text-align: center;
-  color: #5a6c7d;
-  border: 1px solid #e0e6ed;
-  font-size: 0.95rem;
-}
-
-.mypage-stat-table tbody tr:hover {
-  background-color: #f8f9fa;
-}
-
-.mypage-stat-table .mypage-no-data {
-  padding: 40px;
-  color: #95a5a6;
-  font-style: italic;
-}
-
-/* 리스트 테이블 */
-.mypage-list-table {
-  width: 100%;
-  border-collapse: collapse;
-  border: 1px solid #e0e6ed;
-  background: #ffffff;
-}
-
-.mypage-list-table thead th {
-  background-color: #216d30;
-  color: #ffffff;
-  padding: 14px 12px;
-  text-align: center;
-  font-weight: 600;
-  border: 1px solid #1a5524;
-  font-size: 1rem;
-}
-
-.mypage-list-table tbody td {
-  padding: 16px;
-  text-align: center;
-  color: #5a6c7d;
-  border: 1px solid #e0e6ed;
-  font-size: 0.95rem;
-}
-
-.mypage-list-table tbody tr:hover {
-  background-color: #f8f9fa;
-}
-
-.mypage-list-table a {
-  color: #216d30;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.mypage-list-table a:hover {
-  text-decoration: underline;
-}
-
-.mypage-no-list-p {
-  text-align: center;
-  padding: 40px;
-  color: #95a5a6;
-  font-size: 1.1rem;
-}
-
-/* 수정 버튼 */
-.mypage-update-button {
-  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  padding: 12px 32px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(33, 109, 48, 0.3);
-  margin-top: 24px;
-}
-
-.mypage-update-button:hover {
-  background: linear-gradient(135deg, #1a5524 0%, #0e2b14 100%);
-  box-shadow: 0 6px 16px rgba(33, 109, 48, 0.4);
-  transform: translateY(-2px);
-}
-
-.mypage-update-button:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(33, 109, 48, 0.3);
-}
-
-/* 폼 스타일 */
-.mypage-update-form {
-  margin-top: 24px;
-}
-
-.mypage-form-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 24px;
-  border: 1px solid #e0e6ed;
-}
-
-.mypage-form-table th {
-  background-color: #f8f9fa;
-  padding: 14px 16px;
-  text-align: left;
-  font-weight: 600;
-  color: #2c3e50;
-  border: 1px solid #e0e6ed;
-  width: 41%;
-  vertical-align: middle;
-}
-
-.mypage-form-table td {
-  padding: 14px 16px;
-  border: 1px solid #e0e6ed;
-}
-
-.mypage-input-field {
-  width: 100%;
-  padding: 10px 14px;
-  border: 2px solid #e0e6ed;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  color: #2c3e50;
-  transition: all 0.3s ease;
-  background-color: #ffffff;
-}
-
-.mypage-input-field:focus {
-  outline: none;
-  border-color: #216d30;
-  box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
-}
-
-.mypage-input-field:disabled {
-  background-color: #f8f9fa;
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.mypage-submit-button {
-  background: linear-gradient(135deg, #216d30 0%, #1a5524 100%);
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  padding: 12px 32px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(33, 109, 48, 0.3);
-}
-
-.mypage-submit-button:hover:not(:disabled) {
-  background: linear-gradient(135deg, #1a5524 0%, #0e2b14 100%);
-  box-shadow: 0 6px 16px rgba(33, 109, 48, 0.4);
-  transform: translateY(-2px);
-}
-
-.mypage-submit-button:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(33, 109, 48, 0.3);
-}
-
-.mypage-submit-button:disabled {
-  background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
-  cursor: not-allowed;
-  box-shadow: none;
-  opacity: 0.6;
-}
-
-/* 메시지 */
-.mypage-error-message {
-  padding: 14px 16px;
-  margin-bottom: 20px;
-  background: linear-gradient(135deg, #fee 0%, #fdd 100%);
-  border: 1px solid #faa;
-  border-radius: 8px;
-  color: #c33;
-  font-size: 0.9rem;
-  font-weight: 500;
-  box-shadow: 0 2px 8px rgba(255, 102, 102, 0.1);
-}
-
-.mypage-success-message {
-  padding: 14px 16px;
-  margin-bottom: 20px;
-  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-  border: 1px solid #81c784;
-  border-radius: 8px;
-  color: #2e7d32;
-  font-size: 0.9rem;
-  font-weight: 500;
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.1);
-}
-
-/* 로딩 및 에러 */
-.mypage-loading-container,
-.mypage-error-container {
+/* 로딩 */
+.mypage-loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 400px;
-  gap: 16px;
+  padding: 60px 20px;
+  flex: 1;
 }
 
 .mypage-spinner {
-  width: 48px;
-  height: 48px;
+  width: 50px;
+  height: 50px;
   border: 4px solid #e0e6ed;
   border-top-color: #216d30;
   border-radius: 50%;
@@ -371,81 +107,290 @@
   }
 }
 
+.mypage-loading-container p {
+  margin-top: 20px;
+  color: #666;
+  font-size: 16px;
+}
+
+/* 메시지 */
+.mypage-error-message {
+  padding: 12px 16px;
+  background: #fee;
+  border: 1px solid #fcc;
+  border-radius: 6px;
+  color: #c33;
+  margin-bottom: 20px;
+  font-size: 15px;
+}
+
+.mypage-success-message {
+  padding: 12px 16px;
+  background: #e8f5e9;
+  border: 1px solid #a5d6a7;
+  border-radius: 6px;
+  color: #2e7d32;
+  margin-bottom: 20px;
+  font-size: 15px;
+}
+
+/* 정보 조회 테이블 */
+.mypage-info-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mypage-info-table th {
+  width: 200px;
+  padding: 16px 20px;
+  text-align: left;
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #2c3e50;
+  border-bottom: 1px solid #e0e6ed;
+  font-size: 15px;
+}
+
+.mypage-info-table td {
+  padding: 16px 20px;
+  color: #4a5568;
+  border-bottom: 1px solid #e0e6ed;
+  font-size: 15px;
+}
+
+.mypage-info-table tr:last-child th,
+.mypage-info-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* 수정 폼 */
+.mypage-update-form {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.mypage-form-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+}
+
+.mypage-form-table th {
+  width: 200px;
+  padding: 16px 20px;
+  text-align: left;
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #2c3e50;
+  border-bottom: 1px solid #e0e6ed;
+  font-size: 15px;
+  vertical-align: middle;
+}
+
+.mypage-form-table td {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e6ed;
+}
+
+.mypage-form-table tr:last-child th,
+.mypage-form-table tr:last-child td {
+  border-bottom: none;
+}
+
+.mypage-form-table label {
+  display: block;
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 15px;
+}
+
+.mypage-input-field {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 15px;
+  color: #2c3e50;
+  transition: all 0.2s;
+  background-color: #ffffff;
+}
+
+.mypage-input-field:focus {
+  outline: none;
+  border-color: #216d30;
+  box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
+}
+
+.mypage-input-field:disabled {
+  background: #f3f4f6;
+  cursor: not-allowed;
+  color: #9ca3af;
+}
+
+.mypage-input-field::placeholder {
+  color: #9ca3af;
+}
+
+/* 버튼 */
+.mypage-button-group {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.mypage-submit-button {
+  padding: 12px 32px;
+  background: #216d30;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 120px;
+}
+
+.mypage-submit-button:hover:not(:disabled) {
+  background: #1a5524;
+  transform: translateY(-1px);
+}
+
+.mypage-submit-button:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.mypage-cancel-button {
+  padding: 12px 32px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 120px;
+}
+
+.mypage-cancel-button:hover {
+  background: #5a6268;
+  transform: translateY(-1px);
+}
+
+.mypage-edit-button {
+  padding: 10px 24px;
+  background: #216d30;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mypage-edit-button:hover {
+  background: #1a5524;
+  transform: translateY(-1px);
+}
+
 /* 반응형 디자인 */
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
   .mypage-container {
     flex-direction: column;
-    padding: 20px 15px;
   }
 
   .mypage-side-menu {
-    position: static;
     width: 100%;
-    min-width: auto;
+    border-right: none;
+    border-bottom: 1px solid #e0e6ed;
+  }
+
+  .mypage-side-menu-nav {
+    display: flex;
+    overflow-x: auto;
+  }
+
+  .mypage-menu-item {
+    flex-shrink: 0;
+    border-left: none;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+  }
+
+  .mypage-menu-item.active {
+    border-left: none;
+    border-bottom-color: #216d30;
   }
 
   .mypage-main-content {
-    padding: 30px 20px;
     min-width: auto;
+    padding: 30px 20px;
   }
 }
 
 @media (max-width: 768px) {
   .mypage-main-content {
-    padding: 24px 16px;
+    padding: 20px 16px;
   }
 
   .mypage-main-content h1 {
-    font-size: 1.5rem;
+    font-size: 24px;
   }
 
-  .mypage-info-table th,
-  .mypage-info-table td,
-  .mypage-form-table th,
-  .mypage-form-table td {
-    padding: 10px 12px;
-    font-size: 0.9rem;
-  }
-
-  .mypage-info-table,
   .mypage-form-table,
-  .mypage-stat-table,
-  .mypage-list-table {
-    font-size: 0.85rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .mypage-container {
-    padding: 15px 10px;
-  }
-
-  .mypage-main-content {
-    padding: 20px 12px;
-  }
-
-  .mypage-main-content h1 {
-    font-size: 1.3rem;
-  }
-
-  .mypage-side-menu-nav {
-    padding: 8px 0;
-  }
-
-  .mypage-menu-item {
-    padding: 12px 16px;
-    font-size: 0.9rem;
-  }
-
-  .mypage-info-table,
-  .mypage-form-table {
+  .mypage-info-table {
     display: block;
-    overflow-x: auto;
   }
 
-  .mypage-update-button,
-  .mypage-submit-button {
+  .mypage-form-table tbody,
+  .mypage-info-table tbody {
+    display: block;
+  }
+
+  .mypage-form-table tr,
+  .mypage-info-table tr {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+    border: 1px solid #e0e6ed;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .mypage-form-table th,
+  .mypage-info-table th {
     width: 100%;
-    padding: 12px;
+    border-bottom: 1px solid #e0e6ed;
+    background: #216d30;
+    color: white;
+  }
+
+  .mypage-form-table td,
+  .mypage-info-table td {
+    width: 100%;
+    border-bottom: none;
+  }
+
+  .mypage-button-group {
+    flex-direction: column;
+  }
+
+  .mypage-submit-button,
+  .mypage-cancel-button,
+  .mypage-edit-button {
+    width: 100%;
   }
 }

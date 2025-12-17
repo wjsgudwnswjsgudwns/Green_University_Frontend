@@ -133,6 +133,32 @@ export default function StudentInfoPage() {
                   <th>이메일</th>
                   <td>{studentInfo.email}</td>
                 </tr>
+                <tr>
+                  <th>지도교수</th>
+                  <td>{studentInfo.tel}</td>
+                  <th>이메일</th>
+                  <td>{studentInfo.email}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <table className="mypage-info-table">
+              <tbody>
+                <tr>
+                  <th>지도교수</th>
+                  <td>{studentInfo.professorName}</td>
+                  <th>소속</th>
+                  <td>
+                    {studentInfo.professorCollegeName}{" "}
+                    {studentInfo.professorDepartName}
+                  </td>
+                </tr>
+                <tr>
+                  <th>전화번호</th>
+                  <td>{studentInfo.professorTel}</td>
+                  <th>이메일</th>
+                  <td>{studentInfo.professorEmail}</td>
+                </tr>
               </tbody>
             </table>
 
