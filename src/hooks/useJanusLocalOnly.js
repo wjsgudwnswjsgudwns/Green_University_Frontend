@@ -1,92 +1,191 @@
 // src/hooks/useJanusLocalOnly.js
 import { useCallback, useEffect, useRef, useState } from "react";
 
+/**
+ * useJanusLocalOnly (ref-minimized, stable final)
+ * - UI 단일 진실: localMedia
+ * - 주요 안정화:
+ *   1) leaveRoom ref화(항상 최신 finalize)
+ *   2) boot timeout(조인 멈춤 1회 복구)
+ *   3) display fallback 강화(remote 매칭 깨짐 방지)
+ *   4) wantVideo 필터 시 videoLost 강제 해제(“끊김 오판” 방지)
+ *
+ * ✅ 실무 표준 오토플레이/정책 대응:
+ *   - 입장 기본: 마이크 OFF (wantAudio=false)
+ *   - 비디오는 가능하면 ON (wantVideo=true)
+ *   - 오디오는 "사용자 버튼"으로 toggleAudio 했을 때만 송출 시작
+ */
 export function useJanusLocalOnly(
     serverUrl = "https://janus.jsflux.co.kr/janus",
     options = {}
 ) {
-    const { onRemoteParticipantsChanged, onLocalStream, onLocalMediaState } =
-        options || {};
-
-    const remoteChangedRef = useRef(null);
-    const localStreamChangedRef = useRef(null);
-
-    const localMediaStateRef = useRef(null);
-    localMediaStateRef.current = onLocalMediaState;
-
-    useEffect(() => {
-        remoteChangedRef.current = onRemoteParticipantsChanged;
-    }, [onRemoteParticipantsChanged]);
+    // =========================================================
+    // 0) callbacks refs (항상 최신 콜백)
+    // =========================================================
+    const callbacksRef = useRef({
+        onRemoteParticipantsChanged: null,
+        onLocalStream: null,
+    });
 
     useEffect(() => {
-        localStreamChangedRef.current = onLocalStream;
-    }, [onLocalStream]);
+        callbacksRef.current.onRemoteParticipantsChanged =
+            options?.onRemoteParticipantsChanged || null;
+    }, [options?.onRemoteParticipantsChanged]);
+
+    useEffect(() => {
+        callbacksRef.current.onLocalStream = options?.onLocalStream || null;
+    }, [options?.onLocalStream]);
 
     // mounted guard
     const mountedRef = useRef(false);
     useEffect(() => {
         mountedRef.current = true;
-        return () => (mountedRef.current = false);
+        return () => {
+            mountedRef.current = false;
+        };
     }, []);
 
-    // ===== Janus refs =====
-    const janusRef = useRef(null);
-    const pluginRef = useRef(null);
-    const localStreamRef = useRef(null);
-    const initedRef = useRef(false);
-    const privateIdRef = useRef(null);
+    const safeSet = useCallback((fn) => {
+        if (!mountedRef.current) return;
+        fn();
+    }, []);
 
-    // offer/negotiation lock (중복 createOffer 방지)
-    const negotiatingRef = useRef(false);
-    const pendingPublishRef = useRef(null);
-    const publishFnRef = useRef(null);
-
-    // subscriber / remote feeds: feedId -> { handle, feedId, display, stream }
-    const remoteFeedsRef = useRef({});
-
-    const publishedRef = useRef(false);
-    const wantVideoRef = useRef(true);
-
-    const finalizedRef = useRef(false);
-    const lastConfiguredRef = useRef({ audio: null, video: null });
-
-    // reinject loop guard
-    const reinjectCooldownRef = useRef(0);
-    const awaitingDeviceReturnRef = useRef(false);
-    const deviceRetryTimerRef = useRef(null);
-    const reinjectBlockedRef = useRef(false);
-
-    // ===== React state =====
+    // =========================================================
+    // 1) State (UI용)
+    // =========================================================
     const [isSupported, setIsSupported] = useState(true);
     const [isConnecting, setIsConnecting] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
     const [error, setError] = useState(null);
 
-    const [audioEnabled, setAudioEnabled] = useState(true);
-    const [videoEnabled, setVideoEnabled] = useState(true);
-    const [isVideoDeviceLost, setIsVideoDeviceLost] = useState(false);
+    // ✅ 실무 기본값: 입장 마이크 OFF / 비디오 ON
+    const DEFAULT_WANT_AUDIO = false;
+    const DEFAULT_WANT_VIDEO = true;
 
-    // 장치가 아예 없는지(마이크/카메라 둘 다 없음)
+    // 호환/디버그용 (UI는 localMedia만 보게 설계)
+    const [audioEnabled, setAudioEnabled] = useState(DEFAULT_WANT_AUDIO);
+    const [videoEnabled, setVideoEnabled] = useState(DEFAULT_WANT_VIDEO);
+    const [isVideoDeviceLost, setIsVideoDeviceLost] = useState(false);
     const [noMediaDevices, setNoMediaDevices] = useState(false);
 
-    const audioEnabledRef = useRef(true);
-    const videoEnabledRef = useRef(true);
-    const isConnectedRef = useRef(false);
+    // ✅ UI 단일 진실(localMedia)
+    const [localMedia, setLocalMedia] = useState({
+        audio: DEFAULT_WANT_AUDIO,
+        video: DEFAULT_WANT_VIDEO,
+        videoDeviceLost: false,
+        noMediaDevices: false,
+        liveAudio: false,
+        liveVideo: false,
+    });
+
+    // =========================================================
+    // 2) Refs (최소 덩어리)
+    // =========================================================
+    // ✅ 세션 세대(이전 async 이벤트 무효화)
+    const genRef = useRef(0); // join/leave마다 증가
+    const closingRef = useRef(false); // leave 시작~finalize까지 true
+
+    // ✅ leave 완료를 기다릴 수 있게 Promise 제공
+    const leaveWaitRef = useRef({
+        promise: null,
+        resolve: null,
+    });
+
+    const resetLeaveWait = useCallback(() => {
+        leaveWaitRef.current.promise = new Promise((res) => {
+            leaveWaitRef.current.resolve = res;
+        });
+    }, []);
 
     useEffect(() => {
-        audioEnabledRef.current = audioEnabled;
-    }, [audioEnabled]);
+        if (!leaveWaitRef.current.promise) resetLeaveWait();
+    }, [resetLeaveWait]);
+
+    const bumpGen = useCallback(() => {
+        genRef.current += 1;
+        return genRef.current;
+    }, []);
+
+    const isStale = useCallback((myGen) => {
+        return closingRef.current || myGen !== genRef.current;
+    }, []);
+
+    const janusRef = useRef({
+        janus: null,
+        pub: null,
+        privateId: null,
+        remote: {}, // feedId -> { handle, feedId, display, stream }
+        remotePending: {},
+        localStream: null,
+    });
+
+    const connRef = useRef({
+        isConnected: false,
+        isConnecting: false,
+    });
 
     useEffect(() => {
-        videoEnabledRef.current = videoEnabled;
-    }, [videoEnabled]);
-
-    useEffect(() => {
-        isConnectedRef.current = isConnected;
+        connRef.current.isConnected = isConnected;
     }, [isConnected]);
 
-    // ===== helpers =====
-    function hasLiveTrack(stream, kind) {
+    useEffect(() => {
+        connRef.current.isConnecting = isConnecting;
+    }, [isConnecting]);
+
+    const sessionRef = useRef({
+        inited: false,
+        destroying: false,
+        joined: false,
+        lastJoin: null, // {roomNumber, displayName}
+        bootRetryCount: 0,
+    });
+
+    const timersRef = useRef({
+        notify: null,
+        deviceDebounce: null,
+        deviceCooldown: 0,
+        boot: null, // ✅ boot timeout
+    });
+
+    // “사용자 의도”의 단일 진실
+    const mediaRef = useRef({
+        // ✅ 기본: 오디오 OFF / 비디오 ON
+        wantAudio: DEFAULT_WANT_AUDIO,
+        wantVideo: DEFAULT_WANT_VIDEO,
+
+        noDevices: false,
+        hasAudioDevice: true,
+        hasVideoDevice: true,
+
+        videoLost: false, // “영상 현재 불가”로 판단되는 상태
+        permissionDeniedVideo: false,
+    });
+
+    const negotiationRef = useRef({
+        locked: false,
+        pending: null, // { audio: intentAudio, video: intentVideo }
+    });
+
+    const publishedRef = useRef(false);
+    const lastConfiguredRef = useRef({ audio: null, video: null });
+    // ✅ “수동 재연결 로직”을 훅 내부에서 재사용하기 위한 ref
+    const hardReconnectRef = useRef(null);
+
+    // ✅ track dead 이후, devicechange가 안 와도 1회 재시도 트리거용
+    const deadRetryTimerRef = useRef(null);
+    // =========================================================
+    // 3) Utils
+    // =========================================================
+    const hasAnyTrack = useCallback((stream, kind) => {
+        if (!stream) return false;
+        const tracks =
+            kind === "video"
+                ? stream.getVideoTracks?.() || []
+                : stream.getAudioTracks?.() || [];
+        return tracks.length > 0;
+    }, []);
+
+    const hasLiveTrack = useCallback((stream, kind) => {
         if (!stream) return false;
         const tracks =
             kind === "video"
@@ -95,82 +194,163 @@ export function useJanusLocalOnly(
         return (
             Array.isArray(tracks) && tracks.some((t) => t.readyState === "live")
         );
-    }
-
-    // 장치 탐지(초기 1회)
-    useEffect(() => {
-        const md = navigator.mediaDevices;
-        if (!md?.enumerateDevices) return;
-
-        md.enumerateDevices()
-            .then((devices) => {
-                const hasAudio = devices.some((d) => d.kind === "audioinput");
-                const hasVideo = devices.some((d) => d.kind === "videoinput");
-                setNoMediaDevices(!hasAudio && !hasVideo);
-            })
-            .catch(() => {});
     }, []);
 
-    // "현재 내 상태를 외부로 알리는" helper
+    const clearTimer = useCallback((key) => {
+        const t = timersRef.current[key];
+        if (t) {
+            window.clearTimeout(t);
+            timersRef.current[key] = null;
+        }
+    }, []);
+
+    // =========================================================
+    // 4) Device availability
+    // =========================================================
+    const refreshDeviceAvailability = useCallback(async () => {
+        const md = navigator.mediaDevices;
+        if (!md?.enumerateDevices) {
+            mediaRef.current.noDevices = true;
+            mediaRef.current.hasAudioDevice = false;
+            mediaRef.current.hasVideoDevice = false;
+
+            safeSet(() => setNoMediaDevices(true));
+            return { hasAudio: false, hasVideo: false, noMediaDevices: true };
+        }
+
+        const devices = await md.enumerateDevices().catch(() => null);
+        if (!devices) return null;
+
+        const hasAudio = devices.some((d) => d.kind === "audioinput");
+        const hasVideo = devices.some((d) => d.kind === "videoinput");
+        const none = !hasAudio && !hasVideo;
+
+        mediaRef.current.noDevices = none;
+        mediaRef.current.hasAudioDevice = hasAudio;
+        mediaRef.current.hasVideoDevice = hasVideo;
+
+        safeSet(() => setNoMediaDevices(none));
+        return { hasAudio, hasVideo, noMediaDevices: none };
+    }, [safeSet]);
+
+    useEffect(() => {
+        refreshDeviceAvailability();
+    }, [refreshDeviceAvailability]);
+
+    // =========================================================
+    // 5) Local media snapshot (UI 단일 진실 갱신)
+    // =========================================================
     const emitLocalMediaState = useCallback(() => {
-        const fn = localMediaStateRef.current;
-        if (typeof fn !== "function") return;
-
-        const wantAudio = !!audioEnabledRef.current;
-        const wantVideo = !!videoEnabledRef.current;
-
-        const s = localStreamRef.current;
+        const s = janusRef.current.localStream;
         const liveAudio = hasLiveTrack(s, "audio");
         const liveVideo = hasLiveTrack(s, "video");
 
-        const videoLostForSignal =
-            !!isVideoDeviceLost ||
-            (!!wantVideo && (!liveVideo || noMediaDevices));
+        const wantAudio = !!mediaRef.current.wantAudio;
+        const wantVideo = !!mediaRef.current.wantVideo;
 
-        fn({
+        const videoDeviceLost =
+            !!mediaRef.current.videoLost ||
+            (!!wantVideo &&
+                !liveVideo &&
+                !!mediaRef.current.hasVideoDevice &&
+                !mediaRef.current.noDevices);
+
+        const next = {
             audio: wantAudio,
             video: wantVideo,
-            videoDeviceLost: videoLostForSignal,
-            noMediaDevices: !!noMediaDevices,
-            liveAudio,
-            liveVideo,
+            videoDeviceLost: !!videoDeviceLost,
+            noMediaDevices: !!mediaRef.current.noDevices,
+            liveAudio: !!liveAudio,
+            liveVideo: !!liveVideo,
+        };
+
+        safeSet(() => {
+            setLocalMedia((prev) => {
+                const same =
+                    prev.audio === next.audio &&
+                    prev.video === next.video &&
+                    prev.videoDeviceLost === next.videoDeviceLost &&
+                    prev.noMediaDevices === next.noMediaDevices &&
+                    prev.liveAudio === next.liveAudio &&
+                    prev.liveVideo === next.liveVideo;
+                return same ? prev : next;
+            });
+
+            // 호환 state도 정렬
+            setAudioEnabled(wantAudio);
+            setVideoEnabled(wantVideo);
+            setIsVideoDeviceLost(!!videoDeviceLost);
+            setNoMediaDevices(!!mediaRef.current.noDevices);
         });
-    }, [noMediaDevices, isVideoDeviceLost]);
+    }, [hasLiveTrack, safeSet]);
 
-    const lockNegotiation = () => {
-        if (negotiatingRef.current) return false;
-        negotiatingRef.current = true;
-        return true;
-    };
+    // =========================================================
+    // 6) Remote participants notify (debounce)
+    // =========================================================
+    const flushRemoteParticipants = useCallback(() => {
+        timersRef.current.notify = null;
 
-    const runPublishQueued = useCallback(() => {
-        const pending = pendingPublishRef.current;
-        if (!pending) return;
-        pendingPublishRef.current = null;
-        publishFnRef.current?.(!!pending.audio, !!pending.video);
-    }, []);
-
-    const unlockNegotiation = useCallback(() => {
-        negotiatingRef.current = false;
-        runPublishQueued();
-    }, [runPublishQueued]);
-
-    // ===== notify remotes debounce =====
-    const notifyTimerRef = useRef(null);
-
-    const flushRemoteParticipantsChanged = useCallback(() => {
-        notifyTimerRef.current = null;
-
-        const fn = remoteChangedRef.current;
+        const fn = callbacksRef.current.onRemoteParticipantsChanged;
         if (typeof fn !== "function") return;
 
-        const list = Object.values(remoteFeedsRef.current || {}).map(
-            (info) => ({
-                id: info.feedId,
-                display: info.display,
-                stream: info.stream || null,
-                videoDead: !info.stream,
-            })
+        const list = Object.values(janusRef.current.remote || {}).map(
+            (info) => {
+                const stream = info.stream || null;
+
+                const audioTracks = stream?.getAudioTracks?.() || [];
+                const videoTracks = stream?.getVideoTracks?.() || [];
+
+                const hasAnyTrack =
+                    audioTracks.length > 0 || videoTracks.length > 0;
+
+                // (선택) 기존 호환 정보 유지용
+                const hasLiveVideo = hasLiveTrack(stream, "video");
+                const hasLiveAudio = hasLiveTrack(stream, "audio");
+
+                return {
+                    feedId: info.feedId,
+                    id: info.feedId,
+
+                    // display 원문
+                    display: info.display,
+                    stream,
+
+                    // ✅ display JSON 파싱해서 userId/name/role 같이 내려주기
+                    ...(typeof info.display === "string"
+                        ? (() => {
+                              try {
+                                  const parsed = JSON.parse(info.display);
+                                  return {
+                                      userId: parsed?.userId ?? null,
+                                      name: parsed?.name ?? null,
+                                      role: parsed?.role ?? null,
+                                  };
+                              } catch {
+                                  return {
+                                      userId: null,
+                                      name: null,
+                                      role: null,
+                                  };
+                              }
+                          })()
+                        : { userId: null, name: null, role: null }),
+
+                    hasLiveVideo: stream
+                        ? hasLiveTrack(stream, "video")
+                        : false,
+                    hasLiveAudio: stream
+                        ? hasLiveTrack(stream, "audio")
+                        : false,
+
+                    // ✅ stream이 없으면 “dead로 확정”하지 말고 false 처리(= 아직 연결중일 수 있음)
+                    dead: stream
+                        ? !(audioTracks.length > 0 || videoTracks.length > 0)
+                        : false,
+
+                    // ✅ stream이 없으면 true 주지 말기 (여기가 지금 네 UI를 ‘꺼짐 고정’시키는 원인)
+                    videoDead: stream ? videoTracks.length === 0 : false,
+                };
+            }
         );
 
         try {
@@ -181,30 +361,36 @@ export function useJanusLocalOnly(
                 e
             );
         }
-    }, []);
+    }, [hasLiveTrack]);
 
     const notifyRemoteParticipantsChanged = useCallback(() => {
-        if (notifyTimerRef.current) return;
-        notifyTimerRef.current = window.setTimeout(
-            flushRemoteParticipantsChanged,
+        if (timersRef.current.notify) return;
+        timersRef.current.notify = window.setTimeout(
+            flushRemoteParticipants,
             80
         );
-    }, [flushRemoteParticipantsChanged]);
+    }, [flushRemoteParticipants]);
 
-    const notifyLocalStreamChanged = useCallback((stream) => {
-        const fn = localStreamChangedRef.current;
-        if (typeof fn !== "function") return;
-        try {
-            fn(stream);
-        } catch (e) {
-            console.error("[useJanusLocalOnly] onLocalStream error", e);
-        }
-    }, []);
+    // =========================================================
+    // 7) Local stream setter (track dead 감지)
+    // =========================================================
+    const localGenRef = useRef(0);
 
-    const setLocalStreamSafe = useCallback(
+    const setLocalStream = useCallback(
         (stream) => {
-            localStreamRef.current = stream || null;
-            notifyLocalStreamChanged(stream || null);
+            janusRef.current.localStream = stream || null;
+
+            const fn = callbacksRef.current.onLocalStream;
+            if (typeof fn === "function") {
+                try {
+                    fn(stream || null);
+                } catch (e) {
+                    console.error("[useJanusLocalOnly] onLocalStream error", e);
+                }
+            }
+
+            localGenRef.current += 1;
+            const myGen = localGenRef.current;
 
             if (!stream) {
                 emitLocalMediaState();
@@ -212,253 +398,99 @@ export function useJanusLocalOnly(
             }
 
             stream.getVideoTracks?.().forEach((track) => {
-                track.onended = () => {
-                    if (!mountedRef.current) return;
+                const onDead = () => {
+                    if (deadRetryTimerRef.current)
+                        window.clearTimeout(deadRetryTimerRef.current);
+                    deadRetryTimerRef.current = window.setTimeout(() => {
+                        deadRetryTimerRef.current = null;
 
-                    if (!videoEnabledRef.current) return;
-                    if (reinjectBlockedRef.current) return;
-                    reinjectBlockedRef.current = true;
+                        // ✅ leave/closing 중이면 절대 reconnect 금지
+                        if (closingRef.current || sessionRef.current.destroying)
+                            return;
 
-                    setIsVideoDeviceLost(true);
-
-                    //  트랙 죽었음: "딜레이 후 1회"만 시도하고 멈춤
-                    awaitingDeviceReturnRef.current = true;
-
-                    // 이미 타이머 있으면 중복 예약 방지
-                    if (deviceRetryTimerRef.current) return;
-
-                    deviceRetryTimerRef.current = window.setTimeout(() => {
-                        deviceRetryTimerRef.current = null;
-                        reinjectIfPossible?.({ source: "track-dead" });
-                    }, 2500);
+                        if (!connRef.current.isConnected) return;
+                        if (mediaRef.current.permissionDeniedVideo) return;
+                        if (negotiationRef.current.locked) return;
+                        reinjectIfPossible();
+                    }, 600);
                 };
-                if (track.oninactive === null) track.oninactive = track.onended;
+
+                track.onended = onDead;
+                if (track.oninactive == null) track.oninactive = onDead;
             });
 
             emitLocalMediaState();
         },
-        [notifyLocalStreamChanged, emitLocalMediaState]
+        [emitLocalMediaState, hasLiveTrack, safeSet]
     );
 
-    // ===== remote feed detach/reset =====
-    const detachRemoteFeed = useCallback(
-        (feedId, { skipHandleCleanup = false, silent = false } = {}) => {
-            const feedInfo = remoteFeedsRef.current[feedId];
-            if (!feedInfo) return;
+    // =========================================================
+    // 8) Negotiation helpers
+    // =========================================================
+    const publishLocalStreamRef = useRef(null);
 
-            if (!skipHandleCleanup) {
-                try {
-                    feedInfo.handle?.hangup?.();
-                    feedInfo.handle?.detach?.();
-                } catch (e) {
-                    console.warn(
-                        "[subscriber] detachRemoteFeed cleanup error",
-                        e
-                    );
-                }
-            }
+    const lockNegotiation = useCallback(() => {
+        if (negotiationRef.current.locked) return false;
+        negotiationRef.current.locked = true;
+        return true;
+    }, []);
 
-            delete remoteFeedsRef.current[feedId];
-            if (!silent) notifyRemoteParticipantsChanged();
-        },
-        [notifyRemoteParticipantsChanged]
-    );
+    const unlockNegotiation = useCallback(() => {
+        negotiationRef.current.locked = false;
 
-    const resetAllRemoteFeeds = useCallback(
-        ({ silent = false } = {}) => {
-            const ids = Object.keys(remoteFeedsRef.current);
-            ids.forEach((feedId) => detachRemoteFeed(feedId, { silent: true }));
-            remoteFeedsRef.current = {};
-            if (!silent) notifyRemoteParticipantsChanged();
-        },
-        [detachRemoteFeed, notifyRemoteParticipantsChanged]
-    );
+        const pending = negotiationRef.current.pending;
+        if (!pending) return;
+        if (mediaRef.current.permissionDeniedVideo) {
+            negotiationRef.current.pending = null;
+            return;
+        }
+        negotiationRef.current.pending = null;
+        publishLocalStreamRef.current?.(pending.audio, pending.video, {
+            republish: true,
+        });
+    }, []);
 
-    // ===== finalize =====
-    const finalize = useCallback(
-        (reason = "unknown") => {
-            if (finalizedRef.current) return;
-            finalizedRef.current = true;
-
-            // negotiation state reset
-            negotiatingRef.current = false;
-            pendingPublishRef.current = null;
-
-            // timer
-            if (notifyTimerRef.current) {
-                window.clearTimeout(notifyTimerRef.current);
-                notifyTimerRef.current = null;
-            }
-
-            if (deviceRetryTimerRef.current) {
-                window.clearTimeout(deviceRetryTimerRef.current);
-                deviceRetryTimerRef.current = null;
-            }
-            // remote feeds
-            resetAllRemoteFeeds({ silent: true });
-            notifyRemoteParticipantsChanged();
-
-            // local tracks stop
-            try {
-                localStreamRef.current?.getTracks?.().forEach((t) => t.stop());
-            } catch {}
-
-            setLocalStreamSafe(null);
-
-            privateIdRef.current = null;
-
-            try {
-                pluginRef.current?.hangup?.();
-            } catch {}
-            pluginRef.current = null;
-
-            janusRef.current = null;
-
-            lastConfiguredRef.current = { audio: null, video: null };
-            publishedRef.current = false;
-            wantVideoRef.current = true;
-
-            // reinject guards
-            reinjectBlockedRef.current = false;
-            reinjectCooldownRef.current = 0;
-
-            setIsConnecting(false);
-            setIsConnected(false);
-            isConnectedRef.current = false;
-
-            // UI state
-            setAudioEnabled(true);
-            setVideoEnabled(true);
-            audioEnabledRef.current = true;
-            videoEnabledRef.current = true;
-
-            setIsVideoDeviceLost(false);
-            setError(null);
-        },
-        [
-            notifyRemoteParticipantsChanged,
-            resetAllRemoteFeeds,
-            setLocalStreamSafe,
-        ]
-    );
-
-    // ===== publish/republish =====
-    const republishSafe = useCallback(
-        (useAudio, useVideo, attempt = 0) => {
-            const Janus = window.Janus;
-            const handle = pluginRef.current;
-            if (!Janus || !handle) return;
-
-            if (!lockNegotiation()) {
-                pendingPublishRef.current = {
-                    audio: !!useAudio,
-                    video: !!useVideo,
-                };
-                return;
-            }
-
-            const prev = lastConfiguredRef.current || {
-                audio: null,
-                video: null,
-            };
-            const replaceAudio = prev.audio !== useAudio;
-            const replaceVideo = prev.video !== useVideo;
-
-            handle.createOffer({
-                media: {
-                    audioRecv: false,
-                    videoRecv: false,
-                    audioSend: !!useAudio,
-                    videoSend: !!useVideo,
-                    replaceAudio,
-                    replaceVideo,
-                },
-                success: (jsep) => {
-                    try {
-                        handle.send({
-                            message: {
-                                request: "configure",
-                                audio: !!useAudio,
-                                video: !!useVideo,
-                            },
-                            jsep,
-                        });
-
-                        lastConfiguredRef.current = {
-                            audio: !!useAudio,
-                            video: !!useVideo,
-                        };
-
-                        // 여기서는 "미디어 재구성 성공" 의미로 상태만 보강
-                        setIsConnecting(false);
-                        if (useVideo) setIsVideoDeviceLost(false);
-
-                        const latest =
-                            handle?.webrtcStuff?.myStream ||
-                            handle?.webrtcStuff?.stream ||
-                            null;
-                        if (latest) setLocalStreamSafe(latest);
-
-                        emitLocalMediaState();
-                    } finally {
-                        unlockNegotiation();
-                    }
-                },
-                error: (err) => {
-                    console.error(
-                        "[useJanusLocalOnly] republishSafe error:",
-                        err
-                    );
-
-                    const isPermissionDenied =
-                        err?.name === "NotAllowedError" ||
-                        err?.name === "PermissionDeniedError" ||
-                        String(err?.message || "")
-                            .toLowerCase()
-                            .includes("permission");
-
-                    unlockNegotiation();
-
-                    if (isPermissionDenied) {
-                        setIsConnecting(false);
-                        return;
-                    }
-
-                    if (attempt >= 1) {
-                        if (useVideo) setIsVideoDeviceLost(true);
-                        setIsConnecting(false);
-                        return;
-                    }
-
-                    if (useVideo) {
-                        setIsVideoDeviceLost(true);
-                        return republishSafe(useAudio, false, attempt + 1);
-                    }
-                    if (useAudio)
-                        return republishSafe(false, false, attempt + 1);
-
-                    setIsConnecting(false);
-                },
-            });
-        },
-        [setLocalStreamSafe, emitLocalMediaState, unlockNegotiation]
-    );
-
+    // =========================================================
+    // 9) publish / republish (의도값 -> 실제값)
+    // =========================================================
     const publishLocalStream = useCallback(
-        (useAudio = true, useVideo = true) => {
+        async (intentAudio = true, intentVideo = true, opts = {}) => {
             const Janus = window.Janus;
-            const handle = pluginRef.current;
+            const handle = janusRef.current.pub;
             if (!Janus || !handle) return;
+            const intentVideoSafe = mediaRef.current.permissionDeniedVideo
+                ? false
+                : !!intentVideo;
+            // ✅ “사용자 의도” 업데이트
+            mediaRef.current.wantAudio = !!intentAudio;
+            mediaRef.current.wantVideo = !!intentVideo;
 
-            wantVideoRef.current = !!useVideo;
+            safeSet(() => {
+                setAudioEnabled(!!intentAudio);
+                setVideoEnabled(!!intentVideo);
+            });
 
-            // 이미 publish 성공했으면 republish
-            if (publishedRef.current || isConnectedRef.current) {
-                return republishSafe(!!useAudio, !!useVideo, 0);
+            // 최신 디바이스 스냅샷
+            await refreshDeviceAvailability().catch(() => null);
+
+            const noDev = !!mediaRef.current.noDevices;
+            const hasA = !!mediaRef.current.hasAudioDevice;
+            const hasV = !!mediaRef.current.hasVideoDevice;
+
+            // ✅ 실제로 Janus에 보낼 값(디바이스 기반 필터)
+            const wantAudio = !!intentAudio && !noDev && hasA;
+            const wantVideo = !!intentVideoSafe && !noDev && hasV;
+
+            // ✅ (핵심) 필터 결과로 wantVideo가 false면 lost는 무조건 false
+            if (!wantVideo) {
+                mediaRef.current.videoLost = false;
+                safeSet(() => setIsVideoDeviceLost(false));
             }
 
-            // 둘 다 false면 configure만
-            if (!useAudio && !useVideo) {
+            emitLocalMediaState();
+
+            // 미디어 없이 참가
+            if (!wantAudio && !wantVideo) {
                 try {
                     handle.send({
                         message: {
@@ -468,123 +500,302 @@ export function useJanusLocalOnly(
                         },
                     });
                     publishedRef.current = true;
-                    setIsConnecting(false);
+                    safeSet(() => setIsConnecting(false));
                     emitLocalMediaState();
-                } catch (e) {
-                    setError("미디어 없이 참가 처리 중 오류가 발생했습니다.");
-                    setIsConnecting(false);
+                } catch {
+                    safeSet(() =>
+                        setError(
+                            "미디어 없이 참가 처리 중 오류가 발생했습니다."
+                        )
+                    );
+                    safeSet(() => setIsConnecting(false));
                 }
                 return;
             }
 
+            // 협상 락
             if (!lockNegotiation()) {
-                pendingPublishRef.current = {
-                    audio: !!useAudio,
-                    video: !!useVideo,
+                negotiationRef.current.pending = {
+                    audio: !!intentAudio,
+                    video: !!intentVideo,
                 };
                 return;
             }
+
+            const prev = lastConfiguredRef.current;
+            const republish = !!opts.republish || publishedRef.current;
+
+            const replaceAudio = republish ? prev.audio !== !!wantAudio : true;
+            const replaceVideo = republish ? prev.video !== !!wantVideo : true;
 
             handle.createOffer({
                 media: {
                     audioRecv: false,
                     videoRecv: false,
-                    audioSend: !!useAudio,
-                    videoSend: !!useVideo,
+                    audioSend: !!wantAudio,
+                    videoSend: !!wantVideo,
+                    replaceAudio,
+                    replaceVideo,
                 },
                 success: (jsep) => {
                     try {
                         handle.send({
                             message: {
                                 request: "configure",
-                                audio: !!useAudio,
-                                video: !!useVideo,
+                                audio: !!wantAudio,
+                                video: !!wantVideo,
                             },
                             jsep,
                         });
 
                         publishedRef.current = true;
-                        setIsConnecting(false);
-
                         lastConfiguredRef.current = {
-                            audio: !!useAudio,
-                            video: !!useVideo,
+                            audio: !!wantAudio,
+                            video: !!wantVideo,
                         };
 
-                        if (useVideo) setIsVideoDeviceLost(false);
+                        // 성공이면 videoLost 해제
+                        if (wantVideo) {
+                            mediaRef.current.videoLost = false;
+                            mediaRef.current.permissionDeniedVideo = false;
+                            safeSet(() => setIsVideoDeviceLost(false));
+                        }
 
                         const latest =
                             handle?.webrtcStuff?.myStream ||
                             handle?.webrtcStuff?.stream ||
                             null;
-                        if (latest) setLocalStreamSafe(latest);
+                        if (latest) setLocalStream(latest);
 
+                        safeSet(() => setIsConnecting(false));
                         emitLocalMediaState();
                     } finally {
                         unlockNegotiation();
                     }
                 },
-                error: (err) => {
+                error: async (err) => {
                     console.error(
                         "[useJanusLocalOnly] createOffer error:",
                         err
                     );
 
+                    const name = err?.name || "";
+                    const msg = String(err?.message || "").toLowerCase();
+
                     const isPermissionDenied =
-                        err?.name === "NotAllowedError" ||
-                        err?.name === "PermissionDeniedError" ||
-                        String(err?.message || "")
-                            .toLowerCase()
-                            .includes("permission");
+                        name === "NotAllowedError" ||
+                        name === "PermissionDeniedError" ||
+                        msg.includes("permission") ||
+                        msg.includes("denied");
 
+                    const isDeviceNotFound =
+                        name === "NotFoundError" ||
+                        name === "DevicesNotFoundError" ||
+                        msg.includes("notfound") ||
+                        msg.includes("device not found") ||
+                        msg.includes("no capture device");
+
+                    negotiationRef.current.pending = null;
                     unlockNegotiation();
+                    // 1) 권한 거부: video 의도를 내려 루프 차단
 
-                    if (isPermissionDenied) {
-                        setIsConnecting(false);
+                    const pc = janusRef.current.pub?.webrtcStuff?.pc;
+                    const pcDead =
+                        !pc ||
+                        pc.connectionState === "closed" ||
+                        pc.iceConnectionState === "closed";
+
+                    if (pcDead) {
+                        safeSet(() => setIsConnecting(false));
+                        hardReconnectRef.current?.("createOffer.pc-dead");
                         return;
                     }
 
-                    if (useVideo) {
-                        setIsVideoDeviceLost(true);
-                        return publishLocalStream(useAudio, false);
-                    }
-                    if (useAudio) {
-                        setAudioEnabled(false);
-                        audioEnabledRef.current = false;
-                        return publishLocalStream(false, false);
+                    if (isPermissionDenied) {
+                        // ✅ 의도는 ON 유지 (무조건 카메라 ON 정책)
+                        // mediaRef.current.wantVideo = false; // ❌ 제거
+                        negotiationRef.current.pending = null;
+                        negotiationRef.current.locked = false;
+
+                        mediaRef.current.videoLost = true;
+                        mediaRef.current.permissionDeniedVideo = true;
+                        try {
+                            setLocalStream(null);
+                        } catch {}
+                        safeSet(() => {
+                            // 의도는 ON으로 두되, 실제 송출은 실패했으니 lost만 올린다
+                            setVideoEnabled(true); // ✅ 사용자 의도 ON
+                            setIsVideoDeviceLost(true); // ✅ 현재 불가 상태 표시
+                            setIsConnecting(false);
+                            setError(
+                                "카메라 권한이 거부되어 영상 송출을 시작할 수 없습니다. 브라우저 권한을 허용한 뒤 다시 시도해 주세요."
+                            );
+                        });
+                        try {
+                            const a =
+                                !!mediaRef.current.wantAudio &&
+                                !mediaRef.current.noDevices &&
+                                !!mediaRef.current.hasAudioDevice;
+                            handle.send({
+                                message: {
+                                    request: "configure",
+                                    audio: a,
+                                    video: false,
+                                },
+                            });
+                            publishedRef.current = true;
+                            lastConfiguredRef.current = {
+                                audio: a,
+                                video: false,
+                            };
+                        } catch {}
+                        emitLocalMediaState();
+                        return;
                     }
 
-                    setIsConnecting(false);
+                    // 2) 장치 없음: “원래 없음” 처리 + audio-only 폴백
+                    if (isDeviceNotFound) {
+                        await refreshDeviceAvailability().catch(() => null);
+
+                        mediaRef.current.videoLost = false;
+                        safeSet(() => setIsVideoDeviceLost(false));
+                        safeSet(() => setIsConnecting(false));
+                        emitLocalMediaState();
+
+                        if (mediaRef.current.noDevices) {
+                            return publishLocalStreamRef.current?.(
+                                false,
+                                false,
+                                { republish: true }
+                            );
+                        }
+                        if (mediaRef.current.hasAudioDevice) {
+                            return publishLocalStreamRef.current?.(
+                                true,
+                                false,
+                                { republish: true }
+                            );
+                        }
+                        return publishLocalStreamRef.current?.(false, false, {
+                            republish: true,
+                        });
+                    }
+
+                    // 3) 기타 에러: video 실패면 videoLost 올리고 audio-only 폴백
+                    if (wantVideo) {
+                        mediaRef.current.videoLost = true;
+                        safeSet(() => setIsVideoDeviceLost(true));
+                        emitLocalMediaState();
+                        safeSet(() => setIsConnecting(false));
+                        return publishLocalStreamRef.current?.(
+                            !!intentAudio,
+                            false,
+                            {
+                                republish: true,
+                            }
+                        );
+                    }
+
+                    safeSet(() => setIsConnecting(false));
                 },
             });
         },
         [
-            republishSafe,
-            setLocalStreamSafe,
             emitLocalMediaState,
+            lockNegotiation,
+            refreshDeviceAvailability,
+            safeSet,
+            setLocalStream,
             unlockNegotiation,
         ]
     );
 
     useEffect(() => {
-        publishFnRef.current = publishLocalStream;
+        publishLocalStreamRef.current = publishLocalStream;
     }, [publishLocalStream]);
 
-    // ===== remote feed attach =====
+    // =========================================================
+    // 10) Remote feed attach/detach/reset
+    // =========================================================
+    const detachRemoteFeed = useCallback(
+        (feedId, { skipHandleCleanup = false } = {}) => {
+            const info = janusRef.current.remote?.[feedId];
+            // ✅ pending도 같이 제거
+            delete janusRef.current.remotePending?.[feedId];
+
+            if (!info) return;
+
+            if (!skipHandleCleanup) {
+                try {
+                    info.handle?.hangup?.();
+                    info.handle?.detach?.();
+                } catch {}
+            }
+            delete janusRef.current.remote[feedId];
+        },
+        []
+    );
+
+    const resetRemoteFeeds = useCallback(() => {
+        try {
+            Object.values(janusRef.current.remote || {}).forEach((info) => {
+                try {
+                    info.handle?.hangup?.();
+                    info.handle?.detach?.();
+                } catch {}
+            });
+        } catch {}
+        janusRef.current.remote = {};
+        janusRef.current.remotePending = {}; // ✅ 추가
+        notifyRemoteParticipantsChanged();
+    }, [notifyRemoteParticipantsChanged]);
+
     const newRemoteFeed = useCallback(
         (feedId, display, roomNumber) => {
+            const myGen = genRef.current;
             const Janus = window.Janus;
-            if (!Janus || !janusRef.current) return;
-            if (remoteFeedsRef.current[feedId]) return;
+            if (!Janus || !janusRef.current.janus) return;
 
-            janusRef.current.attach({
+            const existing = janusRef.current.remote[feedId];
+            if (existing) {
+                const pcAlive = !!existing.handle?.webrtcStuff?.pc;
+                const hasStream = !!existing.stream;
+
+                if (pcAlive && hasStream) return; // 정상일 때만 중복 차단
+
+                // ✅ 죽었으면 정리 후 재attach 허용
+                detachRemoteFeed(feedId);
+            }
+            if (janusRef.current.remotePending?.[feedId]) return;
+
+            janusRef.current.remotePending[feedId] = true; // ✅ in-flight 마킹
+
+            const safeDisplay =
+                display ??
+                JSON.stringify({
+                    name: `User${feedId}`,
+                    role: "PARTICIPANT",
+                    userId: null,
+                });
+
+            janusRef.current.janus.attach({
                 plugin: "janus.plugin.videoroom",
 
                 success: (handle) => {
-                    remoteFeedsRef.current[feedId] = {
+                    if (isStale(myGen)) {
+                        delete janusRef.current.remotePending[feedId]; // ✅ 정리
+                        try {
+                            handle?.detach?.();
+                        } catch {}
+                        return;
+                    }
+
+                    // ✅ 이제 remote에 등록 + pending 해제
+                    delete janusRef.current.remotePending[feedId];
+                    janusRef.current.remote[feedId] = {
                         handle,
                         feedId,
-                        display,
+                        display: safeDisplay,
                         stream: null,
                     };
 
@@ -594,28 +805,59 @@ export function useJanusLocalOnly(
                         ptype: "subscriber",
                         feed: feedId,
                     };
-                    if (privateIdRef.current)
-                        subscribe.private_id = privateIdRef.current;
+                    if (janusRef.current.privateId)
+                        subscribe.private_id = janusRef.current.privateId;
 
                     handle.send({ message: subscribe });
                     notifyRemoteParticipantsChanged();
                 },
 
                 error: (err) => {
+                    delete janusRef.current.remotePending[feedId]; // ✅ 정리
+                    if (isStale(myGen)) return;
                     console.error("[subscriber] attach error:", err);
                 },
 
                 onmessage: (msg, jsep) => {
+                    if (isStale(myGen)) return;
                     if (!jsep) return;
 
-                    const feedInfo = remoteFeedsRef.current[feedId];
-                    const handle = feedInfo?.handle;
+                    const info = janusRef.current.remote[feedId];
+                    const handle = info?.handle;
                     if (!handle) return;
+
+                    // offer만 처리
+                    const jtype = jsep?.type;
+                    if (jtype && jtype !== "offer") return;
+
+                    // ✅ "이 offer를 처리하는 동안 cleanup/destroy 되면" success 콜백에서 막기 위해 토큰 발급
+                    info.answerToken = (info.answerToken || 0) + 1;
+                    const token = info.answerToken;
 
                     handle.createAnswer({
                         jsep,
-                        media: { audioSend: false, videoSend: false },
+                        media: {
+                            audioSend: false,
+                            videoSend: false,
+                            audioRecv: true,
+                            videoRecv: true,
+                        },
                         success: (jsepAnswer) => {
+                            // ✅ 1) stale이면 중단
+                            if (isStale(myGen)) return;
+
+                            // ✅ 2) feed 정보가 없어졌거나 handle이 바뀌었으면 중단
+                            const cur = janusRef.current.remote?.[feedId];
+                            if (!cur) return;
+                            if (cur.handle !== handle) return;
+
+                            // ✅ 3) 최신 토큰이 아니면(더 최신 offer 처리 중이면) 중단
+                            if (cur.answerToken !== token) return;
+
+                            // ✅ 4) Janus가 이미 WebRTC stuff 정리했으면 중단 (pc가 죽은 상태)
+                            const pc = handle?.webrtcStuff?.pc;
+                            if (!pc) return;
+
                             handle.send({
                                 message: {
                                     request: "start",
@@ -625,6 +867,7 @@ export function useJanusLocalOnly(
                             });
                         },
                         error: (err) => {
+                            if (isStale(myGen)) return;
                             console.error(
                                 "[subscriber] createAnswer error:",
                                 err
@@ -634,33 +877,203 @@ export function useJanusLocalOnly(
                 },
 
                 onremotestream: (stream) => {
-                    const prev = remoteFeedsRef.current[feedId];
+                    if (isStale(myGen)) return;
+
+                    const prev = janusRef.current.remote[feedId];
                     if (!prev) return;
-                    remoteFeedsRef.current[feedId] = { ...prev, stream };
+                    janusRef.current.remote[feedId] = { ...prev, stream };
                     notifyRemoteParticipantsChanged();
                 },
 
                 oncleanup: () => {
-                    detachRemoteFeed(feedId, { skipHandleCleanup: true });
+                    if (isStale(myGen)) return;
+
+                    // ✅ 1순위 실험: cleanup에서 feed를 삭제하지 않는다.
+                    // 이유: 새 참여자 합류 타이밍에는 stream이 아직 붙기 전이라
+                    // 300ms 체크로 삭제하면 "꺼짐"으로 고정될 수 있음.
+                    // leaving/unpublished 이벤트에서만 detachRemoteFeed 하도록 한다.
+
+                    const cur = janusRef.current.remote?.[feedId];
+                    if (!cur) return;
+                    const pc = cur.handle?.webrtcStuff?.pc;
+                    if (!pc) {
+                        detachRemoteFeed(feedId, { skipHandleCleanup: true });
+                        notifyRemoteParticipantsChanged();
+
+                        // (선택) resync 한번 더 당겨도 좋음
+                        // janusRef.current.pub?.send({ message: { request:"listparticipants", room:Number(roomNumber) } ... });
+
+                        return;
+                    }
+                    janusRef.current.remote[feedId] = { ...cur, stream: null };
+                    notifyRemoteParticipantsChanged();
+
+                    console.log("[subscriber] oncleanup (no detach)", {
+                        feedId,
+                        display: cur.display,
+                    });
                 },
             });
         },
-        [detachRemoteFeed, notifyRemoteParticipantsChanged]
+        [detachRemoteFeed, notifyRemoteParticipantsChanged, isStale]
     );
 
-    // ===== create session & attach publisher =====
+    // =========================================================
+    // 11) finalize / cleanup (연결만 정리)
+    // =========================================================
+    const finalize = useCallback(
+        (reason = "finalize") => {
+            sessionRef.current.joined = false;
+            sessionRef.current.destroying = false;
+            sessionRef.current.bootRetryCount = 0;
+
+            clearTimer("notify");
+            clearTimer("deviceDebounce");
+            clearTimer("boot");
+
+            resetRemoteFeeds();
+
+            // local stream stop
+            try {
+                const s = janusRef.current.localStream;
+                s?.getTracks?.().forEach((t) => {
+                    try {
+                        t.onended = null;
+                        t.oninactive = null;
+                        t.stop();
+                    } catch {}
+                });
+            } catch {}
+            janusRef.current.localStream = null;
+            setLocalStream(null);
+
+            // plugin/janus
+            try {
+                janusRef.current.pub?.hangup?.();
+            } catch {}
+            janusRef.current.pub = null;
+            janusRef.current.privateId = null;
+            janusRef.current.janus = null;
+
+            // negotiation
+            negotiationRef.current.locked = false;
+            negotiationRef.current.pending = null;
+
+            // publish state
+            publishedRef.current = false;
+            lastConfiguredRef.current = { audio: null, video: null };
+
+            // ✅ 기본값으로 “의도”도 복구해두는 게 실무에서 안정적
+            mediaRef.current.wantAudio = DEFAULT_WANT_AUDIO;
+            mediaRef.current.wantVideo = DEFAULT_WANT_VIDEO;
+            mediaRef.current.videoLost = false;
+
+            safeSet(() => {
+                setIsConnecting(false);
+                setIsConnected(false);
+                setError(null);
+
+                setAudioEnabled(DEFAULT_WANT_AUDIO);
+                setVideoEnabled(DEFAULT_WANT_VIDEO);
+                setIsVideoDeviceLost(false);
+            });
+            if (deadRetryTimerRef.current) {
+                window.clearTimeout(deadRetryTimerRef.current);
+                deadRetryTimerRef.current = null;
+            }
+
+            connRef.current.isConnected = false;
+            connRef.current.isConnecting = false;
+
+            emitLocalMediaState();
+            closingRef.current = false;
+            leaveWaitRef.current.resolve?.();
+            resetLeaveWait();
+        },
+        [
+            clearTimer,
+            emitLocalMediaState,
+            resetRemoteFeeds,
+            safeSet,
+            setLocalStream,
+        ]
+    );
+
+    const finalizeRef = useRef(finalize);
+    useEffect(() => {
+        finalizeRef.current = finalize;
+    }, [finalize]);
+
+    // =========================================================
+    // 12) leaveRoom (ref-safe)
+    // =========================================================
+    const leaveRoomRef = useRef(null);
+
+    const leaveRoomImpl = useCallback(
+        (reason = "leaveRoom") => {
+            if (sessionRef.current.destroying)
+                return leaveWaitRef.current.promise;
+
+            sessionRef.current.destroying = true;
+
+            // ✅ 이전 세션 이벤트 무효화
+            closingRef.current = true;
+            bumpGen();
+
+            clearTimer("boot");
+
+            const janus = janusRef.current.janus;
+            const pub = janusRef.current.pub;
+
+            try {
+                pub?.send?.({ message: { request: "leave" } });
+            } catch {}
+
+            // ✅ destroy가 async로 destroyed 콜백 타고 finalize될 수 있으니,
+            //    finalize에서 resolve되게 한다.
+            if (janus) {
+                try {
+                    janus.destroy();
+                    return leaveWaitRef.current.promise;
+                } catch {}
+            }
+
+            finalizeRef.current?.(`${reason}.noJanus`);
+            return leaveWaitRef.current.promise;
+        },
+        [clearTimer]
+    );
+
+    useEffect(() => {
+        leaveRoomRef.current = leaveRoomImpl;
+    }, [leaveRoomImpl]);
+
+    const leaveRoom = useCallback((reason) => {
+        return leaveRoomRef.current?.(reason); // ✅ Promise 반환
+    }, []);
+
+    // =========================================================
+    // 13) Create session & publisher attach (+ boot timeout mark)
+    // =========================================================
+
     const createSessionAndAttach = useCallback(
         ({ roomNumber, displayName }) => {
+            const myGen = genRef.current;
             const Janus = window.Janus;
             if (!Janus) return;
 
-            finalizedRef.current = false;
+            sessionRef.current.joined = false;
             publishedRef.current = false;
 
             const janus = new Janus({
                 server: serverUrl,
-
                 success: () => {
+                    if (isStale(myGen)) {
+                        try {
+                            janus.destroy();
+                        } catch {}
+                        return;
+                    }
                     if (!mountedRef.current) {
                         try {
                             janus.destroy();
@@ -668,13 +1081,19 @@ export function useJanusLocalOnly(
                         return;
                     }
 
-                    janusRef.current = janus;
+                    janusRef.current.janus = janus;
 
                     janus.attach({
                         plugin: "janus.plugin.videoroom",
-
                         success: (handle) => {
-                            pluginRef.current = handle;
+                            if (isStale(myGen)) {
+                                try {
+                                    handle?.detach?.();
+                                } catch {}
+                                return;
+                            }
+                            janusRef.current.pub = handle;
+
                             handle.send({
                                 message: {
                                     request: "join",
@@ -684,21 +1103,25 @@ export function useJanusLocalOnly(
                                 },
                             });
                         },
-
                         error: (err) => {
+                            if (isStale(myGen)) return;
                             console.error("[publisher] attach error:", err);
-                            setError(
-                                "videoroom attach 중 에러가 발생했습니다."
-                            );
-                            setIsConnecting(false);
+                            safeSet(() => {
+                                setError(
+                                    "videoroom attach 중 에러가 발생했습니다."
+                                );
+                                setIsConnecting(false);
+                            });
+                            connRef.current.isConnecting = false;
+                            clearTimer("boot");
                         },
-
                         onmessage: (msg, jsep) => {
+                            if (isStale(myGen)) return;
                             const data = msg?.plugindata?.data || msg || {};
                             const event = data.videoroom;
                             const errorCode = data.error_code;
 
-                            // 방 없으면(426) 만들고 join
+                            // room not found -> create then join
                             if (event === "event" && errorCode === 426) {
                                 const createBody = {
                                     request: "create",
@@ -707,7 +1130,7 @@ export function useJanusLocalOnly(
                                     bitrate: 512000,
                                 };
 
-                                pluginRef.current?.send({
+                                janusRef.current.pub?.send({
                                     message: createBody,
                                     success: (result) => {
                                         const d =
@@ -715,7 +1138,7 @@ export function useJanusLocalOnly(
                                             result ||
                                             {};
                                         if (d.videoroom === "created") {
-                                            pluginRef.current?.send({
+                                            janusRef.current.pub?.send({
                                                 message: {
                                                     request: "join",
                                                     room: d.room,
@@ -731,27 +1154,40 @@ export function useJanusLocalOnly(
                                             "[publisher] room create error:",
                                             err
                                         );
-                                        setError(
-                                            "회의 방 생성 중 오류가 발생했습니다."
-                                        );
-                                        setIsConnecting(false);
+                                        safeSet(() => {
+                                            setError(
+                                                "회의 방 생성 중 오류가 발생했습니다."
+                                            );
+                                            setIsConnecting(false);
+                                        });
+                                        connRef.current.isConnecting = false;
+                                        clearTimer("boot");
                                     },
                                 });
                                 return;
                             }
 
-                            // ✅ 핵심: "joined"를 연결 성공으로 본다 (publish 성공 여부와 분리)
                             if (event === "joined") {
-                                privateIdRef.current = data.private_id;
+                                sessionRef.current.joined = true;
+                                sessionRef.current.bootRetryCount = 0;
 
-                                setIsConnected(true);
-                                setIsConnecting(false);
-                                isConnectedRef.current = true;
+                                clearTimer("boot");
 
-                                // 초기 publish: 현재 상태에 맞춰 진행
-                                publishLocalStream(
-                                    audioEnabledRef.current,
-                                    videoEnabledRef.current
+                                janusRef.current.privateId = data.private_id;
+
+                                safeSet(() => {
+                                    setIsConnected(true);
+                                    setIsConnecting(false);
+                                });
+
+                                connRef.current.isConnected = true;
+                                connRef.current.isConnecting = false;
+
+                                // ✅ 입장 직후 publish: "마이크 OFF" 기본값으로 시작
+                                publishLocalStreamRef.current?.(
+                                    mediaRef.current.wantAudio, // false
+                                    mediaRef.current.wantVideo, // true
+                                    { republish: true }
                                 );
 
                                 const list = data.publishers || [];
@@ -767,6 +1203,46 @@ export function useJanusLocalOnly(
                                         );
                                     notifyRemoteParticipantsChanged();
                                 }
+
+                                const resync = () => {
+                                    const h = janusRef.current.pub;
+                                    if (!h) return;
+
+                                    h.send({
+                                        message: {
+                                            request: "listparticipants",
+                                            room: Number(roomNumber),
+                                        },
+                                        success: (result) => {
+                                            const d =
+                                                result?.plugindata?.data ||
+                                                result ||
+                                                {};
+                                            const parts = d.participants || [];
+
+                                            parts.forEach((p) => {
+                                                if (!p?.id) return;
+                                                if (
+                                                    janusRef.current.remote[
+                                                        p.id
+                                                    ]
+                                                )
+                                                    return;
+                                                newRemoteFeed(
+                                                    p.id,
+                                                    p.display,
+                                                    roomNumber
+                                                );
+                                            });
+
+                                            notifyRemoteParticipantsChanged();
+                                        },
+                                        error: () => {},
+                                    });
+                                };
+
+                                resync();
+                                window.setTimeout(resync, 1000);
                             }
 
                             if (event === "event") {
@@ -799,309 +1275,317 @@ export function useJanusLocalOnly(
                                 if (changed) notifyRemoteParticipantsChanged();
 
                                 if (data.error === "Room not found") {
-                                    setError("회의 방이 종료되었습니다.");
+                                    safeSet(() =>
+                                        setError("회의 방이 종료되었습니다.")
+                                    );
                                     try {
-                                        janusRef.current?.destroy();
+                                        janusRef.current.janus?.destroy();
                                     } catch {}
                                     return;
                                 }
                             }
 
-                            if (jsep && pluginRef.current) {
-                                pluginRef.current.handleRemoteJsep({ jsep });
+                            if (jsep && janusRef.current.pub) {
+                                janusRef.current.pub.handleRemoteJsep({ jsep });
                             }
                         },
-
                         onlocalstream: (stream) => {
-                            setLocalStreamSafe(stream);
+                            setLocalStream(stream);
                         },
-
-                        oncleanup: () => {
-                            // publisher cleanup (필요하면 로그만)
-                        },
+                        oncleanup: () => {},
                     });
                 },
-
                 error: (err) => {
                     console.error("[useJanusLocalOnly] Janus error:", err);
-                    setError("Janus 세션 생성 중 에러가 발생했습니다.");
-                    setIsConnecting(false);
+                    safeSet(() => {
+                        setError("Janus 세션 생성 중 에러가 발생했습니다.");
+                        setIsConnecting(false);
+                    });
+                    connRef.current.isConnecting = false;
+                    clearTimer("boot");
                 },
-
                 destroyed: () => {
-                    finalize("janus.destroyed");
+                    finalizeRef.current?.("janus.destroyed");
                 },
             });
         },
         [
             serverUrl,
             detachRemoteFeed,
-            finalize,
             newRemoteFeed,
             notifyRemoteParticipantsChanged,
-            publishLocalStream,
-            setLocalStreamSafe,
+            safeSet,
+            setLocalStream,
+            clearTimer,
         ]
     );
 
-    // ===== toggles =====
-    const toggleAudio = useCallback(() => {
-        // 장치 없음이면 상태만 토글
-        if (noMediaDevices) {
-            const nextAudio = !audioEnabledRef.current;
-            setAudioEnabled(nextAudio);
-            audioEnabledRef.current = nextAudio;
-            emitLocalMediaState();
-            reinjectBlockedRef.current = false;
-            return;
-        }
+    // =========================================================
+    // 14) joinRoom (+ boot timeout / 1회 재시도)
+    // =========================================================
+    const joinRoomRef = useRef(null);
 
-        const nextAudio = !audioEnabledRef.current;
-        setAudioEnabled(nextAudio);
-        audioEnabledRef.current = nextAudio;
-
-        emitLocalMediaState();
-
-        if (!pluginRef.current || !isConnectedRef.current) return;
-        publishLocalStream(nextAudio, videoEnabledRef.current);
-    }, [publishLocalStream, noMediaDevices, emitLocalMediaState]);
-
-    const toggleVideo = useCallback(() => {
-        // 장치 없음이면 상태만 토글
-        if (noMediaDevices) {
-            const nextVideo = !videoEnabledRef.current;
-            setVideoEnabled(nextVideo);
-            videoEnabledRef.current = nextVideo;
-            if (nextVideo) {
-                setIsVideoDeviceLost(false);
-                reinjectBlockedRef.current = false;
-            }
-
-            emitLocalMediaState();
-
-            if (!nextVideo) reinjectBlockedRef.current = false;
-            return;
-        }
-
-        const nextVideo = !videoEnabledRef.current;
-
-        if (!nextVideo) reinjectBlockedRef.current = false;
-        wantVideoRef.current = nextVideo;
-        if (nextVideo) setIsVideoDeviceLost(false);
-
-        setVideoEnabled(nextVideo);
-        videoEnabledRef.current = nextVideo;
-
-        emitLocalMediaState();
-
-        if (!pluginRef.current || !isConnectedRef.current) return;
-        publishLocalStream(audioEnabledRef.current, nextVideo);
-    }, [publishLocalStream, noMediaDevices, emitLocalMediaState]);
-
-    // ===== joinRoom =====
-    const joinRoom = useCallback(
-        ({ roomNumber, displayName }) => {
+    const joinRoomImpl = useCallback(
+        async ({ roomNumber, displayName }) => {
             const Janus = window.Janus;
 
             if (!Janus) {
-                setError("Janus 라이브러리가 아직 로드되지 않았습니다.");
+                safeSet(() =>
+                    setError("Janus 라이브러리가 아직 로드되지 않았습니다.")
+                );
                 return;
             }
 
             if (!Janus.isWebrtcSupported()) {
-                setIsSupported(false);
-                setError("이 브라우저는 WebRTC를 지원하지 않습니다.");
+                safeSet(() => {
+                    setIsSupported(false);
+                    setError("이 브라우저는 WebRTC를 지원하지 않습니다.");
+                });
                 return;
             }
+            if (sessionRef.current.destroying || closingRef.current) {
+                await (leaveWaitRef.current.promise || Promise.resolve());
+            }
+            if (connRef.current.isConnecting || connRef.current.isConnected)
+                return;
 
-            if (isConnecting || isConnected) return;
+            sessionRef.current.destroying = false;
+            sessionRef.current.joined = false;
+            sessionRef.current.lastJoin = { roomNumber, displayName };
+            sessionRef.current.bootRetryCount = 0;
 
-            resetAllRemoteFeeds({ silent: true });
-            notifyRemoteParticipantsChanged();
+            resetRemoteFeeds();
 
-            setError(null);
-            setIsConnecting(true);
+            safeSet(() => {
+                setError(null);
+                setIsConnecting(true);
+            });
+            connRef.current.isConnecting = true;
 
-            const start = () => {
-                if (!mountedRef.current) {
-                    setIsConnecting(false);
-                    return;
-                }
+            await refreshDeviceAvailability().catch(() => null);
 
-                finalizedRef.current = false;
-                publishedRef.current = false;
+            if (
+                mediaRef.current.noDevices ||
+                !mediaRef.current.hasVideoDevice
+            ) {
+                mediaRef.current.videoLost = false;
+                safeSet(() => setIsVideoDeviceLost(false));
+            }
+            emitLocalMediaState();
 
-                if (!initedRef.current) {
-                    Janus.init({
-                        debug: "all",
-                        callback: () => {
-                            initedRef.current = true;
-                            createSessionAndAttach({ roomNumber, displayName });
-                        },
-                    });
-                } else {
-                    createSessionAndAttach({ roomNumber, displayName });
-                }
+            const run = () => {
+                createSessionAndAttach({ roomNumber, displayName });
+
+                clearTimer("boot");
+                timersRef.current.boot = window.setTimeout(() => {
+                    timersRef.current.boot = null;
+
+                    if (!mountedRef.current) return;
+                    if (sessionRef.current.destroying) return;
+                    if (sessionRef.current.joined) return;
+
+                    if (sessionRef.current.bootRetryCount >= 1) {
+                        safeSet(() => {
+                            setIsConnecting(false);
+                            setError(
+                                "회의 연결이 지연되고 있습니다. 재접속을 시도해 주세요."
+                            );
+                        });
+                        connRef.current.isConnecting = false;
+                        return;
+                    }
+
+                    sessionRef.current.bootRetryCount += 1;
+
+                    leaveRoomRef.current?.("boot-timeout");
+                    window.setTimeout(() => {
+                        const last = sessionRef.current.lastJoin;
+                        if (last) joinRoomRef.current?.(last);
+                    }, 600);
+                }, 3500);
             };
 
-            start();
+            if (!sessionRef.current.inited) {
+                Janus.init({
+                    debug: "all",
+                    callback: () => {
+                        sessionRef.current.inited = true;
+                        run();
+                    },
+                });
+            } else {
+                run();
+            }
         },
         [
-            isConnecting,
-            isConnected,
-            resetAllRemoteFeeds,
-            notifyRemoteParticipantsChanged,
             createSessionAndAttach,
+            emitLocalMediaState,
+            refreshDeviceAvailability,
+            resetRemoteFeeds,
+            safeSet,
+            clearTimer,
         ]
     );
 
-    // ===== leaveRoom =====
-    const leaveRoom = useCallback(() => {
-        if (finalizedRef.current) return;
+    useEffect(() => {
+        joinRoomRef.current = joinRoomImpl;
+    }, [joinRoomImpl]);
 
-        const janus = janusRef.current;
-        const plugin = pluginRef.current;
+    const joinRoom = useCallback((params) => {
+        joinRoomRef.current?.(params);
+    }, []);
 
-        try {
-            plugin?.send?.({ message: { request: "leave" } });
-        } catch {}
+    // =========================================================
+    // 15) toggleAudio / toggleVideo
+    // =========================================================
+    const toggleAudio = useCallback(() => {
+        const next = !mediaRef.current.wantAudio;
+        mediaRef.current.wantAudio = next;
 
-        if (janus) {
-            try {
-                janus.destroy();
-                return;
-            } catch (e) {
-                console.warn("[useJanusLocalOnly] janus.destroy error", e);
-            }
+        safeSet(() => setAudioEnabled(next));
+        emitLocalMediaState();
+
+        if (!connRef.current.isConnected || !janusRef.current.pub) return;
+
+        // ✅ 오디오 토글은 실무에서 “명확한 republish 트리거”
+        publishLocalStreamRef.current?.(next, mediaRef.current.wantVideo, {
+            republish: true,
+        });
+    }, [emitLocalMediaState, safeSet]);
+
+    const toggleVideo = useCallback(() => {
+        const next = !mediaRef.current.wantVideo;
+        mediaRef.current.wantVideo = next;
+
+        if (!mediaRef.current.permissionDeniedVideo) {
+            mediaRef.current.videoLost = false;
         }
 
-        finalize("leaveRoom.noJanus");
-    }, [finalize]);
+        safeSet(() => {
+            setVideoEnabled(next);
+            if (!mediaRef.current.permissionDeniedVideo)
+                setIsVideoDeviceLost(false);
+        });
 
-    useEffect(() => {
-        return () => {
-            leaveRoom();
-        };
-    }, [leaveRoom]);
+        emitLocalMediaState();
 
-    const reinjectIfPossible = useCallback(
-        async ({ source } = {}) => {
-            if (!isConnectedRef.current || !pluginRef.current) return;
-            // "복귀 대기(awaiting)" 상태일 때만 reinject 허용
-            // (ping 등에서 불필요한 반복 재협상 방지)
-            if (
-                !awaitingDeviceReturnRef.current &&
-                source !== "track-dead" &&
-                source !== "devicechange"
-            ) {
-                return;
-            }
+        if (!connRef.current.isConnected || !janusRef.current.pub) return;
+        publishLocalStreamRef.current?.(mediaRef.current.wantAudio, next, {
+            republish: true,
+        });
+    }, [emitLocalMediaState, safeSet]);
 
-            //track-dead 이후 잠금 상태면 devicechange 전까지 재시도 금지
-            if (reinjectBlockedRef.current && source !== "devicechange") {
-                return;
-            }
-            const wantAudio = !!audioEnabledRef.current;
-            const wantVideo = !!videoEnabledRef.current;
-            if (!wantAudio && !wantVideo) return;
-
-            const md = navigator.mediaDevices;
-            if (!md?.enumerateDevices) return;
-
-            const devices = await md.enumerateDevices().catch(() => null);
-            if (!devices) return;
-
-            const hasAudioDev = devices.some((d) => d.kind === "audioinput");
-            const hasVideoDev = devices.some((d) => d.kind === "videoinput");
-
-            // ✅ 장치가 아예 없으면: "아무것도 하지 않음" (시도 자체 금지)
-            if (!hasAudioDev && !hasVideoDev) {
-                setNoMediaDevices(true);
-                emitLocalMediaState();
-                // track-dead 이후라면 계속 "복귀 대기" 상태 유지
-                awaitingDeviceReturnRef.current = true;
-                return;
-            }
-
-            setNoMediaDevices(false);
-
-            //  쿨타임(15초)
-            const now = Date.now();
-            if (now - reinjectCooldownRef.current < 15000) return;
-
-            // ✅ 트랙이 진짜 죽었는지 확인
-            const s = localStreamRef.current;
-            const needAudio = wantAudio && !hasLiveTrack(s, "audio");
-            const needVideo = wantVideo && !hasLiveTrack(s, "video");
-            if (!needAudio && !needVideo) {
-                // 이미 살아났으면 대기 해제
-                awaitingDeviceReturnRef.current = false;
-                return;
-            }
-
-            // ✅ 이번 시도 기록 (쿨타임 시작)
-            reinjectCooldownRef.current = now;
-
-            const nextAudio = wantAudio && hasAudioDev;
-            const nextVideo = wantVideo && hasVideoDev;
-
-            publishLocalStream(nextAudio, nextVideo);
-            emitLocalMediaState();
-
-            // ✅ track-dead로 들어온 재시도는 "1번으로 종료"
-            if (source === "track-dead") {
-                // 이후는 devicechange에서만 다시 시도
-                awaitingDeviceReturnRef.current = true;
-                return;
-            }
-
-            // devicechange로 들어온 시도는 성공/실패와 무관하게 1회로 끝
-            awaitingDeviceReturnRef.current = false;
-        },
-        [publishLocalStream, emitLocalMediaState]
-    );
-
-    // 장치 변경 시 즉시 reinject 트리거
+    // =========================================================
+    // 16) devicechange  (force hardReconnect)
+    // =========================================================
     useEffect(() => {
         const md = navigator.mediaDevices;
-        if (!md?.addEventListener) return;
+        if (!md?.addEventListener || !md?.enumerateDevices) return;
 
         const onDeviceChange = () => {
-            //  트랙 죽어서 복귀 기다리는 중이 아니면 아무것도 안 함
-            if (!awaitingDeviceReturnRef.current) return;
-            reinjectBlockedRef.current = false;
+            clearTimer("deviceDebounce");
 
-            // 중복 예약 방지
-            if (deviceRetryTimerRef.current) {
-                window.clearTimeout(deviceRetryTimerRef.current);
-                deviceRetryTimerRef.current = null;
-            }
+            timersRef.current.deviceDebounce = window.setTimeout(async () => {
+                timersRef.current.deviceDebounce = null;
 
-            deviceRetryTimerRef.current = window.setTimeout(() => {
-                deviceRetryTimerRef.current = null;
-                reinjectIfPossible?.({ source: "devicechange" });
-            }, 2500);
+                // 연결 중에만 의미 있음 (원하면 연결 전에도 lastJoin 있으면 시도 가능)
+                if (!connRef.current.isConnected) return;
+
+                // 과도한 연속 트리거 방지
+                const now = Date.now();
+                if (now - (timersRef.current.deviceCooldown || 0) < 1200)
+                    return;
+                timersRef.current.deviceCooldown = now;
+
+                // 스냅샷 갱신(UI 정렬용)
+                const snap = await refreshDeviceAvailability().catch(
+                    () => null
+                );
+                if (!snap) return;
+
+                // 디바이스 자체가 없거나 비디오가 없으면 -> lost 해제 후 종료
+                if (snap.noMediaDevices || !snap.hasVideo) {
+                    mediaRef.current.videoLost = false;
+                    safeSet(() => setIsVideoDeviceLost(false));
+                    emitLocalMediaState();
+                    return;
+                }
+                if (mediaRef.current.permissionDeniedVideo) return;
+                // ✅ 핵심: 디바이스가 “있다” => 바로 세션 재생성(하드 리커넥트)
+                hardReconnectRef.current?.("devicechange");
+            }, 250);
         };
 
         md.addEventListener("devicechange", onDeviceChange);
         return () => {
             md.removeEventListener("devicechange", onDeviceChange);
-            if (deviceRetryTimerRef.current) {
-                window.clearTimeout(deviceRetryTimerRef.current);
-                deviceRetryTimerRef.current = null;
-            }
+            clearTimer("deviceDebounce");
         };
-    }, [reinjectIfPossible]);
+    }, [clearTimer, emitLocalMediaState, refreshDeviceAvailability, safeSet]);
 
-    // 상태 변화 시 외부 싱크
+    // =========================================================
+    // 17) Unmount cleanup
+    // =========================================================
+    useEffect(() => {
+        return () => {
+            leaveRoomRef.current?.("unmount");
+        };
+    }, []);
+
+    const reinjectIfPossible = useCallback(() => {
+        // 연결 안돼있으면 의미 없음
+        if (!connRef.current.isConnected) return;
+        if (!janusRef.current.pub) return;
+        if (mediaRef.current.permissionDeniedVideo) return;
+        if (negotiationRef.current.locked) return;
+        // "의도" 기준으로 다시 publish
+        publishLocalStreamRef.current?.(
+            mediaRef.current.wantAudio,
+            mediaRef.current.wantVideo,
+            { republish: true }
+        );
+    }, []);
+
     useEffect(() => {
         emitLocalMediaState();
-    }, [isVideoDeviceLost, emitLocalMediaState]);
+    }, [emitLocalMediaState]);
+
+    // =========================================================
+    // 18) Exports
+    // =========================================================
+
+    const hardReconnect = useCallback(async (reason = "hardReconnect") => {
+        const last = sessionRef.current.lastJoin;
+        if (!last) return;
+
+        // 이미 종료 중이면 기다렸다가
+        if (sessionRef.current.destroying || closingRef.current) {
+            await (leaveWaitRef.current.promise || Promise.resolve());
+        }
+
+        // 연결돼있으면 깨끗이 leave 후 join
+        try {
+            await leaveRoomRef.current?.(reason);
+        } catch {}
+
+        // join 재시도
+        joinRoomRef.current?.(last);
+    }, []);
 
     useEffect(() => {
+        hardReconnectRef.current = hardReconnect;
+    }, [hardReconnect]);
+    const retryVideoPermission = useCallback(() => {
+        // ✅ 사용자가 브라우저 권한 허용한 후 누르는 버튼용
+        mediaRef.current.permissionDeniedVideo = false;
+        mediaRef.current.videoLost = false;
+        safeSet(() => setIsVideoDeviceLost(false));
+        setError(null);
+        setIsConnecting(true);
         emitLocalMediaState();
-    }, [noMediaDevices, emitLocalMediaState]);
-
+        // 다시 publish 시도 (실패하면 또 permissionDenied로 돌아올 것)
+        reinjectIfPossible();
+    }, [emitLocalMediaState, reinjectIfPossible, safeSet]);
     return {
         isSupported,
         isConnecting,
@@ -1113,10 +1597,14 @@ export function useJanusLocalOnly(
         isVideoDeviceLost,
         noMediaDevices,
 
+        localMedia,
+
         toggleAudio,
         toggleVideo,
         joinRoom,
         leaveRoom,
         reinjectIfPossible,
+        hardReconnect,
+        retryVideoPermission,
     };
 }
