@@ -16,6 +16,7 @@ import CounselingDetailPanel from "../components/CounselingDetailPanel";
 import "../styles/StudentMeeting.css";
 
 function StudentCounselingPage() {
+
   // 공통 주간 범위 훅
   const { fromDate, toDate, setFromDate, setToDate, goPrevWeek, goNextWeek } =
     useWeekRange();
@@ -77,6 +78,7 @@ function StudentCounselingPage() {
         setProfessors(data || []);
         if (data && data.length > 0) {
           setSelectedProfessorId(data[0].id);
+
         }
       } catch (e) {
         if (cancelled) return;
@@ -152,6 +154,7 @@ function StudentCounselingPage() {
         setSelectedSlot(slot);
         setMemo("");
         setDetailError("");
+
         return;
       }
     }
@@ -231,6 +234,7 @@ function StudentCounselingPage() {
               type="date"
               value={toDate}
               onChange={(e) => handleChangeToDate(e.target.value)}
+
             />
           </div>
           <button
@@ -290,6 +294,8 @@ function StudentCounselingPage() {
           />
         </div>
 
+
+
         {/* 오른쪽: 상세 패널 */}
         <div className="smp-detail-container">
           <h3 className="smp-detail-title">상세 정보</h3>
@@ -303,6 +309,7 @@ function StudentCounselingPage() {
             memo={memo}
             onChangeMemo={setMemo}
           />
+
         </div>
       </section>
     </div>

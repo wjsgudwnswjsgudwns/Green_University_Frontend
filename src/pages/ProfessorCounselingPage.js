@@ -109,11 +109,13 @@ function ProfessorCounselingPage() {
       // ▶ 편집 모드 → 끌 때
       if (hasDraft) {
         const ok = window.confirm(
+
           "편집 모드에서 적용되지 않은 변경 사항이 있습니다.\n" +
             "편집 모드를 종료하면 이 변경 사항이 사라집니다. 계속하시겠습니까?"
         );
         if (!ok) {
           return;
+
         }
       }
 
@@ -161,6 +163,7 @@ function ProfessorCounselingPage() {
         r.status !== "REJECTED"
     );
 
+
     setSelectedReservation(res || null);
     setDetailError("");
     setDetailLoading(false); // 클릭 시엔 로딩 없음
@@ -205,6 +208,7 @@ function ProfessorCounselingPage() {
 
     const reservationId = reservation.reservationId ?? reservation.id ?? null;
 
+
     if (!reservationId) {
       console.error("예약 ID를 찾을 수 없습니다.", reservation);
       alert("예약 ID를 찾을 수 없습니다.");
@@ -214,11 +218,13 @@ function ProfessorCounselingPage() {
     const title = "";
     const description = "";
 
+
     try {
       setDetailLoading(true);
       setDetailError("");
 
       await approveReservation(reservationId, { title, description });
+
 
       // 승인 후 주간 예약 목록 다시 조회
       await reloadReservations();
@@ -307,6 +313,7 @@ function ProfessorCounselingPage() {
               type="date"
               value={toDate}
               onChange={(e) => handleChangeToDate(e.target.value)}
+
             />
           </div>
           <button
@@ -365,6 +372,7 @@ function ProfessorCounselingPage() {
           />
         </div>
 
+
         {/* 오른쪽: 상세 패널 */}
         <div className="pcp-detail-container">
           <h3 className="pcp-detail-title">상세 정보</h3>
@@ -376,6 +384,7 @@ function ProfessorCounselingPage() {
             onReserve={handleReserve}
             onCancel={handleCancel}
           />
+
         </div>
       </section>
     </div>

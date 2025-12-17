@@ -1,5 +1,5 @@
 // src/components/counseling/CounselingDetailPanel.js
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 function formatRange(startAt, endAt) {
@@ -42,10 +42,30 @@ function CounselingDetailPanel({
     const navigate = useNavigate();
     const isStudent = mode === "student";
 
+    // 교수 예약 수락 시 입력할 제목/내용 상태
+    const [title, setTitle] = useState("");
+    const [description, setDescription] = useState("");
+
+    // 예약이 변경될 때 입력값 초기화 (예약에 title/description이 있을 경우 사용)
+    useEffect(() => {
+        const defaultTitle = reservation?.title || "";
+        const defaultDesc = reservation?.description || "";
+        setTitle(defaultTitle);
+        setDescription(defaultDesc);
+    }, [reservation]);
+
     const handleEnterMeeting = () => {
         const meetingId = reservation?.meetingId ?? slot?.meetingId ?? null;
         if (!meetingId) return;
         navigate(`/meetings/${meetingId}`);
+    };
+
+    // 취소 버튼 클릭: 사유 입력 후 콜백 호출
+    const handleCancelClick = () => {
+        if (!onCancel) return;
+        const reason = window.prompt("취소 사유를 입력하세요 (선택):", "");
+        if (reason === null) return;
+        onCancel(reason);
     };
 
     // 학생 취소 버튼 클릭 핸들러
@@ -53,10 +73,8 @@ function CounselingDetailPanel({
         if (!reservation) return;
 
         if (reservation.status === "RESERVED") {
-            // 아직 승인 전이면 실제 취소
-            if (onCancel) {
-                onCancel();
-            }
+            // 아직 승인 전이면 실제 취소 → 사유 입력 후 취소 콜백 호출
+            handleCancelClick();
             return;
         }
 
@@ -174,8 +192,64 @@ function CounselingDetailPanel({
                         </div>
                     </div>
 
-                    {/* 🔹 하단 버튼 영역 */}
+                    {/* 🔹 하단 영역: 입력 폼 + 버튼 */}
                     <div style={{ marginTop: "6px" }}>
+                        {/* 교수일 때만 예약 수락 전 입력 폼 */}
+                        {!isStudent && canProfessorApprove && (
+                            <div style={{ marginBottom: "8px" }}>
+                                <div style={{ marginBottom: "4px" }}>
+                                    <label
+                                        style={{
+                                            fontSize: "12px",
+                                            fontWeight: 600,
+                                        }}
+                                    >
+                                        주제(선택)
+                                        <input
+                                            type="text"
+                                            value={title}
+                                            onChange={(e) =>
+                                                setTitle(e.target.value)
+                                            }
+                                            style={{
+                                                width: "100%",
+                                                marginTop: "4px",
+                                                padding: "4px",
+                                                fontSize: "12px",
+                                                border: "1px solid #ccc",
+                                                borderRadius: "4px",
+                                            }}
+                                        />
+                                    </label>
+                                </div>
+                                <div style={{ marginBottom: "4px" }}>
+                                    <label
+                                        style={{
+                                            fontSize: "12px",
+                                            fontWeight: 600,
+                                        }}
+                                    >
+                                        내용(선택)
+                                        <textarea
+                                            rows={3}
+                                            value={description}
+                                            onChange={(e) =>
+                                                setDescription(e.target.value)
+                                            }
+                                            style={{
+                                                width: "100%",
+                                                marginTop: "4px",
+                                                fontSize: "12px",
+                                                border: "1px solid #ccc",
+                                                borderRadius: "4px",
+                                                resize: "vertical",
+                                            }}
+                                        />
+                                    </label>
+                                </div>
+                            </div>
+                        )}
+
                         {/* 버튼들 한 줄에 붙이기 */}
                         <div
                             style={{
@@ -203,7 +277,7 @@ function CounselingDetailPanel({
                                 </button>
                             )}
 
-                            {/* 학생: 예약 취소 (상태에 따라 취소 or 알럿) */}
+                            {/* 학생: 예약 취소 */}
                             {isStudent && canStudentCancel && (
                                 <button
                                     type="button"
@@ -223,11 +297,13 @@ function CounselingDetailPanel({
                                 </button>
                             )}
 
-                            {/* 교수: 예약 수락 / 취소 */}
+                            {/* 교수: 예약 수락 */}
                             {!isStudent && canProfessorApprove && onReserve && (
                                 <button
                                     type="button"
-                                    onClick={onReserve}
+                                    onClick={() =>
+                                        onReserve(title, description)
+                                    }
                                     disabled={loading}
                                     style={{
                                         padding: "6px 10px",
@@ -242,10 +318,12 @@ function CounselingDetailPanel({
                                     예약 수락
                                 </button>
                             )}
+
+                            {/* 교수: 예약 취소 */}
                             {!isStudent && canProfessorCancel && onCancel && (
                                 <button
                                     type="button"
-                                    onClick={onCancel}
+                                    onClick={handleCancelClick}
                                     disabled={loading}
                                     style={{
                                         padding: "6px 10px",
@@ -262,7 +340,7 @@ function CounselingDetailPanel({
                             )}
                         </div>
 
-                        {/* 회의 링크가 있을 때만 가로선 + 안내문구 */}
+                        {/* 회의 링크 안내 */}
                         {hasMeetingLink && (
                             <>
                                 <hr
