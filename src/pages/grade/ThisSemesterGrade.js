@@ -82,7 +82,7 @@ const ThisSemesterGrade = () => {
           <>
             <div>
               <h4 className="tsg-section-title">과목별 성적</h4>
-              <table border="1" className="tsg-list-table">
+              <table className="tsg-list-table">
                 <thead>
                   <tr>
                     <th>연도</th>
@@ -133,7 +133,7 @@ const ThisSemesterGrade = () => {
             {mygrade && (
               <div>
                 <h4 className="tsg-section-title">누계 성적</h4>
-                <table border="1" className="tsg-list-table">
+                <table className="tsg-list-table">
                   <thead>
                     <tr>
                       <th>연도</th>

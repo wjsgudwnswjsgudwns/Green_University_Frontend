@@ -2,14 +2,20 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../api/axiosConfig";
+import DatePicker from "react-datepicker";
+import { registerLocale } from "react-datepicker";
+import ko from "date-fns/locale/ko";
+import "react-datepicker/dist/react-datepicker.css";
 import "../../styles/scheduleInfo.css";
+
+registerLocale("ko", ko);
 
 export default function ScheduleRegisterPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    startDay: "",
-    endDay: "",
+    startDay: null,
+    endDay: null,
     information: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -30,6 +36,22 @@ export default function ScheduleRegisterPage() {
     setError("");
   };
 
+  const handleDateChange = (name, date) => {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: date,
+    }));
+    setError("");
+  };
+
+  const formatDateForAPI = (date) => {
+    if (!date) return "";
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -39,10 +61,7 @@ export default function ScheduleRegisterPage() {
       return;
     }
 
-    const startDate = new Date(formData.startDay);
-    const endDate = new Date(formData.endDay);
-
-    if (startDate > endDate) {
+    if (formData.startDay > formData.endDay) {
       setError("시작 날짜는 종료 날짜보다 이전이어야 합니다.");
       return;
     }
@@ -50,7 +69,12 @@ export default function ScheduleRegisterPage() {
     setIsSubmitting(true);
 
     try {
-      await api.post("/api/schedule", formData);
+      const submitData = {
+        startDay: formatDateForAPI(formData.startDay),
+        endDay: formatDateForAPI(formData.endDay),
+        information: formData.information,
+      };
+      await api.post("/api/schedule", submitData);
       alert("학사일정이 등록되었습니다.");
       navigate("/schedule/manage");
     } catch (err) {
@@ -84,7 +108,7 @@ export default function ScheduleRegisterPage() {
           <Link to="/schedule" className="sch-menu-item">
             학사일정
           </Link>
-          <Link to="/schedule/manage" className="sch-menu-item">
+          <Link to="/schedule/manage" className="sch-menu-item active">
             학사일정 등록
           </Link>
         </nav>
@@ -96,71 +120,86 @@ export default function ScheduleRegisterPage() {
 
         {error && <div className="sch-error-message">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="sch-register-form">
-          <div className="sch-form-group-vertical">
-            <label htmlFor="startDay">
-              시작날짜 <span className="sch-required">*</span>
-            </label>
-            <input
-              type="date"
-              id="startDay"
-              name="startDay"
-              value={formData.startDay}
-              onChange={handleChange}
-              disabled={isSubmitting}
-              required
-            />
-          </div>
+        <div className="sch-register-container">
+          <form onSubmit={handleSubmit}>
+            <table className="sch-register-table">
+              <tbody>
+                <tr>
+                  <td className="sch-register-label">
+                    시작날짜 <span className="sch-required">*</span>
+                  </td>
+                  <td className="sch-register-content">
+                    <DatePicker
+                      selected={formData.startDay}
+                      onChange={(date) => handleDateChange("startDay", date)}
+                      dateFormat="yyyy-MM-dd"
+                      placeholderText="시작 날짜를 선택하세요"
+                      disabled={isSubmitting}
+                      className="sch-register-input"
+                      locale="ko"
+                      dateFormatCalendar="yyyy년 M월"
+                      required
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td className="sch-register-label">
+                    종료날짜 <span className="sch-required">*</span>
+                  </td>
+                  <td className="sch-register-content">
+                    <DatePicker
+                      selected={formData.endDay}
+                      onChange={(date) => handleDateChange("endDay", date)}
+                      dateFormat="yyyy-MM-dd"
+                      placeholderText="종료 날짜를 선택하세요"
+                      disabled={isSubmitting}
+                      className="sch-register-input"
+                      locale="ko"
+                      minDate={formData.startDay}
+                      dateFormatCalendar="yyyy년 M월"
+                      required
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td className="sch-register-label">
+                    내용 <span className="sch-required">*</span>
+                  </td>
+                  <td className="sch-register-content">
+                    <textarea
+                      name="information"
+                      value={formData.information}
+                      onChange={handleChange}
+                      placeholder="학사일정 내용을 입력하세요"
+                      disabled={isSubmitting}
+                      className="sch-register-textarea"
+                      rows="6"
+                      required
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
 
-          <div className="sch-form-group-vertical">
-            <label htmlFor="endDay">
-              종료날짜 <span className="sch-required">*</span>
-            </label>
-            <input
-              type="date"
-              id="endDay"
-              name="endDay"
-              value={formData.endDay}
-              onChange={handleChange}
-              disabled={isSubmitting}
-              required
-            />
-          </div>
-
-          <div className="sch-form-group-vertical">
-            <label htmlFor="information">
-              내용 <span className="sch-required">*</span>
-            </label>
-            <input
-              type="text"
-              id="information"
-              name="information"
-              value={formData.information}
-              onChange={handleChange}
-              placeholder="학사일정 내용을 입력하세요"
-              disabled={isSubmitting}
-              required
-            />
-          </div>
-
-          <div className="sch-form-buttons-center">
-            <button
-              type="button"
-              className="sch-cancel-button-large"
-              onClick={handleCancel}
-              disabled={isSubmitting}
-            >
-              취소
-            </button>
-            <button
-              type="submit"
-              className="sch-submit-button-large"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "등록 중..." : "등록"}
-            </button>
-          </div>
-        </form>
+            <div className="sch-register-buttons">
+              <button
+                type="button"
+                className="sch-cancel-button"
+                onClick={handleCancel}
+                disabled={isSubmitting}
+              >
+                취소
+              </button>
+              <button
+                type="submit"
+                className="sch-submit-button"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "등록 중..." : "등록"}
+              </button>
+            </div>
+          </form>
+        </div>
       </main>
     </div>
   );

@@ -133,3 +133,180 @@
     padding: 8px 6px;
   }
 }
+
+/* 통계 컨테이너 */
+.apc-statistics-container {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+.apc-donut-section {
+  flex: 0 0 280px;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.apc-donut-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.apc-donut-chart {
+  position: relative;
+  width: 100%;
+  max-width: 200px;
+  margin: 0 auto 20px;
+}
+
+.apc-donut-svg {
+  width: 100%;
+  height: auto;
+}
+
+.apc-donut-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.apc-donut-total {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2c3e50;
+  line-height: 1;
+}
+
+.apc-donut-label {
+  font-size: 12px;
+  color: #6c757d;
+  margin-top: 4px;
+}
+
+.apc-donut-legend {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.apc-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #4a5568;
+}
+
+.apc-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.apc-legend-normal {
+  background-color: #28a745;
+}
+
+.apc-legend-caution {
+  background-color: #ffc107;
+}
+
+.apc-legend-risk {
+  background-color: #fd7e14;
+}
+
+.apc-legend-critical {
+  background-color: #dc3545;
+}
+
+.apc-bars-section {
+  flex: 1;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.apc-bars-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.apc-bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.apc-bar-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.apc-bar-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.apc-bar-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.apc-bar-value {
+  font-size: 13px;
+  color: #6c757d;
+}
+
+.apc-bar-track {
+  height: 24px;
+  background-color: #f3f4f6;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.apc-bar-fill {
+  height: 100%;
+  transition: width 0.6s ease;
+  border-radius: 6px;
+}
+
+.apc-bar-fill-normal {
+  background: linear-gradient(90deg, #28a745 0%, #34ce57 100%);
+}
+
+.apc-bar-fill-caution {
+  background: linear-gradient(90deg, #ffc107 0%, #ffcd39 100%);
+}
+
+.apc-bar-fill-risk {
+  background: linear-gradient(90deg, #fd7e14 0%, #ff922b 100%);
+}
+
+.apc-bar-fill-critical {
+  background: linear-gradient(90deg, #dc3545 0%, #e4606d 100%);
+}
+
+/* 반응형 */
+@media (max-width: 1200px) {
+  .apc-statistics-container {
+    flex-direction: column;
+  }
+
+  .apc-donut-section {
+    flex: 1;
+  }
+}

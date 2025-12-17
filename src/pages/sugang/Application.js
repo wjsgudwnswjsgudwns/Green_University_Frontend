@@ -387,7 +387,7 @@ const Application = () => {
               <span className="count-text">[이 {subjectCount}건]</span>
             </h4>
 
-            <table border="1" className="sugang-application-table">
+            <table className="sugang-application-table">
               <thead>
                 <tr>
                   <th>단과대학</th>

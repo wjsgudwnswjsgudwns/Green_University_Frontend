@@ -89,54 +89,91 @@
 
 /* 위험도 통계 */
 .srs-risk-statistics {
-  display: flex;
-  gap: 16px;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 30px;
 }
 
-.srs-risk-stat-card {
-  flex: 1;
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border-left: 4px solid #216d30;
-  transition: transform 0.2s;
+.srs-risk-statistics h3 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  color: #2c3e50;
+  font-weight: 600;
 }
 
-.srs-risk-stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.srs-risk-stat-card.srs-risk-stat-critical {
-  border-left-color: #dc3545;
-}
-
-.srs-risk-stat-card.srs-risk-stat-warning {
-  border-left-color: #fd7e14;
-}
-
-.srs-risk-stat-card.srs-risk-stat-total {
-  border-left-color: #216d30;
-}
-
-.srs-risk-stat-content {
+.srs-bar-chart {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
-.srs-risk-stat-label {
+.srs-bar-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.srs-bar-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.srs-bar-text {
   font-size: 14px;
-  color: #6c757d;
-  font-weight: 500;
+  font-weight: 600;
+  color: #2c3e50;
 }
 
-.srs-risk-stat-value {
-  font-size: 28px;
+.srs-bar-value {
+  font-size: 13px;
+  color: #6c757d;
+}
+
+.srs-bar-track {
+  height: 24px;
+  background-color: #f3f4f6;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.srs-bar-fill {
+  height: 100%;
+  transition: width 0.6s ease;
+  border-radius: 6px;
+}
+
+.srs-bar-fill-critical {
+  background: linear-gradient(90deg, #dc3545 0%, #e4606d 100%);
+}
+
+.srs-bar-fill-risk {
+  background: linear-gradient(90deg, #fd7e14 0%, #ff922b 100%);
+}
+
+.srs-bar-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #216d30 0%, #2a8f3f 100%);
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.srs-bar-total-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+}
+
+.srs-bar-total-value {
+  font-size: 20px;
   font-weight: 700;
-  color: #2c3e50;
+  color: white;
 }
 
 /* 필터 */
@@ -282,6 +319,7 @@
   color: #4a5568;
   vertical-align: middle;
   white-space: nowrap;
+  font-size: 13px;
 }
 
 .srs-students-table tbody tr {
@@ -349,7 +387,7 @@
 /* 버튼 */
 .srs-comment-btn {
   padding: 6px 16px;
-  background-color: #007bff;
+  background-color: #216d30;
   color: #ffffff;
   border: none;
   border-radius: 4px;
@@ -360,7 +398,7 @@
 }
 
 .srs-comment-btn:hover {
-  background-color: #0056b3;
+  background-color: #1a5524;
   transform: translateY(-1px);
 }
 
@@ -502,16 +540,6 @@
 }
 
 /* 반응형 */
-@media (max-width: 1024px) {
-  .srs-risk-statistics {
-    flex-wrap: wrap;
-  }
-
-  .srs-risk-stat-card {
-    min-width: calc(50% - 8px);
-  }
-}
-
 @media (max-width: 768px) {
   .srs-page-container {
     padding: 30px 20px;
@@ -520,14 +548,6 @@
 
   .srs-title {
     font-size: 24px;
-  }
-
-  .srs-risk-statistics {
-    flex-direction: column;
-  }
-
-  .srs-risk-stat-card {
-    min-width: 100%;
   }
 
   .srs-filters {
