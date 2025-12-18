@@ -20,7 +20,6 @@ import { Stomp } from "@stomp/stompjs";
  * - 로컬 apply도 known/receivedAt 세팅해서 UI 흔들림 방지
  * - meetingId 바뀌면 이전 signals 잔상 제거
  */
-// 핵심만 패치한 버전
 export function useMeetingMediaSignals(meetingId, currentUserId, display) {
     const [mediaStates, setMediaStates] = useState({});
     const [connected, setConnected] = useState(false);
@@ -28,8 +27,26 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
     const stompRef = useRef(null);
     const subscriptionRef = useRef(null);
     const connectedRef = useRef(false);
+    const mountedRef = useRef(false);
+
+    const lastLocalRef = useRef(null); // { audio, video, videoDeviceLost, display, ts }
+    const pendingSendRef = useRef(null); // { audio, video, extra }
+    const sendDebounceTimerRef = useRef(null);
+
     const WS_URL =
         process.env.REACT_APP_WS_URL || "http://localhost:8881/ws-chat";
+
+    useEffect(() => {
+        mountedRef.current = true;
+        return () => {
+            mountedRef.current = false;
+        };
+    }, []);
+
+    const safeSetConnected = useCallback((v) => {
+        if (!mountedRef.current) return;
+        setConnected(v);
+    }, []);
 
     useEffect(() => {
         connectedRef.current = connected;
@@ -47,8 +64,14 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
         stompRef.current = null;
 
         connectedRef.current = false;
-        setConnected(false);
-    }, []);
+        safeSetConnected(false);
+
+        if (sendDebounceTimerRef.current) {
+            clearTimeout(sendDebounceTimerRef.current);
+            sendDebounceTimerRef.current = null;
+        }
+        pendingSendRef.current = null;
+    }, [safeSetConnected]);
 
     // 회의 바뀌면 잔상 제거
     useEffect(() => {
@@ -61,20 +84,26 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
             if (currentUserId == null) return;
 
             const ts = typeof extra.ts === "number" ? extra.ts : Date.now();
+            const myKey = String(currentUserId);
+            const myDisplay = display || String(currentUserId);
+
+            // ✅ “내 최신 상태”는 별도 보관 (WS 재연결 resync용)
+            lastLocalRef.current = {
+                audio: !!audio,
+                video: !!video,
+                videoDeviceLost: !!extra.videoDeviceLost,
+                display: myDisplay,
+                ts,
+            };
 
             setMediaStates((prev) => ({
                 ...prev,
-                [currentUserId]: {
-                    ...prev?.[currentUserId],
+                [myKey]: {
+                    ...prev?.[myKey],
                     audio: !!audio,
                     video: !!video,
                     videoDeviceLost: !!extra.videoDeviceLost,
-                    display:
-                        display ||
-                        prev?.[currentUserId]?.display ||
-                        String(currentUserId),
-
-                    // ✅ sender ts 기반으로 정렬 가능하게
+                    display: myDisplay || prev?.[myKey]?.display || myKey,
                     updatedAt: ts,
                     receivedAt: Date.now(),
                     known: true,
@@ -89,6 +118,7 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
             if (!meetingId || currentUserId == null) return;
 
             const ts = Date.now();
+            const myDisplay = display || String(currentUserId);
 
             // ✅ UI 즉시 반영 (항상)
             applyLocalState(audio, video, { ...extra, ts });
@@ -103,11 +133,11 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
                     JSON.stringify({
                         meetingId,
                         userId: currentUserId,
-                        display: display || String(currentUserId),
+                        display: myDisplay,
                         audio: !!audio,
                         video: !!video,
                         videoDeviceLost: !!extra.videoDeviceLost,
-                        ts, // ✅ 추가
+                        ts,
                     })
                 );
             } catch (e) {
@@ -117,14 +147,32 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
         [meetingId, currentUserId, display, applyLocalState]
     );
 
+    // ✅ 연타 방지: 마지막 상태만 디바운스로 1회 전송
+    const sendMediaState = useCallback(
+        (audio, video, extra = {}) => {
+            pendingSendRef.current = { audio: !!audio, video: !!video, extra };
+
+            if (sendDebounceTimerRef.current) {
+                clearTimeout(sendDebounceTimerRef.current);
+            }
+
+            sendDebounceTimerRef.current = setTimeout(() => {
+                sendDebounceTimerRef.current = null;
+                const p = pendingSendRef.current;
+                pendingSendRef.current = null;
+                if (!p) return;
+                sendMediaStateNow(p.audio, p.video, p.extra);
+            }, 180);
+        },
+        [sendMediaStateNow]
+    );
+
     // ✅ 연결되면 "내 최신 상태" 1회 재전송 (불일치 회복용)
     useEffect(() => {
         if (!connected || !meetingId || currentUserId == null) return;
 
-        const mine = mediaStates?.[currentUserId];
+        const mine = lastLocalRef.current;
         if (!mine) return;
-
-        // mine.audio/video가 없으면 보내지 않음(unknown 유지)
         if (typeof mine.audio !== "boolean" || typeof mine.video !== "boolean")
             return;
 
@@ -133,7 +181,7 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
             reason: "ws-resync",
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [connected]); // 일부러 한 번만
+    }, [connected]);
 
     useEffect(() => {
         if (!meetingId || currentUserId == null) return;
@@ -146,7 +194,7 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
             {},
             () => {
                 connectedRef.current = true;
-                setConnected(true);
+                safeSetConnected(true);
 
                 subscriptionRef.current = stomp.subscribe(
                     `/sub/meetings/${meetingId}/signals`,
@@ -161,7 +209,7 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
                         const userId = payload?.userId;
                         if (userId == null) return;
 
-                        const uid = Number(userId);
+                        const uidKey = String(userId);
                         const ts =
                             typeof payload.ts === "number"
                                 ? payload.ts
@@ -173,7 +221,7 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
                             typeof payload.videoDeviceLost === "boolean";
 
                         setMediaStates((prev) => {
-                            const prevItem = prev?.[uid];
+                            const prevItem = prev?.[uidKey];
 
                             // ✅ out-of-order 방지: 더 오래된 신호면 무시
                             if (prevItem?.updatedAt && ts < prevItem.updatedAt)
@@ -181,13 +229,13 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
 
                             return {
                                 ...prev,
-                                [uid]: {
+                                [uidKey]: {
                                     ...prevItem,
                                     display:
                                         payload.display ||
                                         prevItem?.display ||
-                                        String(uid),
-                                    updatedAt: ts, // ✅ sender ts
+                                        uidKey,
+                                    updatedAt: ts,
                                     receivedAt: Date.now(),
                                     known: true,
                                     ...(hasAudio
@@ -210,17 +258,17 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
             },
             () => {
                 connectedRef.current = false;
-                setConnected(false);
+                safeSetConnected(false);
             }
         );
 
         return disconnect;
-    }, [meetingId, currentUserId, disconnect]);
+    }, [meetingId, currentUserId, disconnect, safeSetConnected, WS_URL]);
 
     return {
         mediaStates,
         sendMediaStateNow,
-        sendMediaState: sendMediaStateNow,
+        sendMediaState,
         mediaSignalConnected: connected,
     };
 }
