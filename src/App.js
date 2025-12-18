@@ -73,6 +73,7 @@ import StaffStudentManagementLayout from "./pages/ai/StaffStudentManagementLayou
 import StaffRiskStudentsPage from "./pages/ai/StaffRiskStudentsPage";
 import AssignAdvisorPage from "./pages/AssignAdvisorPage";
 import MapPage from "./pages/map/MapPage";
+import PersonalizedLearningPage from "./pages/student/PersonalizedLearningPage";
 
 function PrivateRoute({ children, role }) {
   const { user } = useAuth();
@@ -154,6 +155,7 @@ function Layout() {
             </PrivateRoute>
           }
         />
+
         <Route
           path="/board/notice/:id"
           element={
@@ -299,6 +301,15 @@ function Layout() {
           element={
             <PrivateRoute role="student">
               <EvaluationForm />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/student/learningai/:studentId"
+          element={
+            <PrivateRoute role="student">
+              <PersonalizedLearningPage />
             </PrivateRoute>
           }
         />
