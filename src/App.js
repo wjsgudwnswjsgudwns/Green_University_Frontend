@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Header from "./components/Header";
@@ -72,6 +72,7 @@ import AIProfessorCounselingLayout from "./pages/ai/AIProfessorCounselingLayout"
 import StaffStudentManagementLayout from "./pages/ai/StaffStudentManagementLayout";
 import StaffRiskStudentsPage from "./pages/ai/StaffRiskStudentsPage";
 import AssignAdvisorPage from "./pages/AssignAdvisorPage";
+import MapPage from "./pages/map/MapPage";
 
 function PrivateRoute({ children, role }) {
   const { user } = useAuth();
@@ -83,6 +84,16 @@ function PrivateRoute({ children, role }) {
     return <Navigate to="/" replace />;
   }
   return children;
+}
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
 }
 
 function Layout() {
@@ -104,6 +115,7 @@ function Layout() {
   return (
     <>
       {!shouldHideHeaderFooter && <Header />}
+      <ScrollToTop />
       <Routes>
         {/* Public routes */}
         {/* 로그인 관련 */}
@@ -119,6 +131,8 @@ function Layout() {
             </PrivateRoute>
           }
         />
+
+        <Route path="/map" element={<MapPage />} />
 
         {/* 홈 */}
 
