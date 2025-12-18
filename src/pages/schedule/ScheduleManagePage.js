@@ -8,8 +8,18 @@ export default function ScheduleManagePage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [schedules, setSchedules] = useState([]);
+  const [filteredSchedules, setFilteredSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+
+  // 년도 옵션 생성 (현재 년도 기준 -5년 ~ +5년)
+  const currentYear = new Date().getFullYear();
+  const yearOptions = [];
+  for (let i = currentYear - 5; i <= currentYear + 5; i++) {
+    yearOptions.push(i);
+  }
 
   // 직원이 아니면 접근 불가
   useEffect(() => {
@@ -19,6 +29,10 @@ export default function ScheduleManagePage() {
     }
     fetchSchedules();
   }, [user, navigate]);
+
+  useEffect(() => {
+    filterSchedulesByMonth();
+  }, [schedules, selectedYear, selectedMonth]);
 
   const fetchSchedules = async () => {
     try {
@@ -30,6 +44,28 @@ export default function ScheduleManagePage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const parseDate = (dateStr) => {
+    if (!dateStr) return null;
+    const dateOnly = dateStr.split("T")[0];
+    return new Date(dateOnly);
+  };
+
+  const filterSchedulesByMonth = () => {
+    const monthStart = new Date(selectedYear, selectedMonth - 1, 1);
+    const monthEnd = new Date(selectedYear, selectedMonth, 0);
+
+    const filtered = schedules.filter((schedule) => {
+      const startDate = parseDate(schedule.startDay);
+      const endDate = parseDate(schedule.endDay);
+
+      if (!startDate || !endDate) return false;
+
+      return !(endDate < monthStart || startDate > monthEnd);
+    });
+
+    setFilteredSchedules(filtered);
   };
 
   const handleDelete = async (id) => {
@@ -45,6 +81,14 @@ export default function ScheduleManagePage() {
       console.error("학사일정 삭제 실패:", err);
       alert("학사일정 삭제에 실패했습니다.");
     }
+  };
+
+  const handleYearChange = (e) => {
+    setSelectedYear(Number(e.target.value));
+  };
+
+  const handleMonthChange = (e) => {
+    setSelectedMonth(Number(e.target.value));
   };
 
   if (loading) {
@@ -92,6 +136,32 @@ export default function ScheduleManagePage() {
 
         {error && <div className="sch-error-message">{error}</div>}
 
+        {/* 월 선택 */}
+        <div className="sch-month-selector">
+          <select
+            className="sch-year-select"
+            value={selectedYear}
+            onChange={handleYearChange}
+          >
+            {yearOptions.map((year) => (
+              <option key={year} value={year}>
+                {year}년
+              </option>
+            ))}
+          </select>
+          <select
+            className="sch-month-select"
+            value={selectedMonth}
+            onChange={handleMonthChange}
+          >
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((month) => (
+              <option key={month} value={month}>
+                {month}월
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div className="sch-manage-table-container">
           <table className="sch-manage-table">
             <thead>
@@ -103,12 +173,12 @@ export default function ScheduleManagePage() {
               </tr>
             </thead>
             <tbody>
-              {schedules.length > 0 ? (
-                schedules.map((schedule) => (
+              {filteredSchedules.length > 0 ? (
+                filteredSchedules.map((schedule) => (
                   <tr key={schedule.id}>
                     <td>{schedule.id}</td>
                     <td>
-                      {schedule.startDay?.split("T")[0]}~
+                      {schedule.startDay?.split("T")[0]} ~{" "}
                       {schedule.endDay?.split("T")[0]}
                     </td>
                     <td>{schedule.information}</td>
@@ -125,7 +195,7 @@ export default function ScheduleManagePage() {
               ) : (
                 <tr>
                   <td colSpan="4" className="sch-no-data-cell">
-                    등록된 학사일정이 없습니다.
+                    {selectedMonth}월에 등록된 학사일정이 없습니다.
                   </td>
                 </tr>
               )}

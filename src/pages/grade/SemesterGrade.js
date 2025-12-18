@@ -153,7 +153,7 @@ const SemesterGrade = () => {
         ) : gradeList.length > 0 ? (
           <>
             <h4 className="sg-section-title">과목별 성적</h4>
-            <table border="1" className="sg-list-table">
+            <table className="sg-list-table">
               <thead>
                 <tr>
                   <th>연도</th>

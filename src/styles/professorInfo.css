@@ -1,7 +1,7 @@
-/* 학생 정보 조회 페이지 전용 스타일 */
+/* 교수 정보 조회 페이지 전용 스타일 */
 
 /* 페이지 컨테이너 */
-.stu-info-container {
+.prof-info-container {
   display: flex;
   max-width: 1400px;
   margin: 0 auto;
@@ -10,7 +10,7 @@
 }
 
 /* 사이드 메뉴 */
-.stu-info-side-menu {
+.prof-info-side-menu {
   width: 250px;
   background: #ffffff;
   border-right: 1px solid #e0e6ed;
@@ -18,24 +18,24 @@
   flex-shrink: 0;
 }
 
-.stu-info-side-menu-header {
+.prof-info-side-menu-header {
   padding: 0 20px 20px;
   border-bottom: 2px solid #e0b960;
 }
 
-.stu-info-side-menu-header h2 {
+.prof-info-side-menu-header h2 {
   font-size: 24px;
   color: #2c3e50;
   margin: 0;
 }
 
-.stu-info-side-menu-nav {
+.prof-info-side-menu-nav {
   margin-top: 20px;
   display: flex;
   flex-direction: column;
 }
 
-.stu-info-menu-item {
+.prof-info-menu-item {
   display: block;
   padding: 12px 20px;
   color: #4a5568;
@@ -44,12 +44,12 @@
   border-left: 3px solid transparent;
 }
 
-.stu-info-menu-item:hover {
+.prof-info-menu-item:hover {
   background: #f8f9fa;
   color: #216d30;
 }
 
-.stu-info-menu-item.active {
+.prof-info-menu-item.active {
   background: #e8f5e9;
   color: #216d30;
   border-left-color: #216d30;
@@ -57,26 +57,26 @@
 }
 
 /* 메인 컨텐츠 */
-.stu-info-main-content {
+.prof-info-main-content {
   flex: 1;
   padding: 40px;
   min-width: 800px;
 }
 
-.stu-info-main-content h1 {
+.prof-info-main-content h1 {
   font-size: 28px;
   color: #2c3e50;
   margin: 0 0 20px 0;
 }
 
-.stu-info-divider {
+.prof-info-divider {
   height: 2px;
   background: linear-gradient(to right, #e0b960, transparent);
   margin-bottom: 30px;
 }
 
 /* 로딩 */
-.stu-info-loading-container {
+.prof-info-loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -85,16 +85,16 @@
   color: #666;
 }
 
-.stu-info-spinner {
+.prof-info-spinner {
   width: 40px;
   height: 40px;
   border: 4px solid #f3f3f3;
   border-top: 4px solid #216d30;
   border-radius: 50%;
-  animation: stu-info-spin 1s linear infinite;
+  animation: prof-info-spin 1s linear infinite;
 }
 
-@keyframes stu-info-spin {
+@keyframes prof-info-spin {
   0% {
     transform: rotate(0deg);
   }
@@ -103,13 +103,13 @@
   }
 }
 
-.stu-info-loading-container p {
+.prof-info-loading-container p {
   margin-top: 16px;
   font-size: 16px;
 }
 
 /* 에러 */
-.stu-info-error-container {
+.prof-info-error-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -118,14 +118,14 @@
   padding: 40px;
 }
 
-.stu-info-error-container p {
+.prof-info-error-container p {
   color: #dc3545;
   font-size: 16px;
   text-align: center;
 }
 
 /* 정보 테이블 */
-.stu-info-table {
+.prof-info-table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 20px;
@@ -135,16 +135,16 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.stu-info-table tr {
+.prof-info-table tr {
   border-bottom: 1px solid #e0e6ed;
 }
 
-.stu-info-table tr:last-child {
+.prof-info-table tr:last-child {
   border-bottom: none;
 }
 
-.stu-info-table th {
-  width: 120px;
+.prof-info-table th {
+  width: 150px;
   padding: 16px;
   background-color: #e8f5e9;
   font-weight: 600;
@@ -152,19 +152,19 @@
   text-align: center;
   vertical-align: middle;
   font-size: 14px;
+  width: 120px;
 }
 
-.stu-info-table td {
+.prof-info-table td {
   padding: 16px;
   color: #4a5568;
   vertical-align: middle;
   font-size: 14px;
-  text-align: left;
   width: 200px;
 }
 
 /* 수정 버튼 */
-.stu-info-update-button {
+.prof-info-update-button {
   display: block;
   padding: 10px 15px;
   margin: 20px 0 20px auto;
@@ -178,182 +178,92 @@
   transition: all 0.2s;
 }
 
-.stu-info-update-button:hover {
+.prof-info-update-button:hover {
   background-color: #1a5524;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(33, 109, 48, 0.3);
 }
 
-/* 섹션 구분선 */
-.stu-info-section-divider {
-  height: 1px;
-  background: #e0e6ed;
-  margin: 40px 0 30px 0;
-}
-
-/* 섹션 타이틀 */
-.stu-info-section-title {
-  font-size: 20px;
-  color: #2c3e50;
-  margin: 0 0 20px 0;
-  font-weight: 600;
-}
-
-/* 학적 변동 테이블 */
-.stu-info-stat-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.stu-info-stat-table thead {
-  background: #216d30;
-  color: white;
-}
-
-.stu-info-stat-table th {
-  padding: 16px;
-  text-align: center;
-  font-weight: 600;
-  font-size: 14px;
-  white-space: nowrap;
-}
-
-.stu-info-stat-table td {
-  padding: 16px;
-  text-align: center;
-  border-bottom: 1px solid #e0e6ed;
-  color: #4a5568;
-  font-size: 14px;
-}
-
-.stu-info-stat-table tbody tr {
-  transition: background 0.2s;
-}
-
-.stu-info-stat-table tbody tr:hover {
-  background-color: #f8f9fa;
-}
-
-.stu-info-stat-table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-/* 데이터 없음 */
-.stu-info-no-data {
-  text-align: center;
-  padding: 60px 20px !important;
-  color: #6c757d;
-  font-size: 15px;
-}
-
 /* 반응형 */
 @media (max-width: 1200px) {
-  .stu-info-container {
+  .prof-info-container {
     flex-direction: column;
   }
 
-  .stu-info-side-menu {
+  .prof-info-side-menu {
     width: 100%;
     border-right: none;
     border-bottom: 1px solid #e0e6ed;
   }
 
-  .stu-info-side-menu-nav {
+  .prof-info-side-menu-nav {
     flex-direction: row;
     overflow-x: auto;
     padding: 0 20px;
   }
 
-  .stu-info-menu-item {
+  .prof-info-menu-item {
     border-left: none;
     border-bottom: 3px solid transparent;
     white-space: nowrap;
   }
 
-  .stu-info-menu-item.active {
+  .prof-info-menu-item.active {
     border-left: none;
     border-bottom-color: #216d30;
   }
 
-  .stu-info-main-content {
+  .prof-info-main-content {
     min-width: auto;
     padding: 30px 20px;
   }
 }
 
 @media (max-width: 768px) {
-  .stu-info-main-content {
+  .prof-info-main-content {
     padding: 20px 16px;
   }
 
-  .stu-info-main-content h1 {
+  .prof-info-main-content h1 {
     font-size: 24px;
   }
 
-  .stu-info-section-title {
-    font-size: 18px;
-  }
-
-  .stu-info-table-container {
+  .prof-info-table-container {
     overflow-x: auto;
   }
 
-  .stu-info-table {
+  .prof-info-table {
     min-width: 600px;
   }
 
-  .stu-info-table th,
-  .stu-info-table td {
+  .prof-info-table th,
+  .prof-info-table td {
     padding: 12px 8px;
     font-size: 13px;
   }
 
-  .stu-info-stat-table {
-    min-width: 700px;
-  }
-
-  .stu-info-stat-table th,
-  .stu-info-stat-table td {
-    padding: 12px 8px;
-    font-size: 13px;
-  }
-
-  .stu-info-update-button {
+  .prof-info-update-button {
     padding: 10px 32px;
     font-size: 15px;
   }
 }
 
 @media (max-width: 480px) {
-  .stu-info-main-content {
+  .prof-info-main-content {
     padding: 16px 12px;
   }
 
-  .stu-info-main-content h1 {
+  .prof-info-main-content h1 {
     font-size: 20px;
   }
 
-  .stu-info-section-title {
-    font-size: 16px;
-  }
-
-  .stu-info-table th,
-  .stu-info-table td {
+  .prof-info-table th,
+  .prof-info-table td {
     padding: 10px 6px;
     font-size: 12px;
   }
 
-  .stu-info-stat-table th,
-  .stu-info-stat-table td {
-    padding: 10px 6px;
-    font-size: 12px;
-  }
-
-  .stu-info-update-button {
+  .prof-info-update-button {
     width: 100%;
     padding: 10px 24px;
     font-size: 14px;

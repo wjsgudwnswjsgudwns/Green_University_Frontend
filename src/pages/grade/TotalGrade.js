@@ -71,7 +71,7 @@ const TotalGrade = () => {
         ) : mygradeList.length > 0 ? (
           <>
             <h4 style={{ fontWeight: 600 }}>평점 평균</h4>
-            <table border="1" className="sub--list--table">
+            <table className="sub--list--table">
               <thead>
                 <tr>
                   <th>연도</th>

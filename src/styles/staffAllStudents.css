@@ -65,64 +65,170 @@
   margin-bottom: 20px;
 }
 
-/* 통계 카드 */
-.sas-statistics {
+/* 통계 컨테이너 */
+.sas-statistics-container {
   display: flex;
-  gap: 16px;
+  gap: 24px;
   margin-bottom: 30px;
 }
 
-.sas-stat-card {
-  flex: 1;
+.sas-donut-section {
+  flex: 0 0 280px;
   background: white;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border-left: 4px solid #216d30;
-  transition: transform 0.2s;
 }
 
-.sas-stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.sas-donut-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  color: #2c3e50;
+  font-weight: 600;
 }
 
-.sas-stat-card.sas-stat-total {
-  border-left-color: #216d30;
+.sas-donut-chart {
+  position: relative;
+  width: 100%;
+  max-width: 200px;
+  margin: 0 auto 20px;
 }
 
-.sas-stat-card.sas-stat-normal {
-  border-left-color: #28a745;
+.sas-donut-svg {
+  width: 100%;
+  height: auto;
 }
 
-.sas-stat-card.sas-stat-caution {
-  border-left-color: #ffc107;
+.sas-donut-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
 }
 
-.sas-stat-card.sas-stat-risk {
-  border-left-color: #fd7e14;
-}
-
-.sas-stat-card.sas-stat-critical {
-  border-left-color: #dc3545;
-}
-
-.sas-stat-content {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.sas-stat-label {
-  font-size: 14px;
-  color: #6c757d;
-  font-weight: 500;
-}
-
-.sas-stat-value {
+.sas-donut-total {
   font-size: 28px;
   font-weight: 700;
   color: #2c3e50;
+  line-height: 1;
+}
+
+.sas-donut-label {
+  font-size: 12px;
+  color: #6c757d;
+  margin-top: 4px;
+}
+
+.sas-donut-legend {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.sas-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #4a5568;
+}
+
+.sas-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.sas-legend-normal {
+  background-color: #28a745;
+}
+
+.sas-legend-caution {
+  background-color: #ffc107;
+}
+
+.sas-legend-risk {
+  background-color: #fd7e14;
+}
+
+.sas-legend-critical {
+  background-color: #dc3545;
+}
+
+.sas-bars-section {
+  flex: 1;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.sas-bars-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.sas-bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sas-bar-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sas-bar-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sas-bar-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.sas-bar-value {
+  font-size: 13px;
+  color: #6c757d;
+}
+
+.sas-bar-track {
+  height: 24px;
+  background-color: #f3f4f6;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.sas-bar-fill {
+  height: 100%;
+  transition: width 0.6s ease;
+  border-radius: 6px;
+}
+
+.sas-bar-fill-normal {
+  background: linear-gradient(90deg, #28a745 0%, #34ce57 100%);
+}
+
+.sas-bar-fill-caution {
+  background: linear-gradient(90deg, #ffc107 0%, #ffcd39 100%);
+}
+
+.sas-bar-fill-risk {
+  background: linear-gradient(90deg, #fd7e14 0%, #ff922b 100%);
+}
+
+.sas-bar-fill-critical {
+  background: linear-gradient(90deg, #dc3545 0%, #e4606d 100%);
 }
 
 /* 필터 */
@@ -170,6 +276,11 @@
 .sas-filter-group select:disabled {
   background-color: #f3f4f6;
   cursor: not-allowed;
+}
+
+.apc-student-row td {
+  font-size: 15px;
+  font-weight: 500;
 }
 
 .sas-reset-btn {
@@ -311,14 +422,58 @@
   transform: translateY(-1px);
 }
 
+/* 페이징 */
+.sas-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  padding: 20px 0;
+}
+
+.sas-page-btn {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 12px;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #4a5568;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sas-page-btn:hover:not(:disabled) {
+  background: #f8f9fa;
+  border-color: #216d30;
+  color: #216d30;
+}
+
+.sas-page-btn.active {
+  background: #216d30;
+  border-color: #216d30;
+  color: white;
+  font-weight: 600;
+}
+
+.sas-page-btn:disabled {
+  background: #f3f4f6;
+  color: #d1d5db;
+  cursor: not-allowed;
+  border-color: #e5e7eb;
+}
+
 /* 반응형 */
-@media (max-width: 1024px) {
-  .sas-statistics {
-    flex-wrap: wrap;
+@media (max-width: 1200px) {
+  .sas-statistics-container {
+    flex-direction: column;
   }
 
-  .sas-stat-card {
-    min-width: calc(33.333% - 11px);
+  .sas-donut-section {
+    flex: 1;
   }
 }
 
@@ -330,14 +485,6 @@
 
   .sas-title {
     font-size: 24px;
-  }
-
-  .sas-statistics {
-    flex-direction: column;
-  }
-
-  .sas-stat-card {
-    min-width: 100%;
   }
 
   .sas-filters {
@@ -359,4 +506,81 @@
     padding: 8px 4px;
     font-size: 13px;
   }
+}
+
+/* 페이징 */
+.sas-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  padding: 20px 0;
+}
+
+.sas-page-btn {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 12px;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #4a5568;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sas-page-btn:hover:not(:disabled) {
+  background: #f8f9fa;
+  border-color: #216d30;
+  color: #216d30;
+}
+
+.sas-page-btn.active {
+  background: #216d30;
+  border-color: #216d30;
+  color: white;
+  font-weight: 600;
+}
+
+.sas-page-btn:disabled {
+  background: #f3f4f6;
+  color: #d1d5db;
+  cursor: not-allowed;
+  border-color: #e5e7eb;
+}
+
+.sas-page-numbers {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.sas-page-num {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 12px;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #4a5568;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sas-page-num:hover {
+  background: #f8f9fa;
+  border-color: #216d30;
+  color: #216d30;
+}
+
+.sas-page-num.active {
+  background: #216d30;
+  border-color: #216d30;
+  color: white;
+  font-weight: 600;
 }

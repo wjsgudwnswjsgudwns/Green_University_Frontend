@@ -50,6 +50,8 @@ export const AuthProvider = ({ children }) => {
 
       console.log("로그인 성공:", principal);
 
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
       return { success: true, user: principal };
     } catch (error) {
       console.error("로그인 오류:", error);

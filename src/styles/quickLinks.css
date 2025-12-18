@@ -1,0 +1,144 @@
+/* QuickLinks 전용 스타일 - 접두사: quick-links- */
+
+.quick-links-card {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.quick-links-header {
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #216d30;
+}
+
+.quick-links-header h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #216d30;
+}
+
+.quick-links-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: flex-start;
+}
+
+.quick-link-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 16px;
+  background-color: #fafafa;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  text-decoration: none;
+  color: #333;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  gap: 12px;
+  min-height: 110px;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.quick-link-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background-color: #f0f4f1;
+  border-radius: 12px;
+  color: #216d30;
+  transition: all 0.3s ease;
+}
+
+.quick-link-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  color: #333;
+  transition: color 0.3s ease;
+  white-space: nowrap;
+}
+
+.quick-link-item:hover {
+  background-color: #ffffff;
+  border-color: #216d30;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(33, 109, 48, 0.15);
+}
+
+.quick-link-item:hover .quick-link-icon {
+  background-color: #216d30;
+  color: white;
+  transform: scale(1.05);
+}
+
+.quick-link-item:hover .quick-link-text {
+  color: #216d30;
+}
+
+/* 반응형 */
+@media (max-width: 1024px) {
+  .quick-links-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .quick-link-item {
+    flex: 1 1 auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .quick-links-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  .quick-link-item {
+    padding: 18px 10px;
+    min-height: 100px;
+  }
+
+  .quick-link-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .quick-link-text {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .quick-links-card {
+    padding: 16px;
+  }
+
+  .quick-links-grid {
+    gap: 12px;
+  }
+
+  .quick-link-item {
+    padding: 16px 8px;
+    min-height: 90px;
+    gap: 10px;
+  }
+
+  .quick-link-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .quick-link-text {
+    font-size: 0.8rem;
+  }
+}

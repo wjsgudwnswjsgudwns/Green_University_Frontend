@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../api/axiosConfig";
-import "../../styles/subject.css";
 import "../../styles/ProfessorSubjectListPage.css";
 
 export default function ProfessorSubjectListPage() {
@@ -129,11 +128,7 @@ export default function ProfessorSubjectListPage() {
                   </option>
                 ))}
               </select>
-              <button type="submit">
-                <ul className="professor-subject-filter button ul">
-                  <li style={{ height: "24px", marginRight: "2px" }}>조회</li>
-                </ul>
-              </button>
+              <button type="submit">조회</button>
             </div>
           </form>
         </div>
@@ -145,7 +140,7 @@ export default function ProfessorSubjectListPage() {
         {loading ? (
           <p className="subject-no-list-p">로딩 중...</p>
         ) : subjectList.length > 0 ? (
-          <table border="1" className="subject-list-table">
+          <table className="subject-list-table">
             <thead>
               <tr>
                 <th>학수번호</th>

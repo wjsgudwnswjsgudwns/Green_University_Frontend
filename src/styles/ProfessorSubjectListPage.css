@@ -1,15 +1,227 @@
-/* 교수 강의 목록 페이지 추가 스타일 - ProfessorSubjectListPage.css */
+/* 교수 강의 목록 페이지 전용 스타일 */
 
 /* 페이지 컨테이너 */
 .professor-subject-page-container {
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  max-width: 1400px;
+  margin: 0 auto;
   min-height: 100vh;
-  background: #f5f5f5;
+  background: white;
 }
 
-/* 강의 계획서 조회 버튼 */
+/* 사이드 메뉴 */
+.subject-sub-menu {
+  width: 250px;
+  background: #ffffff;
+  border-right: 1px solid #e0e6ed;
+  padding: 20px 0;
+  flex-shrink: 0;
+}
+
+.subject-sub-menu-top {
+  padding: 0 20px 20px;
+  border-bottom: 2px solid #e0b960;
+}
+
+.subject-sub-menu-top h2 {
+  font-size: 24px;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.subject-sub-menu-mid {
+  margin-top: 20px;
+}
+
+.subject-sub-menu-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.subject-sub-menu-table tbody tr td {
+  padding: 0;
+}
+
+.subject-sub-menu-table tbody tr td a {
+  display: block;
+  padding: 12px 20px;
+  color: #4a5568;
+  text-decoration: none;
+  transition: all 0.2s;
+  border-left: 3px solid transparent;
+}
+
+.subject-sub-menu-table tbody tr td a:hover {
+  background: #f8f9fa;
+  color: #216d30;
+}
+
+.subject-sub-menu-table tbody tr td a.subject-selected-menu {
+  background: #e8f5e9;
+  color: #216d30;
+  border-left-color: #216d30;
+  font-weight: 600;
+}
+
+/* 메인 컨텐츠 */
+.subject-main {
+  flex: 1;
+  padding: 40px;
+  min-width: 800px;
+}
+
+.subject-main h1 {
+  font-size: 28px;
+  color: #2c3e50;
+  margin: 0 0 20px 0;
+}
+
+.subject-main h4 {
+  font-size: 18px;
+  color: #2c3e50;
+  margin: 24px 0 16px 0;
+}
+
+.subject-split-div {
+  height: 2px;
+  background: linear-gradient(to right, #e0b960, transparent);
+  margin-bottom: 30px;
+}
+
+/* 로딩 */
+.subject-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: #666;
+}
+
+.subject-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #216d30;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 필터 */
+.subject-sub-filter {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e0e6ed;
+}
+
+.subject-sub-filter form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.subject-sub-filter form > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.subject-sub-filter select {
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 15px;
+  color: #2c3e50;
+  background-color: #ffffff;
+  transition: all 0.2s;
+  min-width: 200px;
+}
+
+.subject-sub-filter select:focus {
+  outline: none;
+  border-color: #216d30;
+  box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
+}
+
+.subject-sub-filter select:hover {
+  border-color: #216d30;
+}
+
+.subject-sub-filter button {
+  padding: 10px 24px;
+  background-color: #216d30;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.subject-sub-filter button:hover {
+  background-color: #1a5524;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(33, 109, 48, 0.3);
+}
+
+/* 테이블 */
+.subject-list-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.subject-list-table thead {
+  background: #216d30;
+  color: white;
+}
+
+.subject-list-table th {
+  padding: 16px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 15px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.subject-list-table td {
+  padding: 16px;
+  text-align: center;
+  border-bottom: 1px solid #e0e6ed;
+  color: #4a5568;
+  vertical-align: middle;
+  font-size: 14px;
+}
+
+.subject-list-table tbody tr {
+  transition: background 0.2s;
+}
+
+.subject-list-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.subject-list-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* 링크 버튼 */
 .professor-subject-plan-view {
   list-style: none;
   padding: 0;
@@ -17,56 +229,154 @@
 }
 
 .professor-subject-plan-view li {
-  height: 24px;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
 }
 
-.professor-subject-plan-view a {
+.professor-subject-plan-view li a {
   display: inline-block;
   padding: 6px 16px;
-  background: #216d30;
-  color: white;
+  background-color: #216d30;
+  color: #ffffff;
+  text-decoration: none;
   border-radius: 4px;
   font-size: 13px;
-  text-decoration: none;
-  transition: background 0.2s;
+  font-weight: 500;
+  transition: all 0.2s;
 }
 
-.professor-subject-plan-view a:hover {
-  background: #1a5524;
+.professor-subject-plan-view li a:hover {
+  background-color: #1a5524;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(33, 109, 48, 0.3);
 }
 
-/* 조회 버튼 스타일 */
-.professor-subject-filter button ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* 데이터 없음 */
+.subject-no-list-p {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6c757d;
+  font-size: 16px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.professor-subject-filter button ul li {
-  height: 24px;
-  display: flex;
-  align-items: center;
-}
-
-/* 강의 목록 제목 */
-.professor-subject-main h4 span {
-  font-weight: 600;
-  color: #2c3e50;
-}
-
-/* 반응형 디자인 */
-@media (max-width: 768px) {
+/* 반응형 */
+@media (max-width: 1200px) {
   .professor-subject-page-container {
     flex-direction: column;
   }
 
-  .professor-subject-plan-view li {
-    height: auto;
+  .subject-sub-menu {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e0e6ed;
+  }
+
+  .subject-sub-menu-mid {
+    margin-top: 0;
+  }
+
+  .subject-sub-menu-table tbody {
+    display: flex;
+    overflow-x: auto;
+    padding: 0 20px;
+  }
+
+  .subject-sub-menu-table tbody tr {
+    display: inline-block;
+  }
+
+  .subject-sub-menu-table tbody tr td a {
+    border-left: none;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+  }
+
+  .subject-sub-menu-table tbody tr td a.subject-selected-menu {
+    border-left: none;
+    border-bottom-color: #216d30;
+  }
+
+  .subject-main {
+    min-width: auto;
+    padding: 30px 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .subject-main {
+    padding: 20px 16px;
+  }
+
+  .subject-main h1 {
+    font-size: 24px;
+  }
+
+  .subject-main h4 {
+    font-size: 16px;
+  }
+
+  .subject-sub-filter {
+    padding: 16px;
+  }
+
+  .subject-sub-filter form > div {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .subject-sub-filter select {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .subject-sub-filter button {
+    width: 100%;
+  }
+
+  .subject-list-table-container {
+    overflow-x: auto;
+  }
+
+  .subject-list-table {
+    min-width: 600px;
+  }
+
+  .subject-list-table th,
+  .subject-list-table td {
+    padding: 12px 8px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .subject-main {
+    padding: 16px 12px;
+  }
+
+  .subject-main h1 {
+    font-size: 20px;
+  }
+
+  .subject-main h4 {
+    font-size: 15px;
+  }
+
+  .subject-sub-filter {
+    padding: 12px;
+  }
+
+  .subject-list-table th,
+  .subject-list-table td {
+    padding: 10px 6px;
+    font-size: 12px;
+  }
+
+  .professor-subject-plan-view li a {
+    padding: 4px 12px;
+    font-size: 12px;
   }
 }

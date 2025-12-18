@@ -14,7 +14,7 @@
 }
 
 .align-items-start {
-  align-items: flex-start;
+  align-items: center;
 }
 
 /* 사이드 메뉴 */
@@ -148,6 +148,7 @@ main h4 {
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
+  height: 44px;
 }
 
 .sub--filter button:hover {
@@ -290,6 +291,25 @@ main h4 {
   font-size: 16px;
 }
 
+/* 예비 수강 신청 내역 버튼 */
+.preStuSubList--button {
+  padding: 10px 24px;
+  background: #216d30;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+  height: 44px;
+}
+
+.preStuSubList--button:hover {
+  background: #1a5524;
+}
+
 /* 반응형 */
 @media (max-width: 1200px) {
   .sub--menu {
@@ -326,5 +346,10 @@ main h4 {
   .sub--list--table th,
   .sub--list--table td {
     padding: 10px 8px;
+  }
+
+  .preStuSubList--button {
+    width: 100%;
+    margin-top: 12px;
   }
 }

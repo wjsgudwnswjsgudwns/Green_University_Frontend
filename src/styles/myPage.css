@@ -170,11 +170,10 @@
 /* 수정 폼 */
 .mypage-update-form {
   max-width: 800px;
-  margin: 0 auto;
 }
 
 .mypage-form-table {
-  width: 100%;
+  width: 80%;
   border-collapse: collapse;
   background: white;
   border-radius: 8px;
@@ -187,7 +186,7 @@
   width: 200px;
   padding: 16px 20px;
   text-align: left;
-  background: #f8f9fa;
+  background-color: #e8f5e9;
   font-weight: 600;
   color: #2c3e50;
   border-bottom: 1px solid #e0e6ed;
@@ -213,7 +212,7 @@
 }
 
 .mypage-input-field {
-  width: 100%;
+  width: 90%;
   padding: 10px 14px;
   border: 1px solid #d1d5db;
   border-radius: 6px;

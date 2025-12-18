@@ -96,7 +96,7 @@
 }
 
 .pc-risk-search-input {
-  width: 100%;
+  width: 30%;
   padding: 10px 14px;
   border: 1px solid #d1d5db;
   border-radius: 6px;
@@ -146,6 +146,22 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+.pc-students-table th,
+.pc-students-table td {
+  white-space: nowrap;
+  padding: 12px 8px;
+}
+
+.pc-students-table td {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.pc-students-table {
+  width: 100%;
+  min-width: max-content;
+}
+
 /* 반응형 디자인 */
 @media (max-width: 768px) {
   .pc-risk-summary-cards {
@@ -174,4 +190,182 @@
   .pc-alert-count {
     align-self: flex-start;
   }
+}
+
+/* 위험 학생 통계 컨테이너 */
+.pc-risk-statistics-container {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+.pc-risk-donut-section {
+  flex: 0 0 280px;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.pc-risk-donut-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.pc-risk-donut-chart {
+  position: relative;
+  width: 100%;
+  max-width: 200px;
+  margin: 0 auto 20px;
+}
+
+.pc-risk-donut-svg {
+  width: 100%;
+  height: auto;
+}
+
+.pc-risk-donut-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.pc-risk-donut-total {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2c3e50;
+  line-height: 1;
+}
+
+.pc-risk-donut-label {
+  font-size: 12px;
+  color: #6c757d;
+  margin-top: 4px;
+}
+
+.pc-risk-donut-legend {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.pc-risk-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #4a5568;
+}
+
+.pc-risk-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.pc-risk-legend-critical {
+  background-color: #dc3545;
+}
+
+.pc-risk-legend-risk {
+  background-color: #fd7e14;
+}
+
+.pc-risk-bars-section {
+  flex: 1;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.pc-risk-bars-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.pc-risk-bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pc-risk-bar-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pc-risk-bar-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pc-risk-bar-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.pc-risk-bar-value {
+  font-size: 13px;
+  color: #6c757d;
+}
+
+.pc-risk-bar-track {
+  height: 24px;
+  background-color: #f3f4f6;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.pc-risk-bar-fill {
+  height: 100%;
+  transition: width 0.6s ease;
+  border-radius: 6px;
+}
+
+.pc-risk-bar-fill-critical {
+  background: linear-gradient(90deg, #dc3545 0%, #e4606d 100%);
+}
+
+.pc-risk-bar-fill-risk {
+  background: linear-gradient(90deg, #fd7e14 0%, #ff922b 100%);
+}
+
+/* 반응형 */
+@media (max-width: 1200px) {
+  .pc-risk-statistics-container {
+    flex-direction: column;
+  }
+
+  .pc-risk-donut-section {
+    flex: 1;
+  }
+}
+
+.pc-reset-btn {
+  padding: 10px 24px;
+  background-color: #6c757d;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-left: auto;
+}
+
+.pc-reset-btn:hover {
+  background-color: #5a6268;
 }

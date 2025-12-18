@@ -128,24 +128,36 @@ export default function NoticeListPage() {
 
           {/* 검색 폼 */}
           <form onSubmit={handleSearch} className="notice-search-form">
-            <select
-              className="notice-select"
-              value={searchType}
-              onChange={(e) => setSearchType(e.target.value)}
-            >
-              <option value="title">제목</option>
-              <option value="keyword">제목+내용</option>
-            </select>
-            <input
-              type="text"
-              className="notice-input"
-              placeholder="검색어를 입력하세요"
-              value={searchKeyword}
-              onChange={(e) => setSearchKeyword(e.target.value)}
-            />
-            <button type="submit" className="notice-btn">
-              검색
-            </button>
+            <div className="notice-search-left">
+              <select
+                className="notice-select"
+                value={searchType}
+                onChange={(e) => setSearchType(e.target.value)}
+              >
+                <option value="title">제목</option>
+                <option value="keyword">제목+내용</option>
+              </select>
+              <input
+                type="text"
+                className="notice-input"
+                placeholder="검색어를 입력하세요"
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+              />
+              <button type="submit" className="notice-btn">
+                검색
+              </button>
+            </div>
+
+            {user?.userRole === "staff" && (
+              <button
+                type="button"
+                className="notice-btn"
+                onClick={() => navigate("/board/notice/write")}
+              >
+                등록
+              </button>
+            )}
           </form>
 
           {/* 공지사항 테이블 */}
@@ -204,15 +216,6 @@ export default function NoticeListPage() {
                 {i + 1}
               </a>
             ))}
-            {user?.userRole === "staff" && (
-              <button
-                className="notice-btn"
-                onClick={() => navigate("/board/notice/write")}
-                style={{ marginLeft: "20px" }}
-              >
-                등록
-              </button>
-            )}
           </div>
         </div>
       </div>
