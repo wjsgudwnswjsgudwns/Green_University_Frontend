@@ -30,7 +30,11 @@ export default function QuickLinks() {
       { name: "성적조회", link: "/grade/total", icon: Award },
       { name: "등록금납부", link: "/student/tuition/list", icon: CreditCard },
       { name: "시간표", link: "/sugang/schedule", icon: Calendar },
-      { name: "휴학신청", link: "/student/break/application", icon: FileText },
+      {
+        name: "학습 지원",
+        link: `/student/learningai/${user?.id}`,
+        icon: FileText,
+      },
       { name: "학생상담", link: "/student/counseling", icon: MessageSquare },
     ],
     professor: [
