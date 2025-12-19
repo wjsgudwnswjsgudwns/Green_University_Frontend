@@ -244,10 +244,11 @@
   gap: 12px;
   justify-content: center;
   margin-top: 30px;
+  justify-content: flex-end;
 }
 
 .mypage-submit-button {
-  padding: 12px 32px;
+  padding: 10px 16px;
   background: #216d30;
   color: white;
   border: none;
@@ -256,7 +257,8 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-  min-width: 120px;
+  margin-right: 185px;
+  /* min-width: 120px; */
 }
 
 .mypage-submit-button:hover:not(:disabled) {
@@ -392,4 +394,83 @@
   .mypage-edit-button {
     width: 100%;
   }
+}
+
+/* 이메일 인증 관련 스타일 */
+.mypage-email-verification-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.mypage-email-input-wrapper {
+  flex: 1;
+}
+
+.mypage-verification-button {
+  padding: 8px 16px;
+  background: #216d30;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.mypage-verification-button:hover:not(:disabled) {
+  background: #1a5524;
+  transform: translateY(-1px);
+}
+
+.mypage-verification-button:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.mypage-verification-button.resend {
+  background: #6c757d;
+}
+
+.mypage-verify-button {
+  padding: 8px 16px;
+  background: #216d30;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.mypage-verify-button:hover:not(:disabled) {
+  background: #1a5524;
+  transform: translateY(-1px);
+}
+
+.mypage-verify-button:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.mypage-verified-badge {
+  color: #216d30;
+  font-weight: bold;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.mypage-verification-code-input {
+  flex: 1;
+}
+
+.mypage-verification-help-text {
+  color: #dc3545;
+  display: block;
+  margin-top: 5px;
+  font-size: 13px;
 }
