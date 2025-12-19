@@ -10,6 +10,7 @@ export default function NoticeDetailPage() {
   const { id } = useParams();
 
   const [notice, setNotice] = useState(null);
+  const [noticeFiles, setNoticeFiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const isFetched = React.useRef(false);
 
@@ -33,7 +34,38 @@ export default function NoticeDetailPage() {
           setNotice(response.data);
           isFetched.current = true;
 
-          // 2. 조회수 증가 (별도 API 호출)
+          // 디버깅: 받은 content 확인
+          if (response.data && response.data.content) {
+            console.log("받은 notice content:", response.data.content);
+            // content에서 img 태그 찾기
+            const imgMatches = response.data.content.match(/<img[^>]*>/gi);
+            if (imgMatches) {
+              console.log("발견된 img 태그:", imgMatches);
+              imgMatches.forEach((imgTag, index) => {
+                const srcMatch = imgTag.match(/src=["']([^"']+)["']/i);
+                if (srcMatch) {
+                  console.log(`이미지 #${index + 1} URL:`, srcMatch[1]);
+                }
+              });
+            } else {
+              console.log("content에 img 태그가 없습니다.");
+            }
+          }
+
+          // 2. 첨부파일 목록 조회
+          try {
+            const filesResponse = await api.get(`/api/notice/${id}/files`);
+            if (!cancelled) {
+              setNoticeFiles(filesResponse.data || []);
+            }
+          } catch (filesError) {
+            console.warn("첨부파일 조회 실패:", filesError);
+            if (!cancelled) {
+              setNoticeFiles([]);
+            }
+          }
+
+          // 3. 조회수 증가 (별도 API 호출)
           try {
             await api.post(`/api/notice/${id}/views`);
           } catch (viewError) {
@@ -73,6 +105,28 @@ export default function NoticeDetailPage() {
     } catch (error) {
       console.error("삭제 실패:", error);
       alert("삭제에 실패했습니다.");
+    }
+  };
+
+  // 파일 다운로드 처리
+  const handleFileDownload = async (uuidFilename, originFilename) => {
+    try {
+      const response = await api.get(`/api/notice/file/${uuidFilename}`, {
+        responseType: "blob",
+      });
+
+      // Blob을 URL로 변환하여 다운로드
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", originFilename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("파일 다운로드 실패:", error);
+      alert("파일 다운로드에 실패했습니다.");
     }
   };
 
@@ -153,12 +207,14 @@ export default function NoticeDetailPage() {
                 <td className="notice-detail-label">내용</td>
                 <td className="notice-detail-content-text">
                   <div dangerouslySetInnerHTML={{ __html: notice.content }} />
-                  {notice.uuidFilename && (
+
+                  {/* 하위 호환성: 기존 단일 파일 표시 (files가 없을 때) */}
+                  {noticeFiles.length === 0 && notice.uuidFilename && (
                     <>
                       <br />
                       <br />
                       <img
-                        src={`/images/uploads/${notice.uuidFilename}`}
+                        src={`https://green-front-51217.s3.ap-northeast-2.amazonaws.com/${notice.uuidFilename}`}
                         alt="첨부 이미지"
                         style={{ maxWidth: "600px", maxHeight: "800px" }}
                         onError={(e) => {
@@ -169,6 +225,47 @@ export default function NoticeDetailPage() {
                   )}
                 </td>
               </tr>
+              {/* 첨부파일 목록 - 별도 행으로 분리 (이미지 제외) */}
+              {(() => {
+                // 이미지 파일 필터링 (본문에 이미 삽입되어 있으므로 첨부파일에서 제외)
+                const nonImageFiles = noticeFiles.filter(
+                  (file) =>
+                    !file.originFilename?.match(
+                      /\.(jpg|jpeg|png|gif|bmp|webp)$/i
+                    )
+                );
+                return nonImageFiles.length > 0 ? (
+                  <tr>
+                    <td className="notice-detail-label">첨부파일</td>
+                    <td className="notice-detail-content">
+                      <div className="notice-attachments">
+                        <div className="notice-files-list">
+                          {nonImageFiles.map((file, index) => (
+                            <div key={index} className="notice-file-item">
+                              <div className="notice-file-download">
+                                <span className="notice-file-icon">📄</span>
+                                <a
+                                  href="#"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    handleFileDownload(
+                                      file.uuidFilename,
+                                      file.originFilename
+                                    );
+                                  }}
+                                  className="notice-file-link"
+                                >
+                                  {file.originFilename}
+                                </a>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                ) : null;
+              })()}
             </tbody>
           </table>
 

@@ -14,6 +14,9 @@ export default function NoticeEditPage() {
     title: "",
     content: "",
   });
+  const [files, setFiles] = useState([]);
+  const [filePreviews, setFilePreviews] = useState([]);
+  const [existingFiles, setExistingFiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
@@ -34,6 +37,15 @@ export default function NoticeEditPage() {
           title: notice.title,
           content: notice.content.replace(/<br>/g, "\n"),
         });
+        
+        // 기존 첨부파일 조회
+        try {
+          const filesResponse = await api.get(`/api/notice/${id}/files`);
+          setExistingFiles(filesResponse.data || []);
+        } catch (filesError) {
+          console.warn("첨부파일 조회 실패:", filesError);
+          setExistingFiles([]);
+        }
       } catch (error) {
         console.error("공지사항 조회 실패:", error);
         alert("공지사항을 불러오는데 실패했습니다.");
@@ -55,6 +67,48 @@ export default function NoticeEditPage() {
     }));
   };
 
+  // 파일 선택 처리 (여러 파일)
+  const handleFileChange = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    if (selectedFiles.length > 0) {
+      setFiles(selectedFiles);
+      
+      // 이미지 미리보기 생성
+      const previews = selectedFiles.map((file) => {
+        const isImage = file.type.startsWith("image/");
+        return {
+          file,
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          isImage,
+          preview: isImage ? URL.createObjectURL(file) : null,
+        };
+      });
+      setFilePreviews(previews);
+    }
+  };
+
+  // 파일 제거
+  const handleRemoveFile = (index) => {
+    const newFiles = files.filter((_, i) => i !== index);
+    const newPreviews = filePreviews.filter((_, i) => i !== index);
+    
+    // URL 해제 (메모리 누수 방지)
+    if (filePreviews[index]?.preview) {
+      URL.revokeObjectURL(filePreviews[index].preview);
+    }
+    
+    setFiles(newFiles);
+    setFilePreviews(newPreviews);
+    
+    // input 초기화
+    const fileInput = document.getElementById("noticeFilesEdit");
+    if (fileInput) {
+      fileInput.value = "";
+    }
+  };
+
   // 수정 처리
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -71,10 +125,29 @@ export default function NoticeEditPage() {
     setSubmitting(true);
 
     try {
-      await api.put(`/api/notice/${id}`, {
-        category: formData.category,
-        title: formData.title,
-        content: formData.content,
+      const submitData = new FormData();
+      submitData.append("category", formData.category);
+      submitData.append("title", formData.title);
+      submitData.append("content", formData.content);
+      
+      // 여러 파일 추가
+      if (files.length > 0) {
+        files.forEach((file) => {
+          submitData.append("files", file);
+        });
+      }
+
+      await api.put(`/api/notice/${id}`, submitData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      // 미리보기 URL 정리
+      filePreviews.forEach((preview) => {
+        if (preview.preview) {
+          URL.revokeObjectURL(preview.preview);
+        }
       });
 
       alert("공지사항이 수정되었습니다.");
@@ -191,6 +264,89 @@ export default function NoticeEditPage() {
                   </tr>
                 </tbody>
               </table>
+
+              {/* 기존 첨부파일 표시 */}
+              {existingFiles.length > 0 && (
+                <div className="notice-existing-files">
+                  <h4 style={{ marginBottom: "12px", fontSize: "16px", fontWeight: "600" }}>
+                    기존 첨부파일 ({existingFiles.length}개)
+                  </h4>
+                  <div className="notice-files-list">
+                    {existingFiles.map((file, index) => (
+                      <div key={index} className="notice-file-download">
+                        <span className="notice-file-icon">📄</span>
+                        <a
+                          href={`/api/notice/file/${file.uuidFilename}`}
+                          download={file.originFilename}
+                          className="notice-file-link"
+                        >
+                          {file.originFilename}
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                  <p style={{ marginTop: "8px", fontSize: "13px", color: "#6c757d" }}>
+                    새 파일을 선택하면 기존 파일이 모두 교체됩니다.
+                  </p>
+                </div>
+              )}
+
+              {/* 파일 업로드 (여러 파일) */}
+              <div className="notice-file-upload">
+                <input
+                  type="file"
+                  className="notice-file-input"
+                  id="noticeFilesEdit"
+                  multiple
+                  onChange={handleFileChange}
+                />
+                <label className="notice-file-label" htmlFor="noticeFilesEdit">
+                  {files.length > 0
+                    ? `${files.length}개 파일 선택됨`
+                    : "새 파일 선택 (여러 개 가능)"}
+                </label>
+              </div>
+
+              {/* 파일 미리보기 */}
+              {filePreviews.length > 0 && (
+                <div className="notice-file-previews">
+                  {filePreviews.map((preview, index) => (
+                    <div key={index} className="notice-file-preview-item">
+                      {preview.isImage ? (
+                        <div className="notice-image-preview">
+                          <img
+                            src={preview.preview}
+                            alt={preview.name}
+                            className="notice-preview-image"
+                          />
+                          <button
+                            type="button"
+                            className="notice-remove-file-btn"
+                            onClick={() => handleRemoveFile(index)}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="notice-file-preview">
+                          <span className="notice-file-icon">📄</span>
+                          <span className="notice-file-name">{preview.name}</span>
+                          <span className="notice-file-size">
+                            {(preview.size / 1024).toFixed(1)} KB
+                          </span>
+                          <button
+                            type="button"
+                            className="notice-remove-file-btn"
+                            onClick={() => handleRemoveFile(index)}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
 
               <div className="notice-btn-group">
                 <button
