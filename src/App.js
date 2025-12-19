@@ -74,6 +74,7 @@ import StaffRiskStudentsPage from "./pages/ai/StaffRiskStudentsPage";
 import AssignAdvisorPage from "./pages/AssignAdvisorPage";
 import MapPage from "./pages/map/MapPage";
 import PersonalizedLearningPage from "./pages/student/PersonalizedLearningPage";
+import EmailTestPage from "./pages/email/EmailTestPage";
 
 function PrivateRoute({ children, role }) {
   const { user } = useAuth();
@@ -134,6 +135,8 @@ function Layout() {
         />
 
         <Route path="/map" element={<MapPage />} />
+
+        <Route path="/email" element={<EmailTestPage />} />
 
         {/* 홈 */}
 
