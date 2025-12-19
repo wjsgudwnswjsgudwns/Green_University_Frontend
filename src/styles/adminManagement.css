@@ -166,7 +166,7 @@
 }
 
 .admin-form-vertical {
-  max-width: 600px;
+  max-width: 100%;
 }
 
 .admin-form-header {
@@ -211,12 +211,7 @@
   transition: all 0.2s;
   background-color: #ffffff;
   flex: 1;
-  min-width: 200px;
-}
-
-.admin-form-vertical .admin-input,
-.admin-form-vertical .admin-select {
-  width: 100%;
+  min-width: 180px;
 }
 
 .admin-input:focus,

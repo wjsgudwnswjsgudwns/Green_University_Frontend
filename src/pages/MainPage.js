@@ -7,6 +7,7 @@ import banner1 from "../images/Green_University_FrontView.png";
 import banner2 from "../images/Meeting_3_people.png";
 import banner3 from "../images/Principal.png";
 import banner4 from "../images/Meeting_5_people.png";
+import banner5 from "../images/banner5.png";
 import QuickLinks from "../components/QuickLinks";
 
 export default function MainPage() {
@@ -20,7 +21,7 @@ export default function MainPage() {
   const noticeRef = useRef(null);
   const scheduleRef = useRef(null);
 
-  const banners = [banner1, banner2, banner3, banner4];
+  const banners = [banner1, banner2, banner3, banner4, banner5];
 
   // 자동 슬라이드
   useEffect(() => {

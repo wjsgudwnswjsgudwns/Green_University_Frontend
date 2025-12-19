@@ -15,13 +15,16 @@ export default function SubjectManagement() {
   const [error, setError] = useState("");
   const [crud, setCrud] = useState(searchParams.get("crud") || "select");
 
-  // 페이징 관련 상태
+  // 드롭다운용 데이터
+  const [professorList, setProfessorList] = useState([]);
+  const [roomList, setRoomList] = useState([]);
+  const [departmentList, setDepartmentList] = useState([]);
+
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [pageSize] = useState(10);
 
-  // 검색 관련 상태
   const [searchKeyword, setSearchKeyword] = useState("");
   const [updateSearchKeyword, setUpdateSearchKeyword] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -62,12 +65,29 @@ export default function SubjectManagement() {
     }
   };
 
+  // 드롭다운 데이터 로드
+  const fetchDropdownData = async () => {
+    try {
+      const [profRes, roomRes, deptRes] = await Promise.all([
+        api.get("/api/admin/professors/all"),
+        api.get("/api/admin/rooms/all"),
+        api.get("/api/admin/departments/all"),
+      ]);
+      setProfessorList(profRes.data || []);
+      setRoomList(roomRes.data || []);
+      setDepartmentList(deptRes.data || []);
+    } catch (err) {
+      console.error("드롭다운 데이터 로드 실패:", err);
+    }
+  };
+
   useEffect(() => {
     if (user?.userRole !== "staff") {
       navigate("/");
       return;
     }
     fetchData();
+    fetchDropdownData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, navigate, currentPage]);
 
@@ -112,7 +132,6 @@ export default function SubjectManagement() {
     }
   };
 
-  // 수정 모드용 실시간 검색
   const handleUpdateSearch = async (keyword) => {
     setUpdateSearchKeyword(keyword);
 
@@ -132,7 +151,6 @@ export default function SubjectManagement() {
     }
   };
 
-  // 검색 결과에서 과목 선택
   const handleSelectSubject = (subject) => {
     setFormData({
       id: subject.id,
@@ -227,7 +245,6 @@ export default function SubjectManagement() {
         id: parseInt(formData.id),
       };
 
-      // 값이 있는 필드만 추가
       if (formData.name) requestData.name = formData.name;
       if (formData.professorId)
         requestData.professorId = parseInt(formData.professorId);
@@ -339,7 +356,6 @@ export default function SubjectManagement() {
         <h1>강의</h1>
         <div className="admin-divider"></div>
 
-        {/* CRUD 버튼 */}
         <div className="admin-crud-buttons">
           <button
             onClick={() => handleCrudChange("insert")}
@@ -363,7 +379,6 @@ export default function SubjectManagement() {
 
         {error && <div className="admin-error-message">{error}</div>}
 
-        {/* 검색 바 (조회/삭제 모드) */}
         {(crud === "select" || crud === "delete") && (
           <div className="admin-search-bar">
             <input
@@ -392,14 +407,12 @@ export default function SubjectManagement() {
           </div>
         )}
 
-        {/* 등록 폼 */}
         {crud === "insert" && (
           <form
             onSubmit={handleSubmit}
             className="admin-form admin-form-vertical"
           >
             <div className="admin-form-header">
-              <span className="material-symbols-outlined">school</span>
               <span className="admin-form-title">등록하기</span>
             </div>
             <div className="admin-form-content">
@@ -412,33 +425,53 @@ export default function SubjectManagement() {
                 className="admin-input"
                 required
               />
-              <input
-                type="number"
+
+              <select
                 name="professorId"
                 value={formData.professorId}
                 onChange={handleChange}
-                placeholder="교수ID를 입력하세요"
-                className="admin-input"
+                className="admin-select"
                 required
-              />
-              <input
-                type="text"
+              >
+                <option value="">교수를 선택하세요</option>
+                {professorList.map((prof) => (
+                  <option key={prof.id} value={prof.id}>
+                    {prof.id} - {prof.name} ({prof.department?.name || "미지정"}
+                    )
+                  </option>
+                ))}
+              </select>
+
+              <select
                 name="roomId"
                 value={formData.roomId}
                 onChange={handleChange}
-                placeholder="강의실을 입력하세요"
-                className="admin-input"
+                className="admin-select"
                 required
-              />
-              <input
-                type="number"
+              >
+                <option value="">강의실을 선택하세요</option>
+                {roomList.map((room) => (
+                  <option key={room.id} value={room.id}>
+                    {room.id} ({room.college?.name || "미지정"})
+                  </option>
+                ))}
+              </select>
+
+              <select
                 name="deptId"
                 value={formData.deptId}
                 onChange={handleChange}
-                placeholder="학과ID를 입력하세요"
-                className="admin-input"
+                className="admin-select"
                 required
-              />
+              >
+                <option value="">학과를 선택하세요</option>
+                {departmentList.map((dept) => (
+                  <option key={dept.id} value={dept.id}>
+                    {dept.id} - {dept.name}
+                  </option>
+                ))}
+              </select>
+
               <div className="admin-radio-group-inline">
                 <label>
                   <input
@@ -540,18 +573,15 @@ export default function SubjectManagement() {
           </form>
         )}
 
-        {/* 수정 폼 */}
         {crud === "update" && (
           <form
             onSubmit={handleUpdate}
             className="admin-form admin-form-vertical"
           >
             <div className="admin-form-header">
-              <span className="material-symbols-outlined">school</span>
               <span className="admin-form-title">수정하기</span>
             </div>
             <div className="admin-form-content">
-              {/* 검색 입력 */}
               <div className="admin-search-select-wrapper">
                 <input
                   type="text"
@@ -562,7 +592,6 @@ export default function SubjectManagement() {
                   autoComplete="off"
                 />
 
-                {/* 검색 결과 드롭다운 */}
                 {searchResults.length > 0 && (
                   <div className="admin-search-results-dropdown">
                     {searchResults.map((subject) => (
@@ -600,30 +629,50 @@ export default function SubjectManagement() {
                     placeholder="강의명을 입력하세요"
                     className="admin-input"
                   />
-                  <input
-                    type="number"
+
+                  <select
                     name="professorId"
                     value={formData.professorId}
                     onChange={handleChange}
-                    placeholder="교수ID를 입력하세요"
-                    className="admin-input"
-                  />
-                  <input
-                    type="text"
+                    className="admin-select"
+                  >
+                    <option value="">교수를 선택하세요</option>
+                    {professorList.map((prof) => (
+                      <option key={prof.id} value={prof.id}>
+                        {prof.id} - {prof.name} (
+                        {prof.department?.name || "미지정"})
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
                     name="roomId"
                     value={formData.roomId}
                     onChange={handleChange}
-                    placeholder="강의실을 입력하세요"
-                    className="admin-input"
-                  />
-                  <input
-                    type="number"
+                    className="admin-select"
+                  >
+                    <option value="">강의실을 선택하세요</option>
+                    {roomList.map((room) => (
+                      <option key={room.id} value={room.id}>
+                        {room.id} ({room.college?.name || "미지정"})
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
                     name="deptId"
                     value={formData.deptId}
                     onChange={handleChange}
-                    placeholder="학과ID를 입력하세요"
-                    className="admin-input"
-                  />
+                    className="admin-select"
+                  >
+                    <option value="">학과를 선택하세요</option>
+                    {departmentList.map((dept) => (
+                      <option key={dept.id} value={dept.id}>
+                        {dept.id} - {dept.name}
+                      </option>
+                    ))}
+                  </select>
+
                   <select
                     name="subDay"
                     value={formData.subDay}
@@ -697,12 +746,10 @@ export default function SubjectManagement() {
           </form>
         )}
 
-        {/* 삭제 안내 */}
         {crud === "delete" && (
           <p className="admin-delete-notice">삭제할 강의명을 클릭해주세요</p>
         )}
 
-        {/* 강의 목록 */}
         <div className="admin-table-container">
           <table className="admin-table admin-subject-table">
             <thead>

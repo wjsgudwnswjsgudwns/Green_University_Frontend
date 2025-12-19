@@ -147,7 +147,7 @@ export default function LoginPage() {
           )}
 
           <form onSubmit={handleSubmit} className="login-form">
-            <div className="form-group">
+            <div className="login-form-group">
               <label htmlFor="id">
                 <span className="material-symbols-outlined">person</span>
               </label>
@@ -164,7 +164,7 @@ export default function LoginPage() {
               />
             </div>
 
-            <div className="form-group">
+            <div className="login-form-group">
               <label htmlFor="password">
                 <span className="material-symbols-outlined">lock</span>
               </label>

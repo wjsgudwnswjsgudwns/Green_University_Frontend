@@ -169,7 +169,6 @@ export default function RoomManagement() {
         {crud === "insert" && (
           <form onSubmit={handleSubmit} className="admin-form">
             <div className="admin-form-header">
-              <span className="material-symbols-outlined">school</span>
               <span className="admin-form-title">등록하기</span>
             </div>
             <div className="admin-form-content">

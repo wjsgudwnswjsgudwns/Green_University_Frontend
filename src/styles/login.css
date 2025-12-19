@@ -184,11 +184,10 @@ html {
   display: flex;
   flex-direction: column;
   gap: 18px;
-  margin-top: 24px;
 }
 
 /* 입력 그룹 */
-.form-group {
+.login-form-group {
   display: flex;
   align-items: center;
   background: #ffffff;
@@ -199,14 +198,14 @@ html {
   position: relative;
 }
 
-.form-group:focus-within {
+.login-form-group:focus-within {
   background: #f0f0f0;
   border: none;
   box-shadow: 0 0 0 3px rgba(224, 185, 96, 0.3);
   transform: translateY(-1px);
 }
 
-.form-group label {
+.login-form-group label {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -215,16 +214,16 @@ html {
   transition: color 0.3s ease;
 }
 
-.form-group:focus-within label {
+.login-form-group:focus-within label {
   color: #123e25;
 }
 
-.form-group label .material-symbols-outlined {
+.login-form-group label .material-symbols-outlined {
   font-size: 22px;
   display: none;
 }
 
-.form-group input {
+.login-form-group input {
   flex: 1;
   border: none;
   outline: none;
@@ -234,12 +233,12 @@ html {
   font-weight: 500;
 }
 
-.form-group input::placeholder {
+.login-form-group input::placeholder {
   color: #7a7a7a;
   font-weight: 400;
 }
 
-.form-group input:disabled {
+.login-form-group input:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -401,7 +400,7 @@ html {
     font-size: 1.5rem;
   }
 
-  .form-group {
+  .login-form-group {
     padding: 12px 14px;
   }
 
@@ -445,7 +444,7 @@ html {
     padding-bottom: 20px;
   }
 
-  .form-group {
+  .login-form-group {
     padding: 10px 12px;
   }
 
@@ -488,14 +487,14 @@ html {
 
 /* 입력 필드 스타일 강제 리셋 (네모 박스 제거) */
 /* 입력 필드 기본 스타일 (로그인 전용 스코프) */
-.login-form .form-group {
+.login-form .login-form-group {
   border: none;
   box-shadow: none;
   padding: 16px 20px;
   background: #ffffff;
 }
 
-.login-form .form-group input {
+.login-form .login-form-group input {
   width: 100%;
   height: auto;
   padding: 0;
@@ -508,7 +507,7 @@ html {
   color: #000000;
 }
 
-.login-form .form-group input:focus {
+.login-form .login-form-group input:focus {
   outline: none;
   box-shadow: none;
 }
