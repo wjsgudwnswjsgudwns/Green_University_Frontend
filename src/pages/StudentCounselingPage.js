@@ -3,11 +3,11 @@ import StudentProfessorSelect from "../components/StudentProfessorSelect";
 import StudentOpenSlotGrid from "../components/StudentOpenSlotGrid";
 
 import {
-  getMyMajorProfessors,
-  getMyReservations,
-  reserveSlot,
-  cancelReservation,
-  getStudentSlots,
+    getMyMajorProfessors,
+    getMyReservations,
+    reserveSlot,
+    cancelReservation,
+    getStudentSlots,
 } from "../api/counselingApi";
 
 import { useWeekRange } from "../hooks/useWeekRange";
@@ -16,304 +16,344 @@ import CounselingDetailPanel from "../components/CounselingDetailPanel";
 import "../styles/StudentMeeting.css";
 
 function StudentCounselingPage() {
+    // 공통 주간 범위 훅
+    const { fromDate, toDate, setFromDate, setToDate, goPrevWeek, goNextWeek } =
+        useWeekRange();
 
-  // 공통 주간 범위 훅
-  const { fromDate, toDate, setFromDate, setToDate, goPrevWeek, goNextWeek } =
-    useWeekRange();
+    // 교수 선택
+    const [professors, setProfessors] = useState([]);
+    const [selectedProfessorId, setSelectedProfessorId] = useState(null);
 
-  // 교수 선택
-  const [professors, setProfessors] = useState([]);
-  const [selectedProfessorId, setSelectedProfessorId] = useState(null);
+    // 슬롯 / 예약
+    const [slots, setSlots] = useState([]); // 해당 교수의 주간 슬롯
+    const [myReservations, setMyReservations] = useState([]);
 
-  // 슬롯 / 예약
-  const [slots, setSlots] = useState([]); // 해당 교수의 주간 슬롯
-  const [myReservations, setMyReservations] = useState([]);
+    // 상세 패널 상태
+    const [selectedSlot, setSelectedSlot] = useState(null);
+    const [selectedReservation, setSelectedReservation] = useState(null);
+    const [memo, setMemo] = useState("");
 
-  // 상세 패널 상태
-  const [selectedSlot, setSelectedSlot] = useState(null);
-  const [selectedReservation, setSelectedReservation] = useState(null);
-  const [memo, setMemo] = useState("");
+    const [loadingDetail, setLoadingDetail] = useState(false);
+    const [detailError, setDetailError] = useState("");
 
-  const [loadingDetail, setLoadingDetail] = useState(false);
-  const [detailError, setDetailError] = useState("");
-
-  // 날짜/교수 변경 시 상세 초기화
-  const clearDetail = useCallback(() => {
-    setSelectedSlot(null);
-    setSelectedReservation(null);
-    setMemo("");
-    setDetailError("");
-    setLoadingDetail(false);
-  }, []);
-
-  // 날짜 변경 래퍼: 변경 시 상세도 초기화
-  const handleChangeFromDate = (value) => {
-    setFromDate(value);
-    clearDetail();
-  };
-
-  const handleChangeToDate = (value) => {
-    setToDate(value);
-    clearDetail();
-  };
-
-  const handlePrevWeek = () => {
-    goPrevWeek();
-    clearDetail();
-  };
-
-  const handleNextWeek = () => {
-    goNextWeek();
-    clearDetail();
-  };
-
-  // 초기: 내 학과 교수 목록
-  useEffect(() => {
-    let cancelled = false;
-
-    (async () => {
-      try {
-        const data = await getMyMajorProfessors();
-        if (cancelled) return;
-        setProfessors(data || []);
-        if (data && data.length > 0) {
-          setSelectedProfessorId(data[0].id);
-
-        }
-      } catch (e) {
-        if (cancelled) return;
-        console.error(e);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  // 현재 주간 데이터 로딩 (슬롯 + 내 예약)
-  const reloadCurrentWeek = useCallback(async () => {
-    try {
-      const reservationsPromise = getMyReservations(fromDate, toDate);
-
-      let slotsPromise = Promise.resolve([]);
-      if (selectedProfessorId) {
-        slotsPromise = getStudentSlots(selectedProfessorId, fromDate, toDate);
-      }
-
-      const [slotsData, myResData] = await Promise.all([
-        slotsPromise,
-        reservationsPromise,
-      ]);
-
-      setSlots(slotsData || []);
-      setMyReservations(myResData || []);
-    } catch (e) {
-      console.error(e);
-    }
-  }, [selectedProfessorId, fromDate, toDate]);
-
-  // 교수/기간 변경 시: 현재 주간 데이터 재조회
-  useEffect(() => {
-    reloadCurrentWeek();
-  }, [reloadCurrentWeek]);
-
-  // 내가 예약한 슬롯 id 리스트 (그리드 색칠용)
-  const myReservedSlotIds =
-    myReservations
-      ?.filter((r) => r.status !== "CANCELED" && r.status !== "REJECTED")
-      .map((r) => Number(r.slotId)) || [];
-
-  // 내 예약 목록에서 선택 (리스트 → 상세)
-  const handleSelectReservation = (reservation) => {
-    setSelectedReservation(reservation);
-
-    const slot = slots.find(
-      (s) => Number(s.slotId) === Number(reservation.slotId)
-    );
-    setSelectedSlot(slot || null);
-
-    setMemo("");
-    setDetailError("");
-  };
-
-  // 그리드에서 슬롯 선택
-  const handleSelectSlot = (slot, meta = {}) => {
-    const { isMine } = meta;
-
-    if (isMine) {
-      const myRes = myReservations.find(
-        (r) =>
-          Number(r.slotId) === Number(slot.slotId) &&
-          r.status !== "CANCELED" &&
-          r.status !== "REJECTED"
-      );
-
-      if (myRes) {
-        setSelectedReservation(myRes);
-        setSelectedSlot(slot);
+    // 날짜/교수 변경 시 상세 초기화
+    const clearDetail = useCallback(() => {
+        setSelectedSlot(null);
+        setSelectedReservation(null);
         setMemo("");
         setDetailError("");
+        setLoadingDetail(false);
+    }, []);
 
-        return;
-      }
-    }
+    // 날짜 변경 래퍼: 변경 시 상세도 초기화
+    const handleChangeFromDate = (value) => {
+        setFromDate(value);
+        clearDetail();
+    };
 
-    setSelectedSlot(slot);
-    setSelectedReservation(null);
-    setMemo("");
-    setDetailError("");
-  };
+    const handleChangeToDate = (value) => {
+        setToDate(value);
+        clearDetail();
+    };
 
-  // 예약 생성
-  const handleReserve = async () => {
-    if (!selectedSlot) return;
-    try {
-      setLoadingDetail(true);
-      setDetailError("");
+    const handlePrevWeek = () => {
+        goPrevWeek();
+        clearDetail();
+    };
 
-      await reserveSlot(selectedSlot.slotId, memo);
+    const handleNextWeek = () => {
+        goNextWeek();
+        clearDetail();
+    };
 
-      await reloadCurrentWeek();
+    // 초기: 내 학과 교수 목록
+    useEffect(() => {
+        let cancelled = false;
 
-      setSelectedSlot(null);
-      setMemo("");
-    } catch (e) {
-      console.error(e);
-      setDetailError("예약 처리 중 오류가 발생했습니다.");
-    } finally {
-      setLoadingDetail(false);
-    }
-  };
+        (async () => {
+            try {
+                const data = await getMyMajorProfessors();
+                if (cancelled) return;
+                setProfessors(data || []);
+                if (data && data.length > 0) {
+                    setSelectedProfessorId(data[0].id);
+                }
+            } catch (e) {
+                if (cancelled) return;
+                console.error(e);
+            }
+        })();
 
-  // 예약 취소
-  const handleCancel = async () => {
-    if (!selectedReservation) return;
-    try {
-      setLoadingDetail(true);
-      setDetailError("");
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
-      await cancelReservation(selectedReservation.reservationId);
+    // 현재 주간 데이터 로딩 (슬롯 + 내 예약)
+    const reloadCurrentWeek = useCallback(async () => {
+        try {
+            const reservationsPromise = getMyReservations(fromDate, toDate);
 
-      await reloadCurrentWeek();
+            let slotsPromise = Promise.resolve([]);
+            if (selectedProfessorId) {
+                slotsPromise = getStudentSlots(
+                    selectedProfessorId,
+                    fromDate,
+                    toDate
+                );
+            }
 
-      setSelectedReservation(null);
-      setSelectedSlot(null);
-    } catch (e) {
-      console.error(e);
-      setDetailError("예약 취소 중 오류가 발생했습니다.");
-    } finally {
-      setLoadingDetail(false);
-    }
-  };
+            const [slotsData, myResData] = await Promise.all([
+                slotsPromise,
+                reservationsPromise,
+            ]);
 
-  return (
-    <div className="smp-page-container">
-      {/* 페이지 헤더 */}
-      <div className="smp-page-header">
-        <h1 className="smp-page-title">상담 신청 (학생용)</h1>
-        <p className="smp-page-subtitle">
-          교수님과의 상담 시간을 예약하고 관리할 수 있습니다.
-        </p>
-      </div>
+            setSlots(slotsData || []);
+            setMyReservations(myResData || []);
+        } catch (e) {
+            console.error(e);
+        }
+    }, [selectedProfessorId, fromDate, toDate]);
 
-      {/* 주간 범위 컨트롤 */}
-      <div className="smp-week-controls">
-        <div className="smp-week-controls-inner">
-          <div>
-            <label>FROM:</label>
-            <input
-              type="date"
-              value={fromDate}
-              onChange={(e) => handleChangeFromDate(e.target.value)}
-            />
-          </div>
-          <div>
-            <label>TO:</label>
-            <input
-              type="date"
-              value={toDate}
-              onChange={(e) => handleChangeToDate(e.target.value)}
+    // 교수/기간 변경 시: 현재 주간 데이터 재조회
+    useEffect(() => {
+        reloadCurrentWeek();
+    }, [reloadCurrentWeek]);
 
-            />
-          </div>
-          <button
-            type="button"
-            className="smp-week-nav-btn"
-            onClick={handlePrevWeek}
-          >
-            ◀ 이전 주
-          </button>
-          <button
-            type="button"
-            className="smp-week-nav-btn"
-            onClick={handleNextWeek}
-          >
-            다음 주 ▶
-          </button>
-        </div>
-      </div>
+    // 내가 예약한 슬롯 id 리스트 (그리드 색칠용)
+    const myReservedSlotIds =
+        myReservations
+            ?.filter((r) => r.status !== "CANCELED" && r.status !== "REJECTED")
+            .map((r) => Number(r.slotId)) || [];
 
-      {/* 내 예약 목록 */}
-      <section className="smp-reservations-section">
-        <CounselingList
-          mode="student"
-          title="내 예약 목록"
-          reservations={myReservations}
-          selectedId={selectedReservation && selectedReservation.reservationId}
-          onSelect={handleSelectReservation}
-        />
-      </section>
+    // 내 예약 목록에서 선택 (리스트 → 상세)
+    const handleSelectReservation = (reservation) => {
+        setSelectedReservation(reservation);
 
-      {/* 스케줄 & 상세 섹션 */}
-      <section className="smp-schedule-detail-section">
-        {/* 왼쪽: 교수 선택 + 시간표 */}
-        <div className="smp-schedule-container">
-          <div className="smp-schedule-header">
-            <h3 className="smp-schedule-title">상담 가능 시간대</h3>
+        const slot = slots.find(
+            (s) => Number(s.slotId) === Number(reservation.slotId)
+        );
+        setSelectedSlot(slot || null);
 
-            {/* 교수 선택 */}
-            <div className="smp-professor-select-wrapper">
-              <StudentProfessorSelect
-                professors={professors}
-                selectedId={selectedProfessorId}
-                onChange={(id) => {
-                  setSelectedProfessorId(id);
-                  clearDetail();
-                }}
-              />
+        setMemo("");
+        setDetailError("");
+    };
+
+    // 그리드에서 슬롯 선택
+    const handleSelectSlot = (slot, meta = {}) => {
+        const { isMine } = meta;
+
+        if (isMine) {
+            const myRes = myReservations.find(
+                (r) =>
+                    Number(r.slotId) === Number(slot.slotId) &&
+                    r.status !== "CANCELED" &&
+                    r.status !== "REJECTED"
+            );
+
+            if (myRes) {
+                setSelectedReservation(myRes);
+                setSelectedSlot(slot);
+                setMemo("");
+                setDetailError("");
+
+                return;
+            }
+        }
+
+        setSelectedSlot(slot);
+        setSelectedReservation(null);
+        setMemo("");
+        setDetailError("");
+    };
+
+    // 예약 생성
+    const handleReserve = async () => {
+        if (!selectedSlot) return;
+        try {
+            setLoadingDetail(true);
+            setDetailError("");
+
+            await reserveSlot(selectedSlot.slotId, memo);
+
+            await reloadCurrentWeek();
+
+            setSelectedSlot(null);
+            setMemo("");
+        } catch (e) {
+            console.error(e);
+            setDetailError("예약 처리 중 오류가 발생했습니다.");
+        } finally {
+            setLoadingDetail(false);
+        }
+    };
+
+    // 예약 취소
+    // 예약 취소
+    const handleCancel = async (reason) => {
+        if (!selectedReservation) return;
+
+        const reservationId =
+            selectedReservation.reservationId ?? selectedReservation.id;
+        if (!reservationId) return;
+
+        try {
+            setLoadingDetail(true);
+            setDetailError("");
+
+            // ✅ reason 전달
+            await cancelReservation(reservationId, reason);
+
+            // ✅ 성공 시에도 동기화
+            await reloadCurrentWeek();
+
+            setSelectedReservation(null);
+            setSelectedSlot(null);
+        } catch (e) {
+            console.error(e);
+
+            // ✅ 서버 메시지 우선 표시 (ex: "이미 교수님이 승인한 예약은 직접 취소할 수 없습니다.")
+            const serverMsg =
+                e?.response?.data?.message ||
+                "예약 취소 중 오류가 발생했습니다.";
+            setDetailError(serverMsg);
+            alert(serverMsg);
+
+            // ✅ 중요: 실패해도 무조건 서버 최신 상태로 동기화
+            await reloadCurrentWeek();
+
+            // ✅ 동기화 후: 현재 선택 상태를 최신 데이터로 다시 매칭
+            // (교수가 승인해버렸으면 status/meetingId가 바뀐 예약으로 교체되어야 함)
+            setSelectedReservation((prev) => {
+                if (!prev) return null;
+
+                const updated = myReservations.find(
+                    (r) =>
+                        Number(r.reservationId) === Number(prev.reservationId)
+                );
+
+                return updated || prev;
+            });
+
+            setSelectedSlot((prevSlot) => {
+                if (!prevSlot) return null;
+                const updatedSlot = slots.find(
+                    (s) => Number(s.slotId) === Number(prevSlot.slotId)
+                );
+                return updatedSlot || prevSlot;
+            });
+        } finally {
+            setLoadingDetail(false);
+        }
+    };
+
+    return (
+        <div className="smp-page-container">
+            {/* 페이지 헤더 */}
+            <div className="smp-page-header">
+                <h1 className="smp-page-title">상담 신청 (학생용)</h1>
+                <p className="smp-page-subtitle">
+                    교수님과의 상담 시간을 예약하고 관리할 수 있습니다.
+                </p>
             </div>
-          </div>
 
-          <StudentOpenSlotGrid
-            fromDate={fromDate}
-            toDate={toDate}
-            slots={slots}
-            myReservedSlotIds={myReservedSlotIds}
-            onSelectSlot={handleSelectSlot}
-          />
+            {/* 주간 범위 컨트롤 */}
+            <div className="smp-week-controls">
+                <div className="smp-week-controls-inner">
+                    <div>
+                        <label>FROM:</label>
+                        <input
+                            type="date"
+                            value={fromDate}
+                            onChange={(e) =>
+                                handleChangeFromDate(e.target.value)
+                            }
+                        />
+                    </div>
+                    <div>
+                        <label>TO:</label>
+                        <input
+                            type="date"
+                            value={toDate}
+                            onChange={(e) => handleChangeToDate(e.target.value)}
+                        />
+                    </div>
+                    <button
+                        type="button"
+                        className="smp-week-nav-btn"
+                        onClick={handlePrevWeek}
+                    >
+                        ◀ 이전 주
+                    </button>
+                    <button
+                        type="button"
+                        className="smp-week-nav-btn"
+                        onClick={handleNextWeek}
+                    >
+                        다음 주 ▶
+                    </button>
+                </div>
+            </div>
+
+            {/* 내 예약 목록 */}
+            <section className="smp-reservations-section">
+                <CounselingList
+                    mode="student"
+                    title="내 예약 목록"
+                    reservations={myReservations}
+                    selectedId={
+                        selectedReservation && selectedReservation.reservationId
+                    }
+                    onSelect={handleSelectReservation}
+                />
+            </section>
+
+            {/* 스케줄 & 상세 섹션 */}
+            <section className="smp-schedule-detail-section">
+                {/* 왼쪽: 교수 선택 + 시간표 */}
+                <div className="smp-schedule-container">
+                    <div className="smp-schedule-header">
+                        <h3 className="smp-schedule-title">상담 가능 시간대</h3>
+
+                        {/* 교수 선택 */}
+                        <div className="smp-professor-select-wrapper">
+                            <StudentProfessorSelect
+                                professors={professors}
+                                selectedId={selectedProfessorId}
+                                onChange={(id) => {
+                                    setSelectedProfessorId(id);
+                                    clearDetail();
+                                }}
+                            />
+                        </div>
+                    </div>
+
+                    <StudentOpenSlotGrid
+                        fromDate={fromDate}
+                        toDate={toDate}
+                        slots={slots}
+                        myReservedSlotIds={myReservedSlotIds}
+                        onSelectSlot={handleSelectSlot}
+                    />
+                </div>
+
+                {/* 오른쪽: 상세 패널 */}
+                <div className="smp-detail-container">
+                    <h3 className="smp-detail-title">상세 정보</h3>
+                    <CounselingDetailPanel
+                        mode="student"
+                        slot={selectedSlot}
+                        reservation={selectedReservation}
+                        error={detailError}
+                        onReserve={handleReserve}
+                        onCancel={handleCancel}
+                        memo={memo}
+                        onChangeMemo={setMemo}
+                    />
+                </div>
+            </section>
         </div>
-
-
-
-        {/* 오른쪽: 상세 패널 */}
-        <div className="smp-detail-container">
-          <h3 className="smp-detail-title">상세 정보</h3>
-          <CounselingDetailPanel
-            mode="student"
-            slot={selectedSlot}
-            reservation={selectedReservation}
-            error={detailError}
-            onReserve={handleReserve}
-            onCancel={handleCancel}
-            memo={memo}
-            onChangeMemo={setMemo}
-          />
-
-        </div>
-      </section>
-    </div>
-  );
+    );
 }
 
 export default StudentCounselingPage;
