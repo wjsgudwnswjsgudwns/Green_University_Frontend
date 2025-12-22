@@ -160,3 +160,17 @@
   border-color: #216d30;
   color: #ffffff;
 }
+
+/* 페이징 버튼 비활성화 스타일 */
+.stafflist-page-button:disabled {
+  background-color: #f8f9fa;
+  color: #ccc;
+  border-color: #e0e0e0;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.stafflist-page-button:disabled:hover {
+  background-color: #f8f9fa;
+  border-color: #e0e0e0;
+}

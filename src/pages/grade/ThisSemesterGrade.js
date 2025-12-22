@@ -32,11 +32,19 @@ const ThisSemesterGrade = () => {
   };
 
   const handleEvaluation = (subjectId) => {
-    window.open(
+    const popup = window.open(
       `/evaluation?subjectId=${subjectId}`,
       "_blank",
       "width=720,height=1000"
     );
+
+    const checkPopupClosed = setInterval(() => {
+      if (popup.closed) {
+        clearInterval(checkPopupClosed);
+        // 팝업이 닫히면 성적 데이터 새로고침
+        fetchThisSemesterGrade();
+      }
+    }, 500); // 0.5초마다 체크
   };
 
   return (
@@ -104,7 +112,7 @@ const ThisSemesterGrade = () => {
                       <td className="tsg-list-name">{grade.name}</td>
                       <td>{grade.type}</td>
                       <td>{grade.grades}</td>
-                      <td>{grade.grade}</td>
+                      <td>{grade.grade || "-"}</td>
                       <td>
                         {grade.evaluationId == null ? (
                           <a
