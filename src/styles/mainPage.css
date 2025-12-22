@@ -1,5 +1,12 @@
 /* Main Page Styles - 클래스명 충돌 방지 */
 
+/* 페이지 컨테이너 기본 설정 */
+.main-page.page-container {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
 /* 배너 슬라이더 */
 .banner-slider {
   position: relative;
@@ -7,7 +14,7 @@
   height: 841px;
   overflow: hidden;
   margin-bottom: 32px;
-  border-radius: 8px;
+  /* border-radius: 8px; */
 }
 
 .slider-track {
@@ -65,6 +72,7 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 20px;
+  box-sizing: border-box;
 }
 
 /* 프로필 카드 - 왼쪽 상단 (1행 1열) */
@@ -95,6 +103,7 @@
   padding: 24px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
+  box-sizing: border-box;
 }
 
 .main-page .content-section:hover {
@@ -226,6 +235,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  min-width: 0;
 }
 
 .main-page .schedule-content h3 {
@@ -233,6 +243,9 @@
   font-size: 1rem;
   font-weight: 600;
   color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .main-page .schedule-content p {
@@ -261,6 +274,7 @@
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
 }
 
 .main-page .profile-header {
@@ -302,6 +316,7 @@
 .main-page .profile-table td {
   padding: 10px 8px;
   vertical-align: middle;
+  word-break: break-word;
 }
 
 .main-page .profile-table td:first-child {
@@ -409,6 +424,7 @@
   .main-page .main-content {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto auto;
+    padding: 0 16px;
   }
 
   .main-page .side-column {
@@ -429,20 +445,33 @@
 
   .banner-slider {
     height: 400px;
+    margin-left: 0;
+    margin-right: 0;
+    border-radius: 0;
   }
 }
 
 @media (max-width: 768px) {
+  .main-page.page-container {
+    padding: 0;
+  }
+
   .main-page .main-content {
-    padding: 0 16px;
+    padding: 0 12px;
+    gap: 16px;
   }
 
   .banner-slider {
     height: 300px;
+    margin-bottom: 16px;
   }
 
   .main-page .section-header h2 {
     font-size: 1.25rem;
+  }
+
+  .main-page .content-section {
+    padding: 20px;
   }
 
   .main-page .schedule-date {
@@ -453,11 +482,25 @@
   .main-page .schedule-date .day {
     font-size: 1.25rem;
   }
+
+  .main-page .notice-title {
+    font-size: 0.9rem;
+  }
+
+  .main-page .notice-date {
+    font-size: 0.8rem;
+  }
 }
 
 @media (max-width: 480px) {
+  .main-page .main-content {
+    padding: 0 8px;
+    gap: 12px;
+  }
+
   .banner-slider {
     height: 200px;
+    margin-bottom: 12px;
   }
 
   .main-page .content-section {
@@ -469,16 +512,86 @@
     padding: 16px;
   }
 
+  .main-page .section-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .main-page .more-link {
+    font-size: 0.85rem;
+  }
+
   .main-page .profile-buttons {
     flex-direction: column;
+    gap: 8px;
+  }
+
+  .main-page .profile-btn {
+    padding: 10px 14px;
+    font-size: 0.85rem;
   }
 
   .main-page .schedule-item {
     flex-direction: column;
     align-items: flex-start;
+    padding: 12px;
+    gap: 12px;
   }
 
   .main-page .schedule-date {
     align-self: flex-start;
+    min-width: 50px;
+    height: 50px;
+  }
+
+  .main-page .schedule-date .month {
+    font-size: 0.75rem;
+  }
+
+  .main-page .schedule-date .day {
+    font-size: 1.2rem;
+  }
+
+  .main-page .schedule-content h3 {
+    font-size: 0.95rem;
+    white-space: normal;
+  }
+
+  .main-page .schedule-content p {
+    font-size: 0.8rem;
+  }
+
+  .main-page .notice-item {
+    padding: 10px 12px;
+  }
+
+  .main-page .notice-title {
+    font-size: 0.85rem;
+    margin-right: 8px;
+  }
+
+  .main-page .notice-date {
+    font-size: 0.75rem;
+  }
+
+  .main-page .profile-table {
+    font-size: 0.85rem;
+  }
+
+  .main-page .profile-table td {
+    padding: 8px 4px;
+  }
+
+  .main-page .profile-table td:first-child {
+    width: 70px;
+  }
+
+  .slider-indicators {
+    bottom: 10px;
+    gap: 6px;
+  }
+
+  .slider-indicators .indicator {
+    width: 8px;
+    height: 8px;
   }
 }

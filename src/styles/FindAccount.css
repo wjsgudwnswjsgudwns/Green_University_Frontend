@@ -119,7 +119,7 @@ html {
   padding: 60px 80px;
 }
 
-/* 계정 찾기 컨테이너 - 투명 배경으로 변경 */
+/* 계정 찾기 컨테이너 */
 .find-account-container {
   position: relative;
   width: 100%;
@@ -195,7 +195,7 @@ html {
   margin-top: 24px;
 }
 
-/* 입력 그룹 - 로그인 페이지와 동일한 스타일, 다른 CSS와 완전 격리 */
+/* 입력 그룹 */
 .find-account-page-wrapper .find-account-form .form-group {
   display: flex !important;
   align-items: center !important;
@@ -206,7 +206,13 @@ html {
   transition: all 0.3s ease !important;
   position: relative !important;
   box-shadow: none !important;
-  margin-bottom: 20px !important;
+  margin-bottom: 0 !important;
+}
+
+.find-account-page-wrapper .find-account-form .form-group:focus-within {
+  background: #f0f0f0 !important;
+  box-shadow: 0 0 0 3px rgba(224, 185, 96, 0.3) !important;
+  transform: translateY(-1px);
 }
 
 .find-account-page-wrapper .find-account-form .form-group label {
@@ -230,8 +236,14 @@ html {
   height: auto !important;
 }
 
-.find-account-page-wrapper .find-account-form .form-group input::-webkit-outer-spin-button,
-.find-account-page-wrapper .find-account-form .form-group input::-webkit-inner-spin-button {
+.find-account-page-wrapper
+  .find-account-form
+  .form-group
+  input::-webkit-outer-spin-button,
+.find-account-page-wrapper
+  .find-account-form
+  .form-group
+  input::-webkit-inner-spin-button {
   -webkit-appearance: none !important;
   margin: 0 !important;
 }
@@ -393,6 +405,8 @@ html {
   justify-content: center;
   text-align: center;
   align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .result-text {
@@ -413,6 +427,7 @@ html {
   border-radius: 10px;
   padding: 16px 20px;
   margin: 20px 0;
+  flex-wrap: wrap;
 }
 
 .temp-password {
@@ -427,17 +442,20 @@ html {
   background: #e0b960;
   border: none;
   border-radius: 6px;
-  padding: 8px;
+  padding: 8px 12px;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 0.9rem;
+  color: #ffffff;
+  font-weight: 600;
 }
 
 .copy-button:hover {
   background: #c9a24d;
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 .copy-button .material-symbols-outlined {
@@ -515,10 +533,16 @@ html {
   }
 
   .find-account-left-text p {
-    font-size: 2rem;
+    font-size: 1.8rem;
+  }
+
+  .passion,
+  .logotext {
+    width: 180px;
   }
 }
 
+/* 모바일 - 위아래 배치 */
 @media (max-width: 768px) {
   .find-account-page-wrapper {
     flex-direction: column;
@@ -530,12 +554,29 @@ html {
     padding: 40px 20px;
   }
 
+  .find-account-left::before {
+    display: none;
+  }
+
   .find-account-left .find-account-logo img {
-    max-width: 160px;
+    max-width: 180px;
+  }
+
+  .find-account-left-text {
+    margin-top: -20px;
+    margin-left: 0;
+    text-align: center;
+    display: flex;
+    justify-content: center;
   }
 
   .find-account-left-text p {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
+  }
+
+  .passion,
+  .logotext {
+    width: 160px;
   }
 
   .find-account-right {
@@ -551,8 +592,17 @@ html {
     font-size: 1.8rem;
   }
 
-  .form-group {
-    padding: 14px 16px;
+  .find-account-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .find-account-page-wrapper .find-account-form .form-group {
+    padding: 14px 16px !important;
+  }
+
+  .find-account-page-wrapper .find-account-form .form-group input,
+  .find-account-page-wrapper .find-account-form .form-group select {
+    font-size: 1rem !important;
   }
 
   .submit-button {
@@ -560,8 +610,10 @@ html {
     font-size: 1rem;
   }
 
-  .result-id {
-    font-size: 1.6rem;
+  .result-name,
+  .result-foundid,
+  .result-text {
+    font-size: 1.5rem;
   }
 
   .temp-password {
@@ -576,57 +628,104 @@ html {
   }
 
   .find-account-left .find-account-logo img {
-    max-width: 140px;
+    max-width: 150px;
+  }
+
+  .find-account-left-text {
+    margin-top: -10px;
   }
 
   .find-account-left-text p {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
+  }
+
+  .passion,
+  .logotext {
+    width: 130px;
+    padding: 8px 0;
+    border-width: 2px;
+  }
+
+  .find-account-container {
+    padding: 0;
   }
 
   .find-account-title {
     font-size: 1.5rem;
+    margin-bottom: 8px;
+    padding-bottom: 12px;
   }
 
   .find-account-subtitle {
     font-size: 0.85rem;
+    margin-bottom: 24px;
   }
 
-  .form-group {
-    padding: 12px 14px;
+  .find-account-page-wrapper .find-account-form .form-group {
+    padding: 12px 14px !important;
+  }
+
+  .find-account-page-wrapper .find-account-form .form-group input,
+  .find-account-page-wrapper .find-account-form .form-group select {
+    font-size: 0.95rem !important;
   }
 
   .submit-button {
     padding: 12px 18px;
+    font-size: 0.95rem;
   }
 
   .find-account-links {
     flex-direction: column;
     gap: 12px;
+    text-align: center;
   }
 
   .find-account-links li:not(:last-child)::after {
     display: none;
   }
 
-  .success-icon .material-symbols-outlined {
-    font-size: 48px;
+  .result-container {
+    padding: 28px 20px;
   }
 
-  .result-id {
+  .result-name,
+  .result-text {
+    font-size: 1.3rem;
+  }
+
+  .result-foundid {
     font-size: 1.4rem;
+  }
+
+  .result-foundid-div {
+    flex-direction: column;
+    gap: 10px;
   }
 
   .temp-password-box {
     flex-direction: column;
     gap: 10px;
+    padding: 14px 16px;
   }
 
   .temp-password {
     font-size: 1rem;
+    letter-spacing: 1px;
   }
 
-  .result-container {
-    padding: 32px 24px;
+  .copy-button {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+  }
+
+  .warning-text {
+    font-size: 0.8rem;
+    padding: 8px;
+  }
+
+  .success-icon .material-symbols-outlined {
+    font-size: 48px;
   }
 }
 

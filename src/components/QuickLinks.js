@@ -35,7 +35,7 @@ export default function QuickLinks() {
         link: `/student/learningai/${user?.id}`,
         icon: FileText,
       },
-      { name: "학생상담", link: "/student/counseling", icon: MessageSquare },
+      { name: "상담", link: "/student/counseling", icon: MessageSquare },
     ],
     professor: [
       { name: "수강생관리", link: "/professor/subject", icon: Users },

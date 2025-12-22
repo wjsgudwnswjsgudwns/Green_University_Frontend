@@ -275,7 +275,7 @@ const PreApplication = () => {
               </span>
             </h4>
 
-            <table border="1" className="sub--list--table">
+            <table className="sub--list--table">
               <thead>
                 <tr>
                   <th>단과대학</th>

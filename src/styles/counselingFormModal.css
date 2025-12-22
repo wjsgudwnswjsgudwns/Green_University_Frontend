@@ -59,9 +59,14 @@
   transition: all 0.2s;
 }
 
-.cfm-close-btn:hover {
+.cfm-close-btn:hover:not(:disabled) {
   background: #e0e6ed;
   color: #2c3e50;
+}
+
+.cfm-close-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* 모달 바디 */
@@ -137,6 +142,14 @@
   outline: none;
   border-color: #216d30;
   box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
+}
+
+.cfm-input:disabled,
+.cfm-textarea:disabled,
+.cfm-select:disabled {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 .cfm-textarea {
@@ -221,6 +234,10 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .cfm-btn-cancel {
@@ -228,7 +245,7 @@
   color: white;
 }
 
-.cfm-btn-cancel:hover {
+.cfm-btn-cancel:hover:not(:disabled) {
   background: #5a6268;
 }
 
@@ -237,13 +254,30 @@
   color: white;
 }
 
-.cfm-btn-submit:hover {
+.cfm-btn-submit:hover:not(:disabled) {
   background: #1a5524;
 }
 
 .cfm-btn:disabled {
   background: #d1d5db;
   cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* 로딩 스피너 */
+.cfm-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: cfm-spin 0.8s linear infinite;
+}
+
+@keyframes cfm-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* 반응형 디자인 */

@@ -124,7 +124,7 @@ const PreAppList = () => {
 
   // 목록 렌더링 함수
   const renderTable = (list, isCompleted = false) => (
-    <table border="1" className="sub--list--table">
+    <table className="sub--list--table">
       <thead>
         <tr>
           <th>학수번호</th>

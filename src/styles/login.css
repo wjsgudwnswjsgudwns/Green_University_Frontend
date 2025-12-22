@@ -354,17 +354,19 @@ html {
     max-width: 200px;
   }
 
-  .login-left-text h1 {
-    font-size: 1.7rem;
+  .login-left-text p {
+    font-size: 1.8rem;
   }
 
-  .login-left-text p {
-    font-size: 1rem;
+  .passion,
+  .logotext {
+    width: 180px;
   }
 }
 
+/* 모바일 - 위아래 배치 */
 @media (max-width: 768px) {
-  .login-page {
+  .login-page-wrapper {
     flex-direction: column;
   }
 
@@ -374,16 +376,29 @@ html {
     padding: 40px 20px;
   }
 
-  .login-left .login-logo img {
-    max-width: 160px;
+  .login-left::before {
+    display: none;
   }
 
-  .login-left-text h1 {
-    font-size: 1.5rem;
+  .login-left .login-logo img {
+    max-width: 180px;
+  }
+
+  .login-left-text {
+    margin-top: -20px;
+    margin-left: 0;
+    text-align: center;
+    display: flex;
+    justify-content: center;
   }
 
   .login-left-text p {
-    font-size: 0.95rem;
+    font-size: 1.5rem;
+  }
+
+  .passion,
+  .logotext {
+    width: 160px;
   }
 
   .login-right {
@@ -393,19 +408,22 @@ html {
 
   .login-container {
     max-width: 100%;
-    padding: 36px 28px;
   }
 
   .login-container-title {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
   }
 
   .login-form-group {
-    padding: 12px 14px;
+    padding: 14px 16px;
+  }
+
+  .login-form-group input {
+    font-size: 1rem;
   }
 
   .login-button {
-    padding: 13px 20px;
+    padding: 14px 20px;
     font-size: 1rem;
   }
 
@@ -422,39 +440,55 @@ html {
   }
 
   .login-left .login-logo img {
-    max-width: 140px;
+    max-width: 150px;
   }
 
-  .login-left-text h1 {
-    font-size: 1.3rem;
-    margin-bottom: 12px;
+  .login-left-text {
+    margin-top: -10px;
   }
 
   .login-left-text p {
-    font-size: 0.9rem;
+    font-size: 1.2rem;
+  }
+
+  .passion,
+  .logotext {
+    width: 130px;
+    padding: 8px 0;
+    border-width: 2px;
   }
 
   .login-container {
-    padding: 28px 20px;
+    padding: 0;
   }
 
   .login-container-title {
-    font-size: 1.3rem;
+    font-size: 1.5rem;
     margin-bottom: 24px;
-    padding-bottom: 20px;
+    padding-bottom: 12px;
   }
 
   .login-form-group {
-    padding: 10px 12px;
+    padding: 12px 14px;
+  }
+
+  .login-form-group input {
+    font-size: 0.95rem;
   }
 
   .login-button {
     padding: 12px 18px;
+    font-size: 0.95rem;
+  }
+
+  .remember-id {
+    font-size: 0.9rem;
   }
 
   .login-links {
     flex-direction: column;
     gap: 12px;
+    text-align: center;
   }
 
   .login-links li:not(:last-child)::after {
@@ -485,8 +519,7 @@ html {
   vertical-align: middle;
 }
 
-/* 입력 필드 스타일 강제 리셋 (네모 박스 제거) */
-/* 입력 필드 기본 스타일 (로그인 전용 스코프) */
+/* 입력 필드 스타일 강제 리셋 */
 .login-form .login-form-group {
   border: none;
   box-shadow: none;

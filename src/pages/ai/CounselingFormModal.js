@@ -20,6 +20,7 @@ export default function CounselingFormModal({
   const [errors, setErrors] = useState({});
   const [completedCounselings, setCompletedCounselings] = useState([]);
   const [loadingCounselings, setLoadingCounselings] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); // 제출 중 상태 추가
 
   // 완료된 상담 내역 불러오기
   useEffect(() => {
@@ -37,6 +38,7 @@ export default function CounselingFormModal({
         selectedReservationId: "",
       });
       setErrors({});
+      setIsSubmitting(false); // 제출 상태 초기화
     }
   }, [isOpen]);
 
@@ -133,20 +135,13 @@ export default function CounselingFormModal({
       return;
     }
 
-    // 디버깅: 전송할 데이터 확인
-    console.log("전송할 데이터:", {
-      studentId,
-      professorId,
-      subjectId,
-      scheduledAt: formData.scheduledAt,
-      counselingContent: formData.counselingContent,
-    });
-
     // 필수 값 검증
     if (!studentId || !professorId || !subjectId) {
       alert("필수 정보가 누락되었습니다. (학생ID, 교수ID, 과목ID)");
       return;
     }
+
+    setIsSubmitting(true); // 제출 시작
 
     try {
       // API 호출
@@ -174,11 +169,13 @@ export default function CounselingFormModal({
       console.error("상담 기록 실패:", error);
       console.error("에러 상세:", error.response?.data);
       alert("상담 기록 저장에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsSubmitting(false); // 제출 완료
     }
   };
 
   const handleOverlayClick = (e) => {
-    if (e.target.className === "cfm-modal-overlay") {
+    if (e.target.className === "cfm-modal-overlay" && !isSubmitting) {
       onClose();
     }
   };
@@ -204,7 +201,11 @@ export default function CounselingFormModal({
         {/* Modal Header */}
         <div className="cfm-modal-header">
           <h2>완료된 상담 기록</h2>
-          <button className="cfm-close-btn" onClick={onClose}>
+          <button
+            className="cfm-close-btn"
+            onClick={onClose}
+            disabled={isSubmitting}
+          >
             <span className="material-symbols-outlined">X</span>
           </button>
         </div>
@@ -241,6 +242,7 @@ export default function CounselingFormModal({
                   name="scheduledAt"
                   value={formData.scheduledAt}
                   onChange={handleChange}
+                  disabled={isSubmitting}
                   className={`cfm-input ${
                     errors.scheduledAt ? "cfm-input-error" : ""
                   }`}
@@ -264,6 +266,7 @@ export default function CounselingFormModal({
                 name="counselingContent"
                 value={formData.counselingContent}
                 onChange={handleChange}
+                disabled={isSubmitting}
                 placeholder="상담 내용을 입력해주세요."
                 rows="8"
                 className={`cfm-textarea ${
@@ -283,11 +286,23 @@ export default function CounselingFormModal({
                 type="button"
                 className="cfm-btn cfm-btn-cancel"
                 onClick={onClose}
+                disabled={isSubmitting}
               >
                 취소
               </button>
-              <button type="submit" className="cfm-btn cfm-btn-submit">
-                등록하기
+              <button
+                type="submit"
+                className="cfm-btn cfm-btn-submit"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <span className="cfm-spinner"></span>
+                    등록 중...
+                  </>
+                ) : (
+                  "등록하기"
+                )}
               </button>
             </div>
           </form>

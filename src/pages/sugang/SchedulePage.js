@@ -292,7 +292,7 @@ const SchedulePage = () => {
               <h4>
                 <span style={{ fontWeight: 600 }}>수강 과목 목록</span>
               </h4>
-              <table border="1" className="sub--list--table">
+              <table className="sub--list--table">
                 <thead>
                   <tr>
                     <th>학수번호</th>

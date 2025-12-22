@@ -98,7 +98,7 @@ export default function BreakListStudent() {
         <div className="mypage-divider"></div>
 
         {breakAppList.length > 0 ? (
-          <table className="mypage-list-table" border="1">
+          <table className="mypage-list-table">
             <thead>
               <tr>
                 <th>신청일자</th>
