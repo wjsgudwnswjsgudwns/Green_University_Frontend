@@ -6,13 +6,14 @@ import React, {
     useRef,
     useState,
 } from "react";
+import "../styles/MediaPanel.css";
 
 /**
- * MediaPanel (final)
- * - mode: 'focus' | 'grid'
- * - 참가자 수 변동으로 stage 렌더가 막히지 않음
- * - 1명이어도 grid 가능
- * - 하단 컨트롤: 마이크/카메라 + 포커스/그리드 토글 + 나가기
+ * MediaPanel (CSS-only ratio, production-stable)
+ * - ✅ GRID/FOCUS 모두 16:9 비율이 "절대" 안 깨짐 (CSS aspect-ratio 프레임)
+ * - ✅ JS로 픽셀 계산/측정 안 함 (0높이/타이밍 이슈 제거)
+ * - GRID: 참가자 수에 따라 직관적인 cols(1/2/3)만 적용
+ * - FOCUS: 상단 썸네일 바(오버레이) + 좌우 순환 스크롤
  */
 export default function MediaPanel({
     participants = [],
@@ -53,19 +54,64 @@ export default function MediaPanel({
     }, [setPlayNonce]);
 
     // =========================================================
-    // safeFocused: focusId invalid/순간 null 방어
+    // lists
     // =========================================================
+    const list = useMemo(() => {
+        const s =
+            sortedParticipants && sortedParticipants.length
+                ? sortedParticipants
+                : participants;
+        return s || [];
+    }, [sortedParticipants, participants]);
+
     const safeFocused = useMemo(() => {
         if (focusedParticipant) return focusedParticipant;
-        const me = (participants || []).find((p) => !!p?.isMe);
-        if (me) return me;
-        return (participants || [])[0] || null;
-    }, [focusedParticipant, participants]);
+        const me = list.find((p) => !!p?.isMe);
+        return me || list[0] || null;
+    }, [focusedParticipant, list]);
 
     const safeFocusId = safeFocused ? String(safeFocused.id) : null;
 
+    // =========================================================
+    // FOCUS thumb strip loop scroll
+    // =========================================================
+    const thumbStripRef = useRef(null);
+
+    const scrollThumbsLoop = useCallback((dir) => {
+        const el = thumbStripRef.current;
+        if (!el) return;
+
+        const maxLeft = Math.max(0, el.scrollWidth - el.clientWidth);
+        const step = Math.floor(el.clientWidth * 0.85);
+
+        const nearStart = el.scrollLeft <= 2;
+        const nearEnd = el.scrollLeft >= maxLeft - 2;
+
+        if (dir > 0) {
+            if (nearEnd) el.scrollTo({ left: 0, behavior: "smooth" });
+            else el.scrollBy({ left: step, behavior: "smooth" });
+        } else {
+            if (nearStart) el.scrollTo({ left: maxLeft, behavior: "smooth" });
+            else el.scrollBy({ left: -step, behavior: "smooth" });
+        }
+    }, []);
+
+    // =========================================================
+    // GRID columns (직관적인 실무형)
+    // - 1명: 1열
+    // - 2~4명: 2열
+    // - 5명 이상: 3열
+    // =========================================================
+    const gridCount = list.length;
+
+    const gridClass = useMemo(() => {
+        if (gridCount <= 1) return "meeting-video__grid--1";
+        if (gridCount <= 4) return "meeting-video__grid--2";
+        return "meeting-video__grid--3";
+    }, [gridCount]);
+
     return (
-        <div className="meeting-video">
+        <div className="meeting-video" data-count={gridCount}>
             {autoplayGateOpen && (
                 <AutoplayGate
                     onConfirm={requestUserGesturePlay}
@@ -105,15 +151,21 @@ export default function MediaPanel({
                             )}
                         </div>
 
-                        {/* thumb-row는 2명 이상일 때만 */}
-                        {participants.length >= 2 && (
+                        {list.length >= 2 && (
                             <div className="meeting-video__thumb-row">
-                                <button className="meeting-video__thumb-nav meeting-video__thumb-nav--prev">
+                                <button
+                                    className="meeting-video__thumb-nav meeting-video__thumb-nav--prev"
+                                    onClick={() => scrollThumbsLoop(-1)}
+                                    title="이전"
+                                >
                                     ‹
                                 </button>
 
-                                <div className="meeting-video__thumb-strip">
-                                    {sortedParticipants
+                                <div
+                                    className="meeting-video__thumb-strip"
+                                    ref={thumbStripRef}
+                                >
+                                    {list
                                         .filter(
                                             (p) =>
                                                 String(p.id) !==
@@ -139,7 +191,11 @@ export default function MediaPanel({
                                         ))}
                                 </div>
 
-                                <button className="meeting-video__thumb-nav meeting-video__thumb-nav--next">
+                                <button
+                                    className="meeting-video__thumb-nav meeting-video__thumb-nav--next"
+                                    onClick={() => scrollThumbsLoop(1)}
+                                    title="다음"
+                                >
                                     ›
                                 </button>
                             </div>
@@ -148,16 +204,16 @@ export default function MediaPanel({
                 )}
 
                 {/* =========================
-            GRID (1명이어도 가능)
+            GRID
            ========================= */}
                 {mode === "grid" && (
                     <div className="meeting-video__stage meeting-video__stage--grid">
-                        <div className="meeting-video__grid">
-                            {(sortedParticipants || []).map((p) => (
+                        <div className={`meeting-video__grid ${gridClass}`}>
+                            {list.map((p) => (
                                 <VideoTile
                                     key={p.id}
                                     participant={p}
-                                    variant={p.isMe ? "me-grid" : "grid"}
+                                    variant="grid"
                                     isFocused={String(p.id) === String(focusId)}
                                     onClick={() =>
                                         handleParticipantClick?.(p.id)
@@ -172,12 +228,6 @@ export default function MediaPanel({
                     </div>
                 )}
             </div>
-
-            {uiMedia?.noMediaDevices && (
-                <div className="meeting-video__device-message">
-                    현재 브라우저에 마이크·카메라가 연결되지 않은 상태입니다.
-                </div>
-            )}
 
             <div className="meeting-video__controls">
                 <button
@@ -200,7 +250,6 @@ export default function MediaPanel({
                     {uiMedia?.video ? "🎥" : "🚫"}
                 </button>
 
-                {/* ✅ 레이아웃 토글 버튼 1개 */}
                 <button
                     className="meeting-video__control-btn meeting-video__control-btn--toggle"
                     onClick={onToggleLayout}
@@ -300,7 +349,7 @@ function AutoplayGate({ onConfirm, onClose }) {
 }
 
 // =========================================================
-// VideoTile (동일 로직 유지)
+// VideoTile (CSS 프레임 16:9, JS는 attach/play만 담당)
 // =========================================================
 function VideoTile({
     participant,
@@ -319,9 +368,6 @@ function VideoTile({
 
     const videoRef = useRef(null);
     const audioRef = useRef(null);
-
-    const [streamTick, setStreamTick] = useState(0);
-    const bumpStreamTick = useCallback(() => setStreamTick((n) => n + 1), []);
 
     const getTracks = useCallback((stream, kind) => {
         if (!stream) return [];
@@ -346,7 +392,6 @@ function VideoTile({
     const mediaState = participant?.userId
         ? mediaStates[participant.userId]
         : null;
-
     const isKnown =
         mediaState &&
         (mediaState.known === true ||
@@ -405,43 +450,7 @@ function VideoTile({
         if (!participant?.isMe) tryPlayEl(audioRef.current);
     }, [tryPlayEl, participant?.isMe]);
 
-    useEffect(() => {
-        const s = participant?.stream;
-        if (!s) return;
-
-        const onAddTrack = () => bumpStreamTick();
-        s.addEventListener?.("addtrack", onAddTrack);
-
-        const bindTrack = (t) => {
-            if (!t) return;
-            const prevUnmute = t.onunmute;
-            const prevMute = t.onmute;
-            const prevEnded = t.onended;
-
-            t.onunmute = (...args) => {
-                bumpStreamTick();
-                if (typeof prevUnmute === "function") prevUnmute(...args);
-            };
-            t.onmute = (...args) => {
-                bumpStreamTick();
-                if (typeof prevMute === "function") prevMute(...args);
-            };
-            t.onended = (...args) => {
-                bumpStreamTick();
-                if (typeof prevEnded === "function") prevEnded(...args);
-            };
-        };
-
-        const tracks = [...getTracks(s, "video"), ...getTracks(s, "audio")];
-        tracks.forEach(bindTrack);
-
-        bumpStreamTick();
-
-        return () => {
-            s.removeEventListener?.("addtrack", onAddTrack);
-        };
-    }, [participant?.stream, bumpStreamTick, getTracks]);
-
+    // video attach
     useEffect(() => {
         const el = videoRef.current;
         if (!el) return;
@@ -460,14 +469,16 @@ function VideoTile({
             if (Janus && Janus.attachMediaStream) {
                 Janus.attachMediaStream(el, participant.stream);
             } else {
-                el.srcObject = participant.stream;
+                if (el.srcObject !== participant.stream)
+                    el.srcObject = participant.stream;
             }
             tryPlayEl(el);
         } catch (e) {
             console.error("[VideoTile] video attach 실패", e);
         }
-    }, [participant?.stream, showVideo, tryPlayEl, streamTick]);
+    }, [participant?.stream, showVideo, tryPlayEl]);
 
+    // audio attach
     useEffect(() => {
         const el = audioRef.current;
         if (!el) return;
@@ -486,20 +497,15 @@ function VideoTile({
             if (Janus && Janus.attachMediaStream) {
                 Janus.attachMediaStream(el, participant.stream);
             } else {
-                el.srcObject = participant.stream;
+                if (el.srcObject !== participant.stream)
+                    el.srcObject = participant.stream;
             }
 
             if (canHearRemote) tryPlayEl(el);
         } catch (e) {
             console.error("[VideoTile] audio attach 실패", e);
         }
-    }, [
-        participant?.stream,
-        participant?.isMe,
-        canHearRemote,
-        tryPlayEl,
-        streamTick,
-    ]);
+    }, [participant?.stream, participant?.isMe, canHearRemote, tryPlayEl]);
 
     useEffect(() => {
         if (!participant?.stream) return;
@@ -513,7 +519,6 @@ function VideoTile({
         "meeting-video__remote",
         variant === "focus" && "meeting-video__remote--focus",
         variant === "thumb" && "meeting-video__remote--thumb",
-        variant === "me-grid" && "meeting-video__remote--me-grid",
         variant === "grid" && "meeting-video__remote--grid",
         isFocused && "meeting-video__remote--focused",
     ]

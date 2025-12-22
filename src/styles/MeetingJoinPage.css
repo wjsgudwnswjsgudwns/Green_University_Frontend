@@ -125,6 +125,12 @@
     gap: 8px;
 }
 
+/* ✅ (중요) grid에서 2컬럼이 1컬럼으로 떨어지는/넘치는 현상 방지 */
+.meeting-video__grid,
+.meeting-video__remote {
+    min-width: 0;
+}
+
 /* ===========================
    3. GRID 모드
    =========================== */
@@ -141,6 +147,15 @@
 
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     align-items: center;
+}
+
+/* ✅ 2명 GRID일 때: 포커스처럼 폭 제한 + 중앙정렬 (과도하게 넓어지는 문제 해결) */
+.meeting-video__grid--two {
+    width: 100%;
+    max-width: 980px; /* 포커스 폭과 동일 */
+    margin: 0 auto; /* 중앙 정렬 */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
 }
 
 .meeting-video__remote--grid,
@@ -345,6 +360,15 @@
     outline: 2px solid rgba(255, 255, 255, 0.55);
 }
 
+/* (추가) 레이아웃 토글 버튼 */
+.meeting-video__control-btn--toggle {
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.1);
+}
+.meeting-video__control-btn--toggle:hover {
+    background: rgba(255, 255, 255, 0.16);
+}
+
 /* ===========================
    7. 오른쪽 채팅 패널
    =========================== */
@@ -511,13 +535,4 @@
     border-radius: 10px;
     font-weight: 700;
     font-size: 14px;
-}
-/* MeetingJoinPage.css */
-
-.meeting-video__control-btn--toggle {
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    background: rgba(255, 255, 255, 0.1);
-}
-.meeting-video__control-btn--toggle:hover {
-    background: rgba(255, 255, 255, 0.16);
 }

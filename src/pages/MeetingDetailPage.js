@@ -195,7 +195,7 @@ function MeetingDetailPage() {
                             fontSize: 15,
                             borderRadius: 6,
                             border: "none",
-                            background: "#2563eb",
+                            background: "#080f1dff",
                             color: "white",
                             cursor: "pointer",
                         }}
