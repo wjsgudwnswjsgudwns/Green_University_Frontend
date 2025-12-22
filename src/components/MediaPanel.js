@@ -8,13 +8,6 @@ import React, {
 } from "react";
 import "../styles/MediaPanel.css";
 
-/**
- * MediaPanel (CSS-only ratio, production-stable)
- * - ✅ GRID/FOCUS 모두 16:9 비율이 "절대" 안 깨짐 (CSS aspect-ratio 프레임)
- * - ✅ JS로 픽셀 계산/측정 안 함 (0높이/타이밍 이슈 제거)
- * - GRID: 참가자 수에 따라 직관적인 cols(1/2/3)만 적용
- * - FOCUS: 상단 썸네일 바(오버레이) + 좌우 순환 스크롤
- */
 export default function MediaPanel({
     participants = [],
     sortedParticipants = [],
@@ -30,12 +23,154 @@ export default function MediaPanel({
 
     onToggleAudio,
     onToggleVideo,
+
+    // ✅ 화면공유: 토글(시작/종료)
+    onToggleScreenShare,
+    // ✅ 화면공유: 재선택(기존 screen 종료 → 새 picker)
+    onRestartScreenShare,
+
     onToggleLayout,
     onLeave,
 
     isConnected,
     isConnecting,
+
+    // ✅ 카메라 드롭다운
+    getVideoInputs,
+    onChangeVideoSource,
 }) {
+    // =========================================================
+    // Media flags (UI)
+    // =========================================================
+    const noMediaDevices = !!uiMedia?.noMediaDevices;
+    const videoDeviceLost = !!uiMedia?.videoDeviceLost;
+    const permissionDeniedVideo = !!uiMedia?.permissionDeniedVideo;
+    const permissionDeniedScreen = !!uiMedia?.permissionDeniedScreen;
+
+    // 버튼 disable 정책
+    const disableControls = !!isConnecting;
+    const disableLeave = !isConnected && !isConnecting;
+
+    // =========================================================
+    // ✅ "현재 모드" & "진짜 송출중" 기준
+    // =========================================================
+    const isScreenMode = uiMedia?.videoSource === "screen";
+
+    // screen 송출중: screen 모드 + video=true + softMuted 아님
+    const isScreenSending =
+        isScreenMode &&
+        uiMedia?.video === true &&
+        uiMedia?.screenSoftMuted !== true;
+
+    // camera 송출중: camera 모드 + video=true + deviceLost/nomedia 아님
+    const isCameraSending =
+        !isScreenMode &&
+        uiMedia?.video === true &&
+        uiMedia?.videoDeviceLost !== true &&
+        uiMedia?.noMediaDevices !== true;
+
+    // =========================================================
+    // Media Intent Handlers
+    // =========================================================
+    const handleAudioToggle = useCallback(() => {
+        if (disableControls) return;
+        onToggleAudio?.();
+    }, [disableControls, onToggleAudio]);
+
+    const handleCameraToggle = useCallback(() => {
+        if (disableControls) return;
+        if (permissionDeniedVideo) return;
+        onToggleVideo?.();
+    }, [disableControls, permissionDeniedVideo, onToggleVideo]);
+
+    // ✅ 🖥 버튼: 시작/종료 토글
+    const handleScreenToggle = useCallback(() => {
+        if (disableControls) return;
+        if (permissionDeniedScreen) return;
+        onToggleScreenShare?.();
+    }, [disableControls, permissionDeniedScreen, onToggleScreenShare]);
+
+    // ✅ ▾ 버튼: "재선택" (기존 화면공유 종료 → 새 picker)
+    const handleScreenRestart = useCallback(() => {
+        if (disableControls) return;
+        if (permissionDeniedScreen) return;
+        // onRestartScreenShare 없으면 fallback으로 toggle
+        if (typeof onRestartScreenShare === "function") onRestartScreenShare();
+        else onToggleScreenShare?.();
+    }, [
+        disableControls,
+        permissionDeniedScreen,
+        onRestartScreenShare,
+        onToggleScreenShare,
+    ]);
+
+    // =========================================================
+    // ✅ Camera Dropdown
+    // =========================================================
+    const [cameraOptions, setCameraOptions] = useState([]);
+    const [camDropdownOpen, setCamDropdownOpen] = useState(false);
+    const camGroupRef = useRef(null);
+
+    // 카메라 목록 로드
+    useEffect(() => {
+        let alive = true;
+        const run = async () => {
+            if (typeof getVideoInputs !== "function") return;
+            try {
+                const list = await getVideoInputs();
+                if (!alive) return;
+
+                const arr = Array.isArray(list) ? list : [];
+                const normalized = arr.map((c, idx) => ({
+                    deviceId: c?.deviceId ?? `unknown-${idx}`,
+                    label: c?.label || `Camera ${idx + 1}`,
+                }));
+                setCameraOptions(normalized);
+            } catch {
+                if (!alive) return;
+                setCameraOptions([]);
+            }
+        };
+        run();
+        return () => {
+            alive = false;
+        };
+    }, [getVideoInputs]);
+
+    // 바깥 클릭하면 닫기
+    useEffect(() => {
+        if (!camDropdownOpen) return;
+
+        const onDown = (e) => {
+            if (!camGroupRef.current) return;
+            if (!camGroupRef.current.contains(e.target)) {
+                setCamDropdownOpen(false);
+            }
+        };
+
+        window.addEventListener("mousedown", onDown);
+        return () => window.removeEventListener("mousedown", onDown);
+    }, [camDropdownOpen]);
+
+    const handleCameraSelect = useCallback(
+        (deviceId) => {
+            if (disableControls) return;
+            if (permissionDeniedVideo) return;
+            if (!deviceId) return;
+
+            onChangeVideoSource?.("camera", deviceId);
+            setCamDropdownOpen(false);
+        },
+        [disableControls, permissionDeniedVideo, onChangeVideoSource]
+    );
+
+    const toggleCamDropdown = useCallback(() => {
+        if (disableControls) return;
+        if (permissionDeniedVideo) return;
+        if (cameraOptions.length === 0) return;
+        setCamDropdownOpen((v) => !v);
+    }, [disableControls, permissionDeniedVideo, cameraOptions.length]);
+
     // =========================================================
     // Autoplay Gate
     // =========================================================
@@ -50,6 +185,10 @@ export default function MediaPanel({
 
     const requestUserGesturePlay = useCallback(() => {
         if (typeof setPlayNonce === "function") setPlayNonce((n) => n + 1);
+
+        // ✅ 재차 차단될 수 있으니 다시 열릴 수 있게 해둠
+        autoplayGateShownRef.current = false;
+
         setAutoplayGateOpen(false);
     }, [setPlayNonce]);
 
@@ -97,18 +236,50 @@ export default function MediaPanel({
     }, []);
 
     // =========================================================
-    // GRID columns (직관적인 실무형)
-    // - 1명: 1열
-    // - 2~4명: 2열
-    // - 5명 이상: 3열
+    // GRID columns
     // =========================================================
     const gridCount = list.length;
-
     const gridClass = useMemo(() => {
         if (gridCount <= 1) return "meeting-video__grid--1";
         if (gridCount <= 4) return "meeting-video__grid--2";
         return "meeting-video__grid--3";
     }, [gridCount]);
+
+    // =========================================================
+    // Banner text
+    // =========================================================
+    const banner = useMemo(() => {
+        if (permissionDeniedScreen) {
+            return {
+                type: "danger",
+                text: "화면 공유 권한이 차단되어 시작할 수 없습니다. (브라우저/사이트 권한에서 화면 공유 허용 후 다시 시도)",
+            };
+        }
+        if (permissionDeniedVideo) {
+            return {
+                type: "danger",
+                text: "카메라 권한이 거부되어 영상 송출이 불가능합니다. (브라우저 권한 허용 후 다시 시도)",
+            };
+        }
+        if (noMediaDevices) {
+            return {
+                type: "warn",
+                text: "미디어 입력 장치가 감지되지 않았습니다.",
+            };
+        }
+        if (videoDeviceLost) {
+            return {
+                type: "warn",
+                text: "카메라 신호가 불안정합니다. 장치/점유 상태를 확인해 주세요.",
+            };
+        }
+        return null;
+    }, [
+        permissionDeniedScreen,
+        permissionDeniedVideo,
+        noMediaDevices,
+        videoDeviceLost,
+    ]);
 
     return (
         <div className="meeting-video" data-count={gridCount}>
@@ -120,11 +291,25 @@ export default function MediaPanel({
             )}
 
             <div className="meeting-video__main">
-                {/* =========================
-            FOCUS
-           ========================= */}
+                {/* Stage */}
                 {mode === "focus" && (
                     <div className="meeting-video__stage meeting-video__stage--strip">
+                        {banner && (
+                            <div
+                                className={[
+                                    "meeting-video__banner",
+                                    banner.type === "danger" &&
+                                        "meeting-video__banner--danger",
+                                    banner.type === "warn" &&
+                                        "meeting-video__banner--warn",
+                                ]
+                                    .filter(Boolean)
+                                    .join(" ")}
+                            >
+                                {banner.text}
+                            </div>
+                        )}
+
                         <div className="meeting-video__focus">
                             {safeFocused ? (
                                 <VideoTile
@@ -203,11 +388,24 @@ export default function MediaPanel({
                     </div>
                 )}
 
-                {/* =========================
-            GRID
-           ========================= */}
                 {mode === "grid" && (
                     <div className="meeting-video__stage meeting-video__stage--grid">
+                        {banner && (
+                            <div
+                                className={[
+                                    "meeting-video__banner",
+                                    banner.type === "danger" &&
+                                        "meeting-video__banner--danger",
+                                    banner.type === "warn" &&
+                                        "meeting-video__banner--warn",
+                                ]
+                                    .filter(Boolean)
+                                    .join(" ")}
+                            >
+                                {banner.text}
+                            </div>
+                        )}
+
                         <div className={`meeting-video__grid ${gridClass}`}>
                             {list.map((p) => (
                                 <VideoTile
@@ -229,39 +427,116 @@ export default function MediaPanel({
                 )}
             </div>
 
+            {/* Controls */}
             <div className="meeting-video__controls">
+                {/* 🎙 마이크 */}
                 <button
                     className={`meeting-video__control-btn ${
                         uiMedia?.audio ? "" : "meeting-video__control-btn--off"
                     }`}
-                    onClick={onToggleAudio}
-                    title="마이크 토글"
+                    onClick={handleAudioToggle}
+                    disabled={disableControls}
+                    title="마이크"
                 >
                     {uiMedia?.audio ? "🎙" : "🔇"}
                 </button>
 
-                <button
-                    className={`meeting-video__control-btn ${
-                        uiMedia?.video ? "" : "meeting-video__control-btn--off"
-                    }`}
-                    onClick={onToggleVideo}
-                    title="카메라 토글"
-                >
-                    {uiMedia?.video ? "🎥" : "🚫"}
-                </button>
+                {/* 🎥 카메라 + 드롭 */}
+                <div className="meeting-video__control-group" ref={camGroupRef}>
+                    <button
+                        className={`meeting-video__control-btn ${
+                            isCameraSending
+                                ? ""
+                                : "meeting-video__control-btn--off"
+                        }`}
+                        onClick={handleCameraToggle}
+                        disabled={disableControls || permissionDeniedVideo}
+                        title="카메라"
+                    >
+                        🎥
+                    </button>
 
+                    <button
+                        className="meeting-video__control-btn meeting-video__control-btn--sub"
+                        disabled={
+                            disableControls ||
+                            permissionDeniedVideo ||
+                            cameraOptions.length === 0
+                        }
+                        title="카메라 선택"
+                        onClick={toggleCamDropdown}
+                    >
+                        ▾
+                    </button>
+
+                    <div
+                        className={`meeting-video__dropdown ${
+                            camDropdownOpen ? "open" : ""
+                        }`}
+                    >
+                        {cameraOptions.length === 0 ? (
+                            <div className="meeting-video__dropdown-empty">
+                                카메라 없음
+                            </div>
+                        ) : (
+                            cameraOptions.map((c) => (
+                                <button
+                                    key={c.deviceId}
+                                    className="meeting-video__dropdown-item"
+                                    onClick={() =>
+                                        handleCameraSelect(c.deviceId)
+                                    }
+                                    disabled={
+                                        disableControls || permissionDeniedVideo
+                                    }
+                                >
+                                    📷 {c.label}
+                                </button>
+                            ))
+                        )}
+                    </div>
+                </div>
+
+                {/* 🖥 화면공유: 🖥=토글(시작/종료) / ▾=재선택(종료→새 picker) */}
+                <div className="meeting-video__control-group">
+                    <button
+                        className={`meeting-video__control-btn ${
+                            isScreenSending
+                                ? ""
+                                : "meeting-video__control-btn--off"
+                        }`}
+                        onClick={handleScreenToggle}
+                        disabled={disableControls || permissionDeniedScreen}
+                        title={isScreenSending ? "화면 공유 종료" : "화면 공유"}
+                    >
+                        🖥
+                    </button>
+
+                    <button
+                        className="meeting-video__control-btn meeting-video__control-btn--sub"
+                        onClick={handleScreenRestart}
+                        disabled={disableControls || permissionDeniedScreen}
+                        title="화면 다시 선택"
+                    >
+                        ▾
+                    </button>
+                </div>
+
+                {/* 🔁 레이아웃 토글 */}
                 <button
-                    className="meeting-video__control-btn meeting-video__control-btn--toggle"
+                    className="meeting-video__control-btn"
                     onClick={onToggleLayout}
+                    disabled={disableControls}
                     title="레이아웃 전환"
                 >
-                    {mode === "focus" ? "🧩" : "🎯"}
+                    {mode === "focus" ? "🔲" : "🎯"}
                 </button>
 
+                {/* ⏹ 나가기 */}
                 <button
                     className="meeting-video__control-btn meeting-video__control-btn--danger"
                     onClick={onLeave}
-                    disabled={!isConnected && !isConnecting}
+                    disabled={disableLeave}
                     title="나가기"
                 >
                     ⏹
@@ -349,7 +624,7 @@ function AutoplayGate({ onConfirm, onClose }) {
 }
 
 // =========================================================
-// VideoTile (CSS 프레임 16:9, JS는 attach/play만 담당)
+// VideoTile (원본 유지 + audioOff 시 mute/pause 유지)
 // =========================================================
 function VideoTile({
     participant,
@@ -396,7 +671,6 @@ function VideoTile({
         mediaState &&
         (mediaState.known === true ||
             typeof mediaState.receivedAt === "number");
-
     const remoteDeviceLost = !!mediaState?.videoDeviceLost;
 
     const videoOn = participant?.isMe
@@ -450,7 +724,6 @@ function VideoTile({
         if (!participant?.isMe) tryPlayEl(audioRef.current);
     }, [tryPlayEl, participant?.isMe]);
 
-    // video attach
     useEffect(() => {
         const el = videoRef.current;
         if (!el) return;
@@ -478,7 +751,6 @@ function VideoTile({
         }
     }, [participant?.stream, showVideo, tryPlayEl]);
 
-    // audio attach
     useEffect(() => {
         const el = audioRef.current;
         if (!el) return;
@@ -489,6 +761,16 @@ function VideoTile({
             if (el.srcObject) el.srcObject = null;
             return;
         }
+
+        // 상대 audioOff면 mute + pause (srcObject 유지)
+        if (!audioOn) {
+            try {
+                el.muted = true;
+                el.pause?.();
+            } catch {}
+            return;
+        }
+
         if (!participant?.stream) return;
 
         try {
@@ -505,7 +787,13 @@ function VideoTile({
         } catch (e) {
             console.error("[VideoTile] audio attach 실패", e);
         }
-    }, [participant?.stream, participant?.isMe, canHearRemote, tryPlayEl]);
+    }, [
+        participant?.stream,
+        participant?.isMe,
+        canHearRemote,
+        tryPlayEl,
+        audioOn,
+    ]);
 
     useEffect(() => {
         if (!participant?.stream) return;

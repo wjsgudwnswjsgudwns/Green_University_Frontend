@@ -133,10 +133,10 @@
     border-radius: 14px;
     background: linear-gradient(
         to bottom,
-        rgba(23, 25, 46, 0.55),
+        rgba(23, 25, 46, 0.192),
         rgba(255, 255, 255, 0)
     );
-    backdrop-filter: blur(6px);
+    backdrop-filter: blur(2px);
 }
 
 .meeting-video__thumb-nav {
@@ -323,4 +323,91 @@
 
 .meeting-video__control-btn--toggle:hover {
     background: rgba(255, 255, 255, 0.16);
+}
+
+.meeting-video__source-select {
+    height: 36px;
+    padding: 0 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.92);
+    outline: none;
+    cursor: pointer;
+}
+.meeting-video__source-select option {
+    color: #111;
+}
+
+/* ===========================
+   Status Banner (top overlay)
+   =========================== */
+
+.meeting-video__banner {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+
+    z-index: 12;
+
+    padding: 10px 12px;
+    border-radius: 12px;
+
+    font-size: 12px;
+    line-height: 1.35;
+
+    color: rgba(255, 255, 255, 0.92);
+    background: rgba(15, 23, 42, 0.72);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    backdrop-filter: blur(6px);
+}
+
+.meeting-video__banner--warn {
+    background: rgba(245, 158, 11, 0.16);
+    border-color: rgba(245, 158, 11, 0.35);
+}
+
+.meeting-video__banner--danger {
+    background: rgba(239, 68, 68, 0.16);
+    border-color: rgba(239, 68, 68, 0.35);
+}
+.meeting-video__control-group {
+    display: flex;
+    position: relative;
+}
+
+.meeting-video__control-btn--sub {
+    padding: 0 8px;
+    font-size: 12px;
+}
+
+.meeting-video__dropdown {
+    position: absolute;
+    bottom: 44px;
+    left: 0;
+    min-width: 180px;
+    background: #111;
+    border-radius: 10px;
+    padding: 6px;
+    display: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.meeting-video__dropdown.open {
+    display: block;
+}
+
+.meeting-video__dropdown-item {
+    width: 100%;
+    padding: 8px 10px;
+    text-align: left;
+    background: transparent;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+}
+
+.meeting-video__dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.08);
 }

@@ -391,6 +391,10 @@ function MeetingJoinPage() {
 
         toggleAudio,
         toggleVideo,
+        toggleScreenShare,
+        getVideoInputs,
+        setVideoSource,
+        restartScreenShare,
     } = useJanusLocalOnly(undefined, {
         onLocalStream: (stream) => {
             if (!stream) return setLocalStream(null);
@@ -404,7 +408,10 @@ function MeetingJoinPage() {
         onRemoteParticipantsChanged: (janusRemotes) =>
             setRemoteParticipants(janusRemotes || []),
     });
-
+    const onChangeVideoSource = useCallback(
+        (type, deviceId) => setVideoSource?.(type, deviceId),
+        [setVideoSource]
+    );
     useEffect(() => {
         leaveRoomRef.current = leaveRoom;
     }, [leaveRoom]);
@@ -418,9 +425,26 @@ function MeetingJoinPage() {
             noMediaDevices: !!m.noMediaDevices,
             liveAudio: !!m.liveAudio,
             liveVideo: !!m.liveVideo,
+
+            videoSource: m.videoSource || "camera",
+            cameraDeviceId: m.cameraDeviceId ?? null,
+
+            screenSoftMuted: !!m.screenSoftMuted,
+            screenCapturing: !!m.screenCapturing,
+
+            permissionDeniedVideo: !!m.permissionDeniedVideo,
+            permissionDeniedScreen: !!m.permissionDeniedScreen,
         };
     }, [localMedia]);
 
+    // const handleChangeVideoSource = useCallback(
+    //     (nextType, deviceId = null) => {
+    //         // nextType: "camera" | "screen"
+    //         // deviceId: 카메라 선택시만 사용
+    //         setVideoSource?.(nextType, deviceId);
+    //     },
+    //     [setVideoSource]
+    // );
     const onToggleAudioUiFirst = useCallback(() => {
         toggleAudio();
     }, [toggleAudio]);
@@ -447,6 +471,8 @@ function MeetingJoinPage() {
             fn(!!uiMedia.audio, !!uiMedia.video, {
                 videoDeviceLost: !!uiMedia.videoDeviceLost,
                 noMediaDevices: !!uiMedia.noMediaDevices,
+                videoSource: uiMedia.videoSource,
+                cameraDeviceId: uiMedia.cameraDeviceId,
                 reason,
             });
         },
@@ -481,6 +507,8 @@ function MeetingJoinPage() {
                 x.video ? 1 : 0,
                 x.videoDeviceLost ? 1 : 0,
                 x.noMediaDevices ? 1 : 0,
+                x.videoSource || "camera",
+                x.cameraDeviceId || "",
             ].join("|");
         };
 
@@ -832,10 +860,14 @@ function MeetingJoinPage() {
                     setPlayNonce={setPlayNonce}
                     onToggleAudio={onToggleAudioUiFirst}
                     onToggleVideo={onToggleVideoUiFirst}
+                    onToggleScreenShare={toggleScreenShare}
                     onToggleLayout={onToggleLayout}
                     onLeave={handleLeave}
                     isConnected={isConnected}
                     isConnecting={isConnecting}
+                    getVideoInputs={getVideoInputs}
+                    onChangeVideoSource={onChangeVideoSource}
+                    onRestartScreenShare={restartScreenShare}
                 />
 
                 <div className="meeting-side">
