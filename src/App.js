@@ -79,7 +79,6 @@ import MapPage from "./pages/map/MapPage";
 import PersonalizedLearningPage from "./pages/student/PersonalizedLearningPage";
 import EmailTestPage from "./pages/email/EmailTestPage";
 
-
 function PrivateRoute({ children, role }) {
     const { user } = useAuth();
     if (!user) {
@@ -93,557 +92,600 @@ function PrivateRoute({ children, role }) {
 }
 
 function ScrollToTop() {
-  const { pathname } = useLocation();
+    const { pathname } = useLocation();
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [pathname]);
 
-  return null;
+    return null;
 }
 
 function Layout() {
+    const location = useLocation();
 
-  const location = useLocation();
+    // 헤더와 푸터를 숨길 경로들
+    const hideHeaderFooterPaths = [
+        "/login",
+        "/find-id",
+        "/find-password",
+        "/evaluation",
+        "/professor/syllabus/:subjectId",
+    ];
+    const shouldHideHeaderFooter =
+        hideHeaderFooterPaths.includes(location.pathname) ||
+        location.pathname.startsWith("/subject/syllabus/") ||
+        location.pathname.startsWith("/professor/syllabus/edit/");
 
-  // 헤더와 푸터를 숨길 경로들
-  const hideHeaderFooterPaths = [
-    "/login",
-    "/find-id",
-    "/find-password",
-    "/evaluation",
-    "/professor/syllabus/:subjectId",
-  ];
-  const shouldHideHeaderFooter =
-    hideHeaderFooterPaths.includes(location.pathname) ||
-    location.pathname.startsWith("/subject/syllabus/") ||
-    location.pathname.startsWith("/professor/syllabus/edit/");
+    return (
+        <>
+            {!shouldHideHeaderFooter && <Header />}
+            <ScrollToTop />
+            <Routes>
+                {/* Public routes */}
+                {/* 로그인 관련 */}
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/find-id" element={<FindIdPage />} />
+                <Route path="/find-password" element={<FindPasswordPage />} />
 
-  return (
-    <>
-      {!shouldHideHeaderFooter && <Header />}
-      <ScrollToTop />
-      <Routes>
-        {/* Public routes */}
-        {/* 로그인 관련 */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/find-id" element={<FindIdPage />} />
-        <Route path="/find-password" element={<FindPasswordPage />} />
+                <Route
+                    path="/subject/syllabus/:subjectId"
+                    element={
+                        <PrivateRoute>
+                            <SyllabusPage />
+                        </PrivateRoute>
+                    }
+                />
 
-        <Route
-          path="/subject/syllabus/:subjectId"
-          element={
-            <PrivateRoute>
-              <SyllabusPage />
-            </PrivateRoute>
-          }
-        />
+                <Route path="/map" element={<MapPage />} />
 
-        <Route path="/map" element={<MapPage />} />
+                <Route path="/email" element={<EmailTestPage />} />
 
-        <Route path="/email" element={<EmailTestPage />} />
+                {/* 홈 */}
 
-        {/* 홈 */}
+                <Route
+                    path="/"
+                    element={
+                        <PrivateRoute>
+                            <MainPage />
+                        </PrivateRoute>
+                    }
+                />
 
-        <Route
-          path="/"
-          element={
-            <PrivateRoute>
-              <MainPage />
-            </PrivateRoute>
-          }
-        />
+                {/* 공통 */}
+                <Route
+                    path="/board/notice"
+                    element={
+                        <PrivateRoute>
+                            <NoticeListPage />
+                        </PrivateRoute>
+                    }
+                />
 
-        {/* 공통 */}
-        <Route
-          path="/board/notice"
-          element={
-            <PrivateRoute>
-              <NoticeListPage />
-            </PrivateRoute>
-          }
-        />
+                <Route
+                    path="/board/notice/:id"
+                    element={
+                        <PrivateRoute>
+                            <NoticeDetailPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/schedule"
+                    element={
+                        <PrivateRoute>
+                            <ScheduleListPage />
+                        </PrivateRoute>
+                    }
+                />
 
-        <Route
-          path="/board/notice/:id"
-          element={
-            <PrivateRoute>
-              <NoticeDetailPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/schedule"
-          element={
-            <PrivateRoute>
-              <ScheduleListPage />
-            </PrivateRoute>
-          }
-        />
+                <Route
+                    path="/schedule/:id"
+                    element={
+                        <PrivateRoute>
+                            <ScheduleDetailPage />
+                        </PrivateRoute>
+                    }
+                />
 
-        <Route
-          path="/schedule/:id"
-          element={
-            <PrivateRoute>
-              <ScheduleDetailPage />
-            </PrivateRoute>
-          }
-        />
+                {/* 학생 */}
 
-        {/* 학생 */}
+                {/* 휴학 */}
+                <Route
+                    path="/student/break/application"
+                    element={<BreakApplication />}
+                />
+                <Route
+                    path="/student/break/list"
+                    element={<BreakListStudent />}
+                />
+                <Route
+                    path="/student/break/detail/:id"
+                    element={<BreakDetail />}
+                />
+                <Route path="/staff/break/list" element={<BreakListStaff />} />
+                <Route
+                    path="/staff/break/detail/:id"
+                    element={<BreakDetail />}
+                />
 
-        {/* 휴학 */}
-        <Route
-          path="/student/break/application"
-          element={<BreakApplication />}
-        />
-        <Route path="/student/break/list" element={<BreakListStudent />} />
-        <Route path="/student/break/detail/:id" element={<BreakDetail />} />
-        <Route path="/staff/break/list" element={<BreakListStaff />} />
-        <Route path="/staff/break/detail/:id" element={<BreakDetail />} />
+                <Route
+                    path="/subject/list/:page"
+                    element={
+                        <PrivateRoute>
+                            <SubjectListPage />
+                        </PrivateRoute>
+                    }
+                />
 
-        <Route
-          path="/subject/list/:page"
-          element={
-            <PrivateRoute>
-              <SubjectListPage />
-            </PrivateRoute>
-          }
-        />
+                <Route path="/sugang/subjectlist" element={<SubjectList />} />
 
-        <Route path="/sugang/subjectlist" element={<SubjectList />} />
+                <Route
+                    path="/sugang/preAppList"
+                    element={
+                        <PrivateRoute>
+                            <PreAppList />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/sugang/pre"
+                    element={
+                        <PrivateRoute>
+                            <PreApplication />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/sugang/list"
+                    element={
+                        <PrivateRoute>
+                            <AppList />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/sugang/schedule"
+                    element={
+                        <PrivateRoute role="student">
+                            <SchedulePage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/sugang/application"
+                    element={
+                        <PrivateRoute>
+                            <Application />
+                        </PrivateRoute>
+                    }
+                />
 
-        <Route
-          path="/sugang/preAppList"
-          element={
-            <PrivateRoute>
-              <PreAppList />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/sugang/pre"
-          element={
-            <PrivateRoute>
-              <PreApplication />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/sugang/list"
-          element={
-            <PrivateRoute>
-              <AppList />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/sugang/schedule"
-          element={
-            <PrivateRoute role="student">
-              <SchedulePage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/sugang/application"
-          element={
-            <PrivateRoute>
-              <Application />
-            </PrivateRoute>
-          }
-        />
+                <Route
+                    path="/student/info"
+                    element={
+                        <PrivateRoute role="student">
+                            <StudentInfoPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/student/update"
+                    element={
+                        <PrivateRoute role="student">
+                            <UpdateUserPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/student/password"
+                    element={
+                        <PrivateRoute role="student">
+                            <ChangePasswordPage />
+                        </PrivateRoute>
+                    }
+                />
 
-        <Route
-          path="/student/info"
-          element={
-            <PrivateRoute role="student">
-              <StudentInfoPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/student/update"
-          element={
-            <PrivateRoute role="student">
-              <UpdateUserPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/student/password"
-          element={
-            <PrivateRoute role="student">
-              <ChangePasswordPage />
-            </PrivateRoute>
-          }
-        />
+                <Route
+                    path="/grade/thisSemester"
+                    element={
+                        <PrivateRoute role="student">
+                            <ThisSemesterGrade />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/grade/semester"
+                    element={
+                        <PrivateRoute role="student">
+                            <SemesterGrade />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/grade/total"
+                    element={
+                        <PrivateRoute role="student">
+                            <TotalGrade />
+                        </PrivateRoute>
+                    }
+                />
 
-        <Route
-          path="/grade/thisSemester"
-          element={
-            <PrivateRoute role="student">
-              <ThisSemesterGrade />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/grade/semester"
-          element={
-            <PrivateRoute role="student">
-              <SemesterGrade />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/grade/total"
-          element={
-            <PrivateRoute role="student">
-              <TotalGrade />
-            </PrivateRoute>
-          }
-        />
+                <Route
+                    path="/evaluation"
+                    element={
+                        <PrivateRoute role="student">
+                            <EvaluationForm />
+                        </PrivateRoute>
+                    }
+                />
 
-        <Route
-          path="/evaluation"
-          element={
-            <PrivateRoute role="student">
-              <EvaluationForm />
-            </PrivateRoute>
-          }
-        />
+                <Route
+                    path="/student/learningai/:studentId"
+                    element={
+                        <PrivateRoute role="student">
+                            <PersonalizedLearningPage />
+                        </PrivateRoute>
+                    }
+                />
 
-        <Route
-          path="/student/learningai/:studentId"
-          element={
-            <PrivateRoute role="student">
-              <PersonalizedLearningPage />
-            </PrivateRoute>
-          }
-        />
+                {/* 교수 */}
+                <Route
+                    path="/professor/subject"
+                    element={
+                        <PrivateRoute role="professor">
+                            <ProfessorSubjectListPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/professor/subject/:subjectId"
+                    element={
+                        <PrivateRoute role="professor">
+                            <SubjectStudentListPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/professor/subject/:subjectId/student/:studentId"
+                    element={
+                        <PrivateRoute role="professor">
+                            <UpdateStudentGradePage />
+                        </PrivateRoute>
+                    }
+                />
 
-        {/* 교수 */}
-        <Route
-          path="/professor/subject"
-          element={
-            <PrivateRoute role="professor">
-              <ProfessorSubjectListPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/professor/subject/:subjectId"
-          element={
-            <PrivateRoute role="professor">
-              <SubjectStudentListPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/professor/subject/:subjectId/student/:studentId"
-          element={
-            <PrivateRoute role="professor">
-              <UpdateStudentGradePage />
-            </PrivateRoute>
-          }
-        />
+                <Route
+                    path="/professor/syllabus/edit/:subjectId"
+                    element={
+                        <PrivateRoute role="professor">
+                            <UpdateSyllabusPage />
+                        </PrivateRoute>
+                    }
+                />
 
-        <Route
-          path="/professor/syllabus/edit/:subjectId"
-          element={
-            <PrivateRoute role="professor">
-              <UpdateSyllabusPage />
-            </PrivateRoute>
-          }
-        />
+                <Route
+                    path="/student/tuition/list"
+                    element={
+                        <PrivateRoute role="student">
+                            <TuitionListPage />
+                        </PrivateRoute>
+                    }
+                />
 
-        <Route
-          path="/student/tuition/list"
-          element={
-            <PrivateRoute role="student">
-              <TuitionListPage />
-            </PrivateRoute>
-          }
-        />
+                <Route
+                    path="/student/tuition/payment"
+                    element={
+                        <PrivateRoute>
+                            <TuitionPaymentPage />
+                        </PrivateRoute>
+                    }
+                />
 
-        <Route
-          path="/student/tuition/payment"
-          element={
-            <PrivateRoute>
-              <TuitionPaymentPage />
-            </PrivateRoute>
-          }
-        />
+                <Route
+                    path="/professor/info"
+                    element={
+                        <PrivateRoute role="professor">
+                            <ProfessorInfoPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/professor/update"
+                    element={
+                        <PrivateRoute role="professor">
+                            <UpdateUserPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/professor/password"
+                    element={
+                        <PrivateRoute role="professor">
+                            <ChangePasswordPage />
+                        </PrivateRoute>
+                    }
+                />
 
-        <Route
-          path="/professor/info"
-          element={
-            <PrivateRoute role="professor">
-              <ProfessorInfoPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/professor/update"
-          element={
-            <PrivateRoute role="professor">
-              <UpdateUserPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/professor/password"
-          element={
-            <PrivateRoute role="professor">
-              <ChangePasswordPage />
-            </PrivateRoute>
-          }
-        />
+                <Route
+                    path="/evaluation/read"
+                    element={
+                        <PrivateRoute role="professor">
+                            <MyEvaluation />
+                        </PrivateRoute>
+                    }
+                />
 
-        <Route
-          path="/evaluation/read"
-          element={
-            <PrivateRoute role="professor">
-              <MyEvaluation />
-            </PrivateRoute>
-          }
-        />
+                <Route
+                    path="/chatbot"
+                    element={
+                        <PrivateRoute role="student">
+                            <ChatbotPage />
+                        </PrivateRoute>
+                    }
+                />
 
-        <Route
-          path="/chatbot"
-          element={
-            <PrivateRoute role="student">
-              <ChatbotPage />
-            </PrivateRoute>
-          }
-        />
+                {/* 직원 */}
 
-        {/* 직원 */}
+                <Route
+                    path="/staff/student-list"
+                    element={<StudentListStaff />}
+                />
+                <Route
+                    path="/staff/student-list/:page"
+                    element={<StudentListStaff />}
+                />
 
-        <Route path="/staff/student-list" element={<StudentListStaff />} />
-        <Route
-          path="/staff/student-list/:page"
-          element={<StudentListStaff />}
-        />
+                <Route
+                    path="/board/notice/write"
+                    element={
+                        <PrivateRoute role="staff">
+                            <NoticeWritePage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/board/notice/edit/:id"
+                    element={
+                        <PrivateRoute role="staff">
+                            <NoticeEditPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/schedule/manage"
+                    element={
+                        <PrivateRoute role="staff">
+                            <ScheduleManagePage />
+                        </PrivateRoute>
+                    }
+                />
 
-        <Route
-          path="/board/notice/write"
-          element={
-            <PrivateRoute role="staff">
-              <NoticeWritePage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/board/notice/edit/:id"
-          element={
-            <PrivateRoute role="staff">
-              <NoticeEditPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/schedule/manage"
-          element={
-            <PrivateRoute role="staff">
-              <ScheduleManagePage />
-            </PrivateRoute>
-          }
-        />
+                <Route
+                    path="/schedule/register"
+                    element={
+                        <PrivateRoute role="staff">
+                            <ScheduleRegisterPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/staff/professor-list"
+                    element={<ProfessorListStaff />}
+                />
+                <Route
+                    path="/staff/professor-list/:page"
+                    element={<ProfessorListStaff />}
+                />
+                <Route
+                    path="/staff/register-student"
+                    element={<RegisterStudent />}
+                />
+                <Route
+                    path="/staff/register-professor"
+                    element={<RegisterProfessor />}
+                />
+                <Route
+                    path="/staff/register-staff"
+                    element={<RegisterStaff />}
+                />
 
-        <Route
-          path="/schedule/register"
-          element={
-            <PrivateRoute role="staff">
-              <ScheduleRegisterPage />
-            </PrivateRoute>
-          }
-        />
-        <Route path="/staff/professor-list" element={<ProfessorListStaff />} />
-        <Route
-          path="/staff/professor-list/:page"
-          element={<ProfessorListStaff />}
-        />
-        <Route path="/staff/register-student" element={<RegisterStudent />} />
-        <Route
-          path="/staff/register-professor"
-          element={<RegisterProfessor />}
-        />
-        <Route path="/staff/register-staff" element={<RegisterStaff />} />
+                <Route
+                    path="/staff/course-period"
+                    element={
+                        <PrivateRoute role="staff">
+                            <UpdatePeriodPage />
+                        </PrivateRoute>
+                    }
+                />
 
-        <Route
-          path="/staff/course-period"
-          element={
-            <PrivateRoute role="staff">
-              <UpdatePeriodPage />
-            </PrivateRoute>
-          }
-        />
+                <Route
+                    path="/staff/tuition/bill"
+                    element={
+                        <PrivateRoute role="staff">
+                            <CreateTuitionBillPage />
+                        </PrivateRoute>
+                    }
+                />
 
-        <Route
-          path="/staff/tuition/bill"
-          element={
-            <PrivateRoute role="staff">
-              <CreateTuitionBillPage />
-            </PrivateRoute>
-          }
-        />
+                <Route
+                    path="/staff/info"
+                    element={
+                        <PrivateRoute role="staff">
+                            <StaffInfoPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/staff/update"
+                    element={
+                        <PrivateRoute role="staff">
+                            <UpdateUserPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/staff/password"
+                    element={
+                        <PrivateRoute role="staff">
+                            <ChangePasswordPage />
+                        </PrivateRoute>
+                    }
+                />
 
-        <Route
-          path="/staff/info"
-          element={
-            <PrivateRoute role="staff">
-              <StaffInfoPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/staff/update"
-          element={
-            <PrivateRoute role="staff">
-              <UpdateUserPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/staff/password"
-          element={
-            <PrivateRoute role="staff">
-              <ChangePasswordPage />
-            </PrivateRoute>
-          }
-        />
+                <Route
+                    path="/staff/admin"
+                    element={
+                        <PrivateRoute role="staff">
+                            <Navigate to="/staff/admin/college" />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/staff/admin/college"
+                    element={
+                        <PrivateRoute role="staff">
+                            <CollegeManagement />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/staff/admin/department"
+                    element={
+                        <PrivateRoute role="staff">
+                            <DepartmentManagement />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/staff/admin/room"
+                    element={
+                        <PrivateRoute role="staff">
+                            <RoomManagement />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/staff/admin/tuition"
+                    element={
+                        <PrivateRoute role="staff">
+                            <TuitionManagement />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/staff/admin/subject"
+                    element={
+                        <PrivateRoute role="staff">
+                            <SubjectManagement />
+                        </PrivateRoute>
+                    }
+                />
 
-        <Route
-          path="/staff/admin"
-          element={
-            <PrivateRoute role="staff">
-              <Navigate to="/staff/admin/college" />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/staff/admin/college"
-          element={
-            <PrivateRoute role="staff">
-              <CollegeManagement />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/staff/admin/department"
-          element={
-            <PrivateRoute role="staff">
-              <DepartmentManagement />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/staff/admin/room"
-          element={
-            <PrivateRoute role="staff">
-              <RoomManagement />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/staff/admin/tuition"
-          element={
-            <PrivateRoute role="staff">
-              <TuitionManagement />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/staff/admin/subject"
-          element={
-            <PrivateRoute role="staff">
-              <SubjectManagement />
-            </PrivateRoute>
-          }
-        />
+                {/* Web Chatting */}
 
-        {/* Web Chatting */}
+                <Route
+                    path="/meetings/:meetingId"
+                    element={
+                        <PrivateRoute>
+                            <MeetingDetailPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/meetings/:meetingId/join"
+                    element={
+                        <PrivateRoute>
+                            <MeetingJoinPage />
+                        </PrivateRoute>
+                    }
+                />
 
-        <Route
-          path="/meetings/:meetingId"
-          element={
-            <PrivateRoute>
-              <MeetingDetailPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/meetings/:meetingId/join"
-          element={
-            <PrivateRoute>
-              <MeetingJoinPage />
-            </PrivateRoute>
-          }
-        />
+                {/* 학생 상담 페이지 */}
+                <Route
+                    path="/student/counseling"
+                    element={
+                        <PrivateRoute role="student">
+                            <StudentCounselingLayout />
+                        </PrivateRoute>
+                    }
+                >
+                    <Route index element={<StudentCounselingPage />} />
 
-        {/* 학생 상담 페이지 */}
-        <Route path="/student/counseling" element={<StudentCounselingPage />} />
+                    <Route
+                        path="meetings"
+                        element={
+                            <PrivateRoute role="student">
+                                <MeetingListPage viewRole="student" />
+                            </PrivateRoute>
+                        }
+                    />
+                </Route>
 
-        <Route
-          path="/aiprofessor/counseling"
-          element={<AIProfessorCounselingLayout />}
-        >
-          {/* 전체 학생 관리 (기본 페이지) */}
-          <Route index element={<AIProfessorCounselingPage />} />
+                <Route
+                    path="/aiprofessor/counseling"
+                    element={<AIProfessorCounselingLayout />}
+                >
+                    {/* 전체 학생 관리 (기본 페이지) */}
+                    <Route index element={<AIProfessorCounselingPage />} />
 
-          {/* 위험 학생 관리 */}
-          <Route path="risk" element={<AIProfessorRiskStudentsPage />} />
+                    {/* 위험 학생 관리 */}
+                    <Route
+                        path="risk"
+                        element={<AIProfessorRiskStudentsPage />}
+                    />
 
-          <Route path="schedule" element={<ProfessorCounselingPage />} />
+                    <Route
+                        path="schedule"
+                        element={<ProfessorCounselingPage />}
+                    />
 
-          <Route
-            path="meetings"
-            element={
-              <PrivateRoute>
-                <MeetingListPage />
-              </PrivateRoute>
-            }
-          />
-        </Route>
+                    <Route
+                        path="meetings"
+                        element={
+                            <PrivateRoute>
+                                <MeetingListPage />
+                            </PrivateRoute>
+                        }
+                    />
+                </Route>
 
-        <Route
-          path="/aiprofessor/counseling/history/:studentId"
-          element={<CounselingHistoryPage />}
-        />
+                <Route
+                    path="/aiprofessor/counseling/history/:studentId"
+                    element={<CounselingHistoryPage />}
+                />
 
-        {/* 스태프 상담 페이지 */}
+                {/* 스태프 상담 페이지 */}
 
-        <Route
-          path="/staff/students/all"
-          element={<StaffStudentManagementLayout />}
-        >
-          <Route index element={<StaffAllStudentsPage />} />
-          <Route path="risk" element={<StaffRiskStudentsPage />} />
-        </Route>
+                <Route
+                    path="/staff/students/all"
+                    element={<StaffStudentManagementLayout />}
+                >
+                    <Route index element={<StaffAllStudentsPage />} />
+                    <Route path="risk" element={<StaffRiskStudentsPage />} />
+                </Route>
 
-        <Route
-          path="/staff/student/:studentId"
-          element={<StaffStudentDetailPage />}
-        />
+                <Route
+                    path="/staff/student/:studentId"
+                    element={<StaffStudentDetailPage />}
+                />
 
-        <Route
-          path="/staff/admin/assign-advisor"
-          element={
-            <PrivateRoute role="staff">
-              <AssignAdvisorPage />
-            </PrivateRoute>
-          }
-        />
+                <Route
+                    path="/staff/admin/assign-advisor"
+                    element={
+                        <PrivateRoute role="staff">
+                            <AssignAdvisorPage />
+                        </PrivateRoute>
+                    }
+                />
 
-        {/* Catch-all route for undefined paths */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-      {!shouldHideHeaderFooter && <Footer />}
-      {!shouldHideHeaderFooter && <ChatbotButton />}
-    </>
-  );
-
+                {/* Catch-all route for undefined paths */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+            {!shouldHideHeaderFooter && <Footer />}
+            {!shouldHideHeaderFooter && <ChatbotButton />}
+        </>
+    );
 }
 
 export default function App() {

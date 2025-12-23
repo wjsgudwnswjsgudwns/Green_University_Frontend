@@ -1677,6 +1677,13 @@ export function useJanusLocalOnly(
                 mediaRef.current.videoSource = "camera";
                 mediaRef.current.cameraDeviceId = null;
                 mediaRef.current.screenSoftMuted = false;
+
+                // ✅ 다음 세션 replace 판단 꼬임 방지
+                lastVideoMetaRef.current = {
+                    videoSource: null,
+                    cameraDeviceId: null,
+                };
+                offerErrorCountRef.current = 0;
             };
 
             // -------------------------
@@ -2245,7 +2252,8 @@ export function useJanusLocalOnly(
     const stopScreenCapture = useCallback((why = "stopScreenCapture") => {
         // ✅ 중요: 재선택/토글 후 피커가 다시 떠야 하므로 무조건 락 해제
         screenPickerLockRef.current = false;
-
+        // ✅ local video track onended가 뒤늦게 와도 "최근 screen 종료"로 판단되게
+        mediaRef.current.screenEndingAt = Date.now();
         try {
             const ss = mediaRef.current.screenStream;
             ss?.getTracks?.().forEach((t) => {
@@ -2347,6 +2355,25 @@ export function useJanusLocalOnly(
         }
 
         // C) OFF -> ON (처음 시작: picker가 떠야 함)
+        // ✅ 화면공유 진입 전 카메라 의도 저장(취소/거부 시 복구)
+        beforeScreenRef.current = {
+            wantVideo: !!m.wantVideo,
+            cameraDeviceId: m.cameraDeviceId ?? null,
+        };
+
+        // ✅ 의도(wantVideo)는 건드리지 않고, "현재 송출"만 잠깐 내려서 중복 offer/track 꼬임 방지
+        if (connRef.current.isConnected && janusRef.current.pub) {
+            try {
+                janusRef.current.pub.send({
+                    message: {
+                        request: "configure",
+                        audio: !!m.wantAudio,
+                        video: false,
+                    },
+                });
+            } catch {}
+        }
+
         m.videoSource = "screen";
         m.screenSoftMuted = false;
         m.wantVideo = true;
@@ -2359,6 +2386,11 @@ export function useJanusLocalOnly(
     }, [emitLocalMediaState, isQuietWindowActive, scheduleApplyIntent]);
 
     const screenPickerLockRef = useRef(false);
+
+    const beforeScreenRef = useRef({
+        wantVideo: DEFAULT_WANT_VIDEO,
+        cameraDeviceId: null,
+    });
 
     useEffect(() => {
         const m = mediaRef.current;
@@ -2446,6 +2478,14 @@ export function useJanusLocalOnly(
                 safeSet(() =>
                     setError("화면 공유 권한이 거부되었거나 취소되었습니다.")
                 );
+                if (connRef.current.isConnected && janusRef.current.pub) {
+                    const restoreVideo = !!beforeScreenRef.current.wantVideo;
+                    // (원하면 cameraDeviceId 복구도 여기서 setVideoSource로 할 수 있지만, 현재는 세션 재생성 정책이라 과하지 않게 둠)
+                    queuePublish(m.wantAudio, restoreVideo, {
+                        republish: true,
+                        reason: "screen-cancel-restore-camera",
+                    });
+                }
             }
         })();
     }, [
@@ -2561,6 +2601,13 @@ export function useJanusLocalOnly(
         async (nextType, deviceId = null) => {
             const t = nextType === "screen" ? "screen" : "camera";
 
+            // ✅ screen 진입 전 상태 저장 (취소/거부 복구용)
+            if (t === "screen") {
+                beforeScreenRef.current = {
+                    wantVideo: !!mediaRef.current.wantVideo,
+                    cameraDeviceId: mediaRef.current.cameraDeviceId ?? null,
+                };
+            }
             // ✅ 정책: camera로 전환이면 screen 캡처는 항상 종료
             if (t === "camera") {
                 stopScreenCapture("setVideoSource->camera");
@@ -2636,7 +2683,11 @@ export function useJanusLocalOnly(
 
         // 1) 기존 캡처 완전 종료 (picker 다시 띄우려면 반드시 필요)
         stopScreenCapture("restartScreenShare");
-
+        // ✅ screen 재시작 진입 전 상태 저장(취소/거부 복구용)
+        beforeScreenRef.current = {
+            wantVideo: !!mediaRef.current.wantVideo,
+            cameraDeviceId: mediaRef.current.cameraDeviceId ?? null,
+        };
         // 2) screen 모드로 의도 고정
         mediaRef.current.videoSource = "screen";
         mediaRef.current.screenSoftMuted = false;

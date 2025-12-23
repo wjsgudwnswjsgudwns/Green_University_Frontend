@@ -281,6 +281,7 @@ function MeetingJoinPage() {
         focusedParticipant,
         switchToGrid,
         switchToFocus,
+        handleMainClick,
         handleParticipantClick,
     } = useMeetingLayout(participants);
 
@@ -459,11 +460,6 @@ function MeetingJoinPage() {
     const onToggleVideoUiFirst = useCallback(() => {
         toggleVideo();
     }, [toggleVideo]);
-
-    const onToggleLayout = useCallback(() => {
-        if (mode === "focus") switchToGrid();
-        else switchToFocus();
-    }, [mode, switchToGrid, switchToFocus]);
 
     const onToggleScreenShareWithSignal = useCallback(() => {
         const isCurrentlyScreen =
@@ -864,6 +860,7 @@ function MeetingJoinPage() {
                     focusId={focusId}
                     focusedParticipant={focusedParticipant}
                     handleParticipantClick={handleParticipantClick}
+                    onMainClick={handleMainClick}
                     uiMedia={uiMedia}
                     mediaStates={mediaStates}
                     playNonce={playNonce}
@@ -871,7 +868,6 @@ function MeetingJoinPage() {
                     onToggleAudio={onToggleAudioUiFirst}
                     onToggleVideo={onToggleVideoUiFirst}
                     onToggleScreenShare={onToggleScreenShareWithSignal}
-                    onToggleLayout={onToggleLayout}
                     onLeave={handleLeave}
                     isConnected={isConnected}
                     isConnecting={isConnecting}
