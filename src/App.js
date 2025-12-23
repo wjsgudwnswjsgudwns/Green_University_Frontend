@@ -72,20 +72,24 @@ import AIProfessorCounselingLayout from "./pages/ai/AIProfessorCounselingLayout"
 import StaffStudentManagementLayout from "./pages/ai/StaffStudentManagementLayout";
 import StaffRiskStudentsPage from "./pages/ai/StaffRiskStudentsPage";
 import AssignAdvisorPage from "./pages/AssignAdvisorPage";
+
+import StudentCounselingLayout from "./pages/student/StudentCounselingLayout";
+
 import MapPage from "./pages/map/MapPage";
 import PersonalizedLearningPage from "./pages/student/PersonalizedLearningPage";
 import EmailTestPage from "./pages/email/EmailTestPage";
 
+
 function PrivateRoute({ children, role }) {
-  const { user } = useAuth();
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-  if (role && user.userRole !== role) {
-    // If role doesn't match, redirect to home
-    return <Navigate to="/" replace />;
-  }
-  return children;
+    const { user } = useAuth();
+    if (!user) {
+        return <Navigate to="/login" replace />;
+    }
+    if (role && user.userRole !== role) {
+        // If role doesn't match, redirect to home
+        return <Navigate to="/" replace />;
+    }
+    return children;
 }
 
 function ScrollToTop() {
@@ -99,6 +103,7 @@ function ScrollToTop() {
 }
 
 function Layout() {
+
   const location = useLocation();
 
   // 헤더와 푸터를 숨길 경로들
@@ -638,12 +643,13 @@ function Layout() {
       {!shouldHideHeaderFooter && <ChatbotButton />}
     </>
   );
+
 }
 
 export default function App() {
-  return (
-    <AuthProvider>
-      <Layout />
-    </AuthProvider>
-  );
+    return (
+        <AuthProvider>
+            <Layout />
+        </AuthProvider>
+    );
 }

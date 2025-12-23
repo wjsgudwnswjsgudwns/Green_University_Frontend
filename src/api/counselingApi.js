@@ -54,12 +54,10 @@ export const reserveSlot = async (slotId, memo) => {
  * 내 예약 취소
  * DELETE /api/counseling/reservations/{reservationId}
  */
-export const cancelReservation = async (reservationId, reason) => {
-    // 사유가 있으면 요청 본문에 함께 전달 (백엔드에서 처리 가능해야 함)
-    const config = reason ? { data: { reason } } : undefined;
-    await api.delete(`/api/counseling/reservations/${reservationId}`, config);
-    // 204 NO_CONTENT → 반환값 없음
-};
+export const cancelReservation = (reservationId, reason) =>
+    api.post(`/api/counseling/reservations/${reservationId}/cancel`, null, {
+        params: { reason: reason ?? "" },
+    });
 export async function getMyReservations(fromDate, toDate) {
     const res = await api.get("/api/counseling/my-reservations", {
         params: {
@@ -155,11 +153,11 @@ export function approveReservation(reservationId, { title, description }) {
     );
 }
 
-export function cancelReservationByProfessor(reservationId, reason) {
-    // 사유가 있으면 바디에 포함
-    const body = reason ? { reason } : {};
-    return api.post(
+export const cancelReservationByProfessor = (reservationId, reason) =>
+    api.post(
         `/api/counseling/professor/reservations/${reservationId}/cancel`,
-        body
+        null,
+        {
+            params: { reason: reason ?? "" },
+        }
     );
-}

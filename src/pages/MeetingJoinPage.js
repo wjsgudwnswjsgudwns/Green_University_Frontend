@@ -16,6 +16,9 @@ import MeetingParticipantsPanel from "../components/MeetingParticipantsPanel";
 import { useMeetingLayout } from "../hooks/useMeetingLayout";
 import { useMeetingMediaSignals } from "../hooks/useMeetingMediaSignals";
 import { useMeetingPresence } from "../hooks/useMeetingPresence";
+import InviteParticipantsModal from "../components/InviteParticipantsModal";
+
+import MediaPanel from "../components/MediaPanel";
 
 function MeetingJoinPage() {
     // =========================================================
@@ -43,6 +46,12 @@ function MeetingJoinPage() {
     const [terminated, setTerminated] = useState(false);
 
     const [sideTab, setSideTab] = useState("chat");
+    const [inviteOpen, setInviteOpen] = useState(false);
+
+    const [rosterParticipants, setRosterParticipants] = useState([]);
+
+    // ✅ MediaPanel에 넘길 playNonce(오토플레이 게이트 트리거)
+    const [playNonce, setPlayNonce] = useState(0);
 
     // =========================================================
     // 3) Navigation / joinInfo State
@@ -91,10 +100,15 @@ function MeetingJoinPage() {
             joinInfo
         );
 
-    const { mediaStates, sendMediaStateNow, mediaSignalConnected } =
-        useMeetingMediaSignals(signalsMeetingId, signalsUserId, myDisplayName);
+    const {
+        mediaStates,
+        sendMediaStateNow,
+        sendMediaState,
+        mediaSignalConnected,
+    } = useMeetingMediaSignals(signalsMeetingId, signalsUserId, myDisplayName);
 
     const sendMediaStateNowRef = useRef(null);
+    const sendMediaStateRef = useRef(null);
     const mediaSignalConnectedRef = useRef(false);
 
     useEffect(() => {
@@ -104,7 +118,9 @@ function MeetingJoinPage() {
     useEffect(() => {
         sendMediaStateNowRef.current = sendMediaStateNow;
     }, [sendMediaStateNow]);
-
+    useEffect(() => {
+        sendMediaStateRef.current = sendMediaState; // ✅ 추가
+    }, [sendMediaState]);
     // =========================================================
     // 5) Presence 안정화 (lastPresenceRef)
     // =========================================================
@@ -159,7 +175,7 @@ function MeetingJoinPage() {
             }
         });
 
-        // 2) effectivePresence 먼저
+        // 2) effectivePresence
         const effectivePresence = (() => {
             if (!presenceConnected) return lastPresenceRef.current || [];
             return Array.isArray(presenceParticipants)
@@ -167,69 +183,57 @@ function MeetingJoinPage() {
                 : [];
         })();
 
-        // 3) 이제 로그
-        console.log(
-            "[presence] userId type:",
-            typeof effectivePresence?.[0]?.userId,
-            effectivePresence?.[0]?.userId
-        );
-        console.log(
-            "[remote] parsed keys:",
-            [...remoteInfoByUserId.keys()].slice(0, 5)
-        );
+        // ✅ 공통: 내 정보는 항상 "me"로 고정
+        const myUserIdNum =
+            joinInfo?.userId != null && joinInfo.userId !== ""
+                ? Number(joinInfo.userId)
+                : null;
 
-        const firstUid = effectivePresence?.[0]?.userId;
-        const firstUidNum =
-            firstUid != null && firstUid !== "" ? Number(firstUid) : null;
+        const myName =
+            joinInfo?.displayName ||
+            joinInfo?.userName ||
+            joinInfo?.nickname ||
+            "나";
 
-        console.log(
-            "[lookup test]",
-            firstUid,
-            "num=",
-            firstUidNum,
-            "=>",
-            firstUidNum != null ? remoteInfoByUserId.get(firstUidNum) : null
-        );
+        const myIsHost =
+            !!joinInfo?.isHost || joinInfo?.userId === joinInfo?.hostUserId;
 
-        // presence가 아직 없으면 "나"만이라도 보여주기
+        // ✅ presence가 비었어도 me 타일 유지
         if (!effectivePresence || effectivePresence.length === 0) {
-            if (!joinInfo?.userId) return [];
+            if (!myUserIdNum) return [];
             return [
                 {
-                    id: String(joinInfo.userId),
-                    name:
-                        joinInfo.displayName ||
-                        joinInfo.userName ||
-                        joinInfo.nickname ||
-                        "나",
+                    id: "me",
+                    userId: myUserIdNum,
+                    name: myName,
                     isMe: true,
-                    isHost:
-                        !!joinInfo.isHost ||
-                        joinInfo.userId === joinInfo.hostUserId,
-                    userId: Number(joinInfo.userId),
+                    isHost: myIsHost,
                     stream: localStream || null,
                     videoDead: false,
                 },
             ];
         }
 
-        // 4) 매핑 (정규화 적용)
-        return effectivePresence.map((p, idx) => {
+        const mapped = effectivePresence.map((p, idx) => {
             const userIdNum =
                 p.userId != null && p.userId !== "" ? Number(p.userId) : null;
 
-            const uid = userIdNum != null ? userIdNum : `temp-${idx}`;
-
             const isMe =
                 userIdNum != null &&
-                joinInfo?.userId != null &&
-                userIdNum === Number(joinInfo.userId);
+                myUserIdNum != null &&
+                userIdNum === myUserIdNum;
 
             const remoteInfo =
                 userIdNum != null ? remoteInfoByUserId.get(userIdNum) : null;
 
+            const stableId = isMe
+                ? "me"
+                : userIdNum != null
+                ? String(userIdNum)
+                : `temp-${idx}`;
+
             return {
-                id: isMe ? "me" : String(uid),
+                id: stableId,
                 userId: userIdNum,
                 name: p.displayName || "참가자",
                 isMe,
@@ -238,6 +242,22 @@ function MeetingJoinPage() {
                 videoDead: isMe ? false : remoteInfo?.videoDead || false,
             };
         });
+
+        // ✅ 내 타일 강제 유지(순간 누락 방어)
+        const hasMeAlready = mapped.some((x) => x.id === "me");
+        if (!hasMeAlready && myUserIdNum != null) {
+            mapped.unshift({
+                id: "me",
+                userId: myUserIdNum,
+                name: myName,
+                isMe: true,
+                isHost: myIsHost,
+                stream: localStream || null,
+                videoDead: false,
+            });
+        }
+
+        return mapped;
     }, [
         presenceParticipants,
         presenceConnected,
@@ -253,6 +273,7 @@ function MeetingJoinPage() {
 
     // =========================================================
     // 7) Layout Hook
+    // - focus 기본 + 참가자 수 변동으로 mode가 강제 변경되지 않도록 hook도 그 정책으로 맞춰야 함
     // =========================================================
     const {
         mode,
@@ -290,7 +311,7 @@ function MeetingJoinPage() {
         [navigate]
     );
 
-    const handleLeave = async () => {
+    const handleLeave = useCallback(async () => {
         terminatedRef.current = true;
         setTerminated(true);
         try {
@@ -303,7 +324,63 @@ function MeetingJoinPage() {
             leaveRoomRef.current?.();
             navigate("/meetings");
         }
-    };
+    }, [hasJoined, meetingId, navigate]);
+
+    // =========================================================
+    // 8-1) Roster fetch (joined/invited 목록)
+    // =========================================================
+    const fetchRosterParticipants = useCallback(async () => {
+        if (!meetingId) return;
+
+        try {
+            const res = await api.get(
+                `/api/meetings/${meetingId}/participants`
+            );
+            setRosterParticipants(res.data || []);
+        } catch (e) {
+            console.error("[roster] fetch failed", e);
+        }
+    }, [meetingId]);
+
+    useEffect(() => {
+        fetchRosterParticipants();
+    }, [fetchRosterParticipants]);
+
+    const participantRosterView = useMemo(() => {
+        const presenceSet = new Set(
+            (presenceParticipants || [])
+                .map((p) => Number(p.userId))
+                .filter((n) => Number.isFinite(n))
+        );
+
+        const list = (rosterParticipants || []).map((r) => {
+            const userId = Number(r.userId);
+
+            const status = String(
+                r.inviteStatus || r.status || "JOINED"
+            ).toUpperCase();
+            const joined = status === "JOINED";
+            const invited = status === "INVITED";
+
+            return {
+                userId,
+                name: r.displayName || r.name || "참가자",
+                role: r.role,
+                status,
+                online:
+                    joined && Number.isFinite(userId)
+                        ? presenceSet.has(userId)
+                        : false,
+                joined,
+                invited,
+            };
+        });
+
+        return {
+            joined: list.filter((x) => x.joined),
+            invited: list.filter((x) => x.invited),
+        };
+    }, [rosterParticipants, presenceParticipants]);
 
     // =========================================================
     // 9) Janus Hook Binding + Controls
@@ -317,11 +394,14 @@ function MeetingJoinPage() {
         joinRoom,
         leaveRoom,
 
-        noMediaDevices,
         localMedia,
 
         toggleAudio,
         toggleVideo,
+        toggleScreenShare,
+        getVideoInputs,
+        setVideoSource,
+        restartScreenShare,
     } = useJanusLocalOnly(undefined, {
         onLocalStream: (stream) => {
             if (!stream) return setLocalStream(null);
@@ -335,7 +415,10 @@ function MeetingJoinPage() {
         onRemoteParticipantsChanged: (janusRemotes) =>
             setRemoteParticipants(janusRemotes || []),
     });
-
+    const onChangeVideoSource = useCallback(
+        (type, deviceId) => setVideoSource?.(type, deviceId),
+        [setVideoSource]
+    );
     useEffect(() => {
         leaveRoomRef.current = leaveRoom;
     }, [leaveRoom]);
@@ -349,11 +432,27 @@ function MeetingJoinPage() {
             noMediaDevices: !!m.noMediaDevices,
             liveAudio: !!m.liveAudio,
             liveVideo: !!m.liveVideo,
+
+            videoSource: m.videoSource || "camera",
+            cameraDeviceId: m.cameraDeviceId ?? null,
+
+            screenSoftMuted: !!m.screenSoftMuted,
+            screenCapturing: !!m.screenCapturing,
+
+            permissionDeniedVideo: !!m.permissionDeniedVideo,
+            permissionDeniedScreen: !!m.permissionDeniedScreen,
         };
     }, [localMedia]);
 
+    // const handleChangeVideoSource = useCallback(
+    //     (nextType, deviceId = null) => {
+    //         // nextType: "camera" | "screen"
+    //         // deviceId: 카메라 선택시만 사용
+    //         setVideoSource?.(nextType, deviceId);
+    //     },
+    //     [setVideoSource]
+    // );
     const onToggleAudioUiFirst = useCallback(() => {
-        // ✅ 유저 제스처: 마이크 ON/OFF
         toggleAudio();
     }, [toggleAudio]);
 
@@ -361,60 +460,65 @@ function MeetingJoinPage() {
         toggleVideo();
     }, [toggleVideo]);
 
-    // =========================================================
-    // 9-1) Autoplay Gate (유저 제스처로만 해결)
-    // =========================================================
-    const [autoplayGateOpen, setAutoplayGateOpen] = useState(false);
-    const [playNonce, setPlayNonce] = useState(0);
+    const onToggleLayout = useCallback(() => {
+        if (mode === "focus") switchToGrid();
+        else switchToFocus();
+    }, [mode, switchToGrid, switchToFocus]);
 
-    const autoplayGateShownRef = useRef(false);
+    const onToggleScreenShareWithSignal = useCallback(() => {
+        const isCurrentlyScreen =
+            uiMedia.videoSource === "screen" &&
+            uiMedia.video === true &&
+            uiMedia.screenSoftMuted !== true;
 
-    const openAutoplayGate = useCallback(() => {
-        if (autoplayGateShownRef.current) return;
-        autoplayGateShownRef.current = true;
-        setAutoplayGateOpen(true);
+        // 👉 토글 후 의도
+        const willBeScreen = !isCurrentlyScreen;
+
+        toggleScreenShare();
+
+        sendMediaStateNowRef.current?.(!!uiMedia.audio, willBeScreen, {
+            videoSource: willBeScreen ? "screen" : "camera",
+            screenCapturing: willBeScreen,
+            screenSoftMuted: false,
+            type: "MEDIA_STATE",
+            reason: willBeScreen ? "screen-on" : "screen-off",
+        });
+    }, [toggleScreenShare, uiMedia]);
+    const onRestartScreenShareWithSignal = useCallback(() => {
+        // 1️⃣ 먼저 OFF 알림
+        sendMediaStateNowRef.current?.(!!uiMedia.audio, false, {
+            videoSource: "camera",
+            screenCapturing: false,
+            screenSoftMuted: false,
+            type: "MEDIA_STATE",
+            reason: "screen-restart-off",
+        });
+
+        // 2️⃣ 실제 Janus 재선택 (세션 재생성)
+        restartScreenShare();
+    }, [restartScreenShare, uiMedia]);
+
+    // =========================================================
+    // 10) Signals Send Triggers (simple + stable)
+    // =========================================================
+
+    // ✅ 훅이 지원하는 필드만 보냄
+    const buildSignalExtra = useCallback((m, reason) => {
+        const x = m || {};
+        return {
+            videoDeviceLost: !!x.videoDeviceLost,
+            videoSource: x.videoSource || "camera",
+            screenSoftMuted: !!x.screenSoftMuted,
+            screenCapturing: !!x.screenCapturing,
+            reason,
+            type: "MEDIA_STATE",
+        };
     }, []);
 
-    const requestUserGesturePlay = useCallback(() => {
-        // ✅ 이 클릭이 “유저 제스처”
-        setPlayNonce((n) => n + 1);
-        setAutoplayGateOpen(false);
-    }, []);
-
-    // =========================================================
-    // 10) Signals Send Triggers
-    // =========================================================
-    const broadcastMyMediaState = useCallback(
-        (reason = "unknown") => {
-            if (!mediaSignalConnectedRef.current) return;
-            if (!isConnected) return;
-
-            const fn = sendMediaStateNowRef.current;
-            if (!fn) return;
-
-            fn(!!uiMedia.audio, !!uiMedia.video, {
-                videoDeviceLost: !!uiMedia.videoDeviceLost,
-                noMediaDevices: !!uiMedia.noMediaDevices,
-                reason,
-            });
-        },
-        [isConnected, uiMedia]
-    );
-
-    const broadcastCtlRef = useRef({
-        didInitial: false,
-        lastLocalKey: "",
-        lastPresenceKey: "",
-        lastSentAt: 0,
-    });
+    const lastSentKeyRef = useRef("");
 
     useEffect(() => {
-        broadcastCtlRef.current = {
-            didInitial: false,
-            lastLocalKey: "",
-            lastPresenceKey: "",
-            lastSentAt: 0,
-        };
+        lastSentKeyRef.current = "";
     }, [meetingId]);
 
     useEffect(() => {
@@ -422,53 +526,40 @@ function MeetingJoinPage() {
         if (!mediaSignalConnected) return;
         if (!isConnected) return;
 
-        const makeLocalKey = (m) => {
-            const x = m || {};
-            return [
-                x.audio ? 1 : 0,
-                x.video ? 1 : 0,
-                x.videoDeviceLost ? 1 : 0,
-                x.noMediaDevices ? 1 : 0,
-            ].join("|");
-        };
+        // ✅ 변화 감지 키 (훅이 관리하는 것만)
+        const key = [
+            uiMedia.audio ? 1 : 0,
+            uiMedia.video ? 1 : 0,
+            uiMedia.videoDeviceLost ? 1 : 0,
+            // uiMedia.videoSource || "camera",
+            // uiMedia.screenSoftMuted ? 1 : 0,
+            // uiMedia.screenCapturing ? 1 : 0,
+        ].join("|");
 
-        const makePresenceKey = (list) => {
-            return (list || [])
-                .map((p) => p.userId)
-                .filter(Boolean)
-                .slice()
-                .sort((a, b) => a - b)
-                .join(",");
-        };
+        // ✅ 첫 1회는 즉시, 이후는 디바운스
+        const isFirst = lastSentKeyRef.current === "";
+        const changed = key !== lastSentKeyRef.current;
+        if (!changed) return;
 
-        const ctl = broadcastCtlRef.current;
-        const now = Date.now();
+        lastSentKeyRef.current = key;
 
-        const localKey = makeLocalKey(uiMedia);
-        const presenceKey = makePresenceKey(presenceParticipants);
+        const extra = buildSignalExtra(
+            uiMedia,
+            isFirst ? "initial" : "localChanged"
+        );
 
-        if (!ctl.didInitial) {
-            ctl.didInitial = true;
-            ctl.lastLocalKey = localKey;
-            ctl.lastPresenceKey = presenceKey;
-            ctl.lastSentAt = now;
-            broadcastMyMediaState("initial");
-            return;
-        }
-
-        const localChanged = localKey !== ctl.lastLocalKey;
-        const presenceChanged = presenceKey !== ctl.lastPresenceKey;
-
-        const throttleOk = now - (ctl.lastSentAt || 0) >= 400;
-        if (!throttleOk) return;
-
-        if (localChanged || presenceChanged) {
-            ctl.lastLocalKey = localKey;
-            ctl.lastPresenceKey = presenceKey;
-            ctl.lastSentAt = now;
-
-            broadcastMyMediaState(
-                localChanged ? "localMediaChanged" : "presenceChanged"
+        if (isFirst) {
+            sendMediaStateNowRef.current?.(
+                !!uiMedia.audio,
+                !!uiMedia.video,
+                extra
+            );
+        } else {
+            // ✅ 연타/짧은 토글은 디바운스로 처리
+            sendMediaStateRef.current?.(
+                !!uiMedia.audio,
+                !!uiMedia.video,
+                extra
             );
         }
     }, [
@@ -476,8 +567,7 @@ function MeetingJoinPage() {
         mediaSignalConnected,
         isConnected,
         uiMedia,
-        presenceParticipants,
-        broadcastMyMediaState,
+        buildSignalExtra,
     ]);
 
     // =========================================================
@@ -584,12 +674,12 @@ function MeetingJoinPage() {
             joinInfo.nickname ||
             "User";
 
-        const isHostSelf =
+        const isHostSelfNow =
             !!joinInfo.isHost || joinInfo.userId === joinInfo.hostUserId;
 
         const displayName = JSON.stringify({
             name: baseName,
-            role: isHostSelf ? "HOST" : "PARTICIPANT",
+            role: isHostSelfNow ? "HOST" : "PARTICIPANT",
             userId: joinInfo.userId,
         });
 
@@ -659,7 +749,9 @@ function MeetingJoinPage() {
             try {
                 const res = await api.post(
                     `/api/meetings/${meetingId}/participants/ping`,
-                    { sessionKey }
+                    {
+                        sessionKey,
+                    }
                 );
 
                 const { active, reason } = res.data || {};
@@ -730,19 +822,11 @@ function MeetingJoinPage() {
         );
     }
 
-    const isHostSelf =
+    const isHostSelfRender =
         !!joinInfo.isHost || joinInfo.userId === joinInfo.hostUserId;
 
     return (
         <div className="meeting-join-page">
-            {/* ✅ 오토플레이 게이트: 유저 제스처 버튼 */}
-            {autoplayGateOpen && (
-                <AutoplayGate
-                    onConfirm={requestUserGesturePlay}
-                    onClose={() => setAutoplayGateOpen(false)}
-                />
-            )}
-
             <div className="meeting-join-page__header">
                 <div>
                     <div className="meeting-join-page__subtitle">
@@ -763,31 +847,6 @@ function MeetingJoinPage() {
                 </div>
 
                 <div style={{ display: "flex", gap: 8 }}>
-                    {participants.length > 1 && (
-                        <div className="meeting-join-page__layout-toggle">
-                            <button
-                                className={
-                                    mode === "focus"
-                                        ? "meeting-join-page__layout-btn meeting-join-page__layout-btn--active"
-                                        : "meeting-join-page__layout-btn"
-                                }
-                                onClick={switchToFocus}
-                            >
-                                강조 모드
-                            </button>
-                            <button
-                                className={
-                                    mode === "grid"
-                                        ? "meeting-join-page__layout-btn meeting-join-page__layout-btn--active"
-                                        : "meeting-join-page__layout-btn"
-                                }
-                                onClick={switchToGrid}
-                            >
-                                그리드 모드
-                            </button>
-                        </div>
-                    )}
-
                     <button
                         onClick={handleLeave}
                         className="meeting-join-page__leave-button"
@@ -798,199 +857,28 @@ function MeetingJoinPage() {
             </div>
 
             <div className="meeting-join-page__main">
-                <div className="meeting-video">
-                    <div className="meeting-video__main">
-                        {mode === "solo" && focusedParticipant && (
-                            <div className="meeting-video__stage meeting-video__stage--solo">
-                                <VideoTile
-                                    participant={focusedParticipant}
-                                    variant="solo"
-                                    isFocused
-                                    onClick={() =>
-                                        handleParticipantClick(
-                                            focusedParticipant.id
-                                        )
-                                    }
-                                    localMedia={uiMedia}
-                                    mediaStates={mediaStates}
-                                    playNonce={playNonce}
-                                    onAutoplayBlocked={openAutoplayGate}
-                                />
-                            </div>
-                        )}
-
-                        {mode === "focus" && participants.length >= 2 && (
-                            <div className="meeting-video__stage meeting-video__stage--strip">
-                                <div className="meeting-video__focus">
-                                    {focusedParticipant && (
-                                        <VideoTile
-                                            participant={focusedParticipant}
-                                            variant="focus"
-                                            isFocused
-                                            onClick={() =>
-                                                handleParticipantClick(
-                                                    focusedParticipant.id
-                                                )
-                                            }
-                                            localMedia={uiMedia}
-                                            mediaStates={mediaStates}
-                                            playNonce={playNonce}
-                                            onAutoplayBlocked={openAutoplayGate}
-                                        />
-                                    )}
-                                </div>
-
-                                <div className="meeting-video__thumb-row">
-                                    <button className="meeting-video__thumb-nav meeting-video__thumb-nav--prev">
-                                        ‹
-                                    </button>
-
-                                    <div className="meeting-video__thumb-strip">
-                                        {sortedParticipants
-                                            .filter((p) => p.id !== focusId)
-                                            .map((p) => (
-                                                <VideoTile
-                                                    key={p.id}
-                                                    participant={p}
-                                                    variant="thumb"
-                                                    onClick={() =>
-                                                        handleParticipantClick(
-                                                            p.id
-                                                        )
-                                                    }
-                                                    localMedia={uiMedia}
-                                                    mediaStates={mediaStates}
-                                                    playNonce={playNonce}
-                                                    onAutoplayBlocked={
-                                                        openAutoplayGate
-                                                    }
-                                                />
-                                            ))}
-                                    </div>
-
-                                    <button className="meeting-video__thumb-nav meeting-video__thumb-nav--next">
-                                        ›
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-
-                        {mode === "grid" && participants.length >= 2 && (
-                            <div className="meeting-video__stage meeting-video__stage--grid">
-                                <div className="meeting-video__grid">
-                                    {sortedParticipants.map((p) => (
-                                        <VideoTile
-                                            key={p.id}
-                                            participant={p}
-                                            variant={
-                                                p.isMe ? "me-grid" : "grid"
-                                            }
-                                            isFocused={p.id === focusId}
-                                            onClick={() =>
-                                                handleParticipantClick(p.id)
-                                            }
-                                            localMedia={uiMedia}
-                                            mediaStates={mediaStates}
-                                            playNonce={playNonce}
-                                            onAutoplayBlocked={openAutoplayGate}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {mode === "solo" &&
-                            !focusedParticipant &&
-                            sortedParticipants[0] && (
-                                <div className="meeting-video__stage meeting-video__stage--solo">
-                                    <VideoTile
-                                        participant={sortedParticipants[0]}
-                                        variant="solo"
-                                        isFocused
-                                        onClick={() =>
-                                            handleParticipantClick(
-                                                sortedParticipants[0].id
-                                            )
-                                        }
-                                        localMedia={uiMedia}
-                                        mediaStates={mediaStates}
-                                        playNonce={playNonce}
-                                        onAutoplayBlocked={openAutoplayGate}
-                                    />
-                                </div>
-                            )}
-                    </div>
-
-                    {uiMedia.noMediaDevices && (
-                        <div className="meeting-video__device-message">
-                            현재 브라우저에 마이크·카메라가 연결되지 않은
-                            상태입니다.
-                        </div>
-                    )}
-
-                    <div className="meeting-video__controls">
-                        <button
-                            className={`meeting-video__control-btn ${
-                                uiMedia.audio
-                                    ? ""
-                                    : "meeting-video__control-btn--off"
-                            }`}
-                            onClick={onToggleAudioUiFirst}
-                            title="마이크 토글"
-                        >
-                            {uiMedia.audio ? "🎙" : "🔇"}
-                        </button>
-
-                        <button
-                            className={`meeting-video__control-btn ${
-                                uiMedia.video
-                                    ? ""
-                                    : "meeting-video__control-btn--off"
-                            }`}
-                            onClick={onToggleVideoUiFirst}
-                            title="카메라 토글"
-                        >
-                            {uiMedia.video ? "🎥" : "🚫"}
-                        </button>
-
-                        <button
-                            className="meeting-video__control-btn"
-                            onClick={() => {
-                                if (manualReconnectLockRef.current) return;
-                                manualReconnectLockRef.current = true;
-
-                                try {
-                                    leaveRoomRef.current?.();
-                                } catch {}
-
-                                const roomNumber = joinInfo.roomNumber;
-
-                                const displayName = JSON.stringify({
-                                    name: joinInfo.displayName || "User",
-                                    role: isHostSelf ? "HOST" : "PARTICIPANT",
-                                    userId: joinInfo.userId,
-                                });
-
-                                window.setTimeout(() => {
-                                    joinRoom({ roomNumber, displayName });
-                                    manualReconnectLockRef.current = false;
-                                }, 500);
-                            }}
-                            title="수동 재연결"
-                        >
-                            🔄
-                        </button>
-
-                        <button
-                            className="meeting-video__control-btn meeting-video__control-btn--danger"
-                            onClick={handleLeave}
-                            disabled={!isConnected && !isConnecting}
-                            title="나가기"
-                        >
-                            ⏹
-                        </button>
-                    </div>
-                </div>
+                <MediaPanel
+                    participants={participants}
+                    sortedParticipants={sortedParticipants}
+                    mode={mode}
+                    focusId={focusId}
+                    focusedParticipant={focusedParticipant}
+                    handleParticipantClick={handleParticipantClick}
+                    uiMedia={uiMedia}
+                    mediaStates={mediaStates}
+                    playNonce={playNonce}
+                    setPlayNonce={setPlayNonce}
+                    onToggleAudio={onToggleAudioUiFirst}
+                    onToggleVideo={onToggleVideoUiFirst}
+                    onToggleScreenShare={onToggleScreenShareWithSignal}
+                    onToggleLayout={onToggleLayout}
+                    onLeave={handleLeave}
+                    isConnected={isConnected}
+                    isConnecting={isConnecting}
+                    getVideoInputs={getVideoInputs}
+                    onChangeVideoSource={onChangeVideoSource}
+                    onRestartScreenShare={onRestartScreenShareWithSignal}
+                />
 
                 <div className="meeting-side">
                     <div className="meeting-side__tabs">
@@ -1027,14 +915,36 @@ function MeetingJoinPage() {
                     ) : (
                         <div style={{ padding: 12 }}>
                             <MeetingParticipantsPanel
-                                participants={sortedParticipants.map((p) => ({
-                                    id: p.id,
+                                joined={(
+                                    participantRosterView?.joined || []
+                                ).map((p) => ({
+                                    id: String(p.userId),
                                     name: p.name,
-                                    isMe: p.isMe,
-                                    isHost: p.isHost,
+                                    isMe:
+                                        Number(p.userId) ===
+                                        Number(joinInfo?.userId),
+                                    isHost: p.role === "HOST",
+                                    online: !!p.online,
                                 }))}
-                                isHost={isHostSelf}
-                                onInvite={() => alert("초대 기능은 추후 구현")}
+                                invited={(
+                                    participantRosterView?.invited || []
+                                ).map((p) => ({
+                                    id: String(p.userId),
+                                    name: p.name,
+                                    isHost: p.role === "HOST",
+                                }))}
+                                isHost={isHostSelfRender}
+                                onInvite={() => setInviteOpen(true)}
+                            />
+
+                            <InviteParticipantsModal
+                                open={inviteOpen}
+                                onClose={() => setInviteOpen(false)}
+                                meetingId={meetingId}
+                                onInvited={() => {
+                                    // 필요하면 여기서 fetchRosterParticipants() 호출
+                                    // fetchRosterParticipants();
+                                }}
                             />
                             <div style={{ fontSize: 12, opacity: 0.7 }}>
                                 presenceConnected: {String(presenceConnected)}
@@ -1042,383 +952,6 @@ function MeetingJoinPage() {
                         </div>
                     )}
                 </div>
-            </div>
-        </div>
-    );
-}
-
-// =========================================================
-// AutoplayGate (유저 제스처 모달)
-// =========================================================
-function AutoplayGate({ onConfirm, onClose }) {
-    return (
-        <div
-            style={{
-                position: "fixed",
-                zIndex: 9999,
-                inset: 0,
-                background: "rgba(0,0,0,0.55)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: 16,
-            }}
-            onClick={onClose}
-        >
-            <div
-                style={{
-                    width: "min(520px, 100%)",
-                    background: "#111",
-                    color: "#fff",
-                    borderRadius: 12,
-                    padding: 16,
-                    boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
-                }}
-                onClick={(e) => e.stopPropagation()}
-            >
-                <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>
-                    브라우저 자동재생이 차단되었습니다
-                </div>
-                <div style={{ fontSize: 13, opacity: 0.85, lineHeight: 1.4 }}>
-                    영상/오디오 재생을 시작하려면 한 번의 사용자 조작이
-                    필요합니다.
-                    <br />
-                    아래 버튼을 눌러 재생을 시작해 주세요.
-                </div>
-
-                <div
-                    style={{
-                        display: "flex",
-                        gap: 8,
-                        marginTop: 14,
-                        justifyContent: "flex-end",
-                    }}
-                >
-                    <button
-                        onClick={onClose}
-                        style={{
-                            padding: "8px 12px",
-                            borderRadius: 10,
-                            border: "1px solid rgba(255,255,255,0.25)",
-                            background: "transparent",
-                            color: "#fff",
-                            cursor: "pointer",
-                        }}
-                    >
-                        닫기
-                    </button>
-                    <button
-                        onClick={onConfirm}
-                        style={{
-                            padding: "8px 12px",
-                            borderRadius: 10,
-                            border: "1px solid rgba(255,255,255,0.25)",
-                            background: "#fff",
-                            color: "#000",
-                            cursor: "pointer",
-                            fontWeight: 700,
-                        }}
-                    >
-                        재생 시작
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-// =========================================================
-// VideoTile (실무형: video는 muted autoplay, audio는 별도 <audio>로 분리)
-// =========================================================
-function VideoTile({
-    participant,
-    variant = "grid",
-    isFocused,
-    onClick,
-    localMedia,
-    mediaStates = {},
-    playNonce,
-    onAutoplayBlocked,
-}) {
-    const noMediaDevices = !!localMedia?.noMediaDevices;
-    const audioEnabled = !!localMedia?.audio; // 내 "마이크 송출" 상태
-    const videoEnabled = !!localMedia?.video;
-    const isVideoDeviceLost = !!localMedia?.videoDeviceLost;
-
-    const videoRef = useRef(null);
-    const audioRef = useRef(null);
-
-    // ✅ stream 내부 변화(addtrack/unmute 등)에도 UI가 반응하게 만드는 트리거
-    const [streamTick, setStreamTick] = useState(0);
-    const bumpStreamTick = useCallback(() => setStreamTick((n) => n + 1), []);
-
-    const getTracks = useCallback((stream, kind) => {
-        if (!stream) return [];
-        try {
-            return kind === "video"
-                ? stream.getVideoTracks?.() || []
-                : stream.getAudioTracks?.() || [];
-        } catch {
-            return [];
-        }
-    }, []);
-
-    const hasAnyTrack = useCallback(
-        (kind) => {
-            const s = participant?.stream;
-            if (!s) return false;
-            return getTracks(s, kind).length > 0;
-        },
-        [participant?.stream, getTracks]
-    );
-
-    const mediaState = participant?.userId
-        ? mediaStates[participant.userId]
-        : null;
-
-    const isKnown =
-        mediaState &&
-        (mediaState.known === true ||
-            typeof mediaState.receivedAt === "number");
-
-    const remoteDeviceLost = !!mediaState?.videoDeviceLost;
-
-    // ✅ 핵심 수정:
-    // - signal이 오기 전(isKnown=false)에는 "live"가 아니라 "track 존재"로 ON 판정
-    // - 즉, 새로 들어온 참가자도 video track만 있으면 바로 켜진 것으로 취급
-    const videoOn = participant?.isMe
-        ? videoEnabled && !isVideoDeviceLost && !noMediaDevices
-        : !remoteDeviceLost &&
-          (isKnown && typeof mediaState.video === "boolean"
-              ? mediaState.video
-              : hasAnyTrack("video"));
-
-    const audioOn = participant?.isMe
-        ? audioEnabled && !noMediaDevices
-        : isKnown && typeof mediaState.audio === "boolean"
-        ? mediaState.audio
-        : hasAnyTrack("audio");
-
-    const showVideo =
-        !!videoOn && !!participant?.stream && hasAnyTrack("video");
-
-    const canHearRemote =
-        !participant?.isMe &&
-        !!participant?.stream &&
-        getTracks(participant.stream, "audio").length > 0;
-
-    const isAutoplayBlockedError = (err) => {
-        const name = err?.name || "";
-        const msg = String(err?.message || "").toLowerCase();
-        return (
-            name === "NotAllowedError" ||
-            msg.includes("notallowed") ||
-            msg.includes("play() failed") ||
-            msg.includes("user gesture") ||
-            msg.includes("gesture")
-        );
-    };
-
-    const tryPlayEl = useCallback(
-        (el) => {
-            if (!el) return;
-            const p = el.play?.();
-            if (p && p.catch) {
-                p.catch((err) => {
-                    if (isAutoplayBlockedError(err)) {
-                        onAutoplayBlocked?.();
-                    }
-                });
-            }
-        },
-        [onAutoplayBlocked]
-    );
-
-    const tryPlay = useCallback(() => {
-        tryPlayEl(videoRef.current);
-        if (!participant?.isMe) tryPlayEl(audioRef.current);
-    }, [tryPlayEl, participant?.isMe]);
-
-    // ✅ stream 내부 변화(addtrack/unmute/mute/ended)에 반응해서 UI 재평가
-    useEffect(() => {
-        const s = participant?.stream;
-        if (!s) return;
-
-        const onAddTrack = () => bumpStreamTick();
-
-        s.addEventListener?.("addtrack", onAddTrack);
-
-        const bindTrack = (t) => {
-            if (!t) return;
-            const prevUnmute = t.onunmute;
-            const prevMute = t.onmute;
-            const prevEnded = t.onended;
-
-            t.onunmute = (...args) => {
-                bumpStreamTick();
-                if (typeof prevUnmute === "function") prevUnmute(...args);
-            };
-            t.onmute = (...args) => {
-                bumpStreamTick();
-                if (typeof prevMute === "function") prevMute(...args);
-            };
-            t.onended = (...args) => {
-                bumpStreamTick();
-                if (typeof prevEnded === "function") prevEnded(...args);
-            };
-
-            return () => {
-                // 원복은 선택사항(대부분 문제 없음). 안전하게 하려면 저장/복원 로직을 더 둬도 됨.
-            };
-        };
-
-        const tracks = [...getTracks(s, "video"), ...getTracks(s, "audio")];
-        tracks.forEach(bindTrack);
-
-        // 초기 1회도 갱신(중간 참여 직후 첫 프레임 보정)
-        bumpStreamTick();
-
-        return () => {
-            s.removeEventListener?.("addtrack", onAddTrack);
-        };
-    }, [participant?.stream, bumpStreamTick, getTracks]);
-
-    // stream attach (video)
-    useEffect(() => {
-        const el = videoRef.current;
-        if (!el) return;
-
-        const Janus = window.Janus;
-
-        if (!showVideo) {
-            if (el.srcObject) el.srcObject = null;
-            return;
-        }
-        if (!participant?.stream) return;
-
-        try {
-            // ✅ video는 항상 muted로 (원격도 muted)
-            el.muted = true;
-
-            if (Janus && Janus.attachMediaStream) {
-                Janus.attachMediaStream(el, participant.stream);
-            } else {
-                el.srcObject = participant.stream;
-            }
-            tryPlayEl(el);
-        } catch (e) {
-            console.error("[VideoTile] video attach 실패", e);
-        }
-        // ✅ streamTick 포함: track 상태 변화에도 재시도
-    }, [participant?.stream, showVideo, tryPlayEl, streamTick]);
-
-    // stream attach (audio - remote only)
-    useEffect(() => {
-        const el = audioRef.current;
-        if (!el) return;
-
-        const Janus = window.Janus;
-
-        if (participant?.isMe) {
-            if (el.srcObject) el.srcObject = null;
-            return;
-        }
-
-        if (!participant?.stream) return;
-
-        try {
-            el.muted = false;
-
-            if (Janus && Janus.attachMediaStream) {
-                Janus.attachMediaStream(el, participant.stream);
-            } else {
-                el.srcObject = participant.stream;
-            }
-
-            if (canHearRemote) tryPlayEl(el);
-        } catch (e) {
-            console.error("[VideoTile] audio attach 실패", e);
-        }
-        // ✅ streamTick 포함
-    }, [
-        participant?.stream,
-        participant?.isMe,
-        canHearRemote,
-        tryPlayEl,
-        streamTick,
-    ]);
-
-    // 유저 제스처(게이트 버튼) 이후 재시도
-    useEffect(() => {
-        if (!participant?.stream) return;
-        tryPlay();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [playNonce]);
-
-    if (!participant) return null;
-
-    const classes = [
-        "meeting-video__remote",
-        variant === "solo" && "meeting-video__remote--solo",
-        variant === "focus" && "meeting-video__remote--focus",
-        variant === "thumb" && "meeting-video__remote--thumb",
-        variant === "me-grid" && "meeting-video__remote--me-grid",
-        variant === "grid" && "meeting-video__remote--grid",
-        isFocused && "meeting-video__remote--focused",
-    ]
-        .filter(Boolean)
-        .join(" ");
-
-    const handleClick = () => {
-        tryPlay(); // 타일 클릭도 유저 제스처로 재시도
-        onClick?.();
-    };
-
-    return (
-        <div className={classes} onClick={handleClick}>
-            <audio
-                ref={audioRef}
-                autoPlay
-                playsInline
-                style={{ display: "none" }}
-            />
-
-            {showVideo ? (
-                <>
-                    <video
-                        ref={videoRef}
-                        autoPlay
-                        playsInline
-                        muted
-                        className="meeting-video__video"
-                    />
-                    <div className="meeting-video__label">
-                        {participant.name}
-                        {participant.isMe && " · 나"}
-                        {participant.isHost && " · 주최자"}
-                    </div>
-                </>
-            ) : (
-                <div className="meeting-video__placeholder">
-                    <div className="meeting-video__avatar">
-                        {participant.name?.[0] || "?"}
-                    </div>
-                    <div className="meeting-video__placeholder-name">
-                        {participant.name}
-                        {participant.isMe && " · 나"}
-                        {participant.isHost && " · 주최자"}
-                    </div>
-                </div>
-            )}
-
-            <div className="meeting-video__badge-row">
-                {!audioOn && <span className="meeting-video__badge">🔇</span>}
-                {!videoOn && <span className="meeting-video__badge">📷✕</span>}
-                {participant.isHost && (
-                    <span className="meeting-video__badge meeting-video__badge--host">
-                        H
-                    </span>
-                )}
             </div>
         </div>
     );

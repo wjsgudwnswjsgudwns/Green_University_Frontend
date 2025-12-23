@@ -1,0 +1,406 @@
+/* src/styles/inviteParticipantsModal.css */
+/* Prefix: ipm- (Invite Participants Modal) */
+
+:root {
+    --ipm-green: #216d30;
+    --ipm-green-dark: #1a5524;
+
+    --ipm-text: #2c3e50;
+    --ipm-muted: #5a6c7d;
+
+    --ipm-border: rgba(33, 109, 48, 0.14);
+    --ipm-border-strong: rgba(33, 109, 48, 0.22);
+
+    --ipm-shadow: 0 18px 60px rgba(0, 0, 0, 0.22);
+    --ipm-shadow-soft: 0 10px 40px rgba(0, 0, 0, 0.14);
+
+    --ipm-radius-lg: 20px;
+    --ipm-radius-md: 14px;
+    --ipm-radius-sm: 12px;
+}
+
+.ipm-backdrop,
+.ipm-backdrop * {
+    box-sizing: border-box;
+}
+
+.ipm-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.48);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    animation: ipm-fadeIn 0.18s ease-out;
+}
+
+@keyframes ipm-fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.ipm-modal {
+    width: 760px;
+    max-width: min(760px, 96vw);
+    max-height: min(82vh, 860px);
+    overflow: auto;
+
+    border-radius: var(--ipm-radius-lg);
+    border: 1px solid var(--ipm-border);
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    color: var(--ipm-text);
+    box-shadow: var(--ipm-shadow);
+    overflow: hidden;
+
+    transform: translateY(6px) scale(0.985);
+    animation: ipm-pop 0.22s ease-out forwards;
+}
+
+@keyframes ipm-pop {
+    to {
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes ipm-barMove {
+    0%,
+    100% {
+        background-position: 0% 0%;
+    }
+    50% {
+        background-position: 100% 0%;
+    }
+}
+
+.ipm-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 18px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    background: transparent;
+}
+
+.ipm-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    background: linear-gradient(
+        135deg,
+        var(--ipm-green) 0%,
+        var(--ipm-green-dark) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.ipm-x {
+    width: 34px;
+    height: 34px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: #fff;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.12s ease, box-shadow 0.18s ease,
+        border-color 0.18s ease;
+}
+
+.ipm-x:hover {
+    transform: translateY(-1px);
+    border-color: var(--ipm-border-strong);
+    box-shadow: var(--ipm-shadow-soft);
+}
+
+/* 에러 */
+.ipm-error {
+    margin: 12px 18px 0;
+    padding: 12px 14px;
+    background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+    border: 1px solid rgba(198, 40, 40, 0.25);
+    border-radius: 14px;
+    color: #842029;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.ipm-section {
+    padding: 16px 18px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* row */
+.ipm-row {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.ipm-label {
+    font-size: 13px;
+    color: var(--ipm-text);
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+
+.ipm-input,
+.ipm-select {
+    width: 100%;
+    border: 2px solid rgba(224, 230, 237, 1);
+    border-radius: var(--ipm-radius-md);
+    padding: 12px 14px;
+    font-size: 14px;
+    color: var(--ipm-text);
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    font-weight: 650;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease,
+        transform 0.18s ease;
+    outline: none;
+}
+
+.ipm-input:focus,
+.ipm-select:focus {
+    border-color: var(--ipm-green);
+    box-shadow: 0 0 0 4px rgba(33, 109, 48, 0.14);
+    transform: scale(1.01);
+}
+
+.ipm-input::placeholder {
+    color: rgba(90, 108, 125, 0.7);
+    font-weight: 600;
+}
+
+/* 검색박스 */
+.ipm-searchbox {
+    margin-top: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 14px;
+    max-height: 240px;
+    overflow: auto;
+    padding: 8px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+}
+
+.ipm-muted {
+    font-size: 13px;
+    color: var(--ipm-muted);
+    padding: 10px 6px;
+    font-weight: 650;
+}
+
+/* 결과(체크 리스트형) */
+.ipm-result {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    width: 100%;
+    text-align: left;
+
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    background: #fff;
+    border-radius: 14px;
+    padding: 12px 12px;
+    cursor: pointer;
+    margin-bottom: 8px;
+
+    transition: transform 0.12s ease, box-shadow 0.18s ease,
+        border-color 0.18s ease, background 0.18s ease;
+}
+
+.ipm-result:hover {
+    transform: translateY(-1px);
+    border-color: var(--ipm-border-strong);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.1);
+}
+
+.ipm-checkbox {
+    margin-top: 3px;
+    width: 16px;
+    height: 16px;
+    accent-color: var(--ipm-green);
+    pointer-events: none;
+}
+
+.ipm-result-body {
+    flex: 1;
+    min-width: 0;
+    display: grid;
+    gap: 4px;
+}
+
+.ipm-result-name {
+    font-size: 14px;
+    font-weight: 900;
+    color: var(--ipm-text);
+}
+
+.ipm-result-email {
+    font-size: 12px;
+    color: var(--ipm-muted);
+    font-weight: 650;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ✅ 이미 등록된 사람 표시/비활성 */
+.ipm-result.is-disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.ipm-result.is-disabled:hover {
+    transform: none;
+    border-color: rgba(0, 0, 0, 0.06);
+    box-shadow: none;
+}
+
+.ipm-badge {
+    margin-left: 8px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 900;
+    background: rgba(90, 108, 125, 0.12);
+    color: rgba(90, 108, 125, 0.9);
+}
+
+/* 초대목록 */
+.ipm-invited {
+    margin-top: 12px;
+}
+
+.ipm-invited-title {
+    font-weight: 900;
+    margin-bottom: 10px;
+    color: var(--ipm-text);
+    font-size: 13px;
+}
+
+/* chips */
+.ipm-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.ipm-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--ipm-border);
+    background: #fff;
+    padding: 10px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--ipm-text);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+.ipm-chip-x {
+    width: 26px;
+    height: 26px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: #fff;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.12s ease, box-shadow 0.18s ease;
+}
+
+.ipm-chip-x:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* footer buttons */
+.ipm-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 18px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+}
+
+.ipm-btn {
+    border: 2px solid rgba(224, 230, 237, 1);
+    border-radius: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    background: #fff;
+    font-weight: 900;
+    font-size: 13px;
+    transition: transform 0.12s ease, box-shadow 0.18s ease,
+        border-color 0.18s ease;
+}
+
+.ipm-btn:hover {
+    transform: translateY(-1px);
+    border-color: var(--ipm-border-strong);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.1);
+}
+
+.ipm-btn.primary {
+    border-color: transparent;
+    background: linear-gradient(
+        135deg,
+        var(--ipm-green) 0%,
+        var(--ipm-green-dark) 100%
+    );
+    color: #fff;
+    box-shadow: 0 10px 26px rgba(33, 109, 48, 0.28);
+}
+
+.ipm-btn.primary:hover {
+    box-shadow: 0 14px 34px rgba(33, 109, 48, 0.36);
+}
+
+.ipm-btn.ghost {
+    background: #fff;
+}
+
+.ipm-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* debug */
+.ipm-debug {
+    padding: 0 18px 14px;
+    font-size: 11px;
+    color: rgba(90, 108, 125, 0.55);
+    font-weight: 650;
+}
+
+/* responsive */
+@media (max-width: 640px) {
+    .ipm-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    .ipm-modal {
+        border-radius: 16px;
+    }
+}

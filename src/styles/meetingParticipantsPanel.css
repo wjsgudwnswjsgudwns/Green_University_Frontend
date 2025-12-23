@@ -1,0 +1,274 @@
+/* src/styles/meetingParticipantsPanel.css */
+/* Prefix: mpp- (Meeting Participants Panel) */
+
+/* cmm 무드에 맞춘 토큰(같은 톤) */
+:root {
+    --mpp-green: #216d30;
+    --mpp-green-dark: #1a5524;
+
+    --mpp-text: #2c3e50;
+    --mpp-muted: #5a6c7d;
+
+    --mpp-border: rgba(33, 109, 48, 0.14);
+    --mpp-border-strong: rgba(33, 109, 48, 0.22);
+
+    --mpp-shadow: 0 18px 60px rgba(0, 0, 0, 0.12);
+    --mpp-shadow-soft: 0 10px 40px rgba(0, 0, 0, 0.08);
+
+    --mpp-radius-lg: 18px;
+    --mpp-radius-md: 14px;
+    --mpp-radius-sm: 12px;
+}
+
+/* 기존 클래스명 유지: .mpp, .mpp__... */
+.mpp,
+.mpp * {
+    box-sizing: border-box;
+}
+
+.mpp {
+    border: 1px solid var(--mpp-border);
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: var(--mpp-radius-lg);
+    padding: 14px;
+    box-shadow: var(--mpp-shadow-soft);
+    overflow: hidden;
+    position: relative;
+}
+
+/* 상단 그린 포인트 바 (원하면 주석 해제) */
+/*
+.mpp::before {
+    content: "";
+    display: block;
+    height: 5px;
+    border-radius: 999px;
+    background: linear-gradient(
+        90deg,
+        var(--mpp-green) 0%,
+        var(--mpp-green-dark) 50%,
+        var(--mpp-green) 100%
+    );
+    background-size: 200% 100%;
+    animation: mpp-barMove 3.2s ease infinite;
+    margin-bottom: 12px;
+}
+*/
+
+@keyframes mpp-barMove {
+    0%,
+    100% {
+        background-position: 0% 0%;
+    }
+    50% {
+        background-position: 100% 0%;
+    }
+}
+
+.mpp__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.mpp__title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 900;
+    background: linear-gradient(
+        135deg,
+        var(--mpp-green) 0%,
+        var(--mpp-green-dark) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* 초대 버튼: cmm-btn 느낌 */
+.mpp__invite-btn {
+    font-size: 12px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    border: 2px solid rgba(224, 230, 237, 1);
+    background: #fff;
+    color: var(--mpp-text);
+    cursor: pointer;
+    font-weight: 900;
+    transition: transform 0.12s ease, box-shadow 0.18s ease,
+        border-color 0.18s ease;
+}
+
+.mpp__invite-btn:hover {
+    transform: translateY(-1px);
+    border-color: var(--mpp-border-strong);
+    box-shadow: var(--mpp-shadow-soft);
+}
+
+.mpp__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 10px;
+}
+
+/* 아이템: 카드형 */
+.mpp__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 12px;
+    border-radius: var(--mpp-radius-md);
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+    transition: transform 0.12s ease, box-shadow 0.18s ease,
+        border-color 0.18s ease;
+}
+
+.mpp__item:hover {
+    transform: translateY(-1px);
+    border-color: var(--mpp-border-strong);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.1);
+}
+
+.mpp__name {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--mpp-text);
+}
+
+/* Tag 공통 */
+.mpp__tag {
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: var(--mpp-muted);
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.mpp__tag--host {
+    border-color: rgba(33, 109, 48, 0.22);
+    color: var(--mpp-green-dark);
+    background: rgba(33, 109, 48, 0.06);
+}
+
+/* Status 배지 공통 */
+.mpp__status {
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: var(--mpp-muted);
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.mpp__status--online {
+    border-color: rgba(33, 109, 48, 0.22);
+    color: var(--mpp-green-dark);
+    background: rgba(33, 109, 48, 0.06);
+}
+
+.mpp__status--offline {
+    opacity: 0.7;
+}
+
+.mpp__status--invited {
+    opacity: 0.75;
+}
+
+/* (LEFT는 지금 UI에서 안 쓰지만, 클래스가 남아있어도 무해함) */
+.mpp__status--left {
+    opacity: 0.55;
+    text-decoration: line-through;
+}
+
+.mpp__empty {
+    margin-top: 10px;
+    padding: 12px 12px;
+    border-radius: var(--mpp-radius-md);
+    border: 1px dashed rgba(0, 0, 0, 0.12);
+    background: rgba(0, 0, 0, 0.02);
+    font-size: 12px;
+    color: var(--mpp-muted);
+    font-weight: 700;
+}
+
+/* ===== Invited (Accordion) ===== */
+.mpp__section {
+    margin-top: 10px;
+}
+
+/* ✅ 라이트 톤 아코디언 (버튼 안 보이던 문제 해결) */
+.mpp__accordion {
+    width: 100%;
+    text-align: left;
+    padding: 8px 10px;
+    border-radius: 10px;
+
+    border: 1px solid var(--mpp-border);
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    color: var(--mpp-text);
+
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    transition: transform 0.12s ease, box-shadow 0.18s ease,
+        border-color 0.18s ease;
+}
+
+.mpp__accordion:hover {
+    transform: translateY(-1px);
+    border-color: var(--mpp-border-strong);
+    box-shadow: var(--mpp-shadow-soft);
+}
+
+.mpp__accordion:active {
+    transform: translateY(0);
+}
+
+.mpp__accordion-icon {
+    opacity: 0.8;
+}
+
+/* 서브 리스트 */
+.mpp__list--sub {
+    margin-top: 8px;
+}
+
+/* 초대중 영역 구분감(가벼운 강조) */
+.mpp__list--sub .mpp__item {
+    border-style: dashed;
+    background: rgba(33, 109, 48, 0.03);
+}
+
+/* 반응형 */
+@media (max-width: 640px) {
+    .mpp {
+        padding: 12px;
+        border-radius: 16px;
+    }
+
+    .mpp__item {
+        padding: 11px 10px;
+    }
+
+    .mpp__invite-btn {
+        padding: 8px 10px;
+    }
+}

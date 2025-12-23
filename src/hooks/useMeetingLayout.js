@@ -1,23 +1,16 @@
 // src/hooks/useMeetingLayout.js
-import { useEffect, useMemo, useState } from "react";
-
-/**
- * participant 구조 예시:
- * {
- *   id: number | string,
- *   name: string,
- *   isMe: boolean,
- *   isHost?: boolean
- * }
- */
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export function useMeetingLayout(participants = []) {
-    const [mode, setMode] = useState("grid"); // 'solo' | 'grid' | 'focus'
+    // ✅ mode는 focus가 기본, 자동 변경 안 함
+    const [mode, setMode] = useState("focus"); // 'grid' | 'focus'
     const [focusId, setFocusId] = useState(null);
+
+    // ✅ 사용자가 직접 포커스를 선택했는지(자동 포커스 중단용)
+    const userPickedRef = useRef(false);
 
     const count = participants.length;
 
-    // id 비교 안정성 확보 (string으로 통일)
     const idsKey = useMemo(
         () => participants.map((p) => String(p.id)).join(","),
         [participants]
@@ -33,89 +26,83 @@ export function useMeetingLayout(participants = []) {
         [participants]
     );
 
+    // ✅ "상대"(나 제외 첫 번째)
+    const other = useMemo(
+        () => participants.find((p) => !p.isMe) || null,
+        [participants]
+    );
+
     const hasId = (id) =>
         id != null && participants.some((p) => String(p.id) === String(id));
 
-    const getOtherId = () => {
-        const other = participants.find((p) => !p.isMe) || participants[0];
-        return other ? String(other.id) : null;
+    const pickDefaultFocusId = () => {
+        // ✅ 우선순위: 상대 -> host -> me -> first
+        if (other) return String(other.id);
+        if (host) return String(host.id);
+        if (me) return String(me.id);
+        return participants[0] ? String(participants[0].id) : null;
     };
 
-    // 참가자 "멤버" 변화(id 목록 변화)에만 반응해서 초기화/재계산
+    // ✅ 참가자 멤버 변화(id 목록 변화) 때만 focusId 보정
     useEffect(() => {
         if (count === 0) {
-            setMode("grid");
             setFocusId(null);
+            userPickedRef.current = false; // 방 비면 리셋
             return;
         }
-
-        if (count === 1) {
-            setMode("solo");
-            setFocusId(String(participants[0].id));
-            return;
-        }
-
-        if (count === 2) {
-            // ✅ 2명은 무조건 focus (grid UX 애매함)
-            setMode("focus");
-            setFocusId((prev) => {
-                if (prev && hasId(prev)) return String(prev);
-                return getOtherId();
-            });
-            return;
-        }
-
-        // 3명 이상
-        setMode((prev) =>
-            prev === "grid" || prev === "focus" ? prev : "grid"
-        );
 
         setFocusId((prev) => {
-            // ✅ 기존 포커스가 유효하면 유지
-            if (prev && hasId(prev)) return String(prev);
+            const otherId = other ? String(other.id) : null;
+            const hostId = host ? String(host.id) : null;
+            const meId = me ? String(me.id) : null;
 
-            // ✅ 없으면 host 우선, 그 다음 첫 번째
-            if (host) return String(host.id);
+            // ✅ 핵심: 2명 이상이면 "초기 기본 포커스는 무조건 상대"
+            // (사용자가 직접 선택하기 전까지만 강제)
+            if (!userPickedRef.current && count >= 2) {
+                if (otherId) return otherId;
+                // other가 없을 정도면 비정상이지만, 방어로 host
+                if (hostId && hostId !== meId) return hostId;
+            }
 
-            const first = participants[0];
-            return first ? String(first.id) : null;
+            // 기존 focus가 없으면 기본
+            if (!prev) return pickDefaultFocusId();
+
+            // 기존 focus가 사라졌으면 기본
+            if (!hasId(prev)) return pickDefaultFocusId();
+
+            // 사용자가 직접 골랐으면 유지
+            if (userPickedRef.current) return String(prev);
+
+            // 그 외는 유지
+            return String(prev);
         });
-    }, [count, idsKey, host?.id]); // ✅ participants 전체가 아니라 idsKey로 튐 방지
+        // mode는 절대 건드리지 않음
+    }, [count, idsKey, me, host, other]);
 
-    // 모드 전환 버튼용
+    // 모드 버튼
     const switchToGrid = () => {
-        if (count <= 1) return;
+        if (count <= 0) return;
         setMode("grid");
-        // focusId는 유지 (원하면 null로 초기화해도 됨)
     };
 
     const switchToFocus = () => {
-        if (count <= 1) return;
-
+        if (count <= 0) return;
         setMode("focus");
         setFocusId((prev) => {
             if (prev && hasId(prev)) return String(prev);
-
-            if (count === 2) return getOtherId();
-
-            if (host) return String(host.id);
-
-            const first = participants[0];
-            return first ? String(first.id) : null;
+            return pickDefaultFocusId();
         });
     };
 
-    // 참가자(썸네일) 클릭
+    // 썸네일 클릭 => focus로 + 해당 사람 포커스
     const handleParticipantClick = (id) => {
         if (count === 0) return;
-
         const targetId = String(id);
         const clicked = participants.find((p) => String(p.id) === targetId);
         if (!clicked) return;
 
-        if (count === 1) return;
+        userPickedRef.current = true; // ✅ 사용자가 직접 포커스 선택
 
-        // ✅ 클릭하면 항상 focus로 + 해당 사람 포커스
         setMode("focus");
         setFocusId(String(clicked.id));
     };
@@ -126,7 +113,7 @@ export function useMeetingLayout(participants = []) {
             : null;
 
     return {
-        mode, // 'solo' | 'grid' | 'focus'
+        mode, // 'grid' | 'focus'
         focusId,
         focusedParticipant,
         participants,
