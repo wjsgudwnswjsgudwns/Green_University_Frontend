@@ -1,0 +1,868 @@
+.pl-personalized-learning-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* 헤더 */
+.pl-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #216d30;
+}
+
+.pl-header-info {
+  flex: 1;
+}
+
+.pl-page-header h1 {
+  font-size: 28px;
+  color: #216d30;
+  margin: 0 0 12px 0;
+  font-weight: 700;
+}
+
+.pl-student-info {
+  font-size: 16px;
+  color: #4a5568;
+  margin: 0 0 8px 0;
+  font-weight: 600;
+}
+
+.pl-analysis-date {
+  font-size: 14px;
+  color: #6c757d;
+  margin: 0 0 8px 0;
+}
+
+.pl-auto-analysis-info {
+  font-size: 13px;
+  color: #216d30;
+  margin: 0;
+  padding: 6px 10px;
+  background: #e8f5e9;
+  border-radius: 4px;
+  display: inline-block;
+  font-weight: 500;
+}
+
+.pl-regenerate-btn {
+  padding: 12px 24px;
+  background-color: #216d30;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.pl-regenerate-btn:hover {
+  background-color: #1a5524;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(33, 109, 48, 0.3);
+}
+
+/* 로딩 */
+.pl-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 20px;
+}
+
+.pl-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e0e6ed;
+  border-top-color: #216d30;
+  border-radius: 50%;
+  animation: pl-spin 0.8s linear infinite;
+}
+
+@keyframes pl-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.pl-loading-container p {
+  color: #666;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* 에러 */
+.pl-error {
+  text-align: center;
+  padding: 60px 20px;
+  color: #dc3545;
+  font-size: 18px;
+}
+
+/* AI 종합 코멘트 박스 */
+.pl-ai-comment-box {
+  background: linear-gradient(135deg, #ffffff 0%, #e8f5e9 100%);
+  border: 2px solid #216d30;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 12px rgba(33, 109, 48, 0.1);
+}
+
+.pl-ai-comment-box h3 {
+  font-size: 20px;
+  color: #216d30;
+  margin: 0 0 16px 0;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pl-ai-comment-box h3::before {
+  font-size: 24px;
+}
+
+.pl-ai-comment-box p {
+  margin: 0;
+  color: #2c3e50;
+  line-height: 1.8;
+  font-size: 15px;
+  white-space: pre-wrap;
+}
+
+/* 탭 메뉴 */
+.pl-tab-menu {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #e0e6ed;
+  background: white;
+  padding: 0 20px;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.pl-tab-menu button {
+  padding: 14px 24px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #6c757d;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  margin-bottom: -2px;
+  white-space: nowrap;
+}
+
+.pl-tab-menu button:hover {
+  color: #216d30;
+  background: #f8f9fa;
+}
+
+.pl-tab-menu button.active {
+  color: #216d30;
+  border-bottom-color: #216d30;
+  background: #e8f5e9;
+}
+
+/* 탭 컨텐츠 */
+.pl-tab-content {
+  background: white;
+  border-radius: 0 0 8px 8px;
+  padding: 30px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 학습 현황 탭 */
+.pl-learning-history-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* 통계 그리드 */
+.pl-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 10px;
+}
+
+.pl-stat-card {
+  background: white;
+  border: 2px solid;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.pl-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.pl-stat-icon {
+  font-size: 40px;
+}
+
+.pl-stat-content {
+  flex: 1;
+}
+
+.pl-stat-title {
+  font-size: 14px;
+  color: #6c757d;
+  margin: 0 0 8px 0;
+  font-weight: 600;
+}
+
+.pl-stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* 진행률 섹션 */
+.pl-progress-section {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.pl-progress-section h3 {
+  font-size: 18px;
+  color: #2c3e50;
+  margin: 0 0 20px 0;
+  font-weight: 600;
+}
+
+.pl-progress-bar-container {
+  margin-bottom: 20px;
+}
+
+.pl-progress-bar-container:last-child {
+  margin-bottom: 0;
+}
+
+.pl-progress-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #4a5568;
+  font-weight: 600;
+}
+
+.pl-progress-bar {
+  height: 24px;
+  background: #e0e6ed;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.pl-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #216d30 0%, #2a8f3f 100%);
+  border-radius: 12px;
+  transition: width 0.6s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.pl-progress-fill::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: pl-shimmer 2s infinite;
+}
+
+@keyframes pl-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* 강점/약점 영역 */
+.pl-areas-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.pl-strong-areas,
+.pl-weak-areas {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.pl-strong-areas {
+  /* border-left: 4px solid #4caf50; */
+}
+
+.pl-weak-areas {
+  /* border-left: 4px solid #ff9800; */
+}
+
+.pl-strong-areas h3,
+.pl-weak-areas h3 {
+  font-size: 16px;
+  color: #2c3e50;
+  margin: 0 0 16px 0;
+  font-weight: 600;
+}
+
+.pl-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  margin: 4px 4px 4px 0;
+}
+
+.pl-badge-success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.pl-badge-warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+/* 추세 섹션 */
+.pl-trend-section {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+}
+
+.pl-trend-section h3 {
+  font-size: 16px;
+  color: #2c3e50;
+  margin: 0 0 16px 0;
+  font-weight: 600;
+}
+
+.pl-trend-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 24px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.pl-trend-indicator::before {
+  font-size: 24px;
+}
+
+.pl-trend-상승추세 {
+  background: #d4edda;
+  color: #155724;
+}
+
+.pl-trend-상승추세::before {
+  content: "📈";
+}
+
+.pl-trend-유지 {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.pl-trend-유지::before {
+  content: "➡️";
+}
+
+.pl-trend-하락추세 {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.pl-trend-하락추세::before {
+  content: "📉";
+}
+
+/* 추천 과목 탭 */
+.pl-recommendations-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.pl-recommendation-section h3 {
+  font-size: 20px;
+  color: #2c3e50;
+  margin: 0 0 20px 0;
+  font-weight: 700;
+}
+
+.pl-subject-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+/* 과목 카드 */
+.pl-subject-card {
+  background: white;
+  border: 1px solid #e0e6ed;
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.pl-subject-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  border-color: #216d30;
+}
+
+.pl-subject-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.pl-subject-header h4 {
+  font-size: 18px;
+  color: #2c3e50;
+  margin: 0;
+  font-weight: 700;
+  flex: 1;
+}
+
+.pl-recommend-score {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+  white-space: nowrap;
+  margin-left: 12px;
+}
+
+.pl-subject-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pl-subject-body p {
+  margin: 0;
+  font-size: 14px;
+  color: #4a5568;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pl-subject-body .pl-professor {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+/* .pl-subject-body .pl-professor::before {
+  content: "👨‍🏫";
+}
+
+.pl-subject-body .pl-credits::before {
+  content: "📚";
+}
+
+.pl-subject-body .pl-capacity::before {
+  content: "👥";
+} */
+
+.pl-reason-box {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  /* border-left: 3px solid #216d30; */
+}
+
+.pl-reason-box strong {
+  display: block;
+  font-size: 13px;
+  color: #216d30;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.pl-reason-box p {
+  margin: 0;
+  font-size: 13px;
+  color: #4a5568;
+  line-height: 1.6;
+}
+
+/* 학습 방향 탭 */
+.pl-learning-direction-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.pl-direction-section {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 24px;
+  /* border-left: 4px solid #216d30; */
+}
+
+.pl-direction-section h3 {
+  font-size: 18px;
+  color: #216d30;
+  margin: 0 0 16px 0;
+  font-weight: 700;
+}
+
+.pl-direction-section .pl-description {
+  margin: 0;
+  color: #4a5568;
+  line-height: 1.8;
+  font-size: 15px;
+}
+
+.pl-suggestion-list,
+.pl-strategy-list,
+.pl-caution-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pl-suggestion-list li,
+.pl-strategy-list li,
+.pl-caution-list li {
+  padding: 12px 16px;
+  background: white;
+  border-radius: 8px;
+  color: #4a5568;
+  line-height: 1.6;
+  font-size: 14px;
+  position: relative;
+  padding-left: 40px;
+}
+
+.pl-suggestion-list li::before {
+  position: absolute;
+  left: 12px;
+  font-size: 18px;
+}
+
+.pl-strategy-list li::before {
+  position: absolute;
+  left: 12px;
+  font-size: 18px;
+}
+
+.pl-caution-list li::before {
+  position: absolute;
+  left: 12px;
+  font-size: 18px;
+}
+
+.pl-direction-section.pl-caution {
+  /* border-left-color: #ff9800; */
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+}
+
+.pl-direction-section.pl-caution h3 {
+  color: #e65100;
+}
+
+.pl-direction-section.pl-highlight {
+  /* border-left-color: #2196f3; */
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+}
+
+.pl-direction-section.pl-highlight h3 {
+  color: #1565c0;
+}
+
+.pl-direction-section.pl-highlight .pl-pattern {
+  margin: 0;
+  color: #1565c0;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.8;
+}
+
+/* 졸업 요건 탭 */
+.pl-graduation-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.pl-graduation-status {
+  text-align: center;
+  padding: 40px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border: 3px solid #4caf50;
+}
+
+.pl-graduation-possible h2 {
+  font-size: 32px;
+  color: #2e7d32;
+  margin: 0 0 12px 0;
+  font-weight: 700;
+}
+
+.pl-graduation-possible h2::before {
+  font-size: 40px;
+  margin-right: 12px;
+}
+
+.pl-graduation-possible p {
+  font-size: 18px;
+  color: #2e7d32;
+  margin: 0;
+  font-weight: 600;
+}
+
+.pl-graduation-in-progress {
+  /* background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); */
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border-color: #2e7d32;
+}
+
+.pl-graduation-in-progress h2 {
+  font-size: 28px;
+  color: #1565c0;
+  margin: 0 0 12px 0;
+  font-weight: 700;
+}
+
+.pl-graduation-in-progress p {
+  font-size: 16px;
+  color: #1565c0;
+  margin: 0;
+  font-weight: 600;
+}
+
+.pl-graduation-progress {
+  text-align: center;
+  padding: 30px;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+
+.pl-graduation-progress h3 {
+  font-size: 20px;
+  color: #2c3e50;
+  margin: 0 0 24px 0;
+  font-weight: 700;
+}
+
+.pl-progress-circle {
+  position: relative;
+  display: inline-block;
+}
+
+.pl-progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 28px;
+  font-weight: 700;
+  color: #4caf50;
+}
+
+.pl-credits-detail {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.pl-credit-detail-card {
+  background: white;
+  border: 2px solid #e0e6ed;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.pl-credit-detail-card h4 {
+  font-size: 18px;
+  color: #2c3e50;
+  margin: 0 0 20px 0;
+  font-weight: 700;
+  text-align: center;
+}
+
+.pl-credit-numbers {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.pl-credit-numbers > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.pl-credit-numbers .pl-label {
+  font-size: 13px;
+  color: #6c757d;
+  font-weight: 600;
+}
+
+.pl-credit-numbers .pl-value {
+  font-size: 20px;
+  color: #2c3e50;
+  font-weight: 700;
+}
+
+.pl-credit-numbers .pl-remaining {
+  color: #ff9800;
+}
+
+/* 반응형 */
+@media (max-width: 1200px) {
+  .pl-stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+
+  .pl-subject-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .pl-personalized-learning-page {
+    padding: 20px 16px;
+  }
+
+  .pl-page-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .pl-regenerate-btn {
+    width: 100%;
+  }
+
+  .pl-page-header h1 {
+    font-size: 24px;
+  }
+
+  .pl-tab-menu {
+    overflow-x: auto;
+    padding: 0 12px;
+  }
+
+  .pl-tab-menu button {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  .pl-tab-content {
+    padding: 20px 16px;
+  }
+
+  .pl-stats-grid,
+  .pl-subject-grid,
+  .pl-credits-detail {
+    grid-template-columns: 1fr;
+  }
+
+  .pl-areas-section {
+    grid-template-columns: 1fr;
+  }
+
+  .pl-stat-card {
+    padding: 16px;
+  }
+
+  .pl-stat-value {
+    font-size: 24px;
+  }
+
+  .pl-graduation-status {
+    padding: 24px 16px;
+  }
+
+  .pl-graduation-possible h2,
+  .pl-graduation-in-progress h2 {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pl-personalized-learning-page {
+    padding: 16px 12px;
+  }
+
+  .pl-page-header h1 {
+    font-size: 20px;
+  }
+
+  .pl-ai-comment-box {
+    padding: 16px;
+  }
+
+  .pl-tab-content {
+    padding: 16px 12px;
+  }
+
+  .pl-subject-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .pl-recommend-score {
+    margin-left: 0;
+  }
+}

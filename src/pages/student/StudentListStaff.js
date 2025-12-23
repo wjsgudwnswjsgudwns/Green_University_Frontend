@@ -21,6 +21,8 @@ export default function StudentListStaff() {
     studentId: "",
   });
 
+  const PAGES_PER_GROUP = 10; // 한 번에 보여줄 페이지 번호 개수
+
   useEffect(() => {
     if (user?.userRole !== "staff") {
       navigate("/");
@@ -96,6 +98,41 @@ export default function StudentListStaff() {
       console.error("새학기 적용 실패:", err);
       alert("새학기 적용에 실패했습니다.");
     }
+  };
+
+  // 페이지 그룹 계산
+  const getPageNumbers = () => {
+    const currentGroup = Math.floor((currentPage - 1) / PAGES_PER_GROUP);
+    const startPage = currentGroup * PAGES_PER_GROUP + 1;
+    const endPage = Math.min(startPage + PAGES_PER_GROUP - 1, totalPages);
+
+    const pages = [];
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    return pages;
+  };
+
+  const canGoPrevGroup = () => {
+    return currentPage > PAGES_PER_GROUP;
+  };
+
+  const canGoNextGroup = () => {
+    const currentGroup = Math.floor((currentPage - 1) / PAGES_PER_GROUP);
+    const lastPageOfCurrentGroup = (currentGroup + 1) * PAGES_PER_GROUP;
+    return totalPages > lastPageOfCurrentGroup;
+  };
+
+  const goToPrevGroup = () => {
+    const currentGroup = Math.floor((currentPage - 1) / PAGES_PER_GROUP);
+    const newPage = (currentGroup - 1) * PAGES_PER_GROUP + 1;
+    handlePageChange(newPage);
+  };
+
+  const goToNextGroup = () => {
+    const currentGroup = Math.floor((currentPage - 1) / PAGES_PER_GROUP);
+    const newPage = (currentGroup + 1) * PAGES_PER_GROUP + 1;
+    handlePageChange(newPage);
   };
 
   if (loading && studentList.length === 0) {
@@ -233,19 +270,58 @@ export default function StudentListStaff() {
 
             {totalPages > 1 && (
               <div className="stafflist-pagination">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                  (page) => (
-                    <button
-                      key={page}
-                      onClick={() => handlePageChange(page)}
-                      className={`stafflist-page-button ${
-                        page === currentPage ? "active" : ""
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  )
-                )}
+                {/* 첫 페이지로 */}
+                <button
+                  onClick={() => handlePageChange(1)}
+                  disabled={currentPage === 1}
+                  className="stafflist-page-button"
+                  title="첫 페이지"
+                >
+                  처음
+                </button>
+
+                {/* 이전 그룹 */}
+                <button
+                  onClick={goToPrevGroup}
+                  disabled={!canGoPrevGroup()}
+                  className="stafflist-page-button"
+                  title="이전 10페이지"
+                >
+                  이전
+                </button>
+
+                {/* 페이지 번호들 */}
+                {getPageNumbers().map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`stafflist-page-button ${
+                      page === currentPage ? "active" : ""
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                {/* 다음 그룹 */}
+                <button
+                  onClick={goToNextGroup}
+                  disabled={!canGoNextGroup()}
+                  className="stafflist-page-button"
+                  title="다음 10페이지"
+                >
+                  다음
+                </button>
+
+                {/* 마지막 페이지로 */}
+                <button
+                  onClick={() => handlePageChange(totalPages)}
+                  disabled={currentPage === totalPages}
+                  className="stafflist-page-button"
+                  title="마지막 페이지"
+                >
+                  마지막
+                </button>
               </div>
             )}
           </>

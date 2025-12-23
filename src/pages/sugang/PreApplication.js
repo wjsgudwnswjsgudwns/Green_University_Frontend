@@ -166,7 +166,7 @@ const PreApplication = () => {
                 <td>
                   <a
                     href="/sugang/pre"
-                    className="sugang-application-menu-link"
+                    className="sugang-application-menu-link sugang-application-menu-active"
                   >
                     예비 수강 신청
                   </a>
@@ -176,7 +176,7 @@ const PreApplication = () => {
                 <td>
                   <a
                     href="/sugang/application"
-                    className="sugang-application-menu-link sugang-application-menu-active"
+                    className="sugang-application-menu-link"
                   >
                     수강 신청
                   </a>
@@ -249,22 +249,18 @@ const PreApplication = () => {
                 </datalist>
 
                 <button type="submit" disabled={loading}>
-                  <ul
-                    className="d-flex justify-content-center"
-                    style={{ margin: 0 }}
-                  >
-                    <li style={{ height: "24px", marginRight: "2px" }}>조회</li>
-                  </ul>
+                  조회
                 </button>
               </div>
             </form>
-            <button
-              className="preStuSubList--button"
-              onClick={() => navigate("/sugang/preAppList")}
-            >
-              예비 수강 신청 내역
-            </button>
           </div>
+
+          <button
+            className="preStuSubList--button"
+            onClick={() => navigate("/sugang/preAppList")}
+          >
+            예비 수강 신청 내역
+          </button>
         </div>
 
         {/* 강의 목록 */}
@@ -279,7 +275,7 @@ const PreApplication = () => {
               </span>
             </h4>
 
-            <table border="1" className="sub--list--table">
+            <table className="sub--list--table">
               <thead>
                 <tr>
                   <th>단과대학</th>

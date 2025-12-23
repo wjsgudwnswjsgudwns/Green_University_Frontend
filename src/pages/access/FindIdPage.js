@@ -64,7 +64,7 @@ export default function FindIdPage() {
       await navigator.clipboard.writeText(foundId.id);
       setCopyMessage("ID가 클립보드에 복사되었습니다!");
       setTimeout(() => setCopyMessage(""), 2000);
-      alert(copyMessage);
+      alert("ID가 클립보드에 복사되었습니다!");
     } catch (error) {
       setCopyMessage("복사 실패. 다시 시도해주세요.");
       setTimeout(() => setCopyMessage(""), 2000);

@@ -19,6 +19,10 @@ export default function StaffAllStudentsPage() {
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [selectedRiskLevel, setSelectedRiskLevel] = useState("");
 
+  // 페이징 상태
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize] = useState(10);
+
   useEffect(() => {
     fetchInitialData();
   }, []);
@@ -47,7 +51,6 @@ export default function StaffAllStudentsPage() {
       }
 
       if (allStudentsResponse.data.code === 1) {
-        // 학생별로 그룹화
         const groupedStudents = groupStudentsByStudent(
           allStudentsResponse.data.data || []
         );
@@ -62,7 +65,6 @@ export default function StaffAllStudentsPage() {
     }
   };
 
-  // 학생별로 그룹화하고 최고 위험도 계산
   const groupStudentsByStudent = (analysisResults) => {
     const studentMap = new Map();
 
@@ -82,7 +84,6 @@ export default function StaffAllStudentsPage() {
       const studentData = studentMap.get(studentId);
       studentData.subjects.push(result);
 
-      // 최고 위험도 업데이트
       const riskPriority = getRiskPriority(result.overallRisk);
       if (riskPriority > studentData.riskPriority) {
         studentData.highestRisk = result.overallRisk;
@@ -126,7 +127,11 @@ export default function StaffAllStudentsPage() {
       );
     }
 
+    // 학번순 정렬
+    filtered.sort((a, b) => a.studentId - b.studentId);
+
     setFilteredStudents(filtered);
+    setCurrentPage(0); // 필터 변경 시 첫 페이지로
   };
 
   const handleCollegeChange = (e) => {
@@ -165,7 +170,6 @@ export default function StaffAllStudentsPage() {
     });
   };
 
-  // 전체 분석 결과에서 위험도별 카운트
   const getTotalRiskCounts = () => {
     return {
       total: allStudents.length,
@@ -174,6 +178,18 @@ export default function StaffAllStudentsPage() {
       risk: allStudents.filter((s) => s.highestRisk === "RISK").length,
       critical: allStudents.filter((s) => s.highestRisk === "CRITICAL").length,
     };
+  };
+
+  // 페이징 계산
+  const totalPages = Math.ceil(filteredStudents.length / pageSize);
+  const startIndex = currentPage * pageSize;
+  const endIndex = startIndex + pageSize;
+  const currentStudents = filteredStudents.slice(startIndex, endIndex);
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 0 && newPage < totalPages) {
+      setCurrentPage(newPage);
+    }
   };
 
   if (loading) {
@@ -205,39 +221,71 @@ export default function StaffAllStudentsPage() {
         </div>
       )}
 
-      <div className="sas-statistics">
-        <div className="sas-stat-card sas-stat-total">
-          <div className="sas-stat-content">
-            <span className="sas-stat-label">전체 학생</span>
-            <span className="sas-stat-value">{riskCounts.total}명</span>
+      <div className="sas-statistics-container">
+        <div className="sas-donut-section">
+          <h3>위험도 분포</h3>
+          <div className="sas-donut-chart">
+            <svg viewBox="0 0 200 200" className="sas-donut-svg">
+              <DonutChart
+                normal={riskCounts.normal}
+                caution={riskCounts.caution}
+                risk={riskCounts.risk}
+                critical={riskCounts.critical}
+                total={riskCounts.total}
+              />
+            </svg>
+            <div className="sas-donut-center">
+              <div className="sas-donut-total">{riskCounts.total}</div>
+              <div className="sas-donut-label">전체</div>
+            </div>
+          </div>
+          <div className="sas-donut-legend">
+            <div className="sas-legend-item">
+              <span className="sas-legend-dot sas-legend-normal"></span>
+              <span>정상</span>
+            </div>
+            <div className="sas-legend-item">
+              <span className="sas-legend-dot sas-legend-caution"></span>
+              <span>주의</span>
+            </div>
+            <div className="sas-legend-item">
+              <span className="sas-legend-dot sas-legend-risk"></span>
+              <span>위험</span>
+            </div>
+            <div className="sas-legend-item">
+              <span className="sas-legend-dot sas-legend-critical"></span>
+              <span>심각</span>
+            </div>
           </div>
         </div>
 
-        <div className="sas-stat-card sas-stat-normal">
-          <div className="sas-stat-content">
-            <span className="sas-stat-label">정상</span>
-            <span className="sas-stat-value">{riskCounts.normal}명</span>
-          </div>
-        </div>
-
-        <div className="sas-stat-card sas-stat-caution">
-          <div className="sas-stat-content">
-            <span className="sas-stat-label">주의</span>
-            <span className="sas-stat-value">{riskCounts.caution}명</span>
-          </div>
-        </div>
-
-        <div className="sas-stat-card sas-stat-risk">
-          <div className="sas-stat-content">
-            <span className="sas-stat-label">위험</span>
-            <span className="sas-stat-value">{riskCounts.risk}명</span>
-          </div>
-        </div>
-
-        <div className="sas-stat-card sas-stat-critical">
-          <div className="sas-stat-content">
-            <span className="sas-stat-label">심각</span>
-            <span className="sas-stat-value">{riskCounts.critical}명</span>
+        <div className="sas-bars-section">
+          <h3>위험도별 학생 수</h3>
+          <div className="sas-bar-chart">
+            <BarItem
+              label="정상"
+              count={riskCounts.normal}
+              total={riskCounts.total}
+              color="normal"
+            />
+            <BarItem
+              label="주의"
+              count={riskCounts.caution}
+              total={riskCounts.total}
+              color="caution"
+            />
+            <BarItem
+              label="위험"
+              count={riskCounts.risk}
+              total={riskCounts.total}
+              color="risk"
+            />
+            <BarItem
+              label="심각"
+              count={riskCounts.critical}
+              total={riskCounts.total}
+              color="critical"
+            />
           </div>
         </div>
       </div>
@@ -299,51 +347,173 @@ export default function StaffAllStudentsPage() {
       <div className="sas-results-info">
         <span className="sas-results-count">
           총 <strong>{filteredStudents.length}</strong>명의 학생
+          {totalPages > 1 && (
+            <span style={{ marginLeft: "10px", color: "#666" }}>
+              (페이지 {currentPage + 1} / {totalPages})
+            </span>
+          )}
         </span>
       </div>
 
       <div className="sas-students-section">
-        {filteredStudents.length === 0 ? (
+        {currentStudents.length === 0 ? (
           <div className="sas-empty-state">
             <p>검색 결과가 없습니다.</p>
           </div>
         ) : (
-          <div className="sas-table-wrapper">
-            <table className="sas-students-table">
-              <thead>
-                <tr>
-                  <th>학번</th>
-                  <th>이름</th>
-                  <th>학과</th>
-                  <th>학년</th>
-                  <th>수강 과목 수</th>
-                  <th>최고 위험도</th>
-                  <th>상세</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredStudents.map((student) => (
-                  <tr key={student.studentId}>
-                    <td>{student.studentId}</td>
-                    <td>{student.student?.name || "학생"}</td>
-                    <td>{student.student?.department?.name || "학과"}</td>
-                    <td>{student.student?.grade}학년</td>
-                    <td>{student.subjects.length}개</td>
-                    <td>{getRiskBadge(student.highestRisk)}</td>
-                    <td>
-                      <button
-                        className="sas-detail-btn"
-                        onClick={() => handleStudentClick(student)}
-                      >
-                        상세보기
-                      </button>
-                    </td>
+          <>
+            <div className="sas-table-wrapper">
+              <table className="sas-students-table">
+                <thead>
+                  <tr>
+                    <th>학번</th>
+                    <th>이름</th>
+                    <th>학과</th>
+                    <th>학년</th>
+                    <th>수강 과목 수</th>
+                    <th>최고 위험도</th>
+                    <th>상세</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {currentStudents.map((student) => (
+                    <tr key={student.studentId}>
+                      <td>{student.studentId}</td>
+                      <td>{student.student?.name || "학생"}</td>
+                      <td>{student.student?.department?.name || "학과"}</td>
+                      <td>{student.student?.grade}학년</td>
+                      <td>{student.subjects.length}개</td>
+                      <td>{getRiskBadge(student.highestRisk)}</td>
+                      <td>
+                        <button
+                          className="sas-detail-btn"
+                          onClick={() => handleStudentClick(student)}
+                        >
+                          상세보기
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {totalPages > 1 && (
+              <div className="sas-pagination">
+                <button
+                  className="sas-page-btn"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 0}
+                >
+                  이전
+                </button>
+
+                <div className="sas-page-numbers">
+                  {[...Array(totalPages)].map((_, index) => (
+                    <button
+                      key={index}
+                      className={`sas-page-num ${
+                        currentPage === index ? "active" : ""
+                      }`}
+                      onClick={() => handlePageChange(index)}
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  className="sas-page-btn"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages - 1}
+                >
+                  다음
+                </button>
+              </div>
+            )}
+          </>
         )}
+      </div>
+    </div>
+  );
+}
+
+function DonutChart({ normal, caution, risk, critical, total }) {
+  if (total === 0) {
+    return (
+      <circle
+        cx="100"
+        cy="100"
+        r="70"
+        fill="none"
+        stroke="#e0e6ed"
+        strokeWidth="40"
+      />
+    );
+  }
+
+  const normalPercent = (normal / total) * 100;
+  const cautionPercent = (caution / total) * 100;
+  const riskPercent = (risk / total) * 100;
+  const criticalPercent = (critical / total) * 100;
+
+  const radius = 70;
+  const circumference = 2 * Math.PI * radius;
+
+  let offset = 0;
+
+  const segments = [
+    { percent: normalPercent, color: "#28a745", className: "normal" },
+    { percent: cautionPercent, color: "#ffc107", className: "caution" },
+    { percent: riskPercent, color: "#fd7e14", className: "risk" },
+    { percent: criticalPercent, color: "#dc3545", className: "critical" },
+  ];
+
+  return (
+    <g transform="rotate(-90 100 100)">
+      {segments.map((segment, index) => {
+        if (segment.percent === 0) return null;
+
+        const dashArray = (segment.percent / 100) * circumference;
+        const dashOffset = -offset;
+
+        offset += dashArray;
+
+        return (
+          <circle
+            key={index}
+            cx="100"
+            cy="100"
+            r={radius}
+            fill="none"
+            stroke={segment.color}
+            strokeWidth="40"
+            strokeDasharray={`${dashArray} ${circumference}`}
+            strokeDashoffset={dashOffset}
+            className={`sas-donut-segment sas-donut-${segment.className}`}
+          />
+        );
+      })}
+    </g>
+  );
+}
+
+function BarItem({ label, count, total, color }) {
+  const percentage = total > 0 ? (count / total) * 100 : 0;
+
+  return (
+    <div className="sas-bar-item">
+      <div className="sas-bar-label">
+        <span className="sas-bar-text">{label}</span>
+        <span className="sas-bar-value">
+          {count}명 ({percentage.toFixed(1)}%)
+        </span>
+      </div>
+      <div className="sas-bar-track">
+        <div
+          className={`sas-bar-fill sas-bar-fill-${color}`}
+          style={{ width: `${percentage}%` }}
+        ></div>
       </div>
     </div>
   );

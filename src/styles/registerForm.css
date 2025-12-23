@@ -7,7 +7,7 @@
 }
 
 .register-form-table {
-  width: 100%;
+  width: 70%;
   border-collapse: collapse;
   background: white;
   border-radius: 8px;
@@ -17,7 +17,7 @@
 }
 
 .register-form-table th {
-  width: 200px;
+  width: 80px;
   padding: 16px 20px;
   text-align: left;
   background: #f8f9fa;
@@ -29,7 +29,7 @@
 }
 
 .register-form-table td {
-  padding: 16px 20px;
+  padding: 16px 40px;
   border-bottom: 1px solid #e0e6ed;
 }
 

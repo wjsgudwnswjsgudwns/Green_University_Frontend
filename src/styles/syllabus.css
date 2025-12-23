@@ -1,39 +1,14 @@
 /* 강의계획서 페이지 전용 스타일 - syllabus.css */
 
 .syllabus-page {
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 40px 20px;
   background: white;
+  min-height: 100vh;
 }
 
 /* 헤더 */
-.syllabus-page header {
-  margin-bottom: 30px;
-}
-
-.syllabus-header-top {
-  height: 2px;
-  background: linear-gradient(to right, #e0b960, transparent);
-  margin-bottom: 20px;
-}
-
-/* 섹션 */
-.syllabus-page section {
-  background: white;
-}
-
-.syllabus-section-header {
-  margin-bottom: 30px;
-}
-
-.syllabus-section-header h2 {
-  font-size: 28px;
-  color: #2c3e50;
-  margin: 0;
-}
-
-/* 강의계획서 헤더 */
 .syllabus-header {
   display: flex;
   justify-content: space-between;
@@ -49,13 +24,37 @@
   margin: 0;
 }
 
-/* 로딩 */
-.syllabus-container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 40px 20px;
+/* 버튼 */
+.syllabus-edit-button,
+.syllabus-print-button {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
 }
 
+.syllabus-edit-button {
+  background: #216d30;
+  color: white;
+}
+
+.syllabus-edit-button:hover {
+  background: #1a5524;
+}
+
+.syllabus-print-button {
+  background: #6c757d;
+  color: white;
+}
+
+.syllabus-print-button:hover {
+  background: #5a6268;
+}
+
+/* 로딩 */
 .syllabus-loading-container {
   display: flex;
   flex-direction: column;
@@ -83,177 +82,131 @@
   margin-top: 20px;
   color: #666;
   font-size: 16px;
-  text-align: center;
 }
 
 /* 에러 */
 .syllabus-error-container {
   text-align: center;
-  padding: 40px;
+  padding: 60px 20px;
 }
 
 .syllabus-error-container p {
-  color: #666;
+  color: #dc3545;
   font-size: 16px;
 }
 
-/* 강의계획서 테이블 */
+/* 컨텐츠 */
+.syllabus-content {
+  background: white;
+}
+
+/* 테이블 */
 .syllabus-table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.syllabus-table colgroup col.syllabus-col1 {
-  width: 14%;
-}
-
-.syllabus-table colgroup col.syllabus-col2 {
-  width: 16%;
-}
-
-.syllabus-table colgroup col.syllabus-col3 {
-  width: 20%;
-}
-
-.syllabus-table colgroup col.syllabus-col4 {
-  width: 16%;
-}
-
-.syllabus-table colgroup col.syllabus-col5 {
-  width: 34%;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .syllabus-table td {
   padding: 14px 16px;
   border: 1px solid #e0e6ed;
-  color: #4a5568;
+  font-size: 15px;
+  vertical-align: middle;
 }
 
-.syllabus-table td:first-child {
+/* 카테고리 셀 (교과목 정보, 교강사 정보) */
+.syllabus-category {
   background: #216d30;
   color: white;
   font-weight: 600;
   text-align: center;
-  vertical-align: middle;
+  width: 80px;
+  font-size: 16px;
 }
 
-.syllabus-table tr td:nth-child(2) {
-  background: #f8f9fa;
-  font-weight: 500;
+/* 라벨 셀 (수업 번호, 교과목 명 등) */
+.syllabus-label {
+  background: #eff7f0;
+  color: rgb(0, 0, 0);
+  font-weight: 600;
   text-align: center;
+  width: 80px;
 }
 
-.syllabus-table tr td:nth-child(4) {
-  background: #f8f9fa;
-  font-weight: 500;
-  text-align: center;
-}
-
-.syllabus-table td.syllabus-align-left {
-  text-align: left;
-  line-height: 1.6;
-}
-
-/* 강의계획서 컨텐츠 */
-.syllabus-content {
+/* 값 셀 */
+.syllabus-value {
   background: white;
+  color: #4a5568;
+  text-align: center;
 }
 
+/* 섹션 */
 .syllabus-section {
   margin-bottom: 30px;
+  padding: 24px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e0e6ed;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .syllabus-section h3 {
   font-size: 20px;
   color: #2c3e50;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #e0b960;
+  margin: 0 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #216d30;
 }
 
 .syllabus-text {
+  color: #4a5568;
+  line-height: 1.8;
+  font-size: 15px;
+  white-space: pre-wrap;
+  word-break: break-word;
   padding: 16px;
   background: #f8f9fa;
-  border-radius: 6px;
-  line-height: 1.8;
-  color: #4a5568;
+  border-radius: 4px;
   min-height: 60px;
-}
-
-/* 버튼 */
-.syllabus-edit-button,
-.syllabus-print-button {
-  padding: 10px 24px;
-  background: #216d30;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.syllabus-edit-button:hover,
-.syllabus-print-button:hover {
-  background: #1a5524;
-}
-
-.syllabus-print-button {
-  background: #6c757d;
-}
-
-.syllabus-print-button:hover {
-  background: #5a6268;
-}
-
-/* 수정하기 버튼 테이블 */
-.syllabus-page table {
-  border-collapse: collapse;
-}
-
-.syllabus-page table td {
-  padding: 10px;
-}
-
-.syllabus-page table td a {
-  display: inline-block;
-  padding: 10px 24px;
-  background: #216d30;
-  color: white;
-  border-radius: 6px;
-  font-size: 15px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: background 0.2s;
-}
-
-.syllabus-page table td a:hover {
-  background: #1a5524;
 }
 
 /* 인쇄 스타일 */
 @media print {
-  .syllabus-header,
-  .syllabus-edit-button,
-  .syllabus-print-button,
-  .syllabus-page table td a {
-    display: none;
-  }
-
   .syllabus-page {
     padding: 20px;
   }
 
+  .syllabus-header {
+    border-bottom: 2px solid #000;
+  }
+
+  .syllabus-edit-button,
+  .syllabus-print-button {
+    display: none;
+  }
+
   .syllabus-table {
     box-shadow: none;
+  }
+
+  .syllabus-category,
+  .syllabus-label {
+    background: #ddd !important;
+    color: #000 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .syllabus-section {
+    page-break-inside: avoid;
     border: 1px solid #000;
   }
 
-  .syllabus-table td {
-    border: 1px solid #000;
+  .syllabus-section h3 {
+    border-bottom: 2px solid #000;
   }
 }
 
@@ -263,23 +216,47 @@
     padding: 20px 16px;
   }
 
-  .syllabus-section-header h2,
-  .syllabus-header h1 {
-    font-size: 24px;
-  }
-
   .syllabus-header {
     flex-direction: column;
     gap: 16px;
     align-items: stretch;
   }
 
+  .syllabus-header h1 {
+    font-size: 24px;
+  }
+
+  .syllabus-header > div {
+    display: flex;
+    gap: 10px;
+  }
+
+  .syllabus-edit-button,
+  .syllabus-print-button {
+    flex: 1;
+  }
+
   .syllabus-table {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .syllabus-table td {
     padding: 10px 8px;
+  }
+
+  .syllabus-category {
+    font-size: 14px;
+    width: 80px;
+  }
+
+  .syllabus-label {
+    width: 90px;
+    font-size: 13px;
+    padding: 8px 6px;
+  }
+
+  .syllabus-section {
+    padding: 16px;
   }
 
   .syllabus-section h3 {
@@ -287,7 +264,7 @@
   }
 
   .syllabus-text {
-    padding: 12px;
     font-size: 14px;
+    padding: 12px;
   }
 }

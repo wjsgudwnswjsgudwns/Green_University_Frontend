@@ -228,66 +228,60 @@ export default function ScheduleDetailPage() {
         <div className="sch-page">
           <div className="sch-header">
             <h1>학사일정 상세</h1>
-            <button
-              className="sch-back-button"
-              onClick={() => navigate("/schedule")}
-            >
-              목록으로
-            </button>
           </div>
-
-          <div className="sch-divider"></div>
 
           {error && <div className="sch-error-message">{error}</div>}
 
           {isEditing ? (
-            <form onSubmit={handleUpdate} className="sch-form">
-              <div className="sch-form-group">
-                <label htmlFor="startDay">
-                  시작 날짜 <span className="sch-required">*</span>
-                </label>
-                <input
-                  type="date"
-                  id="startDay"
-                  name="startDay"
-                  value={formData.startDay}
-                  onChange={handleChange}
-                  disabled={isSubmitting}
-                  required
-                />
-              </div>
+            <div className="sch-form">
+              <table className="sch-detail-table">
+                <tbody>
+                  <tr>
+                    <td className="sch-detail-label">시작 날짜</td>
+                    <td className="sch-detail-content">
+                      <input
+                        type="date"
+                        name="startDay"
+                        value={formData.startDay}
+                        onChange={handleChange}
+                        disabled={isSubmitting}
+                        className="sch-form-input"
+                        required
+                      />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="sch-detail-label">종료 날짜</td>
+                    <td className="sch-detail-content">
+                      <input
+                        type="date"
+                        name="endDay"
+                        value={formData.endDay}
+                        onChange={handleChange}
+                        disabled={isSubmitting}
+                        className="sch-form-input"
+                        required
+                      />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="sch-detail-label">일정 내용</td>
+                    <td className="sch-detail-content">
+                      <textarea
+                        name="information"
+                        value={formData.information}
+                        onChange={handleChange}
+                        rows="4"
+                        disabled={isSubmitting}
+                        className="sch-form-textarea"
+                        required
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
 
-              <div className="sch-form-group">
-                <label htmlFor="endDay">
-                  종료 날짜 <span className="sch-required">*</span>
-                </label>
-                <input
-                  type="date"
-                  id="endDay"
-                  name="endDay"
-                  value={formData.endDay}
-                  onChange={handleChange}
-                  disabled={isSubmitting}
-                  required
-                />
-              </div>
-
-              <div className="sch-form-group">
-                <label htmlFor="information">
-                  일정 내용 <span className="sch-required">*</span>
-                </label>
-                <textarea
-                  id="information"
-                  name="information"
-                  value={formData.information}
-                  onChange={handleChange}
-                  rows="4"
-                  disabled={isSubmitting}
-                  required
-                />
-              </div>
-
-              <div className="sch-form-buttons">
+              <div className="sch-detail-buttons">
                 <button
                   type="button"
                   className="sch-cancel-button"
@@ -297,39 +291,56 @@ export default function ScheduleDetailPage() {
                   취소
                 </button>
                 <button
-                  type="submit"
-                  className="sch-submit-button"
+                  type="button"
+                  className="sch-edit-button"
+                  onClick={handleUpdate}
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? "수정 중..." : "수정"}
                 </button>
               </div>
-            </form>
-          ) : (
-            <div className="sch-detail">
-              <div className="sch-detail-row">
-                <div className="sch-detail-label">기간</div>
-                <div className="sch-detail-value">
-                  {schedule.startDay} ~ {schedule.endDay}
-                </div>
-              </div>
-
-              <div className="sch-detail-row">
-                <div className="sch-detail-label">일정 내용</div>
-                <div className="sch-detail-value">{schedule.information}</div>
-              </div>
-
-              {user?.userRole === "staff" && (
-                <div className="sch-detail-buttons">
-                  <button className="sch-edit-button" onClick={handleEdit}>
-                    수정
-                  </button>
-                  <button className="sch-delete-button" onClick={handleDelete}>
-                    삭제
-                  </button>
-                </div>
-              )}
             </div>
+          ) : (
+            <>
+              <table className="sch-detail-table">
+                <tbody>
+                  <tr>
+                    <td className="sch-detail-label">기간</td>
+                    <td className="sch-detail-content">
+                      {schedule.startDay} ~ {schedule.endDay}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="sch-detail-label">일정 내용</td>
+                    <td className="sch-detail-content sch-detail-content-text">
+                      {schedule.information}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div className="sch-detail-buttons">
+                <button
+                  className="sch-back-button"
+                  onClick={() => navigate("/schedule")}
+                >
+                  목록
+                </button>
+                {user?.userRole === "staff" && (
+                  <>
+                    <button className="sch-edit-button" onClick={handleEdit}>
+                      수정
+                    </button>
+                    <button
+                      className="sch-delete-button"
+                      onClick={handleDelete}
+                    >
+                      삭제
+                    </button>
+                  </>
+                )}
+              </div>
+            </>
           )}
         </div>
       </main>

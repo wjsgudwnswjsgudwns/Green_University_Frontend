@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../api/axiosConfig";
-import "../../styles/subject.css";
+import "../../styles/SubjectStudentList.css";
 
 // 학점 변환 함수
 const gradeToGPA = (grade) => {
@@ -283,31 +283,56 @@ export default function SubjectStudentListPage() {
 
   if (loading) {
     return (
-      <div
-        className="d-flex justify-content-center align-items-start"
-        style={{ minWidth: "100em" }}
-      >
-        <main>
+      <div className="ssl-page-wrapper">
+        <div className="ssl-side-menu">
+          <div className="ssl-side-menu-top">
+            <h2>수업</h2>
+          </div>
+          <div className="ssl-side-menu-mid">
+            <table className="ssl-menu-table">
+              <tbody>
+                <tr>
+                  <td>
+                    <a href="/subject/list/1">전체 강의 조회</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="/professor/subject" className="ssl-selected-menu">
+                      내 강의 조회
+                    </a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="/professor/evaluation">내 강의 평가</a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <main className="ssl-main-content">
           <h1>학생 리스트</h1>
-          <div className="split--div"></div>
-          <p className="no--list--p">로딩 중...</p>
+          <div className="ssl-split-divider"></div>
+          <div className="ssl-loading-wrapper">
+            <div className="ssl-loading-spinner"></div>
+            <p>로딩 중...</p>
+          </div>
         </main>
       </div>
     );
   }
 
   return (
-    <div
-      className="d-flex justify-content-center align-items-start"
-      style={{ minWidth: "100em" }}
-    >
+    <div className="ssl-page-wrapper">
       {/* 사이드 메뉴 */}
-      <div className="sub--menu">
-        <div className="sub--menu--top">
+      <div className="ssl-side-menu">
+        <div className="ssl-side-menu-top">
           <h2>수업</h2>
         </div>
-        <div className="sub--menu--mid">
-          <table className="sub--menu--table">
+        <div className="ssl-side-menu-mid">
+          <table className="ssl-menu-table">
             <tbody>
               <tr>
                 <td>
@@ -316,7 +341,7 @@ export default function SubjectStudentListPage() {
               </tr>
               <tr>
                 <td>
-                  <a href="/professor/subject" className="selected--menu">
+                  <a href="/professor/subject" className="ssl-selected-menu">
                     내 강의 조회
                   </a>
                 </td>
@@ -332,14 +357,14 @@ export default function SubjectStudentListPage() {
       </div>
 
       {/* 메인 컨텐츠 */}
-      <main>
+      <main className="ssl-main-content">
         <h1>[{subject?.name}] 학생 리스트 조회</h1>
-        <div className="split--div"></div>
+        <div className="ssl-split-divider"></div>
 
         {/* 가중치/출결 정책 설정 */}
-        <form className="grading-policy-form" onSubmit={savePolicy}>
+        <form className="ssl-grading-policy-form" onSubmit={savePolicy}>
           <h4>성적 가중치 / 출결 정책</h4>
-          <div className="policy-inputs">
+          <div className="ssl-policy-inputs">
             <label>
               출결(%):
               <input
@@ -458,12 +483,12 @@ export default function SubjectStudentListPage() {
             <button
               type="submit"
               disabled={savingPolicy}
-              className="policy-save-btn"
+              className="ssl-policy-save-btn"
             >
               {savingPolicy ? "저장 중..." : "정책 저장"}
             </button>
           </div>
-          <p className="policy-note">
+          <p className="ssl-policy-note">
             * 기본값: 10/30/30/30, 지각 {policy.latenessPerAbsent}회=1결석, 지각{" "}
             {policy.latenessFreeCount}회까지 무감점, 이후 회당{" "}
             {policy.latenessPenaltyPer}점 감점, 결석 4회 이상 F
@@ -471,24 +496,24 @@ export default function SubjectStudentListPage() {
         </form>
 
         {/* 그룹 색상 범례 */}
-        <div className="grade-legend">
+        <div className="ssl-grade-legend">
           <span>
-            <span className="grade-badge grade-a" /> A 구간
+            <span className="ssl-grade-badge ssl-badge-a" /> A (30%)
           </span>
           <span>
-            <span className="grade-badge grade-b" /> B 구간
+            <span className="ssl-grade-badge ssl-badge-b" /> B (40%)
           </span>
           <span>
-            <span className="grade-badge grade-c" /> C 구간
+            <span className="ssl-grade-badge ssl-badge-c" /> C (30%)
           </span>
           <span>
-            <span className="grade-badge grade-f" /> F (결석 기준)
+            <span className="ssl-grade-badge ssl-badge-f" /> F (결석 기준)
           </span>
         </div>
 
         {studentList.length > 0 ? (
-          <div className="student-list-container">
-            <table border="1" className="sub--list--table">
+          <div className="ssl-student-list-container">
+            <table className="ssl-list-table">
               <thead>
                 <tr>
                   <th>학생 번호</th>
@@ -517,13 +542,13 @@ export default function SubjectStudentListPage() {
                       <tr
                         className={
                           student.group === "A"
-                            ? "grade-row grade-a"
+                            ? "ssl-grade-row ssl-grade-a"
                             : student.group === "B"
-                            ? "grade-row grade-b"
+                            ? "ssl-grade-row ssl-grade-b"
                             : student.group === "C"
-                            ? "grade-row grade-c"
+                            ? "ssl-grade-row ssl-grade-c"
                             : student.group === "F"
-                            ? "grade-row grade-f"
+                            ? "ssl-grade-row ssl-grade-f"
                             : ""
                         }
                       >
@@ -535,7 +560,7 @@ export default function SubjectStudentListPage() {
                         <td>{student.homework || 0}</td>
                         <td>{student.midExam || 0}</td>
                         <td>{student.finalExam || 0}</td>
-                        <td className="computed-mark">
+                        <td className="ssl-computed-mark">
                           {student.computedMark != null
                             ? student.computedMark.toFixed(2)
                             : student.convertedMark ?? 0}
@@ -543,19 +568,19 @@ export default function SubjectStudentListPage() {
                         <td>{student.recommendedGrade || "-"}</td>
                         <td>
                           {student.currentGrade ? (
-                            <span className="current-grade-display">
+                            <span className="ssl-current-grade-display">
                               {student.currentGrade} (
                               {gradeToGPA(student.currentGrade).toFixed(1)})
                             </span>
                           ) : (
-                            <span className="no-grade">-</span>
+                            <span className="ssl-no-grade">-</span>
                           )}
                         </td>
                         <td>
                           <button
                             type="button"
                             onClick={() => scrollToForm(student.studentId)}
-                            className="grade-edit-btn"
+                            className="ssl-grade-edit-btn"
                           >
                             {expandedForms[student.studentId] ? "접기" : "기입"}
                           </button>
@@ -563,12 +588,12 @@ export default function SubjectStudentListPage() {
                       </tr>
                       {expandedForms[student.studentId] && (
                         <tr>
-                          <td colSpan={12} className="student-form-cell">
+                          <td colSpan={12} className="ssl-student-form-cell">
                             <div
                               ref={(el) =>
                                 (formRefs.current[student.studentId] = el)
                               }
-                              className="student-grade-form"
+                              className="ssl-student-grade-form"
                             >
                               <h4>
                                 {student.studentName} ({student.studentId}) 성적
@@ -579,8 +604,8 @@ export default function SubjectStudentListPage() {
                                   handleSubmit(student.studentId, e)
                                 }
                               >
-                                <div className="form-grid">
-                                  <div className="form-group">
+                                <div className="ssl-form-grid">
+                                  <div className="ssl-form-group">
                                     <label>결석</label>
                                     <input
                                       type="number"
@@ -595,11 +620,11 @@ export default function SubjectStudentListPage() {
                                       }
                                       min="0"
                                     />
-                                    <span className="form-note">
+                                    <span className="ssl-form-note">
                                       ※ 결석 4회 이상시 F학점입니다.
                                     </span>
                                   </div>
-                                  <div className="form-group">
+                                  <div className="ssl-form-group">
                                     <label>지각</label>
                                     <input
                                       type="number"
@@ -615,13 +640,13 @@ export default function SubjectStudentListPage() {
                                       min="0"
                                     />
                                     <span
-                                      className="form-note"
+                                      className="ssl-form-note"
                                       style={{ color: "transparent" }}
                                     >
                                       ※
                                     </span>
                                   </div>
-                                  <div className="form-group">
+                                  <div className="ssl-form-group">
                                     <label>과제점수</label>
                                     <input
                                       type="number"
@@ -638,13 +663,13 @@ export default function SubjectStudentListPage() {
                                       step="0.1"
                                     />
                                     <span
-                                      className="form-note"
+                                      className="ssl-form-note"
                                       style={{ color: "transparent" }}
                                     >
                                       ※
                                     </span>
                                   </div>
-                                  <div className="form-group">
+                                  <div className="ssl-form-group">
                                     <label>중간시험</label>
                                     <input
                                       type="number"
@@ -661,13 +686,13 @@ export default function SubjectStudentListPage() {
                                       step="0.1"
                                     />
                                     <span
-                                      className="form-note"
+                                      className="ssl-form-note"
                                       style={{ color: "transparent" }}
                                     >
                                       ※
                                     </span>
                                   </div>
-                                  <div className="form-group">
+                                  <div className="ssl-form-group">
                                     <label>기말시험</label>
                                     <input
                                       type="number"
@@ -684,7 +709,7 @@ export default function SubjectStudentListPage() {
                                       step="0.1"
                                     />
                                   </div>
-                                  <div className="form-group">
+                                  <div className="ssl-form-group">
                                     <label>등급</label>
                                     <select
                                       name="grade"
@@ -708,20 +733,20 @@ export default function SubjectStudentListPage() {
                                     </select>
                                   </div>
                                 </div>
-                                <div className="form-actions">
+                                <div className="ssl-form-actions">
                                   <button
                                     type="button"
                                     onClick={() =>
                                       toggleForm(student.studentId)
                                     }
-                                    className="btn-cancel"
+                                    className="ssl-btn-cancel"
                                   >
                                     취소
                                   </button>
                                   <button
                                     type="submit"
                                     disabled={submitting[student.studentId]}
-                                    className="btn-submit"
+                                    className="ssl-btn-submit"
                                   >
                                     {submitting[student.studentId]
                                       ? "제출 중..."
@@ -740,14 +765,14 @@ export default function SubjectStudentListPage() {
             </table>
           </div>
         ) : (
-          <p className="no--list--p">
+          <p className="ssl-no-list-message">
             해당 강의를 수강하는 학생이 존재하지 않습니다.
           </p>
         )}
 
         <div style={{ marginTop: "20px" }}>
           <button
-            className="button"
+            className="ssl-back-button"
             onClick={() => navigate("/professor/subject")}
           >
             목록

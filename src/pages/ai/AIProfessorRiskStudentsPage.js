@@ -10,6 +10,7 @@ export default function AIProfessorRiskStudentsPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [riskStudents, setRiskStudents] = useState([]);
+  const [allRiskStudents, setAllRiskStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -21,6 +22,12 @@ export default function AIProfessorRiskStudentsPage() {
     direction: "desc",
   });
 
+  // 페이징 상태
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+
   // 모달 관련 상태
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -31,12 +38,30 @@ export default function AIProfessorRiskStudentsPage() {
     }
   }, [user]);
 
+  useEffect(() => {
+    fetchRiskStudentsData();
+  }, [selectedRiskLevel, searchTerm, currentPage]);
+
   const fetchData = async () => {
     try {
       setLoading(true);
       setError("");
 
-      // 담당 지도학생들의 AI 분석 결과 조회
+      // 통계용 전체 위험 학생 데이터
+      await fetchAllRiskStudents();
+
+      // 페이징된 위험 학생 데이터
+      await fetchRiskStudentsData();
+    } catch (err) {
+      console.error("데이터 조회 실패:", err);
+      setError("데이터를 불러오는데 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAllRiskStudents = async () => {
+    try {
       const response = await api.get(
         `/api/ai-analysis/advisor/${user.id}/students`
       );
@@ -61,83 +86,82 @@ export default function AIProfessorRiskStudentsPage() {
             analysis: result,
           }));
 
-        setRiskStudents(riskStudentsData);
+        setAllRiskStudents(riskStudentsData);
       }
     } catch (err) {
-      console.error("데이터 조회 실패:", err);
-      setError("데이터를 불러오는데 실패했습니다.");
-    } finally {
-      setLoading(false);
+      console.error("전체 위험 학생 조회 실패:", err);
     }
   };
 
-  // 필터링 및 정렬
-  const getFilteredAndSortedStudents = () => {
-    let filtered = [...riskStudents];
+  const fetchRiskStudentsData = async () => {
+    try {
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        size: pageSize.toString(),
+      });
 
-    // 위험도 필터
-    if (selectedRiskLevel !== "ALL") {
-      filtered = filtered.filter(
-        (s) => s.analysis.overallRisk === selectedRiskLevel
-      );
-    }
-
-    // 검색어 필터
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(
-        (s) =>
-          String(s.studentId).toLowerCase().includes(term) ||
-          s.studentName.toLowerCase().includes(term) ||
-          (s.deptName && s.deptName.toLowerCase().includes(term)) ||
-          s.subjectName.toLowerCase().includes(term)
-      );
-    }
-
-    // 정렬
-    filtered.sort((a, b) => {
-      let aValue, bValue;
-
-      switch (sortConfig.field) {
-        case "studentId":
-          aValue = a.studentId;
-          bValue = b.studentId;
-          break;
-        case "studentName":
-          aValue = a.studentName;
-          bValue = b.studentName;
-          break;
-        case "subjectName":
-          aValue = a.subjectName;
-          bValue = b.subjectName;
-          break;
-        case "overallRisk":
-          const riskValues = { CRITICAL: 4, RISK: 3, CAUTION: 2, NORMAL: 1 };
-          aValue = riskValues[a.analysis.overallRisk] || 0;
-          bValue = riskValues[b.analysis.overallRisk] || 0;
-          break;
-        case "attendance":
-        case "homework":
-        case "midterm":
-        case "final":
-        case "tuition":
-        case "counseling":
-          const statusValues = { CRITICAL: 4, RISK: 3, CAUTION: 2, NORMAL: 1 };
-          const aStatus = a.analysis[`${sortConfig.field}Status`];
-          const bStatus = b.analysis[`${sortConfig.field}Status`];
-          aValue = statusValues[aStatus] || 0;
-          bValue = statusValues[bStatus] || 0;
-          break;
-        default:
-          return 0;
+      // RISK 또는 CRITICAL 중에서만 필터링
+      if (selectedRiskLevel !== "ALL") {
+        params.append("riskLevel", selectedRiskLevel);
       }
 
-      if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
-      if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
-      return 0;
-    });
+      const response = await api.get(
+        `/api/ai-analysis/advisor/${
+          user.id
+        }/students/paged?${params.toString()}`
+      );
 
-    return filtered;
+      if (response.data.code === 1) {
+        const pageData = response.data.data;
+
+        // 페이징된 데이터에서 RISK, CRITICAL만 추출하여 평탄화
+        const riskStudentsData = [];
+
+        for (const student of pageData.content || []) {
+          // RISK나 CRITICAL인 과목만 필터링
+          const riskSubjects =
+            student.subjects?.filter(
+              (subject) =>
+                subject.overallRisk === "RISK" ||
+                subject.overallRisk === "CRITICAL"
+            ) || [];
+
+          // 각 위험 과목을 개별 행으로 변환
+          for (const subject of riskSubjects) {
+            riskStudentsData.push({
+              studentId: student.studentId,
+              studentName: student.student?.name || "-",
+              deptName: student.student?.department?.name || "-",
+              subjectId: subject.subjectId,
+              subjectName: subject.subject?.name || "-",
+              subYear: subject.analysisYear || "-",
+              semester: subject.semester || "-",
+              analysis: subject,
+            });
+          }
+        }
+
+        // 검색어 필터링
+        let filtered = riskStudentsData;
+        if (searchTerm) {
+          const term = searchTerm.toLowerCase();
+          filtered = riskStudentsData.filter(
+            (s) =>
+              String(s.studentId).toLowerCase().includes(term) ||
+              s.studentName.toLowerCase().includes(term) ||
+              (s.deptName && s.deptName.toLowerCase().includes(term)) ||
+              s.subjectName.toLowerCase().includes(term)
+          );
+        }
+
+        setRiskStudents(filtered);
+        setTotalPages(pageData.totalPages || 0);
+        setTotalElements(filtered.length);
+      }
+    } catch (err) {
+      console.error("위험 학생 데이터 조회 실패:", err);
+      setError("위험 학생 데이터를 불러오는데 실패했습니다.");
+    }
   };
 
   const handleSort = (field) => {
@@ -200,13 +224,25 @@ export default function AIProfessorRiskStudentsPage() {
   };
 
   const getRiskSummary = () => {
-    const critical = riskStudents.filter(
+    const critical = allRiskStudents.filter(
       (s) => s.analysis.overallRisk === "CRITICAL"
     ).length;
-    const risk = riskStudents.filter(
+    const risk = allRiskStudents.filter(
       (s) => s.analysis.overallRisk === "RISK"
     ).length;
     return { critical, risk, total: critical + risk };
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 0 && newPage < totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
+  const handleReset = () => {
+    setSelectedRiskLevel("ALL");
+    setSearchTerm("");
+    setCurrentPage(0);
   };
 
   if (loading) {
@@ -220,44 +256,63 @@ export default function AIProfessorRiskStudentsPage() {
     );
   }
 
-  const filteredStudents = getFilteredAndSortedStudents();
   const summary = getRiskSummary();
 
   return (
     <div className="pc-page-container">
       <div className="pc-header">
-        <h1 className="pc-title">담당 지도학생 중도 이탈 위험 관리</h1>
-        <p className="pc-subtitle">
-          내가 지도하는 학생 중 종합 위험도가 높은 학생들을 집중적으로
-          관리합니다.
-        </p>
+        <h1 className="pc-title">위험 학생 관리</h1>
       </div>
 
-      {error && (
-        <div className="pc-error-message">
-          <span className="material-symbols-outlined">error</span>
-          {error}
-        </div>
-      )}
+      {error && <div className="pc-error-message">{error}</div>}
 
-      {/* 요약 통계 */}
-      <div className="pc-risk-summary-cards">
-        <div className="pc-risk-summary-card pc-risk-card-critical">
-          <div className="pc-risk-summary-content">
-            <div className="pc-risk-summary-label">심각</div>
-            <div className="pc-risk-summary-value">{summary.critical}명</div>
+      <div className="pc-risk-statistics-container">
+        <div className="pc-risk-donut-section">
+          <h3>위험도 분포</h3>
+          <div className="pc-risk-donut-chart">
+            <svg viewBox="0 0 200 200" className="pc-risk-donut-svg">
+              <RiskDonutChart
+                critical={summary.critical}
+                risk={summary.risk}
+                total={summary.total}
+              />
+            </svg>
+            <div className="pc-risk-donut-center">
+              <div className="pc-risk-donut-total">{summary.total}</div>
+              <div className="pc-risk-donut-label">전체</div>
+            </div>
+          </div>
+          <div className="pc-risk-donut-legend">
+            <div className="pc-risk-legend-item">
+              <span className="pc-risk-legend-dot pc-risk-legend-critical"></span>
+              <span>심각</span>
+            </div>
+            <div className="pc-risk-legend-item">
+              <span className="pc-risk-legend-dot pc-risk-legend-risk"></span>
+              <span>위험</span>
+            </div>
           </div>
         </div>
-        <div className="pc-risk-summary-card pc-risk-card-warning">
-          <div className="pc-risk-summary-content">
-            <div className="pc-risk-summary-label">위험</div>
-            <div className="pc-risk-summary-value">{summary.risk}명</div>
-          </div>
-        </div>
-        <div className="pc-risk-summary-card pc-risk-card-total">
-          <div className="pc-risk-summary-content">
-            <div className="pc-risk-summary-label">전체 위험 학생</div>
-            <div className="pc-risk-summary-value">{summary.total}명</div>
+
+        <div className="pc-risk-bars-section">
+          <h3>위험 학생 현황</h3>
+          <div className="pc-risk-bar-chart">
+            <RiskBarItem
+              label="심각"
+              count={summary.critical}
+              total={summary.total}
+              color="critical"
+            />
+            <RiskBarItem
+              label="위험"
+              count={summary.risk}
+              total={summary.total}
+              color="risk"
+            />
+            <div className="pc-risk-bar-total">
+              <span className="pc-risk-bar-total-label">전체 위험 학생</span>
+              <span className="pc-risk-bar-total-value">{summary.total}명</span>
+            </div>
           </div>
         </div>
       </div>
@@ -268,7 +323,10 @@ export default function AIProfessorRiskStudentsPage() {
           <label>위험도</label>
           <select
             value={selectedRiskLevel}
-            onChange={(e) => setSelectedRiskLevel(e.target.value)}
+            onChange={(e) => {
+              setSelectedRiskLevel(e.target.value);
+              setCurrentPage(0);
+            }}
             className="pc-risk-filter-select"
           >
             <option value="ALL">전체</option>
@@ -283,142 +341,198 @@ export default function AIProfessorRiskStudentsPage() {
             type="text"
             placeholder="학번, 이름, 학과, 과목명 검색..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(0);
+            }}
             className="pc-risk-search-input"
           />
         </div>
+
+        <button className="pc-reset-btn" onClick={handleReset}>
+          초기화
+        </button>
       </div>
 
       {/* 학생 목록 */}
       <div className="pc-risk-students-section">
         <div className="pc-section-header">
           <h2>위험 학생 목록</h2>
-          <span className="pc-alert-count">{filteredStudents.length}명</span>
+          <span className="pc-alert-count">
+            {totalElements}명
+            {totalPages > 1 && (
+              <span
+                style={{ marginLeft: "10px", fontSize: "14px", color: "#666" }}
+              >
+                (페이지 {currentPage + 1} / {totalPages})
+              </span>
+            )}
+          </span>
         </div>
 
-        {filteredStudents.length === 0 ? (
+        {riskStudents.length === 0 ? (
           <div className="pc-empty-state">
             <p>
-              {riskStudents.length === 0
+              {allRiskStudents.length === 0
                 ? "현재 담당 지도학생 중 위험 학생이 없습니다."
                 : "검색 조건에 맞는 학생이 없습니다."}
             </p>
           </div>
         ) : (
-          <div className="pc-risk-table-container">
-            <table className="pc-students-table">
-              <thead>
-                <tr>
-                  <th
-                    onClick={() => handleSort("studentId")}
-                    style={{ cursor: "pointer" }}
-                  >
-                    학번 {getSortIcon("studentId")}
-                  </th>
-                  <th
-                    onClick={() => handleSort("studentName")}
-                    style={{ cursor: "pointer" }}
-                  >
-                    이름 {getSortIcon("studentName")}
-                  </th>
-                  <th>학과</th>
-                  <th
-                    onClick={() => handleSort("subjectName")}
-                    style={{ cursor: "pointer" }}
-                  >
-                    과목명 {getSortIcon("subjectName")}
-                  </th>
-                  <th>학년/학기</th>
-                  <th
-                    onClick={() => handleSort("attendance")}
-                    style={{ cursor: "pointer" }}
-                  >
-                    출결 {getSortIcon("attendance")}
-                  </th>
-                  <th
-                    onClick={() => handleSort("homework")}
-                    style={{ cursor: "pointer" }}
-                  >
-                    과제 {getSortIcon("homework")}
-                  </th>
-                  <th
-                    onClick={() => handleSort("midterm")}
-                    style={{ cursor: "pointer" }}
-                  >
-                    중간 {getSortIcon("midterm")}
-                  </th>
-                  <th
-                    onClick={() => handleSort("final")}
-                    style={{ cursor: "pointer" }}
-                  >
-                    기말 {getSortIcon("final")}
-                  </th>
-                  <th
-                    onClick={() => handleSort("tuition")}
-                    style={{ cursor: "pointer" }}
-                  >
-                    등록금 {getSortIcon("tuition")}
-                  </th>
-                  <th
-                    onClick={() => handleSort("counseling")}
-                    style={{ cursor: "pointer" }}
-                  >
-                    상담 {getSortIcon("counseling")}
-                  </th>
-                  <th
-                    onClick={() => handleSort("overallRisk")}
-                    style={{ cursor: "pointer" }}
-                  >
-                    종합위험도 {getSortIcon("overallRisk")}
-                  </th>
-                  <th>상담입력</th>
-                  <th>상담이력</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredStudents.map((student, index) => (
-                  <tr
-                    key={`${student.studentId}-${student.subjectId}-${index}`}
-                  >
-                    <td>{student.studentId}</td>
-                    <td>{student.studentName}</td>
-                    <td>{student.deptName}</td>
-                    <td>{student.subjectName}</td>
-                    <td>
-                      {student.subYear}학년 {student.semester}학기
-                    </td>
-                    <td>{getStatusBadge(student.analysis.attendanceStatus)}</td>
-                    <td>{getStatusBadge(student.analysis.homeworkStatus)}</td>
-                    <td>{getStatusBadge(student.analysis.midtermStatus)}</td>
-                    <td>{getStatusBadge(student.analysis.finalStatus)}</td>
-                    <td>{getStatusBadge(student.analysis.tuitionStatus)}</td>
-                    <td>{getStatusBadge(student.analysis.counselingStatus)}</td>
-                    <td>{getRiskBadge(student.analysis.overallRisk)}</td>
-                    <td>
-                      <button
-                        className="pc-counseling-btn"
-                        onClick={() => handleCounselingClick(student)}
-                      >
-                        상담입력
-                      </button>
-                    </td>
-                    <td>
-                      <button
-                        className="pc-counseling-btn"
-                        onClick={() =>
-                          navigate(
-                            `/aiprofessor/counseling/history/${student.studentId}`
-                          )
-                        }
-                      >
-                        상담이력
-                      </button>
-                    </td>
+          <>
+            <div className="pc-risk-table-container">
+              <table className="pc-students-table">
+                <thead>
+                  <tr>
+                    <th
+                      onClick={() => handleSort("studentId")}
+                      style={{ cursor: "pointer" }}
+                    >
+                      학번 {getSortIcon("studentId")}
+                    </th>
+                    <th
+                      onClick={() => handleSort("studentName")}
+                      style={{ cursor: "pointer" }}
+                    >
+                      이름 {getSortIcon("studentName")}
+                    </th>
+                    <th>학과</th>
+                    <th
+                      onClick={() => handleSort("subjectName")}
+                      style={{ cursor: "pointer" }}
+                    >
+                      과목명 {getSortIcon("subjectName")}
+                    </th>
+                    <th>학년/학기</th>
+                    <th
+                      onClick={() => handleSort("attendance")}
+                      style={{ cursor: "pointer" }}
+                    >
+                      출결 {getSortIcon("attendance")}
+                    </th>
+                    <th
+                      onClick={() => handleSort("homework")}
+                      style={{ cursor: "pointer" }}
+                    >
+                      과제 {getSortIcon("homework")}
+                    </th>
+                    <th
+                      onClick={() => handleSort("midterm")}
+                      style={{ cursor: "pointer" }}
+                    >
+                      중간 {getSortIcon("midterm")}
+                    </th>
+                    <th
+                      onClick={() => handleSort("final")}
+                      style={{ cursor: "pointer" }}
+                    >
+                      기말 {getSortIcon("final")}
+                    </th>
+                    <th
+                      onClick={() => handleSort("tuition")}
+                      style={{ cursor: "pointer" }}
+                    >
+                      등록금 {getSortIcon("tuition")}
+                    </th>
+                    <th
+                      onClick={() => handleSort("counseling")}
+                      style={{ cursor: "pointer" }}
+                    >
+                      상담 {getSortIcon("counseling")}
+                    </th>
+                    <th
+                      onClick={() => handleSort("overallRisk")}
+                      style={{ cursor: "pointer" }}
+                    >
+                      종합위험도 {getSortIcon("overallRisk")}
+                    </th>
+                    <th>상담입력</th>
+                    <th>상담이력</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {riskStudents.map((student, index) => (
+                    <tr
+                      key={`${student.studentId}-${student.subjectId}-${index}`}
+                    >
+                      <td>{student.studentId}</td>
+                      <td>{student.studentName}</td>
+                      <td>{student.deptName}</td>
+                      <td>{student.subjectName}</td>
+                      <td>
+                        {student.subYear}학년 {student.semester}학기
+                      </td>
+                      <td>
+                        {getStatusBadge(student.analysis.attendanceStatus)}
+                      </td>
+                      <td>{getStatusBadge(student.analysis.homeworkStatus)}</td>
+                      <td>{getStatusBadge(student.analysis.midtermStatus)}</td>
+                      <td>{getStatusBadge(student.analysis.finalStatus)}</td>
+                      <td>{getStatusBadge(student.analysis.tuitionStatus)}</td>
+                      <td>
+                        {getStatusBadge(student.analysis.counselingStatus)}
+                      </td>
+                      <td>{getRiskBadge(student.analysis.overallRisk)}</td>
+                      <td>
+                        <button
+                          className="pc-counseling-btn"
+                          onClick={() => handleCounselingClick(student)}
+                        >
+                          상담입력
+                        </button>
+                      </td>
+                      <td>
+                        <button
+                          className="pc-counseling-btn"
+                          onClick={() =>
+                            navigate(
+                              `/aiprofessor/counseling/history/${student.studentId}`
+                            )
+                          }
+                        >
+                          상담이력
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {totalPages > 1 && (
+              <div className="sas-pagination">
+                <button
+                  className="sas-page-btn"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 0}
+                >
+                  이전
+                </button>
+
+                <div className="sas-page-numbers">
+                  {[...Array(totalPages)].map((_, index) => (
+                    <button
+                      key={index}
+                      className={`sas-page-num ${
+                        currentPage === index ? "active" : ""
+                      }`}
+                      onClick={() => handlePageChange(index)}
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  className="sas-page-btn"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages - 1}
+                >
+                  다음
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -435,6 +549,82 @@ export default function AIProfessorRiskStudentsPage() {
           professorId={user.id}
         />
       )}
+    </div>
+  );
+}
+
+function RiskDonutChart({ critical, risk, total }) {
+  if (total === 0) {
+    return (
+      <circle
+        cx="100"
+        cy="100"
+        r="70"
+        fill="none"
+        stroke="#e0e6ed"
+        strokeWidth="40"
+      />
+    );
+  }
+
+  const criticalPercent = (critical / total) * 100;
+  const riskPercent = (risk / total) * 100;
+
+  const radius = 70;
+  const circumference = 2 * Math.PI * radius;
+
+  let offset = 0;
+
+  const segments = [
+    { percent: criticalPercent, color: "#dc3545" },
+    { percent: riskPercent, color: "#fd7e14" },
+  ];
+
+  return (
+    <g transform="rotate(-90 100 100)">
+      {segments.map((segment, index) => {
+        if (segment.percent === 0) return null;
+
+        const dashArray = (segment.percent / 100) * circumference;
+        const dashOffset = -offset;
+
+        offset += dashArray;
+
+        return (
+          <circle
+            key={index}
+            cx="100"
+            cy="100"
+            r={radius}
+            fill="none"
+            stroke={segment.color}
+            strokeWidth="40"
+            strokeDasharray={`${dashArray} ${circumference}`}
+            strokeDashoffset={dashOffset}
+          />
+        );
+      })}
+    </g>
+  );
+}
+
+function RiskBarItem({ label, count, total, color }) {
+  const percentage = total > 0 ? (count / total) * 100 : 0;
+
+  return (
+    <div className="pc-risk-bar-item">
+      <div className="pc-risk-bar-label">
+        <span className="pc-risk-bar-text">{label}</span>
+        <span className="pc-risk-bar-value">
+          {count}명 ({percentage.toFixed(1)}%)
+        </span>
+      </div>
+      <div className="pc-risk-bar-track">
+        <div
+          className={`pc-risk-bar-fill pc-risk-bar-fill-${color}`}
+          style={{ width: `${percentage}%` }}
+        ></div>
+      </div>
     </div>
   );
 }

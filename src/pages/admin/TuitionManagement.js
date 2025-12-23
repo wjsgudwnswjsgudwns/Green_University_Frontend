@@ -214,7 +214,6 @@ export default function TuitionManagement() {
         {crud === "insert" && (
           <form onSubmit={handleSubmit} className="admin-form">
             <div className="admin-form-header">
-              <span className="material-symbols-outlined">school</span>
               <span className="admin-form-title">등록하기</span>
             </div>
             <div className="admin-form-content">
@@ -252,7 +251,6 @@ export default function TuitionManagement() {
         {crud === "update" && (
           <form onSubmit={handleUpdate} className="admin-form">
             <div className="admin-form-header">
-              <span className="material-symbols-outlined">school</span>
               <span className="admin-form-title">수정하기</span>
             </div>
             <div className="admin-form-content">

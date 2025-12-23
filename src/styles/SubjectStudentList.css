@@ -1,0 +1,575 @@
+/* SubjectStudentList 페이지 전용 스타일 */
+
+/* 공통 레이아웃 */
+.ssl-page-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* 사이드 메뉴 */
+.ssl-side-menu {
+  width: 250px;
+  background: #ffffff;
+  border-right: 1px solid #e0e6ed;
+  padding: 20px 0;
+  margin-left: 100px;
+}
+
+.ssl-side-menu-top {
+  padding: 0 20px 20px;
+  border-bottom: 2px solid #e0b960;
+}
+
+.ssl-side-menu-top h2 {
+  font-size: 24px;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.ssl-side-menu-mid {
+  margin-top: 20px;
+}
+
+.ssl-menu-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ssl-menu-table td {
+  padding: 0;
+}
+
+.ssl-menu-table a {
+  display: block;
+  padding: 12px 20px;
+  color: #4a5568;
+  text-decoration: none;
+  transition: all 0.2s;
+  border-left: 3px solid transparent;
+}
+
+.ssl-menu-table a:hover {
+  background: #f8f9fa;
+  color: #216d30;
+}
+
+.ssl-menu-table a.ssl-selected-menu {
+  background: #e8f5e9;
+  color: #216d30;
+  border-left-color: #216d30;
+  font-weight: 600;
+}
+
+/* 메인 영역 */
+.ssl-main-content {
+  flex: 1;
+  padding: 40px;
+  min-width: 800px;
+}
+
+.ssl-main-content h1 {
+  font-size: 28px;
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+.ssl-main-content h4 {
+  font-size: 18px;
+  color: #2c3e50;
+  margin: 20px 0 16px;
+}
+
+.ssl-split-divider {
+  height: 2px;
+  background: linear-gradient(to right, #e0b960, transparent);
+  margin-bottom: 30px;
+}
+
+/* 로딩 화면 */
+.ssl-loading-wrapper {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  font-size: 16px;
+}
+
+.ssl-loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #216d30;
+  border-radius: 50%;
+  animation: ssl-spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes ssl-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.ssl-loading-wrapper p {
+  color: #999;
+  font-size: 16px;
+}
+
+/* 성적 가중치/출결 정책 폼 */
+.ssl-grading-policy-form {
+  background: #f8f9fa;
+  padding: 25px;
+  border-radius: 6px;
+  margin-bottom: 30px;
+  border: 1px solid #e0e6ed;
+}
+
+.ssl-grading-policy-form h4 {
+  margin: 0 0 20px 0;
+  color: #2c3e50;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.ssl-policy-inputs {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.ssl-policy-inputs label {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c3e50;
+  gap: 5px;
+}
+
+.ssl-policy-inputs input {
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 15px;
+  background: white;
+  transition: border-color 0.2s;
+}
+
+.ssl-policy-inputs input:focus {
+  outline: none;
+  border-color: #216d30;
+  box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
+}
+
+.ssl-policy-save-btn {
+  padding: 10px 24px;
+  background: #216d30;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  height: 44px;
+}
+
+.ssl-policy-save-btn:hover:not(:disabled) {
+  background: #1a5524;
+}
+
+.ssl-policy-save-btn:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+}
+
+.ssl-policy-note {
+  margin-top: 15px;
+  padding: 12px;
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+  color: #856404;
+  font-size: 14px;
+  border-radius: 4px;
+}
+
+/* 그룹 색상 범례 */
+.ssl-grade-legend {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  flex-wrap: wrap;
+}
+
+.ssl-grade-legend span {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: #4a5568;
+}
+
+.ssl-grade-badge {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  margin-right: 8px;
+}
+
+.ssl-badge-a {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+}
+
+.ssl-badge-b {
+  background-color: #d1ecf1;
+  border: 1px solid #bee5eb;
+}
+
+.ssl-badge-c {
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+}
+
+.ssl-badge-f {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+}
+
+/* 학생 리스트 컨테이너 */
+.ssl-student-list-container {
+  margin-bottom: 30px;
+}
+
+/* 학생 리스트 테이블 */
+.ssl-list-table {
+  width: 100%;
+  border-collapse: collapse;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ssl-list-table thead {
+  background: #216d30;
+  color: white;
+}
+
+.ssl-list-table th {
+  padding: 12px 14px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 13px;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  white-space: nowrap;
+}
+
+.ssl-list-table th:last-child {
+  border-right: none;
+}
+
+.ssl-list-table tbody tr {
+  border-bottom: 1px solid #e0e6ed;
+  transition: background 0.2s;
+}
+
+.ssl-list-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.ssl-list-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.ssl-list-table td {
+  padding: 10px 12px;
+  text-align: center;
+  color: #4a5568;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+/* 등급별 행 색상 */
+.ssl-grade-row.ssl-grade-a {
+  background-color: #d4edda;
+}
+
+.ssl-grade-row.ssl-grade-a:hover {
+  background-color: #c3e6cb;
+}
+
+.ssl-grade-row.ssl-grade-b {
+  background-color: #d1ecf1;
+}
+
+.ssl-grade-row.ssl-grade-b:hover {
+  background-color: #bee5eb;
+}
+
+.ssl-grade-row.ssl-grade-c {
+  background-color: #fff3cd;
+}
+
+.ssl-grade-row.ssl-grade-c:hover {
+  background-color: #ffeaa7;
+}
+
+.ssl-grade-row.ssl-grade-f {
+  background-color: #f8d7da;
+}
+
+.ssl-grade-row.ssl-grade-f:hover {
+  background-color: #f5c6cb;
+}
+
+.ssl-computed-mark {
+  font-weight: 600;
+  color: #216d30;
+}
+
+.ssl-current-grade-display {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #216d30;
+  color: white;
+  border-radius: 15px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.ssl-no-grade {
+  color: #999;
+  font-style: italic;
+}
+
+/* 기입 버튼 */
+.ssl-grade-edit-btn {
+  padding: 6px 16px;
+  background: #216d30;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.ssl-grade-edit-btn:hover {
+  background: #1a5524;
+}
+
+/* 학생 폼 셀 */
+.ssl-student-form-cell {
+  padding: 0 !important;
+  background: #f8f9fa;
+}
+
+.ssl-student-grade-form {
+  padding: 25px;
+  animation: ssl-slide-down 0.3s ease;
+}
+
+@keyframes ssl-slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ssl-student-grade-form h4 {
+  margin: 0 0 20px 0;
+  color: #2c3e50;
+  font-size: 18px;
+  font-weight: 600;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e0b960;
+}
+
+/* 폼 그리드 */
+.ssl-form-grid {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 25px;
+}
+
+.ssl-form-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  flex: 1;
+}
+
+.ssl-form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 6px;
+}
+
+.ssl-form-group input,
+.ssl-form-group select {
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 15px;
+  background: white;
+  transition: border-color 0.2s;
+}
+
+.ssl-form-group input:focus,
+.ssl-form-group select:focus {
+  outline: none;
+  border-color: #216d30;
+  box-shadow: 0 0 0 3px rgba(33, 109, 48, 0.1);
+}
+
+.ssl-form-note {
+  font-size: 12px;
+  color: #dc3545;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* 폼 액션 버튼 */
+.ssl-form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding-top: 15px;
+  border-top: 1px solid #e0e6ed;
+}
+
+.ssl-btn-cancel {
+  padding: 10px 24px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.ssl-btn-cancel:hover {
+  background: #5a6268;
+}
+
+.ssl-btn-submit {
+  padding: 10px 24px;
+  background: #216d30;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.ssl-btn-submit:hover:not(:disabled) {
+  background: #1a5524;
+}
+
+.ssl-btn-submit:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+}
+
+/* 목록 없음 메시지 */
+.ssl-no-list-message {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  font-size: 16px;
+}
+
+/* 목록 버튼 */
+.ssl-back-button {
+  padding: 10px 24px;
+  background: #216d30;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.ssl-back-button:hover {
+  background: #1a5524;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1200px) {
+  .ssl-side-menu {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e0e6ed;
+    margin-left: 0;
+  }
+
+  .ssl-main-content {
+    min-width: auto;
+    padding: 30px 20px;
+  }
+
+  .ssl-policy-inputs {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ssl-form-grid {
+    flex-direction: column;
+  }
+
+  .ssl-form-group {
+    min-width: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .ssl-main-content {
+    padding: 20px 16px;
+  }
+
+  .ssl-main-content h1 {
+    font-size: 24px;
+  }
+
+  .ssl-list-table {
+    font-size: 13px;
+  }
+
+  .ssl-list-table th,
+  .ssl-list-table td {
+    padding: 10px 8px;
+  }
+
+  .ssl-policy-inputs label {
+    width: 100%;
+  }
+
+  .ssl-grade-legend {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ssl-back-button {
+    width: 100%;
+  }
+}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../api/axiosConfig";
-import "../../styles/myPage.css";
+import "../../styles/staffInfo.css"; // 변경
 
 export default function StaffInfoPage() {
   const { user } = useAuth();
@@ -33,9 +33,9 @@ export default function StaffInfoPage() {
 
   if (loading) {
     return (
-      <div className="mypage-container">
-        <div className="mypage-loading-container">
-          <div className="mypage-spinner"></div>
+      <div className="staff-info-container">
+        <div className="staff-info-loading-container">
+          <div className="staff-info-spinner"></div>
           <p>로딩 중...</p>
         </div>
       </div>
@@ -44,8 +44,8 @@ export default function StaffInfoPage() {
 
   if (error) {
     return (
-      <div className="mypage-container">
-        <div className="mypage-error-container">
+      <div className="staff-info-container">
+        <div className="staff-info-error-container">
           <p>{error}</p>
         </div>
       </div>
@@ -53,28 +53,28 @@ export default function StaffInfoPage() {
   }
 
   return (
-    <div className="mypage-container">
-      <aside className="mypage-side-menu">
-        <div className="mypage-side-menu-header">
+    <div className="staff-info-container">
+      <aside className="staff-info-side-menu">
+        <div className="staff-info-side-menu-header">
           <h2>MY</h2>
         </div>
-        <nav className="mypage-side-menu-nav">
-          <Link to="/staff/info" className="mypage-menu-item active">
+        <nav className="staff-info-side-menu-nav">
+          <Link to="/staff/info" className="staff-info-menu-item active">
             내 정보 조회
           </Link>
-          <Link to="/staff/password" className="mypage-menu-item">
+          <Link to="/staff/password" className="staff-info-menu-item">
             비밀번호 변경
           </Link>
         </nav>
       </aside>
 
-      <main className="mypage-main-content">
+      <main className="staff-info-main-content">
         <h1>내 정보 조회</h1>
-        <div className="mypage-divider"></div>
+        <div className="staff-info-divider"></div>
 
         {staffInfo && (
           <>
-            <table className="mypage-info-table">
+            <table className="staff-info-table">
               <tbody>
                 <tr>
                   <th>ID</th>
@@ -85,7 +85,7 @@ export default function StaffInfoPage() {
               </tbody>
             </table>
 
-            <table className="mypage-info-table">
+            <table className="staff-info-table">
               <tbody>
                 <tr>
                   <th>성명</th>
@@ -109,7 +109,7 @@ export default function StaffInfoPage() {
             </table>
 
             <button
-              className="mypage-update-button"
+              className="staff-info-update-button"
               onClick={() => navigate("/staff/update")}
             >
               수정하기

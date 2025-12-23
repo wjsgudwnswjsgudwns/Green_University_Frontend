@@ -86,53 +86,57 @@ export default function SyllabusPage() {
         <table className="syllabus-table">
           <tbody>
             <tr>
-              <td rowSpan="4">교과목 정보</td>
-              <td>수업 번호</td>
-              <td>{syllabus.subjectId}</td>
-              <td>교과목 명</td>
-              <td>{syllabus.subjectName}</td>
+              <td rowSpan="4" className="syllabus-category">
+                교과목 정보
+              </td>
+              <td className="syllabus-label">수업 번호</td>
+              <td className="syllabus-value">{syllabus.subjectId}</td>
+              <td className="syllabus-label">교과목 명</td>
+              <td className="syllabus-value">{syllabus.subjectName}</td>
             </tr>
 
             <tr>
-              <td>수업 연도</td>
-              <td>{syllabus.subYear}</td>
-              <td>수업 학기</td>
-              <td>{syllabus.semester}</td>
+              <td className="syllabus-label">수업 연도</td>
+              <td className="syllabus-value">{syllabus.subYear}</td>
+              <td className="syllabus-label">수업 학기</td>
+              <td className="syllabus-value">{syllabus.semester}</td>
             </tr>
 
             <tr>
-              <td>학점</td>
-              <td>{syllabus.grades}</td>
-              <td>이수 구분</td>
-              <td>{syllabus.type}</td>
+              <td className="syllabus-label">학점</td>
+              <td className="syllabus-value">{syllabus.grades}</td>
+              <td className="syllabus-label">이수 구분</td>
+              <td className="syllabus-value">{syllabus.type}</td>
             </tr>
 
             <tr>
-              <td>강의 시간</td>
-              <td>{syllabus.classTime || "-"}</td>
-              <td>강의실</td>
-              <td>
+              <td className="syllabus-label">강의 시간</td>
+              <td className="syllabus-value">{syllabus.classTime || "-"}</td>
+              <td className="syllabus-label">강의실</td>
+              <td className="syllabus-value">
                 {syllabus.roomId} ({syllabus.collegeName})
               </td>
             </tr>
           </tbody>
         </table>
 
-        <table border="1" className="syllabus-table">
+        <table className="syllabus-table">
           <tbody>
             <tr>
-              <td rowSpan="2">교강사 정보</td>
-              <td>소속</td>
-              <td>{syllabus.deptName}</td>
-              <td>성명</td>
-              <td>{syllabus.professorName}</td>
+              <td rowSpan="2" className="syllabus-category">
+                교강사 정보
+              </td>
+              <td className="syllabus-label">소속</td>
+              <td className="syllabus-value">{syllabus.deptName}</td>
+              <td className="syllabus-label">성명</td>
+              <td className="syllabus-value">{syllabus.professorName}</td>
             </tr>
 
             <tr>
-              <td>연락처</td>
-              <td>{syllabus.tel}</td>
-              <td>email</td>
-              <td>{syllabus.email}</td>
+              <td className="syllabus-label">연락처</td>
+              <td className="syllabus-value">{syllabus.tel}</td>
+              <td className="syllabus-label">email</td>
+              <td className="syllabus-value">{syllabus.email}</td>
             </tr>
           </tbody>
         </table>

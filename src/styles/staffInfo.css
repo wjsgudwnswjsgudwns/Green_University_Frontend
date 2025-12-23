@@ -1,0 +1,271 @@
+/* 직원 정보 조회 페이지 전용 스타일 */
+
+/* 페이지 컨테이너 */
+.staff-info-container {
+  display: flex;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: white;
+}
+
+/* 사이드 메뉴 */
+.staff-info-side-menu {
+  width: 250px;
+  background: #ffffff;
+  border-right: 1px solid #e0e6ed;
+  padding: 20px 0;
+  flex-shrink: 0;
+}
+
+.staff-info-side-menu-header {
+  padding: 0 20px 20px;
+  border-bottom: 2px solid #e0b960;
+}
+
+.staff-info-side-menu-header h2 {
+  font-size: 24px;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.staff-info-side-menu-nav {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.staff-info-menu-item {
+  display: block;
+  padding: 12px 20px;
+  color: #4a5568;
+  text-decoration: none;
+  transition: all 0.2s;
+  border-left: 3px solid transparent;
+}
+
+.staff-info-menu-item:hover {
+  background: #f8f9fa;
+  color: #216d30;
+}
+
+.staff-info-menu-item.active {
+  background: #e8f5e9;
+  color: #216d30;
+  border-left-color: #216d30;
+  font-weight: 600;
+}
+
+/* 메인 컨텐츠 */
+.staff-info-main-content {
+  flex: 1;
+  padding: 40px;
+  min-width: 800px;
+}
+
+.staff-info-main-content h1 {
+  font-size: 28px;
+  color: #2c3e50;
+  margin: 0 0 20px 0;
+}
+
+.staff-info-divider {
+  height: 2px;
+  background: linear-gradient(to right, #e0b960, transparent);
+  margin-bottom: 30px;
+}
+
+/* 로딩 */
+.staff-info-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: #666;
+}
+
+.staff-info-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #216d30;
+  border-radius: 50%;
+  animation: staff-info-spin 1s linear infinite;
+}
+
+@keyframes staff-info-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.staff-info-loading-container p {
+  margin-top: 16px;
+  font-size: 16px;
+}
+
+/* 에러 */
+.staff-info-error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 40px;
+}
+
+.staff-info-error-container p {
+  color: #dc3545;
+  font-size: 16px;
+  text-align: center;
+}
+
+/* 정보 테이블 */
+.staff-info-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.staff-info-table tr {
+  border-bottom: 1px solid #e0e6ed;
+}
+
+.staff-info-table tr:last-child {
+  border-bottom: none;
+}
+
+.staff-info-table th {
+  width: 150px;
+  padding: 16px;
+  background-color: #e8f5e9;
+  font-weight: 600;
+  color: #2c3e50;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 14px;
+  width: 120px;
+}
+
+.staff-info-table td {
+  padding: 16px;
+  color: #4a5568;
+  vertical-align: middle;
+  font-size: 14px;
+  width: 200px;
+}
+
+/* 수정 버튼 */
+.staff-info-update-button {
+  display: block;
+  padding: 10px 15px;
+  margin: 20px 0 20px auto;
+  background-color: #216d30;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.staff-info-update-button:hover {
+  background-color: #1a5524;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(33, 109, 48, 0.3);
+}
+
+/* 반응형 */
+@media (max-width: 1200px) {
+  .staff-info-container {
+    flex-direction: column;
+  }
+
+  .staff-info-side-menu {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e0e6ed;
+  }
+
+  .staff-info-side-menu-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 0 20px;
+  }
+
+  .staff-info-menu-item {
+    border-left: none;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+  }
+
+  .staff-info-menu-item.active {
+    border-left: none;
+    border-bottom-color: #216d30;
+  }
+
+  .staff-info-main-content {
+    min-width: auto;
+    padding: 30px 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .staff-info-main-content {
+    padding: 20px 16px;
+  }
+
+  .staff-info-main-content h1 {
+    font-size: 24px;
+  }
+
+  .staff-info-table-container {
+    overflow-x: auto;
+  }
+
+  .staff-info-table {
+    min-width: 600px;
+  }
+
+  .staff-info-table th,
+  .staff-info-table td {
+    padding: 12px 8px;
+    font-size: 13px;
+  }
+
+  .staff-info-update-button {
+    padding: 10px 32px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .staff-info-main-content {
+    padding: 16px 12px;
+  }
+
+  .staff-info-main-content h1 {
+    font-size: 20px;
+  }
+
+  .staff-info-table th,
+  .staff-info-table td {
+    padding: 10px 6px;
+    font-size: 12px;
+  }
+
+  .staff-info-update-button {
+    width: 100%;
+    padding: 10px 24px;
+    font-size: 14px;
+  }
+}

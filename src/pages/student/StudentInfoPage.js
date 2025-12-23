@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../api/axiosConfig";
-import "../../styles/myPage.css";
+import "../../styles/studentInfo.css"; // 변경
 
 export default function StudentInfoPage() {
   const { user } = useAuth();
@@ -35,9 +35,9 @@ export default function StudentInfoPage() {
 
   if (loading) {
     return (
-      <div className="mypage-container">
-        <div className="mypage-loading-container">
-          <div className="mypage-spinner"></div>
+      <div className="stu-info-container">
+        <div className="stu-info-loading-container">
+          <div className="stu-info-spinner"></div>
           <p>로딩 중...</p>
         </div>
       </div>
@@ -46,8 +46,8 @@ export default function StudentInfoPage() {
 
   if (error) {
     return (
-      <div className="mypage-container">
-        <div className="mypage-error-container">
+      <div className="stu-info-container">
+        <div className="stu-info-error-container">
           <p>{error}</p>
         </div>
       </div>
@@ -55,40 +55,40 @@ export default function StudentInfoPage() {
   }
 
   return (
-    <div className="mypage-container">
-      <aside className="mypage-side-menu">
-        <div className="mypage-side-menu-header">
+    <div className="stu-info-container">
+      <aside className="stu-info-side-menu">
+        <div className="stu-info-side-menu-header">
           <h2>MY</h2>
         </div>
-        <nav className="mypage-side-menu-nav">
-          <Link to="/student/info" className="mypage-menu-item active">
+        <nav className="stu-info-side-menu-nav">
+          <Link to="/student/info" className="stu-info-menu-item active">
             내 정보 조회
           </Link>
-          <Link to="/student/password" className="mypage-menu-item">
+          <Link to="/student/password" className="stu-info-menu-item">
             비밀번호 변경
           </Link>
-          <Link to="/student/break/application" className="mypage-menu-item">
+          <Link to="/student/break/application" className="stu-info-menu-item">
             휴학 신청
           </Link>
-          <Link to="/student/break/list" className="mypage-menu-item">
+          <Link to="/student/break/list" className="stu-info-menu-item">
             휴학 내역 조회
           </Link>
-          <Link to="/student/tuition/list" className="mypage-menu-item">
+          <Link to="/student/tuition/list" className="stu-info-menu-item">
             등록금 내역 조회
           </Link>
-          <Link to="/student/tuition/payment" className="mypage-menu-item">
+          <Link to="/student/tuition/payment" className="stu-info-menu-item">
             등록금 납부 고지서
           </Link>
         </nav>
       </aside>
 
-      <main className="mypage-main-content">
+      <main className="stu-info-main-content">
         <h1>내 정보 조회</h1>
-        <div className="mypage-divider"></div>
+        <div className="stu-info-divider"></div>
 
         {studentInfo && (
           <>
-            <table className="mypage-info-table">
+            <table className="stu-info-table">
               <tbody>
                 <tr>
                   <th>학번</th>
@@ -113,7 +113,7 @@ export default function StudentInfoPage() {
               </tbody>
             </table>
 
-            <table className="mypage-info-table">
+            <table className="stu-info-table">
               <tbody>
                 <tr>
                   <th>성명</th>
@@ -133,16 +133,10 @@ export default function StudentInfoPage() {
                   <th>이메일</th>
                   <td>{studentInfo.email}</td>
                 </tr>
-                <tr>
-                  <th>지도교수</th>
-                  <td>{studentInfo.tel}</td>
-                  <th>이메일</th>
-                  <td>{studentInfo.email}</td>
-                </tr>
               </tbody>
             </table>
 
-            <table className="mypage-info-table">
+            <table className="stu-info-table">
               <tbody>
                 <tr>
                   <th>지도교수</th>
@@ -163,16 +157,16 @@ export default function StudentInfoPage() {
             </table>
 
             <button
-              className="mypage-update-button"
+              className="stu-info-update-button"
               onClick={() => navigate("/student/update")}
             >
               수정하기
             </button>
 
-            <div className="mypage-section-divider"></div>
+            <div className="stu-info-section-divider"></div>
 
-            <h4 className="mypage-section-title">학적 변동 내역</h4>
-            <table className="mypage-stat-table">
+            <h4 className="stu-info-section-title">학적 변동 내역</h4>
+            <table className="stu-info-stat-table">
               <thead>
                 <tr>
                   <th>변동 일자</th>
@@ -199,7 +193,7 @@ export default function StudentInfoPage() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="5" className="no-data">
+                    <td colSpan="5" className="stu-info-no-data">
                       학적 변동 내역이 없습니다.
                     </td>
                   </tr>

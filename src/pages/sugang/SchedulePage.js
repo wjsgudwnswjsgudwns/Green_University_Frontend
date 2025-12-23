@@ -178,7 +178,7 @@ const SchedulePage = () => {
                 <td>
                   <a
                     href="/sugang/schedule"
-                    className="sugang-application-menu-link"
+                    className="sugang-application-menu-link sugang-application-menu-active"
                   >
                     나의 시간표
                   </a>
@@ -198,7 +198,7 @@ const SchedulePage = () => {
                 <td>
                   <a
                     href="/sugang/application"
-                    className="sugang-application-menu-link sugang-application-menu-active"
+                    className="sugang-application-menu-link"
                   >
                     수강 신청
                   </a>
@@ -292,7 +292,7 @@ const SchedulePage = () => {
               <h4>
                 <span style={{ fontWeight: 600 }}>수강 과목 목록</span>
               </h4>
-              <table border="1" className="sub--list--table">
+              <table className="sub--list--table">
                 <thead>
                   <tr>
                     <th>학수번호</th>

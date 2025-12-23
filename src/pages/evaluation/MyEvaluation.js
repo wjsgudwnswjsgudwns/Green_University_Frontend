@@ -144,7 +144,7 @@ const MyEvaluation = () => {
             {loading ? (
               <p className="me-no-list-p">로딩 중...</p>
             ) : evalList.length > 0 ? (
-              <table border="1" className="me-list-table">
+              <table className="me-list-table">
                 <thead>
                   <tr>
                     <th>과목 이름</th>

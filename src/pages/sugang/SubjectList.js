@@ -131,7 +131,7 @@ const SubjectList = () => {
                 <td>
                   <a
                     href="/sugang/subjectList"
-                    className="sugang-application-menu-link"
+                    className="sugang-application-menu-link sugang-application-menu-active"
                   >
                     강의 시간표 조회
                   </a>
@@ -161,7 +161,7 @@ const SubjectList = () => {
                 <td>
                   <a
                     href="/sugang/application"
-                    className="sugang-application-menu-link sugang-application-menu-active"
+                    className="sugang-application-menu-link"
                   >
                     수강 신청
                   </a>
@@ -237,12 +237,7 @@ const SubjectList = () => {
 
               {/* 검색 버튼 */}
               <button type="submit" disabled={loading}>
-                <ul
-                  className="d-flex justify-content-center"
-                  style={{ margin: 0 }}
-                >
-                  <li style={{ height: "24px", marginRight: "2px" }}>조회</li>
-                </ul>
+                조회
               </button>
             </div>
           </form>
@@ -256,11 +251,11 @@ const SubjectList = () => {
             <h4>
               <span style={{ fontWeight: 600 }}>강의 목록</span>&nbsp;
               <span style={{ color: "gray", fontSize: "18px" }}>
-                [총 {subjectCount}건]
+                [이 {subjectCount}건]
               </span>
             </h4>
 
-            <table border="1" className="sub--list--table">
+            <table className="sub--list--table">
               <thead>
                 <tr>
                   <th>단과대학</th>

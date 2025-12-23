@@ -139,7 +139,7 @@ const AppList = () => {
               <span className="count-text">[총 {sumGrades}학점]</span>
             </h4>
 
-            <table border="1" className="sugang-applist-table">
+            <table className="sugang-applist-table">
               <thead>
                 <tr>
                   <th>학수번호</th>

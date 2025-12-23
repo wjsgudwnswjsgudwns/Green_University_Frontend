@@ -62,14 +62,15 @@ export default function LoginPage() {
 
         console.log("로그인 성공, 역할:", userRole);
 
+        // navigate 대신 window.location 사용 (강제 새로고침)
         if (userRole === "student") {
-          navigate("/student/dashboard");
+          window.location.href = "/student/dashboard";
         } else if (userRole === "professor") {
-          navigate("/professor/dashboard");
+          window.location.href = "/professor/dashboard";
         } else if (userRole === "staff") {
-          navigate("/staff/dashboard");
+          window.location.href = "/staff/dashboard";
         } else {
-          navigate("/");
+          window.location.href = "/";
         }
       } else {
         setError(result.message || "로그인에 실패했습니다.");
@@ -146,7 +147,7 @@ export default function LoginPage() {
           )}
 
           <form onSubmit={handleSubmit} className="login-form">
-            <div className="form-group">
+            <div className="login-form-group">
               <label htmlFor="id">
                 <span className="material-symbols-outlined">person</span>
               </label>
@@ -163,7 +164,7 @@ export default function LoginPage() {
               />
             </div>
 
-            <div className="form-group">
+            <div className="login-form-group">
               <label htmlFor="password">
                 <span className="material-symbols-outlined">lock</span>
               </label>

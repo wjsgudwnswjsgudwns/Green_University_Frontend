@@ -19,6 +19,15 @@ export default function UpdateUserPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  // 이메일 인증 관련 상태
+  const [originalEmail, setOriginalEmail] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
+  const [isCodeSent, setIsCodeSent] = useState(false);
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [codeSendLoading, setCodeSendLoading] = useState(false);
+  const [codeVerifyLoading, setCodeVerifyLoading] = useState(false);
+  const [timer, setTimer] = useState(0);
+
   useEffect(() => {
     if (!user) {
       navigate("/login");
@@ -26,6 +35,18 @@ export default function UpdateUserPage() {
     }
     fetchUserInfo();
   }, [user, navigate]);
+
+  // 타이머 카운트다운
+  useEffect(() => {
+    if (timer > 0) {
+      const interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+      return () => clearInterval(interval);
+    } else if (timer === 0 && isCodeSent) {
+      setIsCodeSent(false);
+    }
+  }, [timer, isCodeSent]);
 
   const fetchUserInfo = async () => {
     try {
@@ -39,6 +60,7 @@ export default function UpdateUserPage() {
           email: response.data.student.email || "",
           password: "",
         });
+        setOriginalEmail(response.data.student.email || "");
       } else if (user.userRole === "professor") {
         response = await api.get("/api/user/info/professor");
         setUserInfo(response.data.professor);
@@ -48,6 +70,7 @@ export default function UpdateUserPage() {
           email: response.data.professor.email || "",
           password: "",
         });
+        setOriginalEmail(response.data.professor.email || "");
       } else if (user.userRole === "staff") {
         response = await api.get("/api/user/info/staff");
         setUserInfo(response.data.staff);
@@ -57,6 +80,7 @@ export default function UpdateUserPage() {
           email: response.data.staff.email || "",
           password: "",
         });
+        setOriginalEmail(response.data.staff.email || "");
       }
     } catch (err) {
       console.error("정보 조회 실패:", err);
@@ -74,6 +98,69 @@ export default function UpdateUserPage() {
     }));
     setError("");
     setSuccess("");
+
+    // 이메일이 변경되면 인증 상태 초기화
+    if (name === "email" && value !== originalEmail) {
+      setIsEmailVerified(false);
+      setIsCodeSent(false);
+      setVerificationCode("");
+    } else if (name === "email" && value === originalEmail) {
+      setIsEmailVerified(true);
+    }
+  };
+
+  // 인증 코드 발송
+  const handleSendCode = async () => {
+    if (!formData.email) {
+      setError("이메일을 입력해주세요.");
+      return;
+    }
+
+    if (formData.email === originalEmail) {
+      setError("현재 이메일과 동일합니다.");
+      return;
+    }
+
+    setCodeSendLoading(true);
+    setError("");
+
+    try {
+      await api.post("/api/email/send", { email: formData.email });
+      setIsCodeSent(true);
+      setTimer(300); // 5분 = 300초
+      setSuccess("인증 코드가 이메일로 발송되었습니다.");
+    } catch (err) {
+      console.error("인증 코드 발송 실패:", err);
+      setError(err.response?.data?.message || "인증 코드 발송에 실패했습니다.");
+    } finally {
+      setCodeSendLoading(false);
+    }
+  };
+
+  // 인증 코드 확인
+  const handleVerifyCode = async () => {
+    if (!verificationCode) {
+      setError("인증 코드를 입력해주세요.");
+      return;
+    }
+
+    setCodeVerifyLoading(true);
+    setError("");
+
+    try {
+      await api.post("/api/email/verify", {
+        email: formData.email,
+        code: verificationCode,
+      });
+      setIsEmailVerified(true);
+      setIsCodeSent(false);
+      setSuccess("이메일 인증이 완료되었습니다.");
+    } catch (err) {
+      console.error("인증 코드 확인 실패:", err);
+      setError(err.response?.data?.message || "인증 코드가 올바르지 않습니다.");
+    } finally {
+      setCodeVerifyLoading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -91,11 +178,19 @@ export default function UpdateUserPage() {
       return;
     }
 
+    // 이메일이 변경되었는데 인증하지 않은 경우
+    if (formData.email !== originalEmail && !isEmailVerified) {
+      setError("이메일 인증을 완료해주세요.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       await api.put(
-        `/api/user/update?password=${encodeURIComponent(formData.password)}`,
+        `/api/user/update?password=${encodeURIComponent(
+          formData.password
+        )}&emailVerified=${isEmailVerified}`,
         {
           address: formData.address,
           tel: formData.tel,
@@ -141,6 +236,12 @@ export default function UpdateUserPage() {
     return commonItems;
   };
 
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes}:${secs.toString().padStart(2, "0")}`;
+  };
+
   if (loading) {
     return (
       <div className="mypage-container">
@@ -151,6 +252,8 @@ export default function UpdateUserPage() {
       </div>
     );
   }
+
+  const emailChanged = formData.email !== originalEmail;
 
   return (
     <div className="mypage-container">
@@ -216,18 +319,74 @@ export default function UpdateUserPage() {
                   <label htmlFor="email">이메일</label>
                 </th>
                 <td>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="mypage-input-field"
-                    disabled={isSubmitting}
-                    required
-                  />
+                  <div className="mypage-email-verification-container">
+                    <div className="mypage-email-input-wrapper">
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        className="mypage-input-field"
+                        disabled={isSubmitting}
+                        required
+                      />
+                    </div>
+                    {emailChanged && !isEmailVerified && (
+                      <button
+                        type="button"
+                        onClick={handleSendCode}
+                        disabled={codeSendLoading || isCodeSent}
+                        className={`mypage-verification-button ${
+                          isCodeSent ? "resend" : ""
+                        }`}
+                      >
+                        {codeSendLoading
+                          ? "발송 중..."
+                          : isCodeSent
+                          ? `재발송 (${formatTime(timer)})`
+                          : "인증코드 발송"}
+                      </button>
+                    )}
+                    {emailChanged && isEmailVerified && (
+                      <span className="mypage-verified-badge">✓ 인증완료</span>
+                    )}
+                  </div>
                 </td>
               </tr>
+              {emailChanged && isCodeSent && !isEmailVerified && (
+                <tr>
+                  <th>
+                    <label htmlFor="verificationCode">인증 코드</label>
+                  </th>
+                  <td>
+                    <div className="mypage-email-verification-container">
+                      <div className="mypage-verification-code-input">
+                        <input
+                          type="text"
+                          id="verificationCode"
+                          value={verificationCode}
+                          onChange={(e) => setVerificationCode(e.target.value)}
+                          placeholder="6자리 인증 코드 입력"
+                          className="mypage-input-field"
+                          maxLength={6}
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleVerifyCode}
+                        disabled={codeVerifyLoading}
+                        className="mypage-verify-button"
+                      >
+                        {codeVerifyLoading ? "확인 중..." : "인증 확인"}
+                      </button>
+                    </div>
+                    <small className="mypage-verification-help-text">
+                      ※ 이메일로 발송된 6자리 코드를 입력하세요 (유효시간: 5분)
+                    </small>
+                  </td>
+                </tr>
+              )}
               <tr>
                 <th>
                   <label htmlFor="password">비밀번호 확인</label>
@@ -249,13 +408,15 @@ export default function UpdateUserPage() {
             </tbody>
           </table>
 
-          <button
-            type="submit"
-            className="mypage-submit-button"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "수정 중..." : "수정하기"}
-          </button>
+          <div className="mypage-button-group">
+            <button
+              type="submit"
+              className="mypage-submit-button"
+              disabled={isSubmitting || (emailChanged && !isEmailVerified)}
+            >
+              {isSubmitting ? "수정 중..." : "수정하기"}
+            </button>
+          </div>
         </form>
       </main>
     </div>

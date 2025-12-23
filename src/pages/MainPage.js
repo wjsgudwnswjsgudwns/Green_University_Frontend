@@ -7,6 +7,8 @@ import banner1 from "../images/Green_University_FrontView.png";
 import banner2 from "../images/Meeting_3_people.png";
 import banner3 from "../images/Principal.png";
 import banner4 from "../images/Meeting_5_people.png";
+import banner5 from "../images/banner5.png";
+import QuickLinks from "../components/QuickLinks";
 
 export default function MainPage() {
   const { user, logout } = useAuth();
@@ -15,11 +17,15 @@ export default function MainPage() {
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // 사용자 상세 정보 상태
+  const [userDetails, setUserDetails] = useState(null);
+  const [userDetailsLoading, setUserDetailsLoading] = useState(true);
+
   // 애니메이션을 위한 ref
   const noticeRef = useRef(null);
   const scheduleRef = useRef(null);
 
-  const banners = [banner1, banner2, banner3, banner4];
+  const banners = [banner1, banner2, banner3, banner4, banner5];
 
   // 자동 슬라이드
   useEffect(() => {
@@ -29,6 +35,38 @@ export default function MainPage() {
 
     return () => clearInterval(interval);
   }, [banners.length]);
+
+  // 사용자 상세 정보 가져오기
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      if (!user) {
+        setUserDetailsLoading(false);
+        return;
+      }
+
+      try {
+        setUserDetailsLoading(true);
+        let response;
+
+        if (user.userRole === "student") {
+          response = await api.get("/api/user/info/student");
+          setUserDetails(response.data.student);
+        } else if (user.userRole === "professor") {
+          response = await api.get("/api/user/info/professor");
+          setUserDetails(response.data.professor);
+        } else if (user.userRole === "staff") {
+          response = await api.get("/api/user/info/staff");
+          setUserDetails(response.data.staff);
+        }
+      } catch (error) {
+        console.error("사용자 정보 조회 실패:", error);
+      } finally {
+        setUserDetailsLoading(false);
+      }
+    };
+
+    fetchUserDetails();
+  }, [user]);
 
   // 공지사항 및 학사일정 데이터 가져오기
   useEffect(() => {
@@ -41,7 +79,7 @@ export default function MainPage() {
           params: { page: 0 },
         });
         const noticeList = noticeResponse.data.content || [];
-        setNotices(noticeList.slice(0, 4)); // 최대 4개만
+        setNotices(noticeList.slice(0, 4));
 
         // 학사일정 전체 가져오기
         const scheduleResponse = await api.get("/api/schedule");
@@ -123,6 +161,18 @@ export default function MainPage() {
     return { month, day };
   };
 
+  // 학적 상태 결정 함수
+  const getStudentStatus = (student) => {
+    if (!student) return "재학";
+
+    if (student.graduationDate) {
+      return "졸업";
+    }
+
+    // 기본적으로 재학
+    return "재학";
+  };
+
   return (
     <div className="main-page page-container">
       {/* 이미지 슬라이더 */}
@@ -152,6 +202,102 @@ export default function MainPage() {
       </div>
 
       <div className="main-content">
+        {/* 프로필 카드 - 왼쪽 상단 */}
+        <div className="side-column">
+          {user && (
+            <div className="profile-card">
+              <ul className="profile-header">
+                <li className="welcome">{user.name}님, 환영합니다.</li>
+              </ul>
+              <hr />
+
+              {userDetailsLoading ? (
+                <div className="loading-text">로딩 중...</div>
+              ) : (
+                <>
+                  {user.userRole === "student" && userDetails && (
+                    <table className="profile-table">
+                      <tbody>
+                        <tr>
+                          <td>이메일</td>
+                          <td>{userDetails.email}</td>
+                        </tr>
+                        <tr>
+                          <td>소속</td>
+                          <td>{userDetails.deptName || "정보 없음"}</td>
+                        </tr>
+                        <tr>
+                          <td>학기</td>
+                          <td>
+                            {userDetails.grade}학년&nbsp;{userDetails.semester}
+                            학기
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>학적상태</td>
+                          <td>{getStudentStatus(userDetails)}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  )}
+
+                  {user.userRole === "professor" && userDetails && (
+                    <table className="profile-table">
+                      <tbody>
+                        <tr>
+                          <td>이메일</td>
+                          <td>{userDetails.email}</td>
+                        </tr>
+                        <tr>
+                          <td>소속</td>
+                          <td>
+                            {userDetails.deptName
+                              ? `${userDetails.deptName} 교수`
+                              : "정보 없음"}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  )}
+
+                  {user.userRole === "staff" && userDetails && (
+                    <table className="profile-table">
+                      <tbody>
+                        <tr>
+                          <td>이메일</td>
+                          <td>{userDetails.email}</td>
+                        </tr>
+                        <tr>
+                          <td>소속</td>
+                          <td>교직원</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  )}
+                </>
+              )}
+
+              <div className="profile-buttons">
+                <Link to={`/${user.userRole}/info`}>
+                  <button className="profile-btn mypage-btn">마이페이지</button>
+                </Link>
+                <button
+                  className="profile-btn logout-btn"
+                  onClick={handleLogout}
+                >
+                  로그아웃
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 빠른 메뉴 - 오른쪽 상단 */}
+        <div className="quick-links-column">
+          <QuickLinks />
+        </div>
+
+        {/* 공지사항 & 학사일정 - 하단 전체 */}
         <div className="main-column">
           {/* 공지사항 섹션 */}
           <div ref={noticeRef} className="content-section fade-in-section">
@@ -223,78 +369,6 @@ export default function MainPage() {
               )}
             </div>
           </div>
-        </div>
-
-        <div className="side-column">
-          {user && (
-            <div className="profile-card">
-              <ul className="profile-header">
-                <li className="welcome">{user.name}님, 환영합니다.</li>
-              </ul>
-              <hr />
-              {user.userRole === "student" && (
-                <table className="profile-table">
-                  <tbody>
-                    <tr>
-                      <td>이메일</td>
-                      <td>{user.email}</td>
-                    </tr>
-                    <tr>
-                      <td>소속</td>
-                      <td>컴퓨터공학과</td>
-                    </tr>
-                    <tr>
-                      <td>학기</td>
-                      <td>3학년&nbsp;2학기</td>
-                    </tr>
-                    <tr>
-                      <td>학적상태</td>
-                      <td>재학</td>
-                    </tr>
-                  </tbody>
-                </table>
-              )}
-              {user.userRole === "professor" && (
-                <table className="profile-table">
-                  <tbody>
-                    <tr>
-                      <td>이메일</td>
-                      <td>{user.email}</td>
-                    </tr>
-                    <tr>
-                      <td>소속</td>
-                      <td>컴퓨터공학과 교수</td>
-                    </tr>
-                  </tbody>
-                </table>
-              )}
-              {user.userRole === "staff" && (
-                <table className="profile-table">
-                  <tbody>
-                    <tr>
-                      <td>이메일</td>
-                      <td>{user.email}</td>
-                    </tr>
-                    <tr>
-                      <td>소속</td>
-                      <td>교직원</td>
-                    </tr>
-                  </tbody>
-                </table>
-              )}
-              <div className="profile-buttons">
-                <Link to={`/${user.userRole}/info`}>
-                  <button className="profile-btn mypage-btn">마이페이지</button>
-                </Link>
-                <button
-                  className="profile-btn logout-btn"
-                  onClick={handleLogout}
-                >
-                  로그아웃
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
