@@ -100,10 +100,15 @@ function MeetingJoinPage() {
             joinInfo
         );
 
-    const { mediaStates, sendMediaStateNow, mediaSignalConnected } =
-        useMeetingMediaSignals(signalsMeetingId, signalsUserId, myDisplayName);
+    const {
+        mediaStates,
+        sendMediaStateNow,
+        sendMediaState,
+        mediaSignalConnected,
+    } = useMeetingMediaSignals(signalsMeetingId, signalsUserId, myDisplayName);
 
     const sendMediaStateNowRef = useRef(null);
+    const sendMediaStateRef = useRef(null);
     const mediaSignalConnectedRef = useRef(false);
 
     useEffect(() => {
@@ -113,7 +118,9 @@ function MeetingJoinPage() {
     useEffect(() => {
         sendMediaStateNowRef.current = sendMediaStateNow;
     }, [sendMediaStateNow]);
-
+    useEffect(() => {
+        sendMediaStateRef.current = sendMediaState; // ✅ 추가
+    }, [sendMediaState]);
     // =========================================================
     // 5) Presence 안정화 (lastPresenceRef)
     // =========================================================
@@ -457,42 +464,61 @@ function MeetingJoinPage() {
         if (mode === "focus") switchToGrid();
         else switchToFocus();
     }, [mode, switchToGrid, switchToFocus]);
+
+    const onToggleScreenShareWithSignal = useCallback(() => {
+        const isCurrentlyScreen =
+            uiMedia.videoSource === "screen" &&
+            uiMedia.video === true &&
+            uiMedia.screenSoftMuted !== true;
+
+        // 👉 토글 후 의도
+        const willBeScreen = !isCurrentlyScreen;
+
+        toggleScreenShare();
+
+        sendMediaStateNowRef.current?.(!!uiMedia.audio, willBeScreen, {
+            videoSource: willBeScreen ? "screen" : "camera",
+            screenCapturing: willBeScreen,
+            screenSoftMuted: false,
+            type: "MEDIA_STATE",
+            reason: willBeScreen ? "screen-on" : "screen-off",
+        });
+    }, [toggleScreenShare, uiMedia]);
+    const onRestartScreenShareWithSignal = useCallback(() => {
+        // 1️⃣ 먼저 OFF 알림
+        sendMediaStateNowRef.current?.(!!uiMedia.audio, false, {
+            videoSource: "camera",
+            screenCapturing: false,
+            screenSoftMuted: false,
+            type: "MEDIA_STATE",
+            reason: "screen-restart-off",
+        });
+
+        // 2️⃣ 실제 Janus 재선택 (세션 재생성)
+        restartScreenShare();
+    }, [restartScreenShare, uiMedia]);
+
     // =========================================================
-    // 10) Signals Send Triggers
+    // 10) Signals Send Triggers (simple + stable)
     // =========================================================
-    const broadcastMyMediaState = useCallback(
-        (reason = "unknown") => {
-            if (!mediaSignalConnectedRef.current) return;
-            if (!isConnected) return;
 
-            const fn = sendMediaStateNowRef.current;
-            if (!fn) return;
+    // ✅ 훅이 지원하는 필드만 보냄
+    const buildSignalExtra = useCallback((m, reason) => {
+        const x = m || {};
+        return {
+            videoDeviceLost: !!x.videoDeviceLost,
+            videoSource: x.videoSource || "camera",
+            screenSoftMuted: !!x.screenSoftMuted,
+            screenCapturing: !!x.screenCapturing,
+            reason,
+            type: "MEDIA_STATE",
+        };
+    }, []);
 
-            fn(!!uiMedia.audio, !!uiMedia.video, {
-                videoDeviceLost: !!uiMedia.videoDeviceLost,
-                noMediaDevices: !!uiMedia.noMediaDevices,
-                videoSource: uiMedia.videoSource,
-                cameraDeviceId: uiMedia.cameraDeviceId,
-                reason,
-            });
-        },
-        [isConnected, uiMedia]
-    );
-
-    const broadcastCtlRef = useRef({
-        didInitial: false,
-        lastLocalKey: "",
-        lastPresenceKey: "",
-        lastSentAt: 0,
-    });
+    const lastSentKeyRef = useRef("");
 
     useEffect(() => {
-        broadcastCtlRef.current = {
-            didInitial: false,
-            lastLocalKey: "",
-            lastPresenceKey: "",
-            lastSentAt: 0,
-        };
+        lastSentKeyRef.current = "";
     }, [meetingId]);
 
     useEffect(() => {
@@ -500,55 +526,40 @@ function MeetingJoinPage() {
         if (!mediaSignalConnected) return;
         if (!isConnected) return;
 
-        const makeLocalKey = (m) => {
-            const x = m || {};
-            return [
-                x.audio ? 1 : 0,
-                x.video ? 1 : 0,
-                x.videoDeviceLost ? 1 : 0,
-                x.noMediaDevices ? 1 : 0,
-                x.videoSource || "camera",
-                x.cameraDeviceId || "",
-            ].join("|");
-        };
+        // ✅ 변화 감지 키 (훅이 관리하는 것만)
+        const key = [
+            uiMedia.audio ? 1 : 0,
+            uiMedia.video ? 1 : 0,
+            uiMedia.videoDeviceLost ? 1 : 0,
+            // uiMedia.videoSource || "camera",
+            // uiMedia.screenSoftMuted ? 1 : 0,
+            // uiMedia.screenCapturing ? 1 : 0,
+        ].join("|");
 
-        const makePresenceKey = (list) => {
-            return (list || [])
-                .map((p) => p.userId)
-                .filter(Boolean)
-                .slice()
-                .sort((a, b) => a - b)
-                .join(",");
-        };
+        // ✅ 첫 1회는 즉시, 이후는 디바운스
+        const isFirst = lastSentKeyRef.current === "";
+        const changed = key !== lastSentKeyRef.current;
+        if (!changed) return;
 
-        const ctl = broadcastCtlRef.current;
-        const now = Date.now();
+        lastSentKeyRef.current = key;
 
-        const localKey = makeLocalKey(uiMedia);
-        const presenceKey = makePresenceKey(presenceParticipants);
+        const extra = buildSignalExtra(
+            uiMedia,
+            isFirst ? "initial" : "localChanged"
+        );
 
-        if (!ctl.didInitial) {
-            ctl.didInitial = true;
-            ctl.lastLocalKey = localKey;
-            ctl.lastPresenceKey = presenceKey;
-            ctl.lastSentAt = now;
-            broadcastMyMediaState("initial");
-            return;
-        }
-
-        const localChanged = localKey !== ctl.lastLocalKey;
-        const presenceChanged = presenceKey !== ctl.lastPresenceKey;
-
-        const throttleOk = now - (ctl.lastSentAt || 0) >= 400;
-        if (!throttleOk) return;
-
-        if (localChanged || presenceChanged) {
-            ctl.lastLocalKey = localKey;
-            ctl.lastPresenceKey = presenceKey;
-            ctl.lastSentAt = now;
-
-            broadcastMyMediaState(
-                localChanged ? "localMediaChanged" : "presenceChanged"
+        if (isFirst) {
+            sendMediaStateNowRef.current?.(
+                !!uiMedia.audio,
+                !!uiMedia.video,
+                extra
+            );
+        } else {
+            // ✅ 연타/짧은 토글은 디바운스로 처리
+            sendMediaStateRef.current?.(
+                !!uiMedia.audio,
+                !!uiMedia.video,
+                extra
             );
         }
     }, [
@@ -556,8 +567,7 @@ function MeetingJoinPage() {
         mediaSignalConnected,
         isConnected,
         uiMedia,
-        presenceParticipants,
-        broadcastMyMediaState,
+        buildSignalExtra,
     ]);
 
     // =========================================================
@@ -860,14 +870,14 @@ function MeetingJoinPage() {
                     setPlayNonce={setPlayNonce}
                     onToggleAudio={onToggleAudioUiFirst}
                     onToggleVideo={onToggleVideoUiFirst}
-                    onToggleScreenShare={toggleScreenShare}
+                    onToggleScreenShare={onToggleScreenShareWithSignal}
                     onToggleLayout={onToggleLayout}
                     onLeave={handleLeave}
                     isConnected={isConnected}
                     isConnecting={isConnecting}
                     getVideoInputs={getVideoInputs}
                     onChangeVideoSource={onChangeVideoSource}
-                    onRestartScreenShare={restartScreenShare}
+                    onRestartScreenShare={onRestartScreenShareWithSignal}
                 />
 
                 <div className="meeting-side">

@@ -641,6 +641,11 @@ function VideoTile({
     const videoEnabled = !!localMedia?.video;
     const isVideoDeviceLost = !!localMedia?.videoDeviceLost;
 
+    const isLocalScreenSoftMuted =
+        !!participant?.isMe &&
+        localMedia?.videoSource === "screen" &&
+        localMedia?.screenSoftMuted === true;
+
     const videoRef = useRef(null);
     const audioRef = useRef(null);
 
@@ -674,7 +679,10 @@ function VideoTile({
     const remoteDeviceLost = !!mediaState?.videoDeviceLost;
 
     const videoOn = participant?.isMe
-        ? videoEnabled && !isVideoDeviceLost && !noMediaDevices
+        ? !isLocalScreenSoftMuted &&
+          videoEnabled &&
+          !isVideoDeviceLost &&
+          !noMediaDevices
         : !remoteDeviceLost &&
           (isKnown && typeof mediaState.video === "boolean"
               ? mediaState.video
@@ -731,9 +739,13 @@ function VideoTile({
         const Janus = window.Janus;
 
         if (!showVideo) {
+            try {
+                el.pause?.();
+            } catch {}
             if (el.srcObject) el.srcObject = null;
             return;
         }
+
         if (!participant?.stream) return;
 
         try {
