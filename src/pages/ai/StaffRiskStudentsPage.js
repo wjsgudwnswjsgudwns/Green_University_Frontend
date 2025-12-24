@@ -31,6 +31,10 @@ export default function StaffRiskStudentsPage() {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [showCommentModal, setShowCommentModal] = useState(false);
 
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailModalStudent, setEmailModalStudent] = useState(null);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+
   useEffect(() => {
     fetchInitialData();
   }, []);
@@ -269,6 +273,86 @@ export default function StaffRiskStudentsPage() {
     }
   };
 
+  // 이메일 발송 핸들러
+  const handleSendEmail = (student, e) => {
+    e.stopPropagation();
+    setEmailModalStudent(student);
+    setShowEmailModal(true);
+  };
+
+  // 위험 학생들에게 일괄 이메일 발송 (학생 + 지도교수)
+  const handleSendRiskEmails = async () => {
+    if (allRiskStudents.length === 0) {
+      alert("발송할 위험 학생이 없습니다.");
+      return;
+    }
+
+    const confirmMessage = `총 ${allRiskStudents.length}명의 위험 학생과 담당 지도교수에게 이메일을 발송하시겠습니까?\n\n- 심각: ${riskCounts.critical}명\n- 위험: ${riskCounts.risk}명\n\n※ 학생과 지도교수 모두에게 발송됩니다.`;
+
+    if (!window.confirm(confirmMessage)) return;
+
+    try {
+      setEmailSending(true);
+
+      let successCount = 0;
+      let failCount = 0;
+      let studentEmailCount = 0;
+      let professorEmailCount = 0;
+
+      // 각 위험 학생에 대해 이메일 발송
+      for (const student of allRiskStudents) {
+        if (!student.subjects || student.subjects.length === 0) {
+          failCount++;
+          continue;
+        }
+
+        // 가장 위험도가 높은 과목의 분석 결과 사용
+        const highestRiskSubject = student.subjects.reduce((prev, current) => {
+          const prevPriority = getRiskPriority(prev.overallRisk);
+          const currentPriority = getRiskPriority(current.overallRisk);
+          return currentPriority > prevPriority ? current : prev;
+        });
+
+        try {
+          // 학생과 지도교수 모두에게 발송
+          const response = await api.post("/api/email-test/send-both", {
+            analysisResultId: highestRiskSubject.id,
+          });
+
+          if (response.data.success) {
+            successCount++;
+            studentEmailCount++;
+
+            // 지도교수 이메일도 발송되었는지 확인
+            if (response.data.data.professorEmail !== "지도교수 미지정") {
+              professorEmailCount++;
+            }
+          } else {
+            failCount++;
+          }
+        } catch (err) {
+          console.error(`학생 ${student.studentId} 이메일 발송 실패:`, err);
+          failCount++;
+        }
+
+        // API 과부하 방지를 위한 딜레이
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+
+      alert(
+        `이메일 발송 완료!\n\n` +
+          `학생 이메일: ${studentEmailCount}건\n` +
+          `교수 이메일: ${professorEmailCount}건\n` +
+          `실패: ${failCount}건`
+      );
+    } catch (err) {
+      console.error("이메일 일괄 발송 오류:", err);
+      alert("이메일 발송 중 오류가 발생했습니다.");
+    } finally {
+      setEmailSending(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="srs-page-container">
@@ -290,13 +374,23 @@ export default function StaffRiskStudentsPage() {
           전체 학생 중 중도 이탈 위험이 높은 학생들을 집중적으로 관리합니다.
         </p>
 
-        <div style={{ marginTop: "16px" }}>
+        <div className="staffriskbutton" style={{ marginTop: "16px" }}>
           <button
             className="srs-ai-run-btn"
             onClick={handleRunAIAnalysis}
             disabled={analyzing}
           >
             {analyzing ? "AI 분석 실행 중..." : "AI 분석 수동 실행"}
+          </button>
+
+          <button
+            className="srs-email-send-btn"
+            onClick={handleSendRiskEmails}
+            disabled={emailSending || allRiskStudents.length === 0}
+          >
+            {emailSending
+              ? "이메일 발송 중..."
+              : "위험 학생 & 지도교수 이메일 발송"}
           </button>
         </div>
       </div>

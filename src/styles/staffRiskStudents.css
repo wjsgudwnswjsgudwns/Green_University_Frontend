@@ -578,3 +578,42 @@
     max-width: 100%;
   }
 }
+
+.srs-email-send-btn {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.srs-email-send-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+  transform: translateY(-1px);
+}
+
+.srs-email-send-btn:disabled {
+  background: linear-gradient(135deg, #cccccc 0%, #bbbbbb 100%);
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.srs-email-send-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(76, 175, 80, 0.3);
+}
+
+.staffriskbutton {
+  display: flex;
+  gap: 10px;
+}
