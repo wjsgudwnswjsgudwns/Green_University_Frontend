@@ -243,6 +243,7 @@
 
 .meeting-video__video {
     object-fit: cover;
+    z-index: 1; /* ✅ overlay와 레이어 고정 */
 }
 
 .meeting-video__placeholder {
@@ -277,6 +278,7 @@
     font-size: 11px;
     color: #f9fafb;
     background: rgba(15, 23, 42, 0.7);
+    z-index: 3; /* ✅ (필수 수정) overlay 위로 */
 }
 
 .meeting-video__remote--focused {
@@ -289,6 +291,7 @@
     bottom: 8px;
     display: flex;
     gap: 4px;
+    z-index: 3; /* ✅ (필수 수정) overlay 위로 */
 }
 
 .meeting-video__badge {
@@ -478,11 +481,13 @@
 
     transition: opacity 220ms ease, transform 220ms ease;
 }
+
 .meeting-video__banner.is-exiting {
     opacity: 0;
     transform: translateY(6px);
     pointer-events: none;
 }
+
 .meeting-video__banner--warn {
     background: rgba(245, 158, 11, 0.16);
     border-color: rgba(245, 158, 11, 0.35);
@@ -537,4 +542,18 @@
         .meeting-video__control-btn--sub
     ):hover {
     filter: brightness(1.06);
+}
+
+/* signals로 videoOff일 때도 video tag는 유지하되 시각적으로만 숨김 */
+.meeting-video__video--hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* video 위에 placeholder를 덮어씌우기 */
+.meeting-video__placeholder--overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2; /* ✅ video 위 */
+    pointer-events: none; /* ✅ 클릭 이벤트 먹지 않게 */
 }
