@@ -34,7 +34,7 @@
 }
 
 /* ===========================
-   Stage (검은 영역) - 고정 프레임
+   Stage - 고정 프레임
    =========================== */
 
 .meeting-video__stage {
@@ -66,10 +66,43 @@
 }
 
 /* ===========================
-   GRID (CSS-only ratio)
+   TOP STATUS (only connecting/connected)
    =========================== */
 
-.meeting-video__stage--grid {
+.meeting-video__status-pill {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 20;
+
+    padding: 6px 10px;
+    border-radius: 999px;
+
+    font-size: 12px;
+    line-height: 1;
+    color: rgba(255, 255, 255, 0.92);
+
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    backdrop-filter: blur(6px);
+}
+
+.meeting-video__status-pill--ok {
+    background: rgba(16, 185, 129, 0.18);
+    border-color: rgba(16, 185, 129, 0.35);
+}
+
+.meeting-video__status-pill--info {
+    background: rgba(59, 130, 246, 0.18);
+    border-color: rgba(59, 130, 246, 0.35);
+}
+
+/* ===========================
+   GRID
+   =========================== */
+
+.meeting-video__stage--grid,
+.meeting-video__stage--solo {
     justify-content: center;
 }
 
@@ -81,7 +114,6 @@
     overflow: hidden;
 }
 
-/* 참가자 수에 따라 cols만 직관적으로 */
 .meeting-video__grid--1 {
     grid-template-columns: 1fr;
 }
@@ -190,7 +222,7 @@
 }
 
 /* ===========================
-   Tile common (핵심: 16:9 프레임)
+   Tile common (16:9)
    =========================== */
 
 .meeting-video__remote {
@@ -198,11 +230,9 @@
     background: #020617;
     border-radius: 10px;
     overflow: hidden;
-
-    aspect-ratio: 16 / 9; /* ✅ 비율 절대 유지 */
+    aspect-ratio: 16 / 9;
 }
 
-/* 비디오/플레이스홀더는 프레임을 채우기 */
 .meeting-video__video,
 .meeting-video__placeholder {
     position: absolute;
@@ -213,6 +243,7 @@
 
 .meeting-video__video {
     object-fit: cover;
+    z-index: 1; /* ✅ overlay와 레이어 고정 */
 }
 
 .meeting-video__placeholder {
@@ -247,6 +278,7 @@
     font-size: 11px;
     color: #f9fafb;
     background: rgba(15, 23, 42, 0.7);
+    z-index: 3; /* ✅ (필수 수정) overlay 위로 */
 }
 
 .meeting-video__remote--focused {
@@ -259,6 +291,7 @@
     bottom: 8px;
     display: flex;
     gap: 4px;
+    z-index: 3; /* ✅ (필수 수정) overlay 위로 */
 }
 
 .meeting-video__badge {
@@ -293,6 +326,7 @@
     backdrop-filter: blur(8px);
 }
 
+/* 단독 버튼 */
 .meeting-video__control-btn {
     width: 40px;
     height: 40px;
@@ -316,41 +350,119 @@
     background: #b91c1c;
 }
 
-.meeting-video__control-btn--toggle {
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    background: rgba(255, 255, 255, 0.1);
+/* ===========================
+   Discord-like grouped control
+   =========================== */
+
+.meeting-video__control-group {
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+
+    border-radius: 999px;
+    overflow: visible;
+
+    background: #1f2937;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+
+    transition: background 160ms ease, border-color 160ms ease;
 }
 
-.meeting-video__control-btn--toggle:hover {
-    background: rgba(255, 255, 255, 0.16);
+.meeting-video__control-group:hover {
+    background: #374151;
 }
 
-.meeting-video__source-select {
-    height: 36px;
-    padding: 0 10px;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    background: rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.92);
-    outline: none;
+.meeting-video__control-group.open {
+    background: #374151;
+    border-color: rgba(255, 255, 255, 0.22);
+}
+
+.meeting-video__control-group.disabled {
+    opacity: 0.65;
+}
+
+.meeting-video__control-btn--in-group {
+    background: transparent;
+    border-radius: 0;
+}
+
+.meeting-video__control-btn--sub {
+    width: 28px;
+    height: 40px;
+
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    border-left: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.meeting-video__control-btn--sub:hover {
+    color: #fff;
+}
+
+/* Dropdown */
+.meeting-video__dropdown {
+    position: absolute;
+    bottom: 48px;
+    left: 0;
+
+    min-width: 180px;
+    padding: 6px;
+
+    background: #111827;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+    display: none;
+    z-index: 20;
+}
+
+.meeting-video__dropdown.open {
+    display: block;
+}
+
+.meeting-video__dropdown-empty {
+    padding: 10px;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 12px;
+}
+
+.meeting-video__dropdown-item {
+    width: 100%;
+    padding: 8px 10px;
+
+    text-align: left;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+
+    color: #e5e7eb;
+    font-size: 13px;
     cursor: pointer;
 }
-.meeting-video__source-select option {
-    color: #111;
+
+.meeting-video__dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.08);
 }
 
 /* ===========================
-   Status Banner (top overlay)
+   Notices (dismissible + auto-hide)
    =========================== */
 
-.meeting-video__banner {
+.meeting-video__notice-stack {
     position: absolute;
-    left: 10px;
-    right: 10px;
-    bottom: 10px;
-
+    left: 12px;
+    bottom: 12px;
     z-index: 12;
 
+    width: min(560px, calc(100% - 24px));
+
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.meeting-video__banner {
     padding: 10px 12px;
     border-radius: 12px;
 
@@ -361,6 +473,19 @@
     background: rgba(15, 23, 42, 0.72);
     border: 1px solid rgba(148, 163, 184, 0.2);
     backdrop-filter: blur(6px);
+
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.meeting-video__banner.is-exiting {
+    opacity: 0;
+    transform: translateY(6px);
+    pointer-events: none;
 }
 
 .meeting-video__banner--warn {
@@ -372,42 +497,63 @@
     background: rgba(239, 68, 68, 0.16);
     border-color: rgba(239, 68, 68, 0.35);
 }
-.meeting-video__control-group {
-    display: flex;
-    position: relative;
+
+.meeting-video__banner-text {
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
-.meeting-video__control-btn--sub {
-    padding: 0 8px;
-    font-size: 12px;
-}
-
-.meeting-video__dropdown {
-    position: absolute;
-    bottom: 44px;
-    left: 0;
-    min-width: 180px;
-    background: #111;
-    border-radius: 10px;
-    padding: 6px;
-    display: none;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-}
-
-.meeting-video__dropdown.open {
-    display: block;
-}
-
-.meeting-video__dropdown-item {
-    width: 100%;
-    padding: 8px 10px;
-    text-align: left;
-    background: transparent;
-    border: none;
-    color: #fff;
+.meeting-video__banner-close {
+    flex: 0 0 auto;
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(0, 0, 0, 0.2);
+    color: rgba(255, 255, 255, 0.9);
     cursor: pointer;
 }
 
-.meeting-video__dropdown-item:hover {
+.meeting-video__banner-close:hover {
     background: rgba(255, 255, 255, 0.08);
+}
+
+/* ===========================
+   FIX: Grouped buttons ON/OFF 표시 복구
+   =========================== */
+
+/* OFF 상태(회색) 확실히 */
+.meeting-video__control-btn--in-group:not(
+        .meeting-video__control-btn--sub
+    ).meeting-video__control-btn--off {
+    background: #4b5563;
+    opacity: 0.9;
+}
+
+/* ON 상태(살짝 강조) */
+.meeting-video__control-btn--in-group:not(.meeting-video__control-btn--sub):not(
+        .meeting-video__control-btn--off
+    ) {
+    background: rgba(16, 185, 129, 0.22);
+}
+
+/* 그룹 안 버튼 hover */
+.meeting-video__control-btn--in-group:not(
+        .meeting-video__control-btn--sub
+    ):hover {
+    filter: brightness(1.06);
+}
+
+/* signals로 videoOff일 때도 video tag는 유지하되 시각적으로만 숨김 */
+.meeting-video__video--hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* video 위에 placeholder를 덮어씌우기 */
+.meeting-video__placeholder--overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2; /* ✅ video 위 */
+    pointer-events: none; /* ✅ 클릭 이벤트 먹지 않게 */
 }

@@ -1,0 +1,331 @@
+/* src/styles/MeetingDetailPage.css */
+/* Prefix: mdp- */
+
+.mdp-page,
+.mdp-page * {
+    box-sizing: border-box;
+}
+
+.mdp-page {
+    /* 오른쪽 모달 같은 배경 */
+    min-height: calc(100vh - 80px);
+    padding: 28px 16px;
+    background: #f5f6f8;
+    color: #111827;
+
+    --mdp-green: #216d30;
+    --mdp-green-dark: #1a5524;
+
+    --mdp-text: #111827;
+    --mdp-muted: #6b7280;
+
+    --mdp-border: rgba(17, 24, 39, 0.08);
+    --mdp-border-strong: rgba(33, 109, 48, 0.22);
+
+    --mdp-radius-lg: 18px;
+    --mdp-radius-md: 14px;
+    --mdp-radius-sm: 12px;
+
+    /* “세련된” 소프트 섀도우 (과하지 않게) */
+    --mdp-shadow: 0 18px 55px rgba(17, 24, 39, 0.12);
+    --mdp-shadow-soft: 0 10px 32px rgba(17, 24, 39, 0.1);
+}
+
+.mdp-shell {
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+.mdp-back {
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    font-size: 13px;
+    border-radius: 12px;
+    border: 1px solid var(--mdp-border);
+    background: #fff;
+    cursor: pointer;
+    font-weight: 800;
+    transition: transform 0.12s ease, box-shadow 0.18s ease,
+        border-color 0.18s ease;
+}
+
+.mdp-back:hover {
+    transform: translateY(-1px);
+    border-color: var(--mdp-border-strong);
+    box-shadow: var(--mdp-shadow-soft);
+}
+
+.mdp-card {
+    background: #fff;
+    border: 1px solid var(--mdp-border);
+    border-radius: var(--mdp-radius-lg);
+    box-shadow: var(--mdp-shadow);
+    overflow: hidden;
+}
+
+.mdp-accent {
+    height: 4px;
+    background: linear-gradient(
+        90deg,
+        var(--mdp-green) 0%,
+        var(--mdp-green-dark) 100%
+    );
+}
+
+/* Header */
+.mdp-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px 18px 14px;
+    border-bottom: 1px solid rgba(17, 24, 39, 0.06);
+}
+
+.mdp-title {
+    margin: 0 0 6px;
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: -0.2px;
+    color: var(--mdp-text);
+}
+
+.mdp-sub {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--mdp-muted);
+    font-weight: 700;
+}
+
+.mdp-sub__dot {
+    opacity: 0.7;
+}
+
+.mdp-chip {
+    border: 1px solid rgba(17, 24, 39, 0.1);
+    background: #fff;
+    border-radius: 999px;
+    padding: 7px 10px;
+    font-size: 12px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.18s ease,
+        border-color 0.18s ease;
+}
+
+.mdp-chip:hover {
+    transform: translateY(-1px);
+    border-color: var(--mdp-border-strong);
+    box-shadow: var(--mdp-shadow-soft);
+}
+
+/* Status badge (모던: 얇은 보더 + 은은한 배경) */
+.mdp-badge {
+    padding: 8px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 900;
+    border: 1px solid rgba(17, 24, 39, 0.1);
+    background: #fff;
+    white-space: nowrap;
+}
+
+.mdp-badge--success {
+    border-color: rgba(33, 109, 48, 0.22);
+    background: rgba(33, 109, 48, 0.08);
+    color: var(--mdp-green-dark);
+}
+
+.mdp-badge--danger {
+    border-color: rgba(220, 38, 38, 0.22);
+    background: rgba(220, 38, 38, 0.08);
+    color: #991b1b;
+}
+
+.mdp-badge--neutral {
+    color: #374151;
+}
+
+/* Section rows (오른쪽 모달처럼 행 단위 정돈) */
+.mdp-section {
+    padding: 6px 18px 0;
+}
+
+.mdp-dl {
+    border: 1px solid rgba(17, 24, 39, 0.06);
+    border-radius: var(--mdp-radius-md);
+    overflow: hidden;
+    background: #fff;
+}
+
+.mdp-row {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(17, 24, 39, 0.06);
+}
+
+.mdp-row:last-child {
+    border-bottom: none;
+}
+
+.mdp-dt {
+    font-size: 13px;
+    font-weight: 800;
+    color: #374151;
+}
+
+.mdp-dd {
+    font-size: 13px;
+    font-weight: 800;
+    color: #111827;
+}
+
+/* Info note */
+.mdp-note {
+    margin: 14px 18px 0;
+    padding: 12px 14px;
+    border-radius: var(--mdp-radius-md);
+    border: 1px solid rgba(17, 24, 39, 0.06);
+    background: #f9fafb;
+    color: #4b5563;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+/* Footer */
+.mdp-foot {
+    padding: 16px 18px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mdp-btn {
+    border: 1px solid rgba(17, 24, 39, 0.1);
+    background: #fff;
+    border-radius: 14px;
+    padding: 14px 16px;
+    cursor: pointer;
+    font-weight: 900;
+    font-size: 14px;
+    transition: transform 0.12s ease, box-shadow 0.18s ease,
+        border-color 0.18s ease;
+}
+
+.mdp-btn:hover {
+    transform: translateY(-1px);
+    border-color: var(--mdp-border-strong);
+    box-shadow: var(--mdp-shadow-soft);
+}
+
+/* primary: 너무 번쩍이지 않게 “딱 단정한” 그린 */
+.mdp-btn--primary {
+    border: none;
+    background: linear-gradient(
+        135deg,
+        var(--mdp-green) 0%,
+        var(--mdp-green-dark) 100%
+    );
+    color: #fff;
+    box-shadow: 0 10px 26px rgba(33, 109, 48, 0.22);
+}
+
+.mdp-btn--primary:hover {
+    box-shadow: 0 14px 34px rgba(33, 109, 48, 0.28);
+}
+
+.mdp-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.mdp-hint {
+    font-size: 12px;
+    color: var(--mdp-muted);
+    font-weight: 700;
+}
+
+/* Alerts / Skeleton */
+.mdp-alert {
+    padding: 12px 14px;
+    border-radius: var(--mdp-radius-md);
+    border: 1px solid rgba(17, 24, 39, 0.1);
+    background: #fff;
+}
+
+.mdp-alert--danger {
+    border-color: rgba(220, 38, 38, 0.22);
+    background: rgba(220, 38, 38, 0.08);
+    color: #991b1b;
+}
+
+.mdp-alert__title {
+    font-weight: 900;
+    margin-bottom: 6px;
+}
+
+.mdp-alert__body {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.mdp-empty {
+    padding: 18px;
+    font-size: 13px;
+    color: var(--mdp-muted);
+    font-weight: 700;
+}
+
+.mdp-pad {
+    padding: 18px;
+}
+
+.mdp-skel {
+    border-radius: 12px;
+    background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 37%, #f3f4f6 63%);
+    background-size: 400% 100%;
+    animation: mdp-skeleton 1.2s ease infinite;
+    margin-bottom: 10px;
+}
+
+.mdp-skel--title {
+    height: 22px;
+    width: 60%;
+}
+.mdp-skel--line {
+    height: 12px;
+    width: 78%;
+}
+.mdp-skel--box {
+    height: 90px;
+    width: 100%;
+    margin-top: 8px;
+}
+
+@keyframes mdp-skeleton {
+    0% {
+        background-position: 100% 0;
+    }
+    100% {
+        background-position: 0 0;
+    }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .mdp-head {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .mdp-row {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+}
