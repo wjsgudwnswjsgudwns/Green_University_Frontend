@@ -83,7 +83,7 @@ export function useJanusLocalOnly(
     const [error, setError] = useState(null);
 
     const DEFAULT_WANT_AUDIO = false; // 입장 기본: 마이크 OFF
-    const DEFAULT_WANT_VIDEO = true; // 입장 기본: 비디오 ON(가능하면)
+    const DEFAULT_WANT_VIDEO = false; // ✅ 입장 기본: 비디오 OFF (버튼으로 켜서 시도)
 
     // legacy / 디버그용
     const [audioEnabled, setAudioEnabled] = useState(DEFAULT_WANT_AUDIO);
@@ -107,6 +107,9 @@ export function useJanusLocalOnly(
         screenSoftMuted: false,
         // ✅ screen capture가 살아있는지(UI 표시/로직용)
         screenCapturing: false,
+
+        // ✅ screen pick nonce (UI에도 반영)
+        screenPickNonce: 0,
 
         permissionDeniedVideo: false,
         permissionDeniedScreen: false,
@@ -236,7 +239,37 @@ export function useJanusLocalOnly(
     const preserveScreenOnFinalizeRef = useRef(false);
 
     // =========================================================
+    // 2.5) ✅ 전환/Resync 가드 (핵심)
+    // - 모드 전환/재선택 중(및 직후) ws-resync / forceResubscribeAll로
+    //   remote detach/attach 루프가 걸리는 걸 차단
+    // =========================================================
+    const modeSwitchingRef = useRef(false); // (아래 switchVideoMode/startScreenShare에서 세팅)
+    const resyncSuspendUntilRef = useRef(0);
+    const switchSeqRef = useRef(0);
+
+    const suspendResync = useCallback((ms = 2200, why = "switch") => {
+        const until = Date.now() + ms;
+        if (until > resyncSuspendUntilRef.current) {
+            resyncSuspendUntilRef.current = until;
+        }
+        switchSeqRef.current += 1;
+        console.log("[resync] suspended", {
+            why,
+            ms,
+            until: resyncSuspendUntilRef.current,
+            seq: switchSeqRef.current,
+        });
+    }, []);
+
+    const isResyncSuppressed = useCallback(() => {
+        if (modeSwitchingRef.current) return true;
+        if (Date.now() < resyncSuspendUntilRef.current) return true;
+        return false;
+    }, []);
+
+    // =========================================================
     // 3) toggle 연타 코알레싱(quiet window)
+    //   ✅ 650ms는 "하드리셋"에서만 적용
     // =========================================================
     const applyTimerRef = useRef(null);
     const bumpTimerRef = useRef(null);
@@ -249,7 +282,13 @@ export function useJanusLocalOnly(
         screenPickNonce: null, // ✅ 추가
     });
 
-    const QUIET_MS = 650;
+    // ✅ "하드리셋" 구간 잠금 타이머
+    const uiLockUntilRef = useRef(0);
+    const lockUIForHardReset = useCallback((ms = 650) => {
+        uiLockUntilRef.current = Date.now() + ms;
+    }, []);
+
+    const QUIET_MS = 120;
     const SAFE_BUMP_MS = 900;
 
     const clearTimer = useCallback((key) => {
@@ -260,8 +299,10 @@ export function useJanusLocalOnly(
         }
     }, []);
 
+    // ✅ 기존: applyTimerRef 존재 여부로 quiet 판단(=0ms도 잠깐 막힘)
+    // ✅ 변경: "하드리셋 락"에서만 UI 입력 막기
     const isQuietWindowActive = useCallback(() => {
-        return !!applyTimerRef.current;
+        return Date.now() < uiLockUntilRef.current;
     }, []);
 
     const hasLiveTrack = useCallback((stream, kind) => {
@@ -273,6 +314,41 @@ export function useJanusLocalOnly(
         return (
             Array.isArray(tracks) && tracks.some((t) => t.readyState === "live")
         );
+    }, []);
+
+    // =========================================================
+    // displayMedia error classify (cancel vs denied)
+    // =========================================================
+    const classifyDisplayMediaError = useCallback((err) => {
+        const name = err?.name || "";
+        const msg = String(err?.message || "").toLowerCase();
+
+        // ✅ cancel 힌트(브라우저/버전별 다양)
+        const cancelHints =
+            name === "AbortError" ||
+            msg.includes("abort") ||
+            msg.includes("aborted") ||
+            msg.includes("cancel") ||
+            msg.includes("dismiss") ||
+            msg.includes("closed");
+
+        // ✅ deny 힌트(“차단/거부” 성격)
+        const denyHints =
+            msg.includes("denied") ||
+            msg.includes("blocked") ||
+            msg.includes("not allowed");
+
+        // ⚠️ getDisplayMedia는 cancel도 NotAllowedError로 오는 경우가 있음
+        const isNotAllowed =
+            name === "NotAllowedError" || name === "PermissionDeniedError";
+
+        const isCancel =
+            cancelHints || (name === "NotAllowedError" && !denyHints);
+        const isDenied =
+            name === "PermissionDeniedError" ||
+            (isNotAllowed && denyHints && !cancelHints);
+
+        return { name, msg, isCancel, isDenied };
     }, []);
 
     // =========================================================
@@ -355,6 +431,10 @@ export function useJanusLocalOnly(
             screenPickNonce: Number(next.screenPickNonce || 0),
         };
 
+        // ✅ soft on/off는 “UI-only”에 가까우므로 상대 resync 스킵
+        const skipResync =
+            typeof reason === "string" && reason.includes("screen-soft-");
+
         const extra = {
             videoDeviceLost: !!next.videoDeviceLost,
             videoSource: next.videoSource || "camera",
@@ -363,6 +443,9 @@ export function useJanusLocalOnly(
             screenPickNonce: Number(next.screenPickNonce || 0),
             reason,
             phase: phase || (immediate ? "commit" : "intent"),
+
+            // ✅ 이게 핵심
+            ...(skipResync ? { skipResync: true } : {}),
         };
 
         if (immediate && typeof sendNow === "function") {
@@ -436,6 +519,7 @@ export function useJanusLocalOnly(
                     prev.cameraDeviceId === next.cameraDeviceId &&
                     prev.screenSoftMuted === next.screenSoftMuted &&
                     prev.screenCapturing === next.screenCapturing &&
+                    prev.screenPickNonce === next.screenPickNonce &&
                     prev.permissionDeniedVideo === next.permissionDeniedVideo &&
                     prev.permissionDeniedScreen === next.permissionDeniedScreen;
                 return same ? prev : next;
@@ -534,8 +618,17 @@ export function useJanusLocalOnly(
         return true;
     }, []);
 
-    const scheduleApplyIntent = useCallback((reason = "toggle") => {
+    // ✅ 옵션 추가: soft on/off는 quietMs=0으로 바로 publish 타게 가능
+    const scheduleApplyIntent = useCallback((reason = "toggle", opt = {}) => {
         const seq = ++applySeqRef.current;
+
+        // ✅ 기본값: 평소 0ms, "하드리셋 락"일 때만 650ms
+        const defaultQuiet = Date.now() < uiLockUntilRef.current ? QUIET_MS : 0;
+
+        const quietMs =
+            typeof opt.quietMs === "number" ? opt.quietMs : defaultQuiet;
+
+        const enableBump = opt.enableBump !== false; // default true
 
         if (applyTimerRef.current) {
             window.clearTimeout(applyTimerRef.current);
@@ -569,7 +662,6 @@ export function useJanusLocalOnly(
             const vs = mediaRef.current.videoSource || "camera";
             const ssm = !!mediaRef.current.screenSoftMuted;
             const spn = Number(mediaRef.current.screenPickNonce || 0);
-
             return { a, v, vs, ssm, spn };
         };
 
@@ -620,13 +712,14 @@ export function useJanusLocalOnly(
             const vsNow = mediaRef.current.videoSource || "camera";
             const isScreenNow = vsNow === "screen";
 
-            if (!isScreenNow) {
+            // ✅ 기존 정책 유지: camera 쪽만 SAFE_BUMP
+            if (enableBump && !isScreenNow) {
                 bumpTimerRef.current = window.setTimeout(() => {
                     bumpTimerRef.current = null;
                     applyOnce("bump");
                 }, SAFE_BUMP_MS);
             }
-        }, QUIET_MS);
+        }, quietMs);
     }, []);
 
     const unlockNegotiation = useCallback(() => {
@@ -646,9 +739,15 @@ export function useJanusLocalOnly(
             return;
         }
 
+        // ✅ 핵심: pending 소모 + 즉시 publish 재시도
         negotiationRef.current.pending = null;
-        scheduleApplyIntent("unlock-pending");
-    }, [scheduleApplyIntent]);
+
+        // 1) 가장 단순/확실: 바로 republish
+        publishLocalStreamRef.current?.(p.audio, p.video, {
+            republish: true,
+            reason: "unlockNegotiation.flush",
+        });
+    }, []);
 
     const queuePublish = useCallback(
         (audio, video, opts = {}) => {
@@ -711,7 +810,13 @@ export function useJanusLocalOnly(
             }
 
             stream.getVideoTracks?.().forEach((track) => {
+                const bornSeq = switchSeqRef.current;
+
                 const onDead = () => {
+                    // ✅ 전환 중/직후(또는 오래된 트랙 ended)는 무시
+                    if (modeSwitchingRef.current) return;
+                    if (bornSeq !== switchSeqRef.current) return;
+
                     const recentlyScreenEnded =
                         Date.now() - (mediaRef.current.screenEndingAt || 0) <
                         1500;
@@ -755,6 +860,7 @@ export function useJanusLocalOnly(
     // =========================================================
     // 9) Remote feed attach/detach/reset
     // =========================================================
+    const REMOTE_STREAM_GRACE_MS = 900;
     const detachRemoteFeed = useCallback(
         (feedId, { skipHandleCleanup = false } = {}) => {
             const info = janusRef.current.remote?.[feedId];
@@ -796,7 +902,19 @@ export function useJanusLocalOnly(
             if (existing) {
                 const pcAlive = !!existing.handle?.webrtcStuff?.pc;
                 const hasStream = !!existing.stream;
+
+                // ✅ pc는 살아있는데 stream만 잠깐 비는 건 "전환 중 oncleanup" 가능성이 큼
+                if (pcAlive && !hasStream) {
+                    const last = Number(existing.lastCleanupAt || 0);
+                    if (Date.now() - last < REMOTE_STREAM_GRACE_MS) {
+                        return; // 그냥 기다림(= detach/재attach 금지)
+                    }
+                }
+
+                // 정상 상태면 그대로 종료
                 if (pcAlive && hasStream) return;
+
+                // 그 외(진짜 꼬임/죽음)만 detach 후 재attach
                 detachRemoteFeed(feedId);
             }
             if (janusRef.current.remotePending?.[feedId]) return;
@@ -817,6 +935,8 @@ export function useJanusLocalOnly(
                     const info = janusRef.current.remote[feedId];
                     if (!info) return;
 
+                    if (on) info.lastCleanupAt = 0; // ✅ 여기로 이동
+
                     // feed별로 stream을 따로 들고 가면서 track add/remove
                     if (!info.stream) info.stream = new MediaStream();
 
@@ -831,7 +951,7 @@ export function useJanusLocalOnly(
                         });
                     }
 
-                    notifyRemoteParticipantsChanged(); // UI에 새 track 반영
+                    notifyRemoteParticipantsChanged();
                 },
                 success: (handle) => {
                     if (isStale(myGen)) {
@@ -848,6 +968,7 @@ export function useJanusLocalOnly(
                         feedId,
                         display: safeDisplay,
                         stream: null,
+                        lastCleanupAt: 0,
                     };
 
                     const subscribe = {
@@ -924,7 +1045,11 @@ export function useJanusLocalOnly(
                     if (isStale(myGen)) return;
                     const prev = janusRef.current.remote[feedId];
                     if (!prev) return;
-                    janusRef.current.remote[feedId] = { ...prev, stream };
+                    janusRef.current.remote[feedId] = {
+                        ...prev,
+                        stream,
+                        lastCleanupAt: 0,
+                    };
                     notifyRemoteParticipantsChanged();
                 },
 
@@ -939,7 +1064,11 @@ export function useJanusLocalOnly(
                         notifyRemoteParticipantsChanged();
                         return;
                     }
-                    janusRef.current.remote[feedId] = { ...cur, stream: null };
+                    janusRef.current.remote[feedId] = {
+                        ...cur,
+                        stream: null,
+                        lastCleanupAt: Date.now(),
+                    };
                     notifyRemoteParticipantsChanged();
                 },
             });
@@ -952,6 +1081,15 @@ export function useJanusLocalOnly(
             const h = janusRef.current.pub;
             if (!h) return;
             if (closingRef.current || sessionRef.current.destroying) return;
+
+            // ✅ 전환 중/직후에는 resub 자체를 막음(딜레이/루프 근원 차단)
+            if (isResyncSuppressed()) {
+                console.log("[forceResubscribeAll] suppressed", {
+                    roomNumber,
+                    reason,
+                });
+                return;
+            }
 
             const myGen = genRef.current;
             h.send({
@@ -994,6 +1132,7 @@ export function useJanusLocalOnly(
             newRemoteFeed,
             notifyRemoteParticipantsChanged,
             isStale,
+            isResyncSuppressed,
         ]
     );
 
@@ -1003,6 +1142,7 @@ export function useJanusLocalOnly(
 
     // =========================================================
     // 10) publish / republish (screenStream 지원)
+    //   ✅ PATCH: screen soft on/off는 createOffer(재협상) 대신 configure-only로 즉시 토글
     // =========================================================
     const publishLocalStream = useCallback(
         async (intentAudio = true, intentVideo = true, opts = {}) => {
@@ -1053,6 +1193,70 @@ export function useJanusLocalOnly(
                 );
             };
 
+            // =========================================================
+            // ✅ FAST PATH: 화면공유 soft on/off는 재협상(createOffer) 없이 configure-only로 즉시 반영
+            // =========================================================
+            const isSoftToggle =
+                typeof opts?.reason === "string" &&
+                opts.reason.includes("screen-soft-");
+            const isScreenNow =
+                (mediaRef.current.videoSource || "camera") === "screen";
+            const hasScreenStream = !!mediaRef.current.screenStream;
+
+            if (
+                isSoftToggle &&
+                isScreenNow &&
+                hasScreenStream &&
+                publishedRef.current
+            ) {
+                try {
+                    const wantVideoFast = !mediaRef.current.screenSoftMuted;
+
+                    mediaRef.current.wantAudio = !!intentAudio;
+                    mediaRef.current.wantVideo = true;
+
+                    safeSet(() => {
+                        setAudioEnabled(!!intentAudio);
+                        setVideoEnabled(true);
+                    });
+
+                    handle.send({
+                        message: {
+                            request: "configure",
+                            audio: !!intentAudio,
+                            video: !!wantVideoFast,
+                        },
+                    });
+
+                    publishedRef.current = true;
+                    lastConfiguredRef.current = {
+                        audio: !!intentAudio,
+                        video: !!wantVideoFast,
+                    };
+
+                    lastVideoMetaRef.current = {
+                        videoSource: "screen",
+                        cameraDeviceId: null,
+                        screenPickNonce: Number(
+                            mediaRef.current.screenPickNonce || 0
+                        ),
+                    };
+
+                    safeSet(() => setIsConnecting(false));
+                    emitLocalMediaState();
+                    commitNow("screen-soft.configure-only.commit");
+                    return;
+                } catch (e) {
+                    console.warn(
+                        "[screen-soft] configure-only failed, fallback to createOffer",
+                        e
+                    );
+                }
+            }
+
+            // =========================================================
+            // 기존 로직 유지
+            // =========================================================
             if (timersRef.current.offerRetry) {
                 negotiationRef.current.pending = {
                     audio: !!intentAudio,
@@ -1155,7 +1359,7 @@ export function useJanusLocalOnly(
 
             const prevMeta = lastVideoMetaRef.current;
 
-            // ✅ PATCH: screenPickNonce 변화도 sourceChanged로 취급 → replaceVideo 강제
+            // ✅ screenPickNonce 변화도 sourceChanged로 취급 → replaceVideo 강제
             const sourceChanged =
                 prevMeta.videoSource !== currentVideoSource ||
                 prevMeta.cameraDeviceId !== currentCameraId ||
@@ -1211,7 +1415,7 @@ export function useJanusLocalOnly(
                         lastVideoMetaRef.current = {
                             videoSource: currentVideoSource,
                             cameraDeviceId: currentCameraId,
-                            screenPickNonce: currentScreenNonce, // ✅ 유지
+                            screenPickNonce: currentScreenNonce,
                         };
 
                         const needResub =
@@ -1229,6 +1433,8 @@ export function useJanusLocalOnly(
                                 window.setTimeout(() => {
                                     if (closingRef.current) return;
                                     if (!connRef.current.isConnected) return;
+                                    // ✅ 전환 중/직후 resub 금지
+                                    if (isResyncSuppressed()) return;
                                     forceResubscribeAllRef.current?.(
                                         roomNumber,
                                         r
@@ -1292,10 +1498,10 @@ export function useJanusLocalOnly(
                         msg.includes("display") ||
                         msg.includes("screen");
 
-                    const isScreenNow =
+                    const isScreenNow2 =
                         (mediaRef.current.videoSource || "camera") === "screen";
                     const isScreenDenied =
-                        isScreenNow && isPermissionDenied && screenWord;
+                        isScreenNow2 && isPermissionDenied && screenWord;
 
                     if (isPermissionDenied || isDeviceNotFound) {
                         if (timersRef.current.offerRetry) {
@@ -1343,7 +1549,7 @@ export function useJanusLocalOnly(
                                 setIsVideoDeviceLost(false);
                                 setIsConnecting(false);
                                 setError(
-                                    isScreenNow
+                                    isScreenNow2
                                         ? "화면 공유 시작에 실패했습니다(디바이스/환경)."
                                         : "카메라를 찾을 수 없습니다. 장치 연결/점유 상태를 확인해 주세요."
                                 );
@@ -1445,9 +1651,7 @@ export function useJanusLocalOnly(
                         publishLocalStreamRef.current?.(
                             pending.audio,
                             pending.video,
-                            {
-                                republish: true,
-                            }
+                            { republish: true }
                         );
                     }, 2500);
 
@@ -1548,7 +1752,7 @@ export function useJanusLocalOnly(
                             lastVideoMetaRef.current = {
                                 videoSource: currentVideoSource,
                                 cameraDeviceId: currentCameraId,
-                                screenPickNonce: currentScreenNonce, // ✅ PATCH
+                                screenPickNonce: currentScreenNonce,
                             };
                         } catch {}
 
@@ -1560,9 +1764,6 @@ export function useJanusLocalOnly(
                         unlockNegotiation();
                         return;
                     }
-
-                    // ✅ PATCH: replaceTrack(null)로 sender를 흔드는 약한 정리 제거
-                    // (레이스/꼬임 유발 가능. nonce 기반 replaceVideo 강제로 충분)
                 }
             }
 
@@ -1577,6 +1778,8 @@ export function useJanusLocalOnly(
             unlockNegotiation,
             signalLocalMedia,
             hasLiveTrack,
+            hardReconnectRef,
+            isResyncSuppressed,
         ]
     );
 
@@ -1977,7 +2180,6 @@ export function useJanusLocalOnly(
                                 connRef.current.isConnected = true;
                                 connRef.current.isConnecting = false;
 
-                                // ✅ screen도 세션 유지: screenStream 있으면 publish, 없으면 picker 후 publish
                                 const isScreen =
                                     mediaRef.current.videoSource === "screen";
                                 if (!isScreen) {
@@ -1987,8 +2189,6 @@ export function useJanusLocalOnly(
                                         { republish: true, reason: "joined" }
                                     );
                                 } else {
-                                    // screenStream 없으면 publishLocalStream이 early return하므로
-                                    // picker가 돌아오면 scheduleApplyIntent로 publish됨
                                     scheduleApplyIntent("joined-screen");
                                 }
 
@@ -2248,11 +2448,12 @@ export function useJanusLocalOnly(
 
     // =========================================================
     // 15) recreateSession / hardReconnect ✅ 직렬화
-    //    - recreateSession은 남겨두되, screen에서는 호출 안함(카메라/디바이스용)
     // =========================================================
     const recreateSession = useCallback(
         async (reason = "recreate") => {
             return runSessionOp(`recreate:${reason}`, async () => {
+                lockUIForHardReset(650);
+
                 screenPickerLockRef.current = false;
                 const last = sessionRef.current.lastJoin;
                 if (!last) return;
@@ -2270,7 +2471,7 @@ export function useJanusLocalOnly(
                 await joinRoomRef.current?.(last);
             });
         },
-        [safeSet, runSessionOp]
+        [safeSet, runSessionOp, lockUIForHardReset]
     );
 
     useEffect(() => {
@@ -2280,6 +2481,8 @@ export function useJanusLocalOnly(
     const hardReconnect = useCallback(
         async (reason = "hardReconnect") => {
             return runSessionOp(`hardReconnect:${reason}`, async () => {
+                lockUIForHardReset(650);
+
                 const last = sessionRef.current.lastJoin;
                 if (!last) return;
 
@@ -2293,7 +2496,7 @@ export function useJanusLocalOnly(
                 await joinRoomRef.current?.(last);
             });
         },
-        [runSessionOp]
+        [runSessionOp, lockUIForHardReset]
     );
 
     useEffect(() => {
@@ -2313,6 +2516,8 @@ export function useJanusLocalOnly(
             const ss = mediaRef.current.screenStream;
             ss?.getTracks?.().forEach((t) => {
                 try {
+                    t.onended = null;
+                    t.oninactive = null;
                     t.stop();
                 } catch {}
             });
@@ -2330,265 +2535,186 @@ export function useJanusLocalOnly(
             mediaRef.current.videoSource = "camera";
         }
     }, []);
+
     // =========================================================
-    // 15.1) ✅ mode switch 전용: "의도 유지" 리조인 + 모드 스위치 헬퍼
-    // - finalize가 intent를 DEFAULT로 리셋하는 걸 막기 위해 preserveScreenOnFinalizeRef를 "intent preserve"로도 사용
-    // - 단, preserve=true면 finalize가 local track stop을 안하므로 여기서 미리 stop 해줌
+    // 15.1) ✅ mode switch 전용 (picker는 "클릭"에서만)
     // =========================================================
-    const rejoinPreserveIntent = useCallback(
-        async (reason = "rejoinPreserveIntent") => {
-            return runSessionOp(`rejoinPreserveIntent:${reason}`, async () => {
-                const last = sessionRef.current.lastJoin;
-                if (!last) return;
+    const switchVideoModeRef = useRef(null);
 
-                safeSet(() => setIsConnecting(true));
-                connRef.current.isConnecting = true;
+    // ✅ 클릭 기반 화면공유 시작(필수: 사용자 제스처)
+    const startScreenShareFromClick = useCallback(
+        async (reason = "startScreenShareFromClick") => {
+            const m = mediaRef.current;
 
-                // preserve=true면 finalize에서 local track stop을 안하므로, 여기서 미리 정리
-                try {
-                    const s = janusRef.current.localStream;
-                    s?.getTracks?.().forEach((t) => {
-                        try {
-                            t.onended = null;
-                            t.oninactive = null;
-                            t.stop();
-                        } catch {}
-                    });
-                } catch {}
-                try {
-                    setLocalStream(null);
-                } catch {}
+            if (isQuietWindowActive()) return false;
+            if (connRef.current.isConnecting) return false;
+            if (modeSwitchingRef.current) return false;
 
-                preserveScreenOnFinalizeRef.current = true;
-                try {
-                    await leaveRoomRef.current?.(`${reason}.preserveIntent`);
-                } finally {
-                    preserveScreenOnFinalizeRef.current = false;
+            if (screenPickerLockRef.current) return false;
+            screenPickerLockRef.current = true;
+            modeSwitchingRef.current = true;
+
+            // ✅ 전환/픽커 동안 resync 차단
+            suspendResync(2800, reason);
+
+            const bornSeq = switchSeqRef.current;
+
+            try {
+                const md = navigator.mediaDevices;
+                if (!md?.getDisplayMedia) {
+                    safeSet(() =>
+                        setError("이 브라우저는 화면 공유를 지원하지 않습니다.")
+                    );
+                    return false;
                 }
 
-                await joinRoomRef.current?.(last);
-            });
-        },
-        [runSessionOp, safeSet, setLocalStream]
-    );
+                // ✅ 1) picker 먼저 (성공할 때만 screen 모드로 커밋)
+                let stream = null;
+                try {
+                    stream = await md.getDisplayMedia({
+                        video: true,
+                        audio: false,
+                    });
+                } catch (err) {
+                    const { isCancel, isDenied } =
+                        classifyDisplayMediaError(err);
 
-    const modeSwitchingRef = useRef(false);
-    const switchVideoModeRef = useRef(null);
+                    m.permissionDeniedScreen = isDenied;
+
+                    emitLocalMediaState();
+                    safeSet(() =>
+                        setError(
+                            isCancel
+                                ? "화면 공유가 취소되었습니다."
+                                : "화면 공유 권한이 거부되어 시작할 수 없습니다."
+                        )
+                    );
+                    return false;
+                }
+
+                // ✅ 2) 성공했으니 이제 커밋 (camera 상태 백업)
+                beforeScreenRef.current = {
+                    wantVideo: !!m.wantVideo,
+                    cameraDeviceId: m.cameraDeviceId ?? null,
+                };
+
+                try {
+                    const old = m.screenStream;
+                    old?.getTracks?.().forEach((t) => t.stop());
+                } catch {}
+
+                m.videoSource = "screen";
+                m.cameraDeviceId = null;
+                m.wantVideo = true;
+                m.screenSoftMuted = false;
+                m.permissionDeniedScreen = false;
+
+                m.screenStream = stream;
+                const t = stream.getVideoTracks?.()[0] || null;
+                m.screenTrackId = t?.id || null;
+
+                // ✅ nonce bump: 무조건 replaceVideo 트리거
+                m.screenPickNonce = (m.screenPickNonce || 0) + 1;
+
+                // ✅ screen 종료 시 camera 복귀 + republish
+                stream.getVideoTracks?.().forEach((track) => {
+                    const myBornSeq = bornSeq;
+                    track.onended = () => {
+                        if (sessionRef.current.destroying || closingRef.current)
+                            return;
+                        // ✅ 오래된 트랙 ended/전환 중 ended는 무시
+                        if (modeSwitchingRef.current) return;
+                        if (myBornSeq !== switchSeqRef.current) return;
+
+                        switchVideoModeRef.current?.("camera", {
+                            reason: "screen-ended",
+                        });
+                    };
+                });
+
+                emitLocalMediaState();
+
+                // ✅ 즉시 publish (딜레이 최소화)
+                if (connRef.current.isConnected && janusRef.current.pub) {
+                    queuePublish(m.wantAudio, true, {
+                        republish: true,
+                        reason: `${reason}.screen-picked`,
+                    });
+                }
+                return true;
+            } finally {
+                modeSwitchingRef.current = false;
+                screenPickerLockRef.current = false;
+            }
+        },
+        [
+            classifyDisplayMediaError,
+            emitLocalMediaState,
+            isQuietWindowActive,
+            queuePublish,
+            safeSet,
+            suspendResync,
+        ]
+    );
 
     const switchVideoModeImpl = useCallback(
         async (nextMode, opts = {}) => {
             const reason = opts?.reason || "switchVideoMode";
-            const toCameraDeviceId =
-                opts?.cameraDeviceId ??
-                beforeScreenRef.current.cameraDeviceId ??
-                null;
-
-            if (modeSwitchingRef.current) return;
-            if (connRef.current.isConnecting) return;
+            const forcePicker = !!opts?.forcePicker;
 
             const m = mediaRef.current;
             const cur = m.videoSource || "camera";
-            if (cur === nextMode) return;
 
-            // 모드 전환은 pending/quiet/offerRetry 다 끊어줌(꼬임 방지)
-            applySeqRef.current += 1;
-            clearTimer("publishDebounce");
-            if (timersRef.current.offerRetry) {
-                clearTimeout(timersRef.current.offerRetry);
-                timersRef.current.offerRetry = null;
-            }
-            timersRef.current.offerRetryPending = null;
-            negotiationRef.current.pending = null;
+            if (isQuietWindowActive()) return;
+            if (connRef.current.isConnecting) return;
+            if (modeSwitchingRef.current) return;
 
-            modeSwitchingRef.current = true;
-            try {
-                // =========================================================
-                // camera -> screen : picker로 stream 확보 후 "의도 유지 리조인"
-                // =========================================================
-                if (nextMode === "screen") {
-                    // camera 상태 백업(복귀용)
-                    beforeScreenRef.current = {
-                        wantVideo: !!m.wantVideo,
-                        cameraDeviceId: m.cameraDeviceId ?? null,
-                    };
-
-                    // intent 먼저 screen으로 전환
-                    m.videoSource = "screen";
-                    m.cameraDeviceId = null;
-                    m.screenSoftMuted = false;
-                    m.wantVideo = true;
-                    m.permissionDeniedScreen = false;
-
-                    m.screenPickNonce = (m.screenPickNonce || 0) + 1;
-                    m.screenTrackId = null;
-                    m.screenStream = null;
-
-                    emitLocalMediaState();
-
-                    const md = navigator.mediaDevices;
-                    if (!md?.getDisplayMedia) {
-                        m.permissionDeniedScreen = true;
-                        m.videoSource = "camera";
-                        emitLocalMediaState();
-                        safeSet(() =>
-                            setError(
-                                "이 브라우저는 화면 공유를 지원하지 않습니다."
-                            )
-                        );
-                        return;
-                    }
-
-                    if (screenPickerLockRef.current) return;
-                    screenPickerLockRef.current = true;
-
-                    let stream = null;
-                    try {
-                        stream = await md.getDisplayMedia({
-                            video: true,
-                            audio: false,
-                        });
-                    } catch (err) {
-                        screenPickerLockRef.current = false;
-
-                        // picker 취소/거부 => camera로 복구(리조인 X)
-                        m.permissionDeniedScreen = true;
-
-                        m.screenPickNonce = (m.screenPickNonce || 0) + 1;
-                        m.screenTrackId = null;
-
+            // ✅ screen 전환
+            if (nextMode === "screen") {
+                const stale = cur === "screen" && !m.screenStream;
+                if (forcePicker || cur !== "screen" || stale) {
+                    if (stale) {
                         m.videoSource = "camera";
                         m.screenSoftMuted = false;
-                        m.screenStream = null;
-
-                        m.cameraDeviceId =
-                            beforeScreenRef.current.cameraDeviceId ?? null;
-                        m.wantVideo = !!beforeScreenRef.current.wantVideo;
-
                         emitLocalMediaState();
-                        safeSet(() =>
-                            setError(
-                                "화면 공유 권한이 거부되었거나 취소되었습니다."
-                            )
-                        );
-
-                        if (
-                            connRef.current.isConnected &&
-                            janusRef.current.pub
-                        ) {
-                            const restoreVideo =
-                                !!beforeScreenRef.current.wantVideo;
-                            queuePublish(m.wantAudio, restoreVideo, {
-                                republish: true,
-                                reason: "screen-cancel-restore-camera",
-                            });
-                        }
-                        return;
-                    } finally {
-                        screenPickerLockRef.current = false;
                     }
 
-                    // picker 성공
-                    m.screenStream = stream;
-                    const t = stream.getVideoTracks?.()[0] || null;
-                    m.screenTrackId = t?.id || null;
-                    m.screenPickNonce = (m.screenPickNonce || 0) + 1;
-
-                    // ✅ screen 종료(브라우저 stop) => screen -> camera 모드 전환 리조인
-                    stream.getVideoTracks?.().forEach((track) => {
-                        track.onended = () => {
-                            if (
-                                sessionRef.current.destroying ||
-                                closingRef.current
-                            )
-                                return;
-                            switchVideoModeRef.current?.("camera", {
-                                reason: "screen-ended",
-                            });
-                        };
-                    });
-
-                    emitLocalMediaState();
-                    signalLocalMedia(
-                        {
-                            audio: !!m.wantAudio,
-                            video: true,
-                            videoDeviceLost: false,
-                            videoSource: "screen",
-                            screenSoftMuted: false,
-                            screenCapturing: true,
-                            screenPickNonce: Number(m.screenPickNonce || 0),
-                        },
-                        {
-                            immediate: false,
-                            reason: "screen-picked.intent",
-                            phase: "intent",
-                        }
-                    );
-
-                    // ✅ picker 성공 즉시: 세션 유지 + republish로 화면공유 반영
-                    if (connRef.current.isConnected && janusRef.current.pub) {
-                        queuePublish(m.wantAudio, true, {
-                            republish: true,
-                            reason: `${reason}.screen-picked`,
-                        });
-                    }
-                    return;
+                    suspendResync(2800, `${reason}.to-screen`);
+                    await startScreenShareFromClick(reason);
                 }
+                return;
+            }
 
-                // =========================================================
-                // screen -> camera : screen 정리 후 "의도 유지 리조인"
-                // =========================================================
-                // 화면 캡처 정리(스트림 stop + nonce bump + source camera)
+            // ✅ camera 전환
+            if (cur === "screen") {
+                suspendResync(2400, `${reason}.to-camera`);
                 stopScreenCapture(`${reason}.stopScreen`);
+            }
 
-                m.videoSource = "camera";
-                m.cameraDeviceId = toCameraDeviceId;
+            m.videoSource = "camera";
+            m.screenSoftMuted = false;
 
-                // 복귀 시 원래 비디오 의도 복원(없으면 현재값 유지)
-                if (typeof beforeScreenRef.current.wantVideo === "boolean") {
-                    m.wantVideo = !!beforeScreenRef.current.wantVideo;
-                }
+            m.cameraDeviceId = beforeScreenRef.current.cameraDeviceId ?? null;
+            if (typeof beforeScreenRef.current.wantVideo === "boolean") {
+                m.wantVideo = !!beforeScreenRef.current.wantVideo;
+            }
 
-                m.screenSoftMuted = false;
+            emitLocalMediaState();
 
-                emitLocalMediaState();
-
-                signalLocalMedia(
-                    {
-                        audio: !!m.wantAudio,
-                        video: !!m.wantVideo,
-                        videoDeviceLost: false,
-                        videoSource: "camera",
-                        screenSoftMuted: false,
-                        screenCapturing: false,
-                        screenPickNonce: Number(m.screenPickNonce || 0),
-                    },
-                    {
-                        immediate: true,
-                        reason: "switch-to-camera.intent",
-                        phase: "intent",
-                        force: true,
-                    }
-                );
-
-                if (connRef.current.isConnected && janusRef.current.pub) {
-                    queuePublish(m.wantAudio, !!m.wantVideo, {
-                        republish: true,
-                        reason: `${reason}.back-to-camera`,
-                    });
-                }
-            } finally {
-                modeSwitchingRef.current = false;
+            if (connRef.current.isConnected && janusRef.current.pub) {
+                queuePublish(m.wantAudio, !!m.wantVideo, {
+                    republish: true,
+                    reason: `${reason}.back-to-camera`,
+                });
             }
         },
         [
-            clearTimer,
             emitLocalMediaState,
+            isQuietWindowActive,
             queuePublish,
-            rejoinPreserveIntent,
-            safeSet,
-            signalLocalMedia,
+            startScreenShareFromClick,
             stopScreenCapture,
+            suspendResync,
         ]
     );
 
@@ -2599,7 +2725,6 @@ export function useJanusLocalOnly(
     // =========================================================
     // 16) toggleAudio / toggleVideo / screen helpers
     // =========================================================
-
     const toggleAudio = useCallback(() => {
         if (isQuietWindowActive()) return;
 
@@ -2618,239 +2743,119 @@ export function useJanusLocalOnly(
         isQuietWindowActive,
     ]);
 
+    // ✅ PATCH: (1) screen 모드에서 누르면 "screen 종료 + camera ON"으로 고정
+    // ✅ PATCH: (2) camera ON 켤 때 permissionDeniedVideo를 풀어서 "다시 시도" 가능
     const toggleVideo = useCallback(() => {
         if (isQuietWindowActive()) return;
 
-        stopScreenCapture("toggleVideo->camera");
+        const m = mediaRef.current;
+        const curVs = m.videoSource || "camera";
 
-        const next = !mediaRef.current.wantVideo;
-        mediaRef.current.videoSource = "camera";
-        mediaRef.current.screenSoftMuted = false;
-        mediaRef.current.wantVideo = next;
+        // 1) screen -> camera (카메라 버튼은 '카메라 켜기' 의도)
+        if (curVs === "screen") {
+            suspendResync(2200, "toggleVideo.from-screen->camera");
+            stopScreenCapture("toggleVideo.from-screen->camera");
 
-        if (!mediaRef.current.permissionDeniedVideo) {
-            mediaRef.current.videoLost = false;
+            m.videoSource = "camera";
+            m.screenSoftMuted = false;
+
+            // ✅ 버튼 눌렀으니 카메라 ON 강제
+            m.wantVideo = true;
+
+            // ✅ deny 상태여도 재시도 가능
+            m.permissionDeniedVideo = false;
+            m.videoLost = false;
+
+            safeSet(() => {
+                setVideoEnabled(true);
+                setIsVideoDeviceLost(false);
+                setError(null);
+            });
+
+            emitLocalMediaState();
+
+            if (!connRef.current.isConnected || !janusRef.current.pub) return;
+            scheduleApplyIntent("toggleVideo.camera-on-from-screen", {
+                quietMs: 0,
+            });
+            return;
+        }
+
+        // 2) camera 토글
+        const next = !m.wantVideo;
+
+        m.videoSource = "camera";
+        m.screenSoftMuted = false;
+        m.wantVideo = next;
+
+        // ✅ ON으로 켤 때는 deny/lost를 풀어 "다시 시도" 가능하게
+        if (next) {
+            m.permissionDeniedVideo = false;
+            m.videoLost = false;
         }
 
         safeSet(() => {
             setVideoEnabled(next);
-            if (!mediaRef.current.permissionDeniedVideo)
+            if (next) {
                 setIsVideoDeviceLost(false);
+                setError(null);
+            }
         });
 
         emitLocalMediaState();
 
         if (!connRef.current.isConnected || !janusRef.current.pub) return;
-        scheduleApplyIntent("toggleVideo");
+        scheduleApplyIntent(next ? "toggleVideo.on" : "toggleVideo.off");
     }, [
         emitLocalMediaState,
         safeSet,
         scheduleApplyIntent,
         isQuietWindowActive,
         stopScreenCapture,
+        suspendResync,
     ]);
 
-    // ✅ screen 토글도 세션 재생성 없이 camera처럼
+    // ✅ 화면공유 토글
     const toggleScreenShare = useCallback(() => {
+        const m = mediaRef.current;
+
         if (isQuietWindowActive()) return;
         if (connRef.current.isConnecting) return;
 
-        const m = mediaRef.current;
         const isScreenMode = m.videoSource === "screen";
-        const isSoftOff =
-            isScreenMode && m.wantVideo === true && m.screenSoftMuted === true;
-        const isOn =
-            isScreenMode && m.wantVideo === true && m.screenSoftMuted !== true;
+        const hasScreenStream = !!m.screenStream;
 
-        // 1) ON -> soft off(송출만 끔)
-        if (isOn) {
-            m.screenSoftMuted = true;
+        // ✅ screen + stream 있음: 무조건 soft 토글(ON/OFF)
+        if (isScreenMode && hasScreenStream) {
+            const turningOn = m.screenSoftMuted === true;
+            m.screenSoftMuted = !turningOn;
             m.wantVideo = true;
+
             emitLocalMediaState();
 
             if (connRef.current.isConnected && janusRef.current.pub) {
-                scheduleApplyIntent("screen-soft-off");
+                scheduleApplyIntent(
+                    turningOn ? "screen-soft-on" : "screen-soft-off",
+                    {
+                        quietMs: 0,
+                        enableBump: false,
+                    }
+                );
             }
             return;
         }
 
-        // 2) soft off -> soft on(송출 다시 켬)
-        if (isSoftOff) {
-            m.screenSoftMuted = false;
-            m.wantVideo = true;
-            emitLocalMediaState();
-
-            if (connRef.current.isConnected && janusRef.current.pub) {
-                scheduleApplyIntent("screen-soft-on");
-            }
-            return;
-        }
-
-        // 3) camera -> screen 시작 (✅ 모드 전환: picker + 의도 유지 리조인)
-        switchVideoModeRef.current?.("screen", { reason: "toggleScreenShare" });
+        // ✅ picker 강제
+        suspendResync(2800, "toggleScreenShare.picker");
+        switchVideoModeRef.current?.("screen", {
+            reason: "toggleScreenShare",
+            forcePicker: true,
+        });
     }, [
         emitLocalMediaState,
         isQuietWindowActive,
         scheduleApplyIntent,
-        safeSet,
-        setLocalStream,
-    ]);
-
-    // ✅ Screen Picker (tick 기반) - 세션 재생성 없이 publish로만 반영
-    useEffect(() => {
-        const m = mediaRef.current;
-
-        if (!isConnected) return;
-        if (sessionRef.current.destroying || closingRef.current) return;
-        if (m.videoSource !== "screen") return;
-        if (m.screenSoftMuted) return;
-        if (m.screenStream) return;
-
-        if (screenPickerLockRef.current) return;
-        screenPickerLockRef.current = true;
-
-        (async () => {
-            try {
-                const md = navigator.mediaDevices;
-                if (!md?.getDisplayMedia) {
-                    safeSet(() =>
-                        setError("이 브라우저는 화면 공유를 지원하지 않습니다.")
-                    );
-                    screenPickerLockRef.current = false;
-                    return;
-                }
-
-                const stream = await md.getDisplayMedia({
-                    video: true,
-                    audio: false,
-                });
-                m.screenStream = stream;
-
-                const t = stream.getVideoTracks?.()[0] || null;
-                m.screenTrackId = t?.id || null;
-                m.screenPickNonce = (m.screenPickNonce || 0) + 1;
-
-                // ✅ screen track 종료 -> camera 복귀 + republish (세션 재생성 X)
-                stream.getVideoTracks()?.forEach((track) => {
-                    track.onended = () => {
-                        if (sessionRef.current.destroying || closingRef.current)
-                            return;
-                        if (applySeqRef.current === 0) return;
-
-                        m.screenEndingAt = Date.now();
-
-                        // 캡처 정리
-                        try {
-                            m.screenStream
-                                ?.getTracks()
-                                ?.forEach((t2) => t2.stop());
-                        } catch {}
-                        m.screenStream = null;
-
-                        m.videoSource = "camera";
-                        m.screenSoftMuted = false;
-                        m.permissionDeniedScreen = false;
-
-                        // 복귀 시 원래 카메라/상태로
-                        m.cameraDeviceId =
-                            beforeScreenRef.current.cameraDeviceId ?? null;
-                        m.wantVideo = !!beforeScreenRef.current.wantVideo;
-
-                        m.screenTrackId = null;
-                        m.screenPickNonce = (m.screenPickNonce || 0) + 1;
-
-                        screenPickerLockRef.current = false;
-
-                        emitLocalMediaState();
-
-                        signalLocalMedia(
-                            {
-                                audio: !!m.wantAudio,
-                                video: !!m.wantVideo,
-                                videoDeviceLost: false,
-                                videoSource: "camera",
-                                screenSoftMuted: false,
-                                screenCapturing: false,
-                                screenPickNonce: Number(m.screenPickNonce || 0),
-                            },
-                            {
-                                immediate: true,
-                                reason: "screen-ended",
-                                phase: "intent",
-                                force: true,
-                            }
-                        );
-
-                        // ✅ 기존 세션에서 republish로 카메라 복귀
-                        if (
-                            connRef.current.isConnected &&
-                            janusRef.current.pub
-                        ) {
-                            scheduleApplyIntent("screen-ended->camera");
-                        }
-                    };
-                });
-
-                emitLocalMediaState();
-
-                signalLocalMedia(
-                    {
-                        audio: !!m.wantAudio,
-                        video: true,
-                        videoDeviceLost: false,
-                        videoSource: "screen",
-                        screenSoftMuted: false,
-                        screenCapturing: true,
-                        screenPickNonce: Number(m.screenPickNonce || 0),
-                    },
-                    {
-                        immediate: false,
-                        reason: "screen-picked.intent",
-                        phase: "intent",
-                    }
-                );
-
-                // ✅ 기존 세션에서 publish(재협상)
-                scheduleApplyIntent("screen-picked");
-            } catch (err) {
-                screenPickerLockRef.current = false;
-                m.permissionDeniedScreen = true;
-
-                m.screenPickNonce = (m.screenPickNonce || 0) + 1;
-                m.screenTrackId = null;
-
-                // picker 취소/거부 시 camera로 복구
-                m.videoSource = "camera";
-                m.screenSoftMuted = false;
-                m.screenStream = null;
-
-                // 복구 상태
-                m.cameraDeviceId =
-                    beforeScreenRef.current.cameraDeviceId ?? null;
-                m.wantVideo = !!beforeScreenRef.current.wantVideo;
-
-                emitLocalMediaState();
-                safeSet(() =>
-                    setError("화면 공유 권한이 거부되었거나 취소되었습니다.")
-                );
-
-                if (connRef.current.isConnected && janusRef.current.pub) {
-                    const restoreVideo = !!beforeScreenRef.current.wantVideo;
-                    queuePublish(m.wantAudio, restoreVideo, {
-                        republish: true,
-                        reason: "screen-cancel-restore-camera",
-                    });
-                }
-            }
-        })();
-    }, [
-        isConnected,
-        screenPickerTick,
-        emitLocalMediaState,
-        scheduleApplyIntent,
-        safeSet,
-        signalLocalMedia,
-        queuePublish,
+        suspendResync,
     ]);
 
     // =========================================================
@@ -2912,6 +2917,7 @@ export function useJanusLocalOnly(
         };
     }, []);
 
+    // ✅ ws-resync: 전환 중/직후는 드랍
     useEffect(() => {
         const onResync = (e) => {
             const roomNumber = sessionRef.current.lastJoin?.roomNumber;
@@ -2919,13 +2925,20 @@ export function useJanusLocalOnly(
             if (!connRef.current.isConnected) return;
             if (!janusRef.current.pub) return;
 
-            // 수신자가 강제로 listparticipants -> detach/attach 재구독
+            if (isResyncSuppressed()) {
+                console.log("[ws-resync] ignored (suppressed)", {
+                    roomNumber,
+                    until: resyncSuspendUntilRef.current,
+                });
+                return;
+            }
+
             forceResubscribeAllRef.current?.(roomNumber, "ws-resync");
         };
 
         window.addEventListener("janus:resync", onResync);
         return () => window.removeEventListener("janus:resync", onResync);
-    }, []);
+    }, [isResyncSuppressed]);
 
     // =========================================================
     // 19) retry permission helpers
@@ -2944,32 +2957,22 @@ export function useJanusLocalOnly(
         reinjectIfPossible();
     }, [emitLocalMediaState, reinjectIfPossible, safeSet]);
 
-    // ✅ screen 권한 재시도도 세션 재생성 없이 picker -> publish
+    // ✅ screen 권한 재시도: 클릭에서 picker 강제
     const retryScreenPermission = useCallback(() => {
         const m = mediaRef.current;
 
         m.permissionDeniedScreen = false;
         safeSet(() => setError(null));
 
-        m.videoSource = "screen";
-        m.cameraDeviceId = null;
-        m.wantVideo = true;
-        m.screenSoftMuted = false;
-
-        m.screenPickNonce = (m.screenPickNonce || 0) + 1;
-        m.screenTrackId = null;
-        m.screenStream = null;
-
-        safeSet(() => setVideoEnabled(true));
-        emitLocalMediaState();
-
-        safeSet(() => setScreenPickerTick((v) => v + 1));
-    }, [emitLocalMediaState, safeSet]);
+        suspendResync(2800, "retryScreenPermission");
+        switchVideoModeRef.current?.("screen", {
+            reason: "retryScreenPermission",
+            forcePicker: true,
+        });
+    }, [safeSet, suspendResync]);
 
     // =========================================================
-    // 20) setVideoSource (Picker 강제 + 전환 정책)
-    //    - ✅ camera: 기존 세션 유지 + republish
-    //    - ✅ screen : 기존 세션 유지 + picker + republish (세션 재생성 X)
+    // 20) setVideoSource
     // =========================================================
     const setVideoSource = useCallback(
         async (nextType, deviceId = null) => {
@@ -2980,58 +2983,34 @@ export function useJanusLocalOnly(
                 clearTimeout(timersRef.current.offerRetry);
                 timersRef.current.offerRetry = null;
             }
+            timersRef.current.offerRetryPending = null;
             negotiationRef.current.pending = null;
 
-            // 기존 screen 정리
-            if (mediaRef.current.videoSource === "screen") {
-                try {
-                    const ss = mediaRef.current.screenStream;
-                    ss?.getTracks?.().forEach((t) => t.stop());
-                } catch {}
-                mediaRef.current.screenStream = null;
-                mediaRef.current.screenSoftMuted = false;
-                mediaRef.current.screenTrackId = null;
-                mediaRef.current.screenPickNonce =
-                    (mediaRef.current.screenPickNonce || 0) + 1;
-                screenPickerLockRef.current = false;
-            }
-
-            // ===== ✅ CAMERA PATH: 기존 세션 유지 + republish =====
+            // ===== CAMERA =====
             if (nextType !== "screen") {
-                if (connRef.current.isConnected && janusRef.current.pub) {
-                    try {
-                        janusRef.current.pub.send({
-                            message: {
-                                request: "configure",
-                                audio: !!mediaRef.current.wantAudio,
-                                video: false,
-                            },
-                        });
-                    } catch {}
-                }
+                const wasScreen = mediaRef.current.videoSource === "screen";
 
-                try {
-                    const s = janusRef.current.localStream;
-                    s?.getVideoTracks?.()?.forEach((t) => {
-                        try {
-                            t.onended = null;
-                            t.oninactive = null;
-                            t.stop();
-                        } catch {}
-                    });
-                } catch {}
-                try {
-                    setLocalStream(null);
-                } catch {}
+                if (wasScreen) {
+                    suspendResync(2400, "setVideoSource.camera.from-screen");
+                    stopScreenCapture("setVideoSource.camera.stopScreen");
+                } else {
+                    // camera device change도 resync 약간 막아줌(전환 후 느려지는 핵심 루프 방지)
+                    suspendResync(1800, "setVideoSource.camera.device-change");
+                }
 
                 mediaRef.current.videoSource = "camera";
                 mediaRef.current.cameraDeviceId = deviceId ?? null;
                 mediaRef.current.screenSoftMuted = false;
                 mediaRef.current.wantVideo = true;
 
-                if (!mediaRef.current.permissionDeniedVideo) {
-                    mediaRef.current.videoLost = false;
-                }
+                // ✅ 선택/변경은 "다시 시도" 의도 → deny/lost를 풀어준다
+                mediaRef.current.permissionDeniedVideo = false;
+                mediaRef.current.videoLost = false;
+
+                safeSet(() => {
+                    setIsVideoDeviceLost(false);
+                    setError(null);
+                });
 
                 emitLocalMediaState();
 
@@ -3041,17 +3020,24 @@ export function useJanusLocalOnly(
                         reason: "setVideoSource.camera.republish",
                     });
                 }
-
                 return;
             }
 
-            // ===== ✅ SCREEN PATH: 세션 유지 + picker + republish (재생성 X) =====
+            // ===== SCREEN =====
+            suspendResync(2800, "setVideoSource.screen");
             switchVideoModeRef.current?.("screen", {
                 reason: "setVideoSource.screen",
+                forcePicker: true,
             });
-            return;
         },
-        [emitLocalMediaState, clearTimer, safeSet, queuePublish, setLocalStream]
+        [
+            clearTimer,
+            emitLocalMediaState,
+            queuePublish,
+            stopScreenCapture,
+            suspendResync,
+            safeSet,
+        ]
     );
 
     // =========================================================
@@ -3059,7 +3045,6 @@ export function useJanusLocalOnly(
     // =========================================================
     const stopVideo = useCallback(
         (reason = "stopVideo") => {
-            // screen 정리
             try {
                 const ss = mediaRef.current.screenStream;
                 ss?.getTracks?.().forEach((t) => {
@@ -3102,31 +3087,29 @@ export function useJanusLocalOnly(
                 { immediate: true, reason: "stopVideo" }
             );
 
-            // ✅ 기존 세션에서 video false로 republish
             if (connRef.current.isConnected && janusRef.current.pub) {
                 queuePublish(mediaRef.current.wantAudio, false, {
                     republish: true,
                     reason: `${reason}.republish-video-off`,
                 });
-            } else {
-                // 연결 전이면 intent만 유지
             }
         },
         [emitLocalMediaState, safeSet, signalLocalMedia, queuePublish]
     );
 
-    // ✅ restartScreenShare: 세션 재생성 없이 picker -> publish
+    // ✅ restartScreenShare: 클릭 기반 picker 강제
     const restartScreenShare = useCallback(() => {
         if (isQuietWindowActive()) return;
 
-        // 기존 캡처 정리(이 호출이 videoSource를 camera로 돌려놓기 때문에
-        // switchVideoMode("screen")이 정상 동작함)
+        suspendResync(2800, "restartScreenShare");
+
         stopScreenCapture("restartScreenShare");
 
         switchVideoModeRef.current?.("screen", {
             reason: "restartScreenShare",
+            forcePicker: true,
         });
-    }, [isQuietWindowActive, stopScreenCapture]);
+    }, [isQuietWindowActive, stopScreenCapture, suspendResync]);
 
     // =========================================================
     // 22) Exports

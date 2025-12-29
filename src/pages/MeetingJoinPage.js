@@ -1188,13 +1188,12 @@ function MeetingJoinPage() {
                                 isHost={isHostSelfRender}
                                 onInvite={() => setInviteOpen(true)}
                             />
-
                             <InviteParticipantsModal
                                 open={inviteOpen}
                                 onClose={() => setInviteOpen(false)}
                                 meetingId={meetingId}
                                 onInvited={() => {
-                                    // fetchRosterParticipants();
+                                    fetchRosterParticipants();
                                 }}
                             />
 

@@ -32,7 +32,7 @@ function getMonday(date) {
 // 그 칸이 "이미 지난 칸"인지 판단 (로컬 기준, 🔥 시작 시간 기준)
 function isPastCell(dateStr, hour) {
     const [y, m, d] = dateStr.split("-").map(Number);
-    const cellStart = new Date(y, m - 1, d, hour, 0, 0); // 칸 시작 시간
+    const cellStart = new Date(y, m - 1, d, hour + 1, 0, 0); // 칸 시작 시간
     const now = new Date();
     return cellStart.getTime() < now.getTime();
 }

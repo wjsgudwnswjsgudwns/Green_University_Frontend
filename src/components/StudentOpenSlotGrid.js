@@ -8,7 +8,7 @@ function parseYmd(dateStr) {
 
 function isPastCell(dateStr, hour) {
     const [y, m, d] = dateStr.split("-").map(Number);
-    const cellStart = new Date(y, m - 1, d, hour, 0, 0);
+    const cellStart = new Date(y, m - 1, d, hour + 1, 0, 0);
     const now = new Date();
     return cellStart.getTime() < now.getTime();
 }
