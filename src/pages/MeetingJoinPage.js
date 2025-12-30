@@ -54,16 +54,18 @@ function MeetingJoinPage() {
     const [playNonce, setPlayNonce] = useState(0);
 
     // =========================================================
-    // UI click-lock
+    // UI click-lock (monotonic time)
     // =========================================================
     const uiLockUntilRef = useRef(0);
+    const nowMs = () => (performance?.now ? performance.now() : Date.now());
+
     const lockUi = useCallback((ms = 1200) => {
-        uiLockUntilRef.current = Date.now() + ms;
+        uiLockUntilRef.current = nowMs() + ms;
     }, []);
-    const isUiLocked = useCallback(
-        () => Date.now() < uiLockUntilRef.current,
-        []
-    );
+
+    const isUiLocked = useCallback(() => {
+        return nowMs() < uiLockUntilRef.current;
+    }, []);
 
     // =========================================================
     // joinInfo
@@ -476,13 +478,24 @@ function MeetingJoinPage() {
     }, []);
 
     const sendIntent = useCallback(
-        (nextAudio, nextVideo, predictedUiMedia, reason = "intent") => {
+        (
+            nextAudio,
+            nextVideo,
+            predictedUiMedia,
+            reason = "intent",
+            extra2 = {}
+        ) => {
             if (!joinInfo) return;
             if (!mediaSignalConnectedRef.current) return;
             const fn = sendMediaStateNowRef.current;
             if (!fn) return;
 
-            const extra = buildSignalExtra(predictedUiMedia, reason, "intent");
+            const extra = buildSignalExtra(
+                predictedUiMedia,
+                reason,
+                "intent",
+                extra2
+            );
             fn(!!nextAudio, !!nextVideo, extra);
         },
         [joinInfo, buildSignalExtra]
@@ -502,7 +515,7 @@ function MeetingJoinPage() {
 
             const seq = ++rejoinSeqRef.current;
 
-            lockUi(1800);
+            lockUi(1800, "hard-rejoin");
             setPlayNonce((n) => n + 1);
 
             try {
@@ -529,7 +542,9 @@ function MeetingJoinPage() {
                 screenSoftMuted: false,
             };
             const predictedVideo = true;
-            sendIntent(uiMedia.audio, predictedVideo, predicted, reason);
+            sendIntent(uiMedia.audio, predictedVideo, predicted, reason, {
+                skipResync: true,
+            });
 
             pendingAfterJoinRef.current = {
                 source,
@@ -544,6 +559,7 @@ function MeetingJoinPage() {
                     predictedVideo,
                     buildSignalExtra(predicted, `commit:${reason}`, "commit", {
                         forceResync: true,
+                        skipResync: false,
                     })
                 );
             } catch {}
@@ -589,7 +605,10 @@ function MeetingJoinPage() {
                         predicted2,
                         `post-join:${p.reason}`,
                         "commit",
-                        { forceResync: true }
+                        {
+                            forceResync: true,
+                            skipResync: false,
+                        }
                     )
                 );
                 window.setTimeout(() => {
@@ -600,7 +619,10 @@ function MeetingJoinPage() {
                             predicted2,
                             `post-join:${p.reason}:t1`,
                             "commit",
-                            { forceResync: true }
+                            {
+                                forceResync: true,
+                                skipResync: false,
+                            }
                         )
                     );
                 }, 900);
@@ -620,20 +642,24 @@ function MeetingJoinPage() {
     // =========================================================
     const onToggleAudioUiFirst = useCallback(() => {
         if (isUiLocked()) return;
-        lockUi(350);
+        lockUi(350, "toggle-audio");
 
         const nextAudio = !uiMedia.audio;
-        sendIntent(nextAudio, uiMedia.video, uiMedia, "click-audio");
+        sendIntent(nextAudio, uiMedia.video, uiMedia, "click-audio", {
+            skipResync: true,
+        });
 
         toggleAudio();
     }, [toggleAudio, isUiLocked, lockUi, uiMedia, sendIntent]);
 
     const onToggleVideoUiFirst = useCallback(() => {
         if (isUiLocked()) return;
-        lockUi(700);
+        lockUi(700, "toggle-video");
 
         const nextVideo = !uiMedia.video;
-        sendIntent(uiMedia.audio, nextVideo, uiMedia, "click-video");
+        sendIntent(uiMedia.audio, nextVideo, uiMedia, "click-video", {
+            skipResync: true,
+        });
 
         toggleVideo();
     }, [toggleVideo, isUiLocked, lockUi, uiMedia, sendIntent]);
@@ -644,7 +670,7 @@ function MeetingJoinPage() {
     // =========================================================
     const onToggleScreenShareWithSignal = useCallback(() => {
         if (isUiLocked()) return;
-        lockUi(1100);
+        lockUi(1100, "toggle-screen");
 
         const isScreen = uiMedia.videoSource === "screen";
         const capturing = !!uiMedia.screenCapturing;
@@ -703,7 +729,9 @@ function MeetingJoinPage() {
         }
 
         // ✅ 상대 UI 즉시 반영(예고)
-        sendIntent(uiMedia.audio, predictedVideo, predicted, reason);
+        sendIntent(uiMedia.audio, predictedVideo, predicted, reason, {
+            skipResync: true,
+        });
 
         // ✅ 실제 토글 (세션 유지 / soft on/off)
         toggleScreenShare?.();
@@ -737,7 +765,7 @@ function MeetingJoinPage() {
             }
 
             // camera 모드에서 device 변경만
-            lockUi(900);
+            lockUi(900, "switch-camera-device");
             setVideoSource?.("camera", deviceId);
         },
         [
@@ -777,6 +805,7 @@ function MeetingJoinPage() {
         const extra = buildSignalExtra(uiMedia, "localIntent", "intent", {
             wantAudio,
             wantVideo,
+            skipResync: true,
         });
 
         sendMediaStateRef.current?.(wantAudio, wantVideo, extra);
@@ -787,7 +816,7 @@ function MeetingJoinPage() {
         uiMedia,
         buildSignalExtra,
     ]);
-
+    const prevStructRef = useRef({ vs: null, cap: null });
     // B) COMMIT
     useEffect(() => {
         if (!joinInfo) return;
@@ -807,10 +836,18 @@ function MeetingJoinPage() {
 
         if (commitKey === lastCommitKeyRef.current) return;
         lastCommitKeyRef.current = commitKey;
+        const vs = uiMedia.videoSource || "camera";
+        const cap = !!uiMedia.screenCapturing;
 
+        const structuralChanged =
+            prevStructRef.current.vs !== vs ||
+            prevStructRef.current.cap !== cap;
+
+        prevStructRef.current = { vs, cap };
         const extra = buildSignalExtra(uiMedia, "publishOk", "commit", {
             liveAudio,
             liveVideo,
+            skipResync: !structuralChanged,
         });
 
         sendMediaStateNowRef.current?.(liveAudio, liveVideo, extra);
