@@ -11,27 +11,17 @@ import { Stomp } from "@stomp/stompjs";
  * - payload.ts 없는 메시지로 updatedAt을 Date.now()로 강제하지 않음
  * - disconnect 시 connectSeq 증가(늦게 오는 콜백/메시지 차단)
  *
- * 요구사항:
+ * 추가(요구사항):
  * - WS 수신 후 즉시 WebRTC resync 시도 X
- * - 딜레이 후 1회 시도
+ * - 딜레이 후 1차, 다시 딜레이 후 2차 시도
  * - 여기서는 window CustomEvent("janus:resync")만 발사
- *
- * ✅ 이번 수정 핵심(완성본):
- * - (중요) convenience 필드는 "항상" 반환해서 stale(이전 값 잔상) 제거
- *   -> screenCapturing OFF인데 타일이 남아 "두 명 튀는" 현상 방지
- * - camera/screen 전환 신호가 intent 로만 와도(resyncRelevant면) resync 트리거 허용
- * - extra 가 중첩(extra.extra)되어 와도 videoSource/screenCapturing 등이 payload에 실리게 평탄화
- * - soft on/off 같은 UI-only는 skipResync로 resync 스킵 가능
- * - (옵션) 동일 key의 resync 예약은 유지(중복 재예약 방지)로 깜빡임 감소
  */
 
 const INTENT_TTL_MS = 3500;
 
-// ✅ WS 수신 → WebRTC resync 트리거 딜레이(1회)
-const RESYNC_DELAY_MS = 120;
-
-// ✅ 필요 시 true로 올려서 send/recv 확인
-const DEBUG_SIGNAL = false;
+// ✅ WS 수신 → WebRTC resync 트리거 딜레이
+const RESYNC_DELAY_1_MS = 260;
+const RESYNC_DELAY_2_MS = 720;
 
 export function useMeetingMediaSignals(meetingId, currentUserId, display) {
     const [mediaStates, setMediaStates] = useState({});
@@ -50,8 +40,9 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
     const pendingSendRef = useRef(null); // { audio, video, extra }
     const sendDebounceTimerRef = useRef(null);
 
-    // resync timers per remote user
-    const resyncTimersRef = useRef(new Map()); // uidKey -> { t, lastKey, lastAt }
+    // ✅ resync timers per remote user
+    // Map<uidKey, { t1: any, t2: any, lastKey: string }>
+    const resyncTimersRef = useRef(new Map());
 
     const WS_URL =
         process.env.REACT_APP_WS_URL || "http://localhost:8881/ws-chat";
@@ -84,13 +75,15 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
         const m = resyncTimersRef.current;
         for (const [, v] of m.entries()) {
             try {
-                if (v?.t) clearTimeout(v.t);
+                if (v?.t1) clearTimeout(v.t1);
+                if (v?.t2) clearTimeout(v.t2);
             } catch {}
         }
         m.clear();
     }, []);
 
     const disconnect = useCallback(() => {
+        // ✅ 이전 연결 무효화
         connectSeqRef.current += 1;
 
         try {
@@ -125,116 +118,61 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [meetingId]);
 
-    // ---------------- utils ----------------
+    // -------- utils --------
     const pickEffective = (item) => item?.commit || item?.intent || null;
 
-    // ✅ extra가 (extra.extra) 중첩되는 케이스까지 평탄화
-    const flattenExtra = useCallback((extra) => {
-        const e0 = extra && typeof extra === "object" ? extra : {};
-        const e1 = e0.extra && typeof e0.extra === "object" ? e0.extra : {};
-        const merged = { ...e1, ...e0 }; // 바깥 extra가 우선
-        return merged;
-    }, []);
-
     const normalizePhase = useCallback((payload) => {
-        const p =
-            payload?.phase ??
-            payload?.extra?.phase ??
-            payload?.extra?.extra?.phase;
-
+        const p = payload?.phase || payload?.extra?.phase;
         if (p === "intent" || p === "commit") return p;
         return "commit";
     }, []);
 
-    const readField = useCallback((payload, key) => {
-        if (!payload) return undefined;
+    const buildEffectiveConvenience = (prevItem) => {
+        const eff = pickEffective(prevItem);
+        if (!eff) {
+            return {
+                audio: prevItem?.audio,
+                video: prevItem?.video,
+                videoDeviceLost: prevItem?.videoDeviceLost,
+                videoSource: prevItem?.videoSource,
+                screenSoftMuted: prevItem?.screenSoftMuted,
+                screenCapturing: prevItem?.screenCapturing,
+                receivedAt: prevItem?.receivedAt,
+                updatedAt: prevItem?.updatedAt ?? null,
+            };
+        }
 
-        if (payload[key] !== undefined) return payload[key];
+        const extra = eff.extra || {};
+        const hasLost = typeof extra.videoDeviceLost === "boolean";
+        const hasVideoSource = typeof extra.videoSource === "string";
+        const hasSoftMuted = typeof extra.screenSoftMuted === "boolean";
+        const hasCapturing = typeof extra.screenCapturing === "boolean";
 
-        const e0 = payload?.extra;
-        if (e0 && typeof e0 === "object" && e0[key] !== undefined)
-            return e0[key];
+        const commitTs = prevItem?.commitUpdatedAt ?? null;
+        const intentTs = prevItem?.intentUpdatedAt ?? null;
 
-        const e1 = e0?.extra;
-        if (e1 && typeof e1 === "object" && e1[key] !== undefined)
-            return e1[key];
-
-        return undefined;
-    }, []);
-
-    /**
-     * ✅ convenience: UI가 참고하는 최종 표시값
-     * - 중요: "항상" 필드를 반환해서 stale(이전 값 잔상) 제거
-     *   -> screenCapturing OFF인데 이전 true가 남는 문제 차단
-     */
-    const buildEffectiveConvenience = (baseItem) => {
-        const eff = pickEffective(baseItem);
-
-        const commitTs = baseItem?.commitUpdatedAt ?? null;
-        const intentTs = baseItem?.intentUpdatedAt ?? null;
         const effectiveUpdatedAt =
             commitTs != null ? commitTs : intentTs != null ? intentTs : null;
 
-        const src = eff || {};
-        const extra =
-            src?.extra && typeof src.extra === "object" ? src.extra : {};
-
-        const asBool = (v) => (typeof v === "boolean" ? v : undefined);
-        const asStr = (v) => (typeof v === "string" ? v : undefined);
-
         return {
-            // audio/video는 eff가 있으면 그걸, 없으면 기존 baseItem의 최종값 유지
-            audio:
-                typeof src.audio === "boolean"
-                    ? src.audio
-                    : typeof baseItem?.audio === "boolean"
-                    ? baseItem.audio
-                    : undefined,
-            video:
-                typeof src.video === "boolean"
-                    ? src.video
-                    : typeof baseItem?.video === "boolean"
-                    ? baseItem.video
-                    : undefined,
+            audio: typeof eff.audio === "boolean" ? eff.audio : prevItem?.audio,
+            video: typeof eff.video === "boolean" ? eff.video : prevItem?.video,
 
-            // ✅ 항상 반환: 없으면 undefined로 덮어서 stale 제거
-            videoDeviceLost: asBool(extra.videoDeviceLost),
-            videoSource: asStr(extra.videoSource),
-            screenSoftMuted: asBool(extra.screenSoftMuted),
-            screenCapturing: asBool(extra.screenCapturing),
+            ...(hasLost ? { videoDeviceLost: !!extra.videoDeviceLost } : {}),
+            ...(hasVideoSource ? { videoSource: extra.videoSource } : {}),
+            ...(hasSoftMuted
+                ? { screenSoftMuted: !!extra.screenSoftMuted }
+                : {}),
+            ...(hasCapturing
+                ? { screenCapturing: !!extra.screenCapturing }
+                : {}),
 
-            receivedAt: src.receivedAt ?? baseItem?.receivedAt,
+            receivedAt: eff.receivedAt,
             updatedAt: effectiveUpdatedAt,
         };
     };
 
-    // ✅ “camera/screen 전환”은 보통 여기 값들로 구분됨
-    const isResyncRelevant = useCallback(
-        (payload) => {
-            if (!payload) return false;
-
-            // ✅ soft 같은 UI-only 신호는 resync 스킵 가능
-            if (readField(payload, "skipResync") === true) return false;
-
-            // 강제 플래그
-            if (readField(payload, "forceResync") === true) return true;
-
-            const vs = readField(payload, "videoSource");
-            const cap = readField(payload, "screenCapturing");
-            const soft = readField(payload, "screenSoftMuted");
-            const lost = readField(payload, "videoDeviceLost");
-
-            return (
-                typeof vs === "string" ||
-                typeof cap === "boolean" ||
-                typeof soft === "boolean" ||
-                typeof lost === "boolean"
-            );
-        },
-        [readField]
-    );
-
-    // ---------------- resync trigger ----------------
+    // -------- WebRTC resync trigger (WS receive -> delayed 1st/2nd) --------
     const shouldTriggerResync = useCallback(
         (payload) => {
             if (!payload) return false;
@@ -248,16 +186,9 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
                 return false;
             }
 
+            // commit만
             const phase = normalizePhase(payload);
-
-            // ✅ 원래는 commit만 트리거였는데,
-            // camera/screen은 intent만 날아오는 경우가 있어서 resyncRelevant면 intent도 허용
-            if (
-                phase !== "commit" &&
-                !(phase === "intent" && isResyncRelevant(payload))
-            ) {
-                return false;
-            }
+            if (phase !== "commit") return false;
 
             // type이 있으면 호환 검사(너무 엄격하면 resync 못 하니 "있으면 검사" 수준)
             if (typeof payload.type === "string") {
@@ -265,13 +196,20 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
                 const allowSnapshotItem =
                     payload.type === "MEDIA_SNAPSHOT_ITEM";
                 if (!allow && !allowSnapshotItem) {
-                    if (!isResyncRelevant(payload)) return false;
+                    const hasAny =
+                        typeof payload.audio === "boolean" ||
+                        typeof payload.video === "boolean" ||
+                        typeof payload.videoSource === "string" ||
+                        typeof payload.screenCapturing === "boolean" ||
+                        typeof payload.screenSoftMuted === "boolean" ||
+                        typeof payload.videoDeviceLost === "boolean";
+                    if (!hasAny) return false;
                 }
             }
 
             return true;
         },
-        [currentUserId, normalizePhase, isResyncRelevant]
+        [currentUserId, normalizePhase]
     );
 
     const dispatchResyncEvent = useCallback(
@@ -280,20 +218,19 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
                 const uid = payload?.userId;
                 if (uid == null) return;
 
-                const vs = readField(payload, "videoSource");
-                const screenCapturing = readField(payload, "screenCapturing");
-                const phase = normalizePhase(payload);
+                const vs =
+                    typeof payload.videoSource === "string"
+                        ? payload.videoSource
+                        : typeof payload?.extra?.videoSource === "string"
+                        ? payload.extra.videoSource
+                        : undefined;
 
-                if (DEBUG_SIGNAL) {
-                    console.log("[mediaSignals] dispatchResyncEvent", {
-                        uid,
-                        phase,
-                        attempt,
-                        reason,
-                        vs,
-                        screenCapturing,
-                    });
-                }
+                const screenCapturing =
+                    typeof payload.screenCapturing === "boolean"
+                        ? payload.screenCapturing
+                        : typeof payload?.extra?.screenCapturing === "boolean"
+                        ? payload.extra.screenCapturing
+                        : undefined;
 
                 window.dispatchEvent(
                     new CustomEvent("janus:resync", {
@@ -301,12 +238,12 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
                             meetingId,
                             userId: uid,
                             display: payload?.display,
-                            phase, // commit or intent
+                            phase: "commit",
                             ts:
                                 typeof payload.ts === "number"
                                     ? payload.ts
                                     : null,
-                            attempt, // 1
+                            attempt, // 1 or 2
                             reason,
                             audio:
                                 typeof payload.audio === "boolean"
@@ -316,12 +253,8 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
                                 typeof payload.video === "boolean"
                                     ? payload.video
                                     : undefined,
-                            videoSource:
-                                typeof vs === "string" ? vs : undefined,
-                            screenCapturing:
-                                typeof screenCapturing === "boolean"
-                                    ? screenCapturing
-                                    : undefined,
+                            videoSource: vs,
+                            screenCapturing,
                         },
                     })
                 );
@@ -332,88 +265,73 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
                 );
             }
         },
-        [meetingId, readField, normalizePhase]
+        [meetingId]
     );
 
-    // ✅ 1회만 예약
-    const scheduleResyncOnce = useCallback(
+    const scheduleResyncTwice = useCallback(
         (payload) => {
-            if (readField(payload, "forceResync") !== true) {
-                if (readField(payload, "skipResync") === true) return;
-            }
-
             if (!shouldTriggerResync(payload)) return;
             if (!mountedRef.current) return;
 
             const uidKey = String(payload.userId);
             const seqAt = connectSeqRef.current;
 
-            const vs = readField(payload, "videoSource");
-            const cap = readField(payload, "screenCapturing");
-
-            const keyParts = [
-                normalizePhase(payload),
-                typeof payload.video === "boolean" ? `v=${payload.video}` : "",
-                typeof payload.audio === "boolean" ? `a=${payload.audio}` : "",
-                typeof vs === "string" ? `src=${vs}` : "",
-                typeof cap === "boolean" ? `cap=${cap}` : "",
-                readField(payload, "forceResync") === true ? "force=1" : "",
-            ].join("|");
-
+            // 이전 예약 취소
             const m = resyncTimersRef.current;
             const prev = m.get(uidKey);
-
-            // ✅ 동일 key면 재예약하지 않음(깜빡임/튀는 느낌 감소)
-            if (prev?.lastKey === keyParts) {
-                if (DEBUG_SIGNAL) {
-                    console.log(
-                        "[mediaSignals] scheduleResyncOnce skip (same key)",
-                        uidKey,
-                        keyParts
-                    );
-                }
-                return;
-            }
-
-            // 이전 예약 취소
             try {
-                if (prev?.t) clearTimeout(prev.t);
+                if (prev?.t1) clearTimeout(prev.t1);
+                if (prev?.t2) clearTimeout(prev.t2);
             } catch {}
 
-            if (DEBUG_SIGNAL) {
-                console.log(
-                    "[mediaSignals] scheduleResyncOnce",
-                    uidKey,
-                    keyParts
-                );
-            }
+            // 변경 식별 키(스팸 방지용)
+            const keyParts = [
+                normalizePhase(payload),
+                typeof payload.ts === "number" ? payload.ts : "no-ts",
+                typeof payload.video === "boolean" ? `v=${payload.video}` : "",
+                typeof payload.audio === "boolean" ? `a=${payload.audio}` : "",
+                typeof payload.videoSource === "string"
+                    ? `src=${payload.videoSource}`
+                    : typeof payload?.extra?.videoSource === "string"
+                    ? `src=${payload.extra.videoSource}`
+                    : "",
+                typeof payload.screenCapturing === "boolean"
+                    ? `cap=${payload.screenCapturing}`
+                    : typeof payload?.extra?.screenCapturing === "boolean"
+                    ? `cap=${payload.extra.screenCapturing}`
+                    : "",
+            ].join("|");
 
-            const t = setTimeout(() => {
+            const t1 = setTimeout(() => {
                 if (!mountedRef.current) return;
                 if (seqAt !== connectSeqRef.current) return;
-                dispatchResyncEvent(payload, 1, "ws-delayed");
-            }, RESYNC_DELAY_MS);
+                dispatchResyncEvent(payload, 1, "ws-delayed-1");
+            }, RESYNC_DELAY_1_MS);
 
-            m.set(uidKey, { t, lastKey: keyParts, lastAt: Date.now() });
+            const t2 = setTimeout(() => {
+                if (!mountedRef.current) return;
+                if (seqAt !== connectSeqRef.current) return;
+                dispatchResyncEvent(payload, 2, "ws-delayed-2");
+            }, RESYNC_DELAY_2_MS);
+
+            m.set(uidKey, { t1, t2, lastKey: keyParts });
         },
-        [shouldTriggerResync, dispatchResyncEvent, normalizePhase, readField]
+        [shouldTriggerResync, dispatchResyncEvent, normalizePhase]
     );
 
-    // ---------------- local apply (commit only) ----------------
+    // -------- local apply (commit only) --------
     const applyLocalCommit = useCallback(
         (audio, video, extra = {}) => {
             if (currentUserId == null) return;
 
-            const flat = flattenExtra(extra);
-            const ts = typeof flat.ts === "number" ? flat.ts : Date.now();
-
+            const ts = typeof extra.ts === "number" ? extra.ts : Date.now();
             const myKey = String(currentUserId);
             const myDisplay = display || String(currentUserId);
 
             const phasePayload = {
                 audio: !!audio,
                 video: !!video,
-                extra: { ...(flat || {}), phase: "commit" },
+                extra: { ...(extra || {}), phase: "commit" },
                 updatedAt: ts,
                 receivedAt: Date.now(),
             };
@@ -422,20 +340,20 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
                 audio: !!audio,
                 video: !!video,
                 videoDeviceLost:
-                    typeof flat.videoDeviceLost === "boolean"
-                        ? !!flat.videoDeviceLost
+                    typeof extra.videoDeviceLost === "boolean"
+                        ? !!extra.videoDeviceLost
                         : undefined,
                 videoSource:
-                    typeof flat.videoSource === "string"
-                        ? flat.videoSource
+                    typeof extra.videoSource === "string"
+                        ? extra.videoSource
                         : undefined,
                 screenSoftMuted:
-                    typeof flat.screenSoftMuted === "boolean"
-                        ? !!flat.screenSoftMuted
+                    typeof extra.screenSoftMuted === "boolean"
+                        ? !!extra.screenSoftMuted
                         : undefined,
                 screenCapturing:
-                    typeof flat.screenCapturing === "boolean"
-                        ? !!flat.screenCapturing
+                    typeof extra.screenCapturing === "boolean"
+                        ? !!extra.screenCapturing
                         : undefined,
                 display: myDisplay,
                 ts,
@@ -460,19 +378,17 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
                 };
             });
         },
-        [currentUserId, display, flattenExtra]
+        [currentUserId, display]
     );
 
-    // ---------------- send now ----------------
+    // -------- send now --------
     const sendMediaStateNow = useCallback(
         (audio, video, extra = {}) => {
             if (!meetingId || currentUserId == null) return;
 
-            const flat = flattenExtra(extra);
-
             const phase =
-                flat?.phase === "intent" || flat?.phase === "commit"
-                    ? flat.phase
+                extra?.phase === "intent" || extra?.phase === "commit"
+                    ? extra.phase
                     : "commit";
 
             const ts = Date.now();
@@ -480,25 +396,11 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
 
             // commit일 때만 로컬 즉시 반영
             if (phase === "commit") {
-                applyLocalCommit(audio, video, { ...flat, ts });
+                applyLocalCommit(audio, video, { ...extra, ts });
             }
 
             // 연결 안 됐으면 종료
-            if (!stompRef.current || !connectedRef.current) {
-                if (DEBUG_SIGNAL) {
-                    console.warn(
-                        "[mediaSignals] send skipped (not connected)",
-                        {
-                            meetingId,
-                            phase,
-                            audio,
-                            video,
-                            flat,
-                        }
-                    );
-                }
-                return;
-            }
+            if (!stompRef.current || !connectedRef.current) return;
 
             const payload = {
                 meetingId,
@@ -509,37 +411,29 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
                 ts,
                 phase,
 
-                // ✅ 전환/화면공유 관련 필드
-                ...(typeof flat.videoDeviceLost === "boolean"
-                    ? { videoDeviceLost: !!flat.videoDeviceLost }
+                ...(typeof extra.videoDeviceLost === "boolean"
+                    ? { videoDeviceLost: !!extra.videoDeviceLost }
                     : {}),
-                ...(typeof flat.videoSource === "string"
-                    ? { videoSource: flat.videoSource }
+                ...(typeof extra.videoSource === "string"
+                    ? { videoSource: extra.videoSource }
                     : {}),
-                ...(typeof flat.screenSoftMuted === "boolean"
-                    ? { screenSoftMuted: !!flat.screenSoftMuted }
+                ...(typeof extra.screenSoftMuted === "boolean"
+                    ? { screenSoftMuted: !!extra.screenSoftMuted }
                     : {}),
-                ...(typeof flat.screenCapturing === "boolean"
-                    ? { screenCapturing: !!flat.screenCapturing }
-                    : {}),
-
-                ...(typeof flat.forceResync === "boolean"
-                    ? { forceResync: !!flat.forceResync }
-                    : {}),
-                ...(typeof flat.skipResync === "boolean"
-                    ? { skipResync: !!flat.skipResync }
+                ...(typeof extra.screenCapturing === "boolean"
+                    ? { screenCapturing: !!extra.screenCapturing }
                     : {}),
 
-                // ✅ type 기본값
-                type: typeof flat.type === "string" ? flat.type : "MEDIA_STATE",
-                ...(typeof flat.reason === "string"
-                    ? { reason: flat.reason }
+                // ✅ (추가) 디버그/표시용 - 없어도 동작엔 영향 없음
+                ...(typeof extra.forceResync === "boolean"
+                    ? { forceResync: !!extra.forceResync }
+                    : {}),
+
+                ...(typeof extra.type === "string" ? { type: extra.type } : {}),
+                ...(typeof extra.reason === "string"
+                    ? { reason: extra.reason }
                     : {}),
             };
-
-            if (DEBUG_SIGNAL) {
-                console.log("[mediaSignals] SEND", payload);
-            }
 
             try {
                 stompRef.current.send(
@@ -551,7 +445,7 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
                 console.error("[useMeetingMediaSignals] send error", e);
             }
         },
-        [meetingId, currentUserId, display, applyLocalCommit, flattenExtra]
+        [meetingId, currentUserId, display, applyLocalCommit]
     );
 
     // 마지막 상태만 디바운스 전송
@@ -597,12 +491,11 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
             type: "MEDIA_STATE",
             reason: "ws-resync",
             phase: "commit",
-            forceResync: true,
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [connected]);
 
-    // ---------------- incoming apply ----------------
+    // -------- incoming apply --------
     const applyIncomingState = useCallback(
         (payload) => {
             const userId = payload?.userId;
@@ -625,12 +518,8 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
             const hasAudio = typeof payload.audio === "boolean";
             const hasVideo = typeof payload.video === "boolean";
 
-            // ✅ extra 평탄화(중첩 extra.extra 대응)
-            const flat = flattenExtra(payload?.extra);
-
             const extra = {
-                ...(flat || {}),
-
+                ...(payload?.extra || {}),
                 ...(typeof payload.videoDeviceLost === "boolean"
                     ? { videoDeviceLost: payload.videoDeviceLost }
                     : {}),
@@ -643,14 +532,9 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
                 ...(typeof payload.screenCapturing === "boolean"
                     ? { screenCapturing: payload.screenCapturing }
                     : {}),
-
                 ...(typeof payload.forceResync === "boolean"
                     ? { forceResync: payload.forceResync }
                     : {}),
-                ...(typeof payload.skipResync === "boolean"
-                    ? { skipResync: payload.skipResync }
-                    : {}),
-
                 ...(typeof payload.type === "string"
                     ? { type: payload.type }
                     : {}),
@@ -721,7 +605,7 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
                 };
             });
         },
-        [currentUserId, normalizePhase, flattenExtra]
+        [currentUserId, normalizePhase]
     );
 
     const applyIncomingStateTwice = useCallback(
@@ -752,17 +636,15 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
 
                     if (now - item.intent.receivedAt > INTENT_TTL_MS) {
                         const { intent, ...rest } = item;
-
-                        // intent 제거 후 convenience를 다시 계산(= stale 제거 유지)
-                        const cleanedBase = {
+                        const cleaned = {
                             ...rest,
                             intent: undefined,
                             intentUpdatedAt: rest.intentUpdatedAt ?? null,
                         };
 
                         next[uid] = {
-                            ...cleanedBase,
-                            ...buildEffectiveConvenience(cleanedBase),
+                            ...cleaned,
+                            ...buildEffectiveConvenience(cleaned),
                         };
                         changed = true;
                     }
@@ -773,10 +655,9 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
         }, 800);
 
         return () => clearInterval(t);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // ---------------- connect ----------------
+    // -------- connect --------
     useEffect(() => {
         if (!meetingId || currentUserId == null) return;
 
@@ -812,15 +693,6 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
                             return;
                         }
 
-                        if (DEBUG_SIGNAL) {
-                            console.log(
-                                "[mediaSignals] RECV",
-                                payload?.type,
-                                payload?.userId,
-                                payload
-                            );
-                        }
-
                         // snapshot
                         if (
                             payload?.type === "MEDIA_SNAPSHOT" &&
@@ -828,14 +700,14 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
                         ) {
                             for (const st of payload.states) {
                                 applyIncomingStateTwice(st, 120);
-                                scheduleResyncOnce(st);
+                                scheduleResyncTwice(st);
                             }
                             return;
                         }
 
                         // single
                         applyIncomingStateTwice(payload, 120);
-                        scheduleResyncOnce(payload);
+                        scheduleResyncTwice(payload);
                     }
                 );
             },
@@ -855,7 +727,7 @@ export function useMeetingMediaSignals(meetingId, currentUserId, display) {
         safeSetConnected,
         WS_URL,
         applyIncomingStateTwice,
-        scheduleResyncOnce,
+        scheduleResyncTwice,
     ]);
 
     const getMediaState = useCallback(

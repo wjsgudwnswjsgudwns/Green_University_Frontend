@@ -12,7 +12,7 @@ export default function MediaPanel({
     participants = [],
     sortedParticipants = [],
     mode = "focus",
-    focusId = null, // (unused)
+    focusId = null,
     focusedParticipant = null,
     handleParticipantClick,
     onMainClick,
@@ -47,7 +47,7 @@ export default function MediaPanel({
     const permissionDeniedVideo = !!uiMedia?.permissionDeniedVideo;
     const permissionDeniedScreen = !!uiMedia?.permissionDeniedScreen;
 
-    const disableControls = false;
+    const disableControls = !!isConnecting;
     const disableLeave = !isConnected && !isConnecting;
 
     // =========================================================
@@ -72,7 +72,6 @@ export default function MediaPanel({
 
     // =========================================================
     // ✅ Notices (dismissible + auto-hide + fade out)
-    // - 상태 기반(권한/장치 문제)만 자동 표시
     // =========================================================
     const FADE_MS = 220;
     const [notices, setNotices] = useState([]);
@@ -88,21 +87,16 @@ export default function MediaPanel({
                 dedupe = true,
                 allowSameText = false,
                 limit = 2,
-
-                // ✅ 추가: 클릭 등 “무조건 다시 띄우기” 용
-                force = false,
             } = opt;
 
-            // ✅ force면 dedupe 완전 우회 + lastNoticeTextRef 갱신도 안 함(자동 dedupe에 영향 X)
             if (
-                !force &&
                 dedupe &&
                 !allowSameText &&
                 lastNoticeTextRef.current === seed.text
             ) {
                 return;
             }
-            if (!force) lastNoticeTextRef.current = seed.text;
+            lastNoticeTextRef.current = seed.text;
 
             const id = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
             const ttlMs =
@@ -171,9 +165,9 @@ export default function MediaPanel({
     }, []);
 
     // =========================================================
-    // ✅ rawNoticeSeed: 자동 상태 기반 배너(원본)
+    // ✅ noticeSeed: 자동 상태 기반 배너
     // =========================================================
-    const rawNoticeSeed = useMemo(() => {
+    const noticeSeed = useMemo(() => {
         if (permissionDeniedScreen) {
             return {
                 type: "danger",
@@ -206,163 +200,36 @@ export default function MediaPanel({
         videoDeviceLost,
     ]);
 
-    // =========================================================
-    // ✅ 튐 방지: 경고가 N ms 이상 "연속 유지"될 때만 표시
-    // =========================================================
-    const NOTICE_STABLE_MS = 450; // 300~600
-    const rawNoticeRef = useRef(null);
     useEffect(() => {
-        rawNoticeRef.current = rawNoticeSeed;
-    }, [rawNoticeSeed]);
-
-    const pendingNoticeRef = useRef({ text: null, timer: null });
+        if (!noticeSeed?.text) return;
+        pushNotice(noticeSeed);
+    }, [noticeSeed, pushNotice]);
 
     useEffect(() => {
-        const prev = pendingNoticeRef.current;
-        if (prev.timer) {
-            try {
-                clearTimeout(prev.timer);
-            } catch {}
-            prev.timer = null;
-        }
-
-        if (!rawNoticeSeed?.text) {
-            pendingNoticeRef.current.text = null;
-            lastNoticeTextRef.current = ""; // ✅ AUTO는 상태가 사라지면 다시 뜰 수 있게 리셋
-            return;
-        }
-
-        const plannedText = rawNoticeSeed.text;
-        pendingNoticeRef.current.text = plannedText;
-
-        const t = window.setTimeout(() => {
-            const latest = rawNoticeRef.current;
-            if (!latest?.text) return;
-            if (latest.text !== plannedText) return;
-            pushNotice(latest); // ✅ AUTO: 기존 dedupe 유지
-        }, NOTICE_STABLE_MS);
-
-        pendingNoticeRef.current.timer = t;
-
-        return () => {
-            try {
-                clearTimeout(t);
-            } catch {}
-        };
-    }, [rawNoticeSeed, pushNotice]);
-
-    useEffect(() => {
-        return () => {
-            const t = pendingNoticeRef.current?.timer;
-            if (t) {
-                try {
-                    clearTimeout(t);
-                } catch {}
-            }
-            pendingNoticeRef.current.timer = null;
-            pendingNoticeRef.current.text = null;
-        };
-    }, []);
-
-    // =========================================================
-    // ✅ "클릭 텍스트 대신" 시각적 NUDGE (짧은 흔들)
-    // =========================================================
-    const [camNudge, setCamNudge] = useState(false);
-    const [screenNudge, setScreenNudge] = useState(false);
-
-    const nudgeOnce = useCallback((which) => {
-        if (which === "cam") {
-            setCamNudge(true);
-            window.setTimeout(() => setCamNudge(false), 240);
-        }
-        if (which === "screen") {
-            setScreenNudge(true);
-            window.setTimeout(() => setScreenNudge(false), 240);
-        }
-    }, []);
-
-    // =========================================================
-    // ✅ 클릭 시 "현재 상태 경고"를 다시 띄우기 (자동은 1회만 뜨는 구조 보완)
-    // =========================================================
-    const pushCameraStateNotice = useCallback(() => {
-        if (permissionDeniedVideo) {
-            pushNotice(
-                {
-                    type: "danger",
-                    text: "카메라 권한이 거부되어 영상 송출이 불가능합니다. (브라우저 권한 허용 후 다시 시도)",
-                },
-                { force: true }
-            );
-            nudgeOnce("cam");
-            return;
-        }
-        if (noMediaDevices) {
-            pushNotice(
-                {
-                    type: "warn",
-                    text: "미디어 입력 장치가 감지되지 않았습니다.",
-                },
-                { force: true }
-            );
-            nudgeOnce("cam");
-            return;
-        }
-        if (videoDeviceLost) {
-            pushNotice(
-                {
-                    type: "warn",
-                    text: "카메라 신호가 불안정합니다. 장치/점유 상태를 확인해 주세요.",
-                },
-                { force: true }
-            );
-            nudgeOnce("cam");
-        }
-    }, [
-        permissionDeniedVideo,
-        noMediaDevices,
-        videoDeviceLost,
-        pushNotice,
-        nudgeOnce,
-    ]);
-
-    const pushScreenStateNotice = useCallback(() => {
-        if (!permissionDeniedScreen) return;
-        pushNotice(
-            {
-                type: "danger",
-                text: "화면 공유 권한이 차단되어 시작할 수 없습니다. (브라우저/사이트 권한에서 화면 공유 허용 후 다시 시도)",
-            },
-            { force: true }
-        );
-        nudgeOnce("screen");
-    }, [permissionDeniedScreen, pushNotice, nudgeOnce]);
+        if (!noticeSeed) lastNoticeTextRef.current = "";
+    }, [noticeSeed]);
 
     // =========================================================
     // Media Intent Handlers
     // =========================================================
     const handleAudioToggle = useCallback(() => {
+        if (disableControls) return;
         onToggleAudio?.();
     }, [disableControls, onToggleAudio]);
 
     // =========================================================
-    // ✅ Camera Dropdown
+    // ✅ Camera Dropdown (Discord-like grouped control)
     // =========================================================
     const [cameraOptions, setCameraOptions] = useState([]);
     const [camDropdownOpen, setCamDropdownOpen] = useState(false);
-    const camStackRef = useRef(null);
+    const camGroupRef = useRef(null);
 
     const normalizeCameraList = useCallback((list) => {
         const arr = Array.isArray(list) ? list : [];
-        return arr.map((c, idx) => {
-            const raw = typeof c?.deviceId === "string" ? c.deviceId : "";
-            const safeId = raw && raw.trim() ? raw : `default-${idx}`; // ✅ "" 방지
-            const label =
-                typeof c?.label === "string" && c.label.trim()
-                    ? c.label
-                    : `Camera ${idx + 1}`;
-
-            return { deviceId: safeId, label };
-        });
+        return arr.map((c, idx) => ({
+            deviceId: c?.deviceId ?? `unknown-${idx}`,
+            label: c?.label || `Camera ${idx + 1}`,
+        }));
     }, []);
 
     const refreshCameras = useCallback(async () => {
@@ -383,12 +250,15 @@ export default function MediaPanel({
 
     useEffect(() => {
         let alive = true;
+
         const run = async () => {
             const normalized = await refreshCameras();
             if (!alive) return;
             return normalized;
         };
+
         run();
+
         return () => {
             alive = false;
         };
@@ -403,8 +273,8 @@ export default function MediaPanel({
         if (!camDropdownOpen) return;
 
         const onDown = (e) => {
-            if (!camStackRef.current) return;
-            if (!camStackRef.current.contains(e.target)) {
+            if (!camGroupRef.current) return;
+            if (!camGroupRef.current.contains(e.target)) {
                 setCamDropdownOpen(false);
             }
         };
@@ -414,174 +284,194 @@ export default function MediaPanel({
     }, [camDropdownOpen]);
 
     const handleCameraSelect = useCallback(
-        async (deviceId) => {
-            const safeId =
-                typeof deviceId === "string" && deviceId.trim()
-                    ? deviceId
-                    : null; // ✅ 없으면 null로
+        (deviceId) => {
+            if (disableControls) return;
+            if (!deviceId) return;
 
-            if (!safeId) {
-                pushNotice(
-                    {
-                        type: "warn",
-                        text: "카메라 ID를 확인할 수 없어 기본 카메라로 시도합니다.",
-                    },
-                    { force: true } // ✅ CLICK: 매번 뜨게
-                );
-                nudgeOnce("cam");
-            }
-
-            try {
-                await Promise.resolve(onChangeVideoSource?.("camera", safeId));
-            } catch (e) {
-                console.error("[MediaPanel] onChangeVideoSource 실패", e);
+            if (permissionDeniedVideo) {
                 pushNotice(
                     {
                         type: "danger",
-                        text: "카메라 전환에 실패했습니다. (권한/점유/장치 상태 확인)",
+                        text: "카메라 권한이 거부되어 장치 선택이 불가능합니다. (브라우저 권한 허용 후 다시 시도)",
                     },
-                    { force: true } // ✅ CLICK: 매번 뜨게
+                    { ttlMs: 5200, allowSameText: true }
                 );
-                nudgeOnce("cam");
-            } finally {
-                setCamDropdownOpen(false);
+                return;
             }
+
+            onChangeVideoSource?.("camera", deviceId);
+            setCamDropdownOpen(false);
         },
-        [onChangeVideoSource, pushNotice, nudgeOnce]
+        [
+            disableControls,
+            permissionDeniedVideo,
+            onChangeVideoSource,
+            pushNotice,
+        ]
     );
 
     const toggleCamDropdown = useCallback(async () => {
         if (disableControls) return;
 
-        // ✅ 상태가 계속 true면 자동 경고는 1회만 뜨므로, 클릭 때 다시 노출
-        pushCameraStateNotice();
+        if (permissionDeniedVideo) {
+            pushNotice(
+                {
+                    type: "danger",
+                    text: "카메라 권한이 거부되어 장치 선택이 불가능합니다. (브라우저 권한 허용 후 다시 시도)",
+                },
+                { ttlMs: 5200, allowSameText: true }
+            );
+            return;
+        }
 
+        // ✅ 클릭 순간에 다시 확인(확실하게)
         const cams = await refreshCameras();
-
-        if (!cams || cams.length === 0) {
-            if (permissionDeniedVideo) {
-                pushNotice(
-                    {
-                        type: "danger",
-                        text: "카메라 권한이 거부되어 장치 목록을 불러올 수 없습니다. 권한 허용 후 다시 시도하세요.",
-                    },
-                    { force: true } // ✅ CLICK: 매번 뜨게
-                );
-            } else {
-                pushNotice(
-                    {
-                        type: "warn",
-                        text: "사용 가능한 카메라가 없습니다. 장치/점유 상태를 확인해 주세요.",
-                    },
-                    { force: true } // ✅ CLICK: 매번 뜨게
-                );
-            }
-            nudgeOnce("cam");
-            setCamDropdownOpen(false);
+        if (noMediaDevices || cams.length === 0) {
+            pushNotice(
+                {
+                    type: "warn",
+                    text: "카메라 장치가 감지되지 않아 선택할 수 없습니다.",
+                },
+                { ttlMs: 2600, allowSameText: true }
+            );
             return;
         }
 
         setCamDropdownOpen((v) => !v);
     }, [
         disableControls,
-        pushCameraStateNotice,
-        refreshCameras,
         permissionDeniedVideo,
+        refreshCameras,
+        noMediaDevices,
         pushNotice,
-        nudgeOnce,
     ]);
 
+    // ✅ 카메라 토글: OFF는 검증/refresh 없이 즉시 실행
     const handleCameraToggle = useCallback(async () => {
         if (disableControls) return;
 
-        // OFF는 그대로 빠르게
+        // ✅ OFF는 빠르게(여기서 async refreshCameras가 들어가면 꺼질 때도 느려짐)
         if (isTurningOffCamera) {
-            try {
-                await Promise.resolve(onToggleVideo?.());
-            } catch (e) {
-                console.error("[MediaPanel] onToggleVideo(OFF) 실패", e);
-                pushNotice(
-                    {
-                        type: "danger",
-                        text: "카메라 끄기에 실패했습니다. 다시 시도해 주세요.",
-                    },
-                    { force: true } // ✅ CLICK: 매번 뜨게
-                );
-                nudgeOnce("cam");
-            }
+            onToggleVideo?.();
             return;
         }
 
-        // ✅ ON 클릭 때도 현재 상태 경고를 다시 노출(상태가 유지되는 케이스 보완)
-        pushCameraStateNotice();
-
-        // ✅ 여기서부터 ON 시도
-        let cams = [];
-        try {
-            cams = (await refreshCameras()) || [];
-        } catch {
-            cams = [];
-        }
-
-        if (noMediaDevices || cams.length === 0) {
-            pushNotice(
-                {
-                    type: "warn",
-                    text: "사용 가능한 카메라를 찾지 못했습니다. (장치 연결/점유 상태 확인 후 다시 시도)",
-                },
-                { force: true } // ✅ CLICK: 매번 뜨게
-            );
-            nudgeOnce("cam");
-        }
-
+        // ---- ON(켜기)만 안내 ----
+        // ✅ 권한 거부여도 "재시도"는 가능하게: 안내만 띄우고 계속 진행
         if (permissionDeniedVideo) {
             pushNotice(
                 {
                     type: "danger",
-                    text: "카메라 권한이 거부되어 있습니다. 브라우저/사이트 권한에서 허용 후 다시 시도하세요.",
+                    text: "카메라 권한이 거부된 상태입니다. 브라우저 권한을 허용한 뒤 다시 시도하세요. (지금은 재시도 요청을 보냅니다)",
                 },
-                { force: true } // ✅ CLICK: 매번 뜨게
+                { ttlMs: 5200, allowSameText: true }
             );
-            nudgeOnce("cam");
+            // ✅ return 하지 않음
         }
 
-        try {
-            await Promise.resolve(onToggleVideo?.());
-        } catch (e) {
-            console.error("[MediaPanel] onToggleVideo(ON) 실패", e);
+        // ✅ 켤 때만 장치 확인
+        const cams = await refreshCameras();
+        if (noMediaDevices || cams.length === 0) {
             pushNotice(
                 {
-                    type: "danger",
-                    text: "카메라 켜기에 실패했습니다. (권한/점유/장치 상태 확인 후 다시 시도)",
+                    type: "warn",
+                    text: "카메라 장치가 감지되지 않아 켤 수 없습니다.",
                 },
-                { force: true } // ✅ CLICK: 매번 뜨게
+                { ttlMs: 2800, allowSameText: true }
             );
-            nudgeOnce("cam");
+            return;
         }
+
+        onToggleVideo?.();
     }, [
         disableControls,
         isTurningOffCamera,
-        pushCameraStateNotice,
-        noMediaDevices,
         permissionDeniedVideo,
         refreshCameras,
+        noMediaDevices,
         onToggleVideo,
         pushNotice,
-        nudgeOnce,
     ]);
 
-    // ✅ 화면공유 토글: 클릭 때도 "현재 상태 경고"를 force로 다시 노출
+    // =========================================================
+    // ✅ Screen Share: in-flight lock (중복 호출 방지)
+    // - permissionDeniedScreen이 "오탐/잔상"일 수 있어서: 안내는 하되, 시도는 막지 않음
+    // =========================================================
+    const screenBusyRef = useRef(false);
+    const [screenBusy, setScreenBusy] = useState(false);
+
+    const runScreenOp = useCallback(async (fn) => {
+        if (screenBusyRef.current) return;
+        screenBusyRef.current = true;
+        setScreenBusy(true);
+
+        try {
+            const ret = fn?.();
+            if (ret && typeof ret.then === "function") await ret;
+        } finally {
+            screenBusyRef.current = false;
+            setScreenBusy(false);
+        }
+    }, []);
+
+    // ✅ 화면공유 토글: OFF는 “권한 경고/검증” 없이 바로 실행
     const handleScreenToggle = useCallback(() => {
-        pushScreenStateNotice();
-        onToggleScreenShare?.();
-    }, [pushScreenStateNotice, onToggleScreenShare]);
+        if (disableControls) return;
+
+        // ✅ OFF(종료)는 바로
+        if (isTurningOffScreen) {
+            runScreenOp(() => onToggleScreenShare?.());
+            return;
+        }
+
+        // ✅ ON(시작)일 때만 안내(시도는 막지 않음)
+        if (permissionDeniedScreen) {
+            pushNotice(
+                {
+                    type: "danger",
+                    text: "화면 공유 권한이 차단되어 시작이 안 될 수 있습니다. (브라우저/사이트 권한에서 화면 공유 허용 후 다시 시도)",
+                },
+                { ttlMs: 5200, allowSameText: true }
+            );
+        }
+
+        runScreenOp(() => onToggleScreenShare?.());
+    }, [
+        disableControls,
+        isTurningOffScreen,
+        permissionDeniedScreen,
+        onToggleScreenShare,
+        pushNotice,
+        runScreenOp,
+    ]);
 
     const handleScreenRestart = useCallback(() => {
-        pushScreenStateNotice();
-        if (typeof onRestartScreenShare === "function")
-            return onRestartScreenShare();
-        return onToggleScreenShare?.();
-    }, [pushScreenStateNotice, onRestartScreenShare, onToggleScreenShare]);
+        if (disableControls) return;
+
+        // ✅ 재선택은 본질적으로 ON 흐름이라 안내 유지
+        if (permissionDeniedScreen) {
+            pushNotice(
+                {
+                    type: "danger",
+                    text: "화면 공유 권한이 차단되어 재선택이 안 될 수 있습니다. (브라우저/사이트 권한에서 화면 공유 허용 후 다시 시도)",
+                },
+                { ttlMs: 5200, allowSameText: true }
+            );
+        }
+
+        runScreenOp(() => {
+            if (typeof onRestartScreenShare === "function")
+                return onRestartScreenShare();
+            return onToggleScreenShare?.();
+        });
+    }, [
+        disableControls,
+        permissionDeniedScreen,
+        onRestartScreenShare,
+        onToggleScreenShare,
+        pushNotice,
+        runScreenOp,
+    ]);
 
     // =========================================================
     // Autoplay Gate
@@ -679,8 +569,8 @@ export default function MediaPanel({
         return "focus";
     }, [mode, isSolo]);
 
-    // ✅ 화면공유 버튼은 UI 비활성화하지 않음
-    const screenControlsDisabled = disableControls;
+    // ✅ 화면공유 버튼은 작업중엔 잠시 비활성(중복 클릭 방지)
+    const screenControlsDisabled = disableControls || screenBusy;
 
     return (
         <div className="meeting-video" data-count={gridCount}>
@@ -692,6 +582,9 @@ export default function MediaPanel({
             )}
 
             <div className="meeting-video__main">
+                {/* =========================
+                    Stage
+                   ========================= */}
                 {renderMode === "focus" && (
                     <div className="meeting-video__stage meeting-video__stage--strip">
                         {topStatus && (
@@ -727,6 +620,7 @@ export default function MediaPanel({
                                             className="meeting-video__banner-close"
                                             onClick={() => dismissNotice(n.id)}
                                             aria-label="닫기"
+                                            title="닫기"
                                         >
                                             ✕
                                         </button>
@@ -765,7 +659,7 @@ export default function MediaPanel({
                                     type="button"
                                     className="meeting-video__thumb-nav meeting-video__thumb-nav--prev"
                                     onClick={() => scrollThumbsLoop(-1)}
-                                    aria-label="이전"
+                                    title="이전"
                                 >
                                     ‹
                                 </button>
@@ -804,7 +698,7 @@ export default function MediaPanel({
                                     type="button"
                                     className="meeting-video__thumb-nav meeting-video__thumb-nav--next"
                                     onClick={() => scrollThumbsLoop(1)}
-                                    aria-label="다음"
+                                    title="다음"
                                 >
                                     ›
                                 </button>
@@ -813,6 +707,7 @@ export default function MediaPanel({
                     </div>
                 )}
 
+                {/* ✅ SOLO */}
                 {renderMode === "solo" && (
                     <div className="meeting-video__stage meeting-video__stage--solo">
                         {topStatus && (
@@ -848,6 +743,7 @@ export default function MediaPanel({
                                             className="meeting-video__banner-close"
                                             onClick={() => dismissNotice(n.id)}
                                             aria-label="닫기"
+                                            title="닫기"
                                         >
                                             ✕
                                         </button>
@@ -917,6 +813,7 @@ export default function MediaPanel({
                                             className="meeting-video__banner-close"
                                             onClick={() => dismissNotice(n.id)}
                                             aria-label="닫기"
+                                            title="닫기"
                                         >
                                             ✕
                                         </button>
@@ -957,42 +854,43 @@ export default function MediaPanel({
                         uiMedia?.audio ? "" : "meeting-video__control-btn--off"
                     }`}
                     onClick={handleAudioToggle}
-                    aria-label="마이크"
+                    disabled={disableControls}
+                    title="마이크"
                 >
                     {uiMedia?.audio ? "🎙" : "🔇"}
                 </button>
 
-                {/* 🎥 카메라 (원형 + 우하단 드롭) */}
+                {/* 🎥 카메라 + 드롭 */}
                 <div
                     className={[
-                        "meeting-video__control-stack",
+                        "meeting-video__control-group",
                         camDropdownOpen && "open",
+                        // ✅ 권한 거부여도 "카메라 버튼"은 재시도 가능해야 해서 그룹 전체 disabled는 막지 않음
                         disableControls && "disabled",
-                        (permissionDeniedVideo || noMediaDevices) &&
-                            "is-blocked",
-                        camNudge && "nudge",
                     ]
                         .filter(Boolean)
                         .join(" ")}
-                    ref={camStackRef}
+                    ref={camGroupRef}
                 >
                     <button
                         type="button"
-                        className={`meeting-video__control-btn ${
+                        className={`meeting-video__control-btn meeting-video__control-btn--in-group ${
                             isCameraSending
                                 ? ""
                                 : "meeting-video__control-btn--off"
                         }`}
                         onClick={handleCameraToggle}
-                        aria-label="카메라"
+                        disabled={disableControls}
+                        title="카메라"
                     >
                         🎥
                     </button>
 
                     <button
                         type="button"
-                        className="meeting-video__control-drop"
-                        aria-label="카메라 선택"
+                        className="meeting-video__control-btn meeting-video__control-btn--in-group meeting-video__control-btn--sub"
+                        disabled={disableControls}
+                        title="카메라 선택"
                         onMouseDown={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -1002,7 +900,9 @@ export default function MediaPanel({
                             e.stopPropagation();
                             toggleCamDropdown();
                         }}
-                    />
+                    >
+                        ▾
+                    </button>
 
                     <div
                         className={`meeting-video__dropdown ${
@@ -1028,6 +928,7 @@ export default function MediaPanel({
                                         e.stopPropagation();
                                         handleCameraSelect(c.deviceId);
                                     }}
+                                    disabled={disableControls}
                                 >
                                     📷 {c.label}
                                 </button>
@@ -1036,34 +937,41 @@ export default function MediaPanel({
                     </div>
                 </div>
 
-                {/* 🖥 화면공유 (원형 + 우하단 드롭) */}
+                {/* 🖥 화면공유 */}
                 <div
                     className={[
-                        "meeting-video__control-stack",
-                        // screenControlsDisabled && "disabled",
-                        permissionDeniedScreen && "is-blocked",
-                        screenNudge && "nudge",
+                        "meeting-video__control-group",
+                        (screenControlsDisabled || permissionDeniedScreen) &&
+                            "disabled",
                     ]
                         .filter(Boolean)
                         .join(" ")}
                 >
                     <button
                         type="button"
-                        className={`meeting-video__control-btn ${
+                        className={`meeting-video__control-btn meeting-video__control-btn--in-group ${
                             isScreenSending
                                 ? ""
                                 : "meeting-video__control-btn--off"
                         }`}
                         onClick={handleScreenToggle}
-                        aria-label="화면 공유"
+                        disabled={screenControlsDisabled}
+                        title={
+                            screenBusy
+                                ? "화면 공유 처리중..."
+                                : isScreenSending
+                                ? "화면 공유 종료"
+                                : "화면 공유"
+                        }
                     >
-                        🖥️
+                        🖥
                     </button>
 
                     <button
                         type="button"
-                        className="meeting-video__control-drop"
-                        aria-label="화면 다시 선택"
+                        className="meeting-video__control-btn meeting-video__control-btn--in-group meeting-video__control-btn--sub"
+                        disabled={screenControlsDisabled}
+                        title={screenBusy ? "처리중..." : "화면 다시 선택"}
                         onMouseDown={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -1071,10 +979,11 @@ export default function MediaPanel({
                         onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-
                             handleScreenRestart();
                         }}
-                    />
+                    >
+                        ▾
+                    </button>
                 </div>
 
                 {/* ⏹ 나가기 */}
@@ -1086,8 +995,8 @@ export default function MediaPanel({
                         e.stopPropagation();
                         onLeave?.();
                     }}
-                    aria-label="나가기"
                     disabled={disableLeave}
+                    title="나가기"
                 >
                     ⏹
                 </button>
@@ -1177,6 +1086,8 @@ function AutoplayGate({ onConfirm, onClose }) {
 
 // =========================================================
 // VideoTile (patched - remote screen OFF 즉시 반영)
+// - signals는 "표시"도 담당해야 함: screenCapturing/videoSource 기반으로 videoOn 계산
+// - attach/play는 기존처럼 stream+track 기반(최소 attach)
 // =========================================================
 function VideoTile({
     participant,
@@ -1201,8 +1112,7 @@ function VideoTile({
     const videoRef = useRef(null);
     const audioRef = useRef(null);
 
-    const [trackVersion, setTrackVersion] = useState(0);
-
+    // ✅ 트랙 이벤트 폭주 방지용(짧은 디바운스)
     const bumpTimerRef = useRef(null);
     const bumpTrackVersion = useCallback(() => {
         if (bumpTimerRef.current) return;
@@ -1211,6 +1121,7 @@ function VideoTile({
             setTrackVersion((v) => v + 1);
         }, 60);
     }, []);
+    const [trackVersion, setTrackVersion] = useState(0);
 
     const getTracks = useCallback((stream, kind) => {
         if (!stream) return [];
@@ -1232,6 +1143,8 @@ function VideoTile({
         [participant?.stream, getTracks]
     );
 
+    // ✅ MediaStream 내부 트랙 변화를 감지해서 재-attach 트리거
+    // - addtrack/removetrack + ended만(⚠ mute/unmute는 폭주 원인이라 제외)
     useEffect(() => {
         const s = participant?.stream;
         if (!s) return;
@@ -1244,6 +1157,7 @@ function VideoTile({
             s.addEventListener?.("removetrack", onRemove);
         } catch {}
 
+        // 현재 트랙 ended 감지
         const all = [];
         try {
             const vts = s.getVideoTracks?.() || [];
@@ -1293,9 +1207,11 @@ function VideoTile({
 
     const remoteDeviceLost = !!mediaState?.videoDeviceLost;
 
+    // ✅ remote track 존재 여부(attach 판단은 이것만)
     const hasRemoteVideoTrack = !participant?.isMe && hasAnyTrack("video");
     const hasRemoteAudioTrack = !participant?.isMe && hasAnyTrack("audio");
 
+    // ✅ signals 기본 플래그
     const remoteVideoFlag =
         !participant?.isMe && isKnown && typeof mediaState?.video === "boolean"
             ? mediaState.video
@@ -1306,6 +1222,7 @@ function VideoTile({
             ? mediaState.audio
             : undefined;
 
+    // ✅ (중요) remote screen 상태를 UI에 반영
     const remoteVideoSource =
         !participant?.isMe && isKnown ? mediaState?.videoSource : undefined;
 
@@ -1315,9 +1232,11 @@ function VideoTile({
     const remoteScreenSoftMuted =
         !participant?.isMe && isKnown ? mediaState?.screenSoftMuted : undefined;
 
+    // remote가 screen 모드인지(둘 중 하나라도 힌트가 있으면 screen으로 간주)
     const remoteIsScreen =
         remoteVideoSource === "screen" || remoteScreenCapturing === true;
 
+    // remote screen “송출중” 판단(OFF를 즉시 placeholder로 반영)
     const remoteScreenSending =
         remoteIsScreen &&
         (remoteVideoFlag ?? true) &&
@@ -1325,6 +1244,7 @@ function VideoTile({
         remoteScreenCapturing !== false &&
         !remoteDeviceLost;
 
+    // ✅ 표시(뱃지/오버레이)용 on/off
     const videoOn = participant?.isMe
         ? !isLocalScreenSoftMuted &&
           videoEnabled &&
@@ -1340,10 +1260,12 @@ function VideoTile({
         ? audioEnabled && !noMediaDevices
         : remoteAudioFlag ?? hasRemoteAudioTrack;
 
+    // ✅ 실제 attach/유지 기준은 track로만
     const renderVideoTag = participant?.isMe
         ? !!participant?.stream && hasAnyTrack("video")
         : !!participant?.stream && hasRemoteVideoTrack;
 
+    // ✅ 화면 "보이기"만 signals로 제어(attach 유지)
     const showVideoVisual = renderVideoTag && videoOn;
 
     const canHearRemote =
@@ -1381,6 +1303,9 @@ function VideoTile({
         if (!participant?.isMe) tryPlayEl(audioRef.current);
     }, [tryPlayEl, participant?.isMe]);
 
+    // =========================================================
+    // ✅ attach 최소화를 위한 signature
+    // =========================================================
     const getTrackSig = useCallback((stream, kind) => {
         try {
             const list =
@@ -1398,6 +1323,9 @@ function VideoTile({
     const videoAttachSigRef = useRef({ stream: null, sig: null });
     const audioAttachSigRef = useRef({ stream: null, sig: null });
 
+    // =========================================================
+    // ✅ VIDEO attach
+    // =========================================================
     useEffect(() => {
         const el = videoRef.current;
         if (!el) return;
@@ -1458,6 +1386,9 @@ function VideoTile({
         tryPlayEl,
     ]);
 
+    // =========================================================
+    // ✅ AUDIO attach (remote only)
+    // =========================================================
     useEffect(() => {
         const el = audioRef.current;
         if (!el) return;
@@ -1523,6 +1454,7 @@ function VideoTile({
         tryPlayEl,
     ]);
 
+    // ✅ remote audio mute만 별도로 즉시 반영(재-attach X)
     useEffect(() => {
         const el = audioRef.current;
         if (!el) return;
@@ -1532,6 +1464,7 @@ function VideoTile({
         } catch {}
     }, [audioOn, participant?.isMe]);
 
+    // ✅ 사용자 제스처로 "재생 시작" 했을 때만 일괄 play 재시도
     useEffect(() => {
         if (!participant?.stream) return;
         tryPlay();
@@ -1615,7 +1548,7 @@ function VideoTile({
                 {!audioOn && <span className="meeting-video__badge">🔇</span>}
                 {!videoOn && <span className="meeting-video__badge">📷✕</span>}
                 {!participant?.isMe && remoteIsScreen && (
-                    <span className="meeting-video__badge">🖥️</span>
+                    <span className="meeting-video__badge">🖥</span>
                 )}
                 {participant.isHost && (
                     <span className="meeting-video__badge meeting-video__badge--host">
