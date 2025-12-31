@@ -37,6 +37,66 @@ function safeTimeMs(dt) {
     return Number.isFinite(t) ? t : null;
 }
 
+/**
+ * ✅ “참가 가능 시간창” 계산
+ * - 시작 10분 전 ~ 종료 10분 후
+ * - endAt 없으면 start+1시간 가정
+ */
+function computeJoinPolicy(info, nowMs, fallbackLabel) {
+    if (!info) return { canJoin: false, inWindow: false, hint: "" };
+
+    const status = info.status;
+
+    // 종료/취소는 무조건 불가
+    if (status === "ENDED")
+        return {
+            canJoin: false,
+            inWindow: false,
+            hint: "이미 종료된 회의입니다.",
+        };
+    if (status === "CANCELED")
+        return { canJoin: false, inWindow: false, hint: "취소된 회의입니다." };
+
+    // 진행 중이면 무조건 가능
+    if (status === "IN_PROGRESS")
+        return { canJoin: true, inWindow: true, hint: "" };
+
+    // 예약(또는 기타) => 시간창 기준
+    const start = safeTimeMs(info.startAt);
+    if (!start) {
+        return {
+            canJoin: false,
+            inWindow: false,
+            hint: "시작 시간이 없어 참가 가능 여부를 판단할 수 없습니다.",
+        };
+    }
+
+    const endRaw = safeTimeMs(info.endAt);
+    const assumedEnd = endRaw ?? start + 60 * 60 * 1000;
+    const end = assumedEnd < start ? start + 60 * 60 * 1000 : assumedEnd;
+
+    const earlyMs = 10 * 60 * 1000; // 시작 10분 전부터
+    const lateMs = 10 * 60 * 1000; // 종료 10분 후까지
+    const windowStart = start - earlyMs;
+    const windowEnd = end + lateMs;
+
+    const inWindow = nowMs >= windowStart && nowMs <= windowEnd;
+    if (inWindow) return { canJoin: true, inWindow: true, hint: "" };
+
+    if (nowMs < windowStart) {
+        return {
+            canJoin: false,
+            inWindow: false,
+            hint: "시작 10분 전부터 참가할 수 있습니다.",
+        };
+    }
+    return {
+        canJoin: false,
+        inWindow: false,
+        hint: "참가 가능한 시간이 지났습니다. (종료 후)",
+    };
+}
+
 export default function MeetingDetailPage() {
     const { meetingId } = useParams();
     const navigate = useNavigate();
@@ -44,6 +104,13 @@ export default function MeetingDetailPage() {
     const [info, setInfo] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+
+    // ✅ 시간에 따라 칩/버튼 상태 자동 갱신
+    const [nowMs, setNowMs] = useState(() => Date.now());
+    useEffect(() => {
+        const id = setInterval(() => setNowMs(Date.now()), 15000); // 15초
+        return () => clearInterval(id);
+    }, []);
 
     useEffect(() => {
         let mounted = true;
@@ -75,84 +142,19 @@ export default function MeetingDetailPage() {
         };
     }, [meetingId]);
 
+    // ✅ 배지는 “서버 status 그대로”
     const statusUI = useMemo(() => mapStatus(info?.status), [info?.status]);
 
-    // ============================================
-    // 참가 정책 (최종)
-    // - IN_PROGRESS: 언제나 참가 가능
-    // - SCHEDULED(예약): 시간 창 안이면 참가 가능
-    // - ENDED/CANCELED: 참가 불가
-    // ============================================
+    // ✅ 참가 가능 여부는 “시간창(시작-10m ~ 종료+10m)” 기준
     const joinPolicy = useMemo(() => {
-        if (!info) {
-            return {
-                canJoin: false,
-                hint: "",
-            };
-        }
-
-        const status = info.status;
-
-        // 종료/취소
-        if (status === "ENDED") {
-            return { canJoin: false, hint: "이미 종료된 회의입니다." };
-        }
-        if (status === "CANCELED") {
-            return { canJoin: false, hint: "취소된 회의입니다." };
-        }
-
-        // 진행중이면 항상 가능
-        if (status === "IN_PROGRESS") {
-            return { canJoin: true, hint: "" };
-        }
-
-        // 예약이면 시간창 기준
-        if (status === "SCHEDULED") {
-            const now = Date.now();
-            const start = safeTimeMs(info.startAt);
-            const end = safeTimeMs(info.endAt);
-
-            if (!start) {
-                return {
-                    canJoin: false,
-                    hint: "시작 시간이 없어 참가 가능 여부를 판단할 수 없습니다.",
-                };
-            }
-
-            const earlyMs = 10 * 60 * 1000; // 시작 10분 전부터
-            const lateMs = 10 * 60 * 1000; // 종료 10분 후까지
-
-            const windowStart = start - earlyMs;
-
-            // end가 없으면 기본 1시간으로 가정 (원하면 서버에서 endAt 항상 내려주게 권장)
-            const assumedEnd = end ?? start + 60 * 60 * 1000;
-            const windowEnd = assumedEnd + lateMs;
-
-            const canJoin = now >= windowStart && now <= windowEnd;
-
-            if (canJoin) return { canJoin: true, hint: "" };
-
-            // 힌트: 아직 시작 전 / 이미 종료 후
-            if (now < windowStart) {
-                return {
-                    canJoin: false,
-                    hint: "아직 참가 가능한 시간이 아닙니다. (시작 전)",
-                };
-            }
-            return {
-                canJoin: false,
-                hint: "참가 가능한 시간이 지났습니다. (종료 후)",
-            };
-        }
-
-        // 그 외 상태는 보수적으로 차단
-        return {
-            canJoin: false,
-            hint: `현재 상태(${statusUI.label})에서는 참가할 수 없습니다.`,
-        };
-    }, [info, statusUI.label]);
+        return computeJoinPolicy(info, nowMs, statusUI.label);
+    }, [info, nowMs, statusUI.label]);
 
     const canJoin = joinPolicy.canJoin;
+
+    // ✅ “예정”일 때만 ‘입장 가능’ 칩을 보이게(진행 중이면 배지로 충분)
+    const showJoinableChip =
+        !!info && info.status === "SCHEDULED" && joinPolicy.inWindow;
 
     const handleCopy = async (text) => {
         try {
@@ -249,11 +251,20 @@ export default function MeetingDetailPage() {
                             </div>
                         </div>
 
-                        <span
-                            className={`mdp-badge mdp-badge--${statusUI.tone}`}
-                        >
-                            {statusUI.label}
-                        </span>
+                        {/* ✅ 오른쪽: 배지는 서버 status 그대로 + 시간창이면 “입장 가능” 칩 */}
+                        <div className="mdp-head__right">
+                            <span
+                                className={`mdp-badge mdp-badge--${statusUI.tone}`}
+                            >
+                                {statusUI.label}
+                            </span>
+
+                            {showJoinableChip && (
+                                <span className="mdp-chip mdp-chip--joinable">
+                                    입장 가능
+                                </span>
+                            )}
+                        </div>
                     </div>
 
                     <div className="mdp-section">

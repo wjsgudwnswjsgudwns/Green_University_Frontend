@@ -21,19 +21,19 @@ import InviteParticipantsModal from "../components/InviteParticipantsModal";
 import MediaPanel from "../components/MediaPanel";
 
 function MeetingJoinPage() {
-    // =========================================================
-    // 1) Router / Refs
-    // =========================================================
     const { meetingId } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
 
     const terminatedRef = useRef(false);
     const leaveRoomRef = useRef(null);
-    const manualReconnectLockRef = useRef(false);
+
+    // ✅ resync용: 마지막 join 인자 + joinRoom 함수 참조
+    const joinRoomRef = useRef(null);
+    const lastJoinArgsRef = useRef(null);
 
     // =========================================================
-    // 2) UI State
+    // UI State
     // =========================================================
     const [error, setError] = useState("");
     const [scriptsLoaded, setScriptsLoaded] = useState(false);
@@ -50,11 +50,23 @@ function MeetingJoinPage() {
 
     const [rosterParticipants, setRosterParticipants] = useState([]);
 
-    // ✅ MediaPanel에 넘길 playNonce(오토플레이 게이트 트리거)
+    // ✅ MediaPanel autoplay gate
     const [playNonce, setPlayNonce] = useState(0);
 
     // =========================================================
-    // 3) Navigation / joinInfo State
+    // UI click-lock
+    // =========================================================
+    const uiLockUntilRef = useRef(0);
+    const lockUi = useCallback((ms = 1200) => {
+        uiLockUntilRef.current = Date.now() + ms;
+    }, []);
+    const isUiLocked = useCallback(
+        () => Date.now() < uiLockUntilRef.current,
+        []
+    );
+
+    // =========================================================
+    // joinInfo
     // =========================================================
     const getNavType = () => {
         const nav = performance.getEntriesByType?.("navigation")?.[0];
@@ -78,7 +90,7 @@ function MeetingJoinPage() {
     const currentUserId = joinInfo?.userId || null;
 
     // =========================================================
-    // 4) Presence / Signals Hooks + Bridge Refs
+    // Presence / Signals
     // =========================================================
     const readyForRealtime = !!meetingId && !!joinInfo && !!currentUserId;
     const readyForPresence = readyForRealtime && !!sessionKey;
@@ -118,11 +130,13 @@ function MeetingJoinPage() {
     useEffect(() => {
         sendMediaStateNowRef.current = sendMediaStateNow;
     }, [sendMediaStateNow]);
+
     useEffect(() => {
-        sendMediaStateRef.current = sendMediaState; // ✅ 추가
+        sendMediaStateRef.current = sendMediaState;
     }, [sendMediaState]);
+
     // =========================================================
-    // 5) Presence 안정화 (lastPresenceRef)
+    // Presence 안정화
     // =========================================================
     const lastPresenceRef = useRef([]);
     useEffect(() => {
@@ -135,7 +149,7 @@ function MeetingJoinPage() {
     }, [presenceParticipants]);
 
     // =========================================================
-    // 6) Participants ViewModel (parse/sort/merge)
+    // Participants ViewModel
     // =========================================================
     function parseDisplay(display) {
         const text = String(display || "");
@@ -163,7 +177,6 @@ function MeetingJoinPage() {
     }
 
     const participants = useMemo(() => {
-        // 1) remote map 먼저
         const remoteInfoByUserId = new Map();
         (remoteParticipants || []).forEach((p) => {
             const parsed = parseDisplay(p.display);
@@ -175,7 +188,6 @@ function MeetingJoinPage() {
             }
         });
 
-        // 2) effectivePresence
         const effectivePresence = (() => {
             if (!presenceConnected) return lastPresenceRef.current || [];
             return Array.isArray(presenceParticipants)
@@ -183,7 +195,6 @@ function MeetingJoinPage() {
                 : [];
         })();
 
-        // ✅ 공통: 내 정보는 항상 "me"로 고정
         const myUserIdNum =
             joinInfo?.userId != null && joinInfo.userId !== ""
                 ? Number(joinInfo.userId)
@@ -198,7 +209,6 @@ function MeetingJoinPage() {
         const myIsHost =
             !!joinInfo?.isHost || joinInfo?.userId === joinInfo?.hostUserId;
 
-        // ✅ presence가 비었어도 me 타일 유지
         if (!effectivePresence || effectivePresence.length === 0) {
             if (!myUserIdNum) return [];
             return [
@@ -243,7 +253,6 @@ function MeetingJoinPage() {
             };
         });
 
-        // ✅ 내 타일 강제 유지(순간 누락 방어)
         const hasMeAlready = mapped.some((x) => x.id === "me");
         if (!hasMeAlready && myUserIdNum != null) {
             mapped.unshift({
@@ -272,21 +281,18 @@ function MeetingJoinPage() {
     );
 
     // =========================================================
-    // 7) Layout Hook
-    // - focus 기본 + 참가자 수 변동으로 mode가 강제 변경되지 않도록 hook도 그 정책으로 맞춰야 함
+    // Layout Hook
     // =========================================================
     const {
         mode,
         focusId,
         focusedParticipant,
-        switchToGrid,
-        switchToFocus,
         handleMainClick,
         handleParticipantClick,
     } = useMeetingLayout(participants);
 
     // =========================================================
-    // 8) Terminate / Leave handlers
+    // Terminate / Leave
     // =========================================================
     useEffect(() => {
         terminatedRef.current = terminated;
@@ -328,7 +334,7 @@ function MeetingJoinPage() {
     }, [hasJoined, meetingId, navigate]);
 
     // =========================================================
-    // 8-1) Roster fetch (joined/invited 목록)
+    // Roster fetch
     // =========================================================
     const fetchRosterParticipants = useCallback(async () => {
         if (!meetingId) return;
@@ -384,7 +390,7 @@ function MeetingJoinPage() {
     }, [rosterParticipants, presenceParticipants]);
 
     // =========================================================
-    // 9) Janus Hook Binding + Controls
+    // Janus Hook
     // =========================================================
     const {
         isSupported,
@@ -399,10 +405,14 @@ function MeetingJoinPage() {
 
         toggleAudio,
         toggleVideo,
+
+        // ✅ 토글(soft on/off)은 이걸 사용
         toggleScreenShare,
+        // ✅ 드롭(재선택)은 기존 로직 유지 (아래 requestHardSwitch 경로)
+        restartScreenShare,
+
         getVideoInputs,
         setVideoSource,
-        restartScreenShare,
     } = useJanusLocalOnly(undefined, {
         onLocalStream: (stream) => {
             if (!stream) return setLocalStream(null);
@@ -416,10 +426,11 @@ function MeetingJoinPage() {
         onRemoteParticipantsChanged: (janusRemotes) =>
             setRemoteParticipants(janusRemotes || []),
     });
-    const onChangeVideoSource = useCallback(
-        (type, deviceId) => setVideoSource?.(type, deviceId),
-        [setVideoSource]
-    );
+
+    useEffect(() => {
+        joinRoomRef.current = joinRoom;
+    }, [joinRoom]);
+
     useEffect(() => {
         leaveRoomRef.current = leaveRoom;
     }, [leaveRoom]);
@@ -429,10 +440,12 @@ function MeetingJoinPage() {
         return {
             audio: !!m.audio,
             video: !!m.video,
-            videoDeviceLost: !!m.videoDeviceLost,
-            noMediaDevices: !!m.noMediaDevices,
+
             liveAudio: !!m.liveAudio,
             liveVideo: !!m.liveVideo,
+
+            videoDeviceLost: !!m.videoDeviceLost,
+            noMediaDevices: !!m.noMediaDevices,
 
             videoSource: m.videoSource || "camera",
             cameraDeviceId: m.cameraDeviceId ?? null,
@@ -445,119 +458,362 @@ function MeetingJoinPage() {
         };
     }, [localMedia]);
 
-    // const handleChangeVideoSource = useCallback(
-    //     (nextType, deviceId = null) => {
-    //         // nextType: "camera" | "screen"
-    //         // deviceId: 카메라 선택시만 사용
-    //         setVideoSource?.(nextType, deviceId);
-    //     },
-    //     [setVideoSource]
-    // );
-    const onToggleAudioUiFirst = useCallback(() => {
-        toggleAudio();
-    }, [toggleAudio]);
-
-    const onToggleVideoUiFirst = useCallback(() => {
-        toggleVideo();
-    }, [toggleVideo]);
-
-    const onToggleScreenShareWithSignal = useCallback(() => {
-        const isCurrentlyScreen =
-            uiMedia.videoSource === "screen" &&
-            uiMedia.video === true &&
-            uiMedia.screenSoftMuted !== true;
-
-        // 👉 토글 후 의도
-        const willBeScreen = !isCurrentlyScreen;
-
-        toggleScreenShare();
-
-        sendMediaStateNowRef.current?.(!!uiMedia.audio, willBeScreen, {
-            videoSource: willBeScreen ? "screen" : "camera",
-            screenCapturing: willBeScreen,
-            screenSoftMuted: false,
-            type: "MEDIA_STATE",
-            reason: willBeScreen ? "screen-on" : "screen-off",
-        });
-    }, [toggleScreenShare, uiMedia]);
-    const onRestartScreenShareWithSignal = useCallback(() => {
-        // 1️⃣ 먼저 OFF 알림
-        sendMediaStateNowRef.current?.(!!uiMedia.audio, false, {
-            videoSource: "camera",
-            screenCapturing: false,
-            screenSoftMuted: false,
-            type: "MEDIA_STATE",
-            reason: "screen-restart-off",
-        });
-
-        // 2️⃣ 실제 Janus 재선택 (세션 재생성)
-        restartScreenShare();
-    }, [restartScreenShare, uiMedia]);
-
     // =========================================================
-    // 10) Signals Send Triggers (simple + stable)
+    // Signals helper
     // =========================================================
-
-    // ✅ 훅이 지원하는 필드만 보냄
-    const buildSignalExtra = useCallback((m, reason) => {
+    const buildSignalExtra = useCallback((m, reason, phase, extra2 = {}) => {
         const x = m || {};
         return {
+            type: "MEDIA_STATE",
+            phase,
             videoDeviceLost: !!x.videoDeviceLost,
             videoSource: x.videoSource || "camera",
             screenSoftMuted: !!x.screenSoftMuted,
             screenCapturing: !!x.screenCapturing,
             reason,
-            type: "MEDIA_STATE",
+            ...extra2,
         };
     }, []);
 
-    const lastSentKeyRef = useRef("");
+    const sendIntent = useCallback(
+        (nextAudio, nextVideo, predictedUiMedia, reason = "intent") => {
+            if (!joinInfo) return;
+            if (!mediaSignalConnectedRef.current) return;
+            const fn = sendMediaStateNowRef.current;
+            if (!fn) return;
+
+            const extra = buildSignalExtra(predictedUiMedia, reason, "intent");
+            fn(!!nextAudio, !!nextVideo, extra);
+        },
+        [joinInfo, buildSignalExtra]
+    );
+
+    // =========================================================
+    // ✅ 드롭/모드전환용 하드 리조인 로직 (그대로 유지)
+    // =========================================================
+    const pendingAfterJoinRef = useRef(null); // { source, deviceId, ensureVideo, reason }
+    const rejoinSeqRef = useRef(0);
+
+    const hardRejoin = useCallback(
+        (reason = "hard-rejoin") => {
+            if (terminatedRef.current) return;
+            const args = lastJoinArgsRef.current;
+            if (!args) return;
+
+            const seq = ++rejoinSeqRef.current;
+
+            lockUi(1800);
+            setPlayNonce((n) => n + 1);
+
+            try {
+                leaveRoomRef.current?.();
+            } catch {}
+
+            window.setTimeout(() => {
+                if (terminatedRef.current) return;
+                if (seq !== rejoinSeqRef.current) return;
+                joinRoomRef.current?.(args);
+            }, 250);
+        },
+        [lockUi]
+    );
+
+    const requestHardSwitch = useCallback(
+        (source, deviceId, reason) => {
+            if (isUiLocked()) return;
+
+            const predicted = {
+                ...uiMedia,
+                videoSource: source,
+                screenCapturing: source === "screen",
+                screenSoftMuted: false,
+            };
+            const predictedVideo = true;
+            sendIntent(uiMedia.audio, predictedVideo, predicted, reason);
+
+            pendingAfterJoinRef.current = {
+                source,
+                deviceId: deviceId || null,
+                ensureVideo: true,
+                reason,
+            };
+
+            try {
+                sendMediaStateNowRef.current?.(
+                    uiMedia.audio,
+                    predictedVideo,
+                    buildSignalExtra(predicted, `commit:${reason}`, "commit", {
+                        forceResync: true,
+                    })
+                );
+            } catch {}
+
+            hardRejoin(reason);
+        },
+        [isUiLocked, uiMedia, sendIntent, hardRejoin, buildSignalExtra]
+    );
 
     useEffect(() => {
-        lastSentKeyRef.current = "";
+        if (!isConnected) return;
+        const p = pendingAfterJoinRef.current;
+        if (!p) return;
+        pendingAfterJoinRef.current = null;
+
+        window.setTimeout(() => {
+            if (terminatedRef.current) return;
+
+            if (p.source === "screen") {
+                setVideoSource?.("screen");
+            } else {
+                const did = p.deviceId || uiMedia.cameraDeviceId || null;
+                setVideoSource?.("camera", did);
+            }
+
+            if (p.ensureVideo && !uiMedia.video) {
+                toggleVideo?.();
+            }
+
+            setPlayNonce((n) => n + 1);
+
+            try {
+                const predicted2 = {
+                    ...uiMedia,
+                    videoSource: p.source,
+                    screenCapturing: p.source === "screen",
+                    screenSoftMuted: false,
+                };
+                sendMediaStateNowRef.current?.(
+                    uiMedia.audio,
+                    true,
+                    buildSignalExtra(
+                        predicted2,
+                        `post-join:${p.reason}`,
+                        "commit",
+                        { forceResync: true }
+                    )
+                );
+                window.setTimeout(() => {
+                    sendMediaStateNowRef.current?.(
+                        uiMedia.audio,
+                        true,
+                        buildSignalExtra(
+                            predicted2,
+                            `post-join:${p.reason}:t1`,
+                            "commit",
+                            { forceResync: true }
+                        )
+                    );
+                }, 900);
+            } catch {}
+        }, 450);
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isConnected]);
+
+    useEffect(() => {
+        pendingAfterJoinRef.current = null;
+        rejoinSeqRef.current = 0;
     }, [meetingId]);
 
+    // =========================================================
+    // UI handlers
+    // =========================================================
+    const onToggleAudioUiFirst = useCallback(() => {
+        if (isUiLocked()) return;
+        lockUi(350);
+
+        const nextAudio = !uiMedia.audio;
+        sendIntent(nextAudio, uiMedia.video, uiMedia, "click-audio");
+
+        toggleAudio();
+    }, [toggleAudio, isUiLocked, lockUi, uiMedia, sendIntent]);
+
+    const onToggleVideoUiFirst = useCallback(() => {
+        if (isUiLocked()) return;
+        lockUi(700);
+
+        const nextVideo = !uiMedia.video;
+        sendIntent(uiMedia.audio, nextVideo, uiMedia, "click-video");
+
+        toggleVideo();
+    }, [toggleVideo, isUiLocked, lockUi, uiMedia, sendIntent]);
+
+    // =========================================================
+    // ✅ 핵심 수정: "토글(soft on/off)"만 고침
+    // - 드롭(재선택/교체) 로직은 아래 onRestart/onChange 그대로 둠
+    // =========================================================
+    const onToggleScreenShareWithSignal = useCallback(() => {
+        if (isUiLocked()) return;
+        lockUi(1100);
+
+        const isScreen = uiMedia.videoSource === "screen";
+        const capturing = !!uiMedia.screenCapturing;
+        const softMuted = !!uiMedia.screenSoftMuted;
+
+        // ✅ 토글 의도 예측 (soft on/off)
+        // 1) camera -> screen 시작
+        // 2) screen (on) -> stop(=camera로 복귀 예상)  /  or screen (softOff) -> resume
+        let predicted = { ...uiMedia };
+        let predictedVideo = !!uiMedia.video;
+        let reason = "screen-toggle";
+
+        if (!isScreen) {
+            // camera -> start screen (picker는 훅 내부)
+            predicted = {
+                ...uiMedia,
+                videoSource: "screen",
+                screenCapturing: true,
+                screenSoftMuted: false,
+            };
+            predictedVideo = true; // 공유 시작 의도는 "보이게"
+            reason = "screen-on";
+        } else {
+            if (capturing && softMuted) {
+                // screen soft-off -> resume
+                predicted = {
+                    ...uiMedia,
+                    videoSource: "screen",
+                    screenCapturing: true,
+                    screenSoftMuted: false,
+                };
+                predictedVideo = true;
+                reason = "screen-resume";
+            } else if (capturing && !softMuted) {
+                // screen on -> off (대부분 camera로 복귀)
+                predicted = {
+                    ...uiMedia,
+                    videoSource: "camera",
+                    screenCapturing: false,
+                    screenSoftMuted: false,
+                };
+                // video는 사용자가 켜둔 상태 유지(대부분 true)
+                predictedVideo = !!uiMedia.video;
+                reason = "screen-off";
+            } else {
+                // screen인데 capturing이 false인 이상 케이스 -> 다시 on 의도
+                predicted = {
+                    ...uiMedia,
+                    videoSource: "screen",
+                    screenCapturing: true,
+                    screenSoftMuted: false,
+                };
+                predictedVideo = true;
+                reason = "screen-on(recover)";
+            }
+        }
+
+        // ✅ 상대 UI 즉시 반영(예고)
+        sendIntent(uiMedia.audio, predictedVideo, predicted, reason);
+
+        // ✅ 실제 토글 (세션 유지 / soft on/off)
+        toggleScreenShare?.();
+
+        // ✅ autoplay gate도 같이 한번
+        setPlayNonce((n) => n + 1);
+    }, [isUiLocked, lockUi, uiMedia, sendIntent, toggleScreenShare]);
+
+    // ✅ 드롭/재선택은 "영향 안 주게" 그대로 유지
+    const onRestartScreenShareWithSignal = useCallback(() => {
+        if (isUiLocked()) return;
+
+        // 화면 재선택도: 그냥 screen으로 하드 리조인 + 새 picker 유도
+        requestHardSwitch("screen", null, "screen-reselect");
+    }, [isUiLocked, requestHardSwitch]);
+
+    const onChangeVideoSource = useCallback(
+        (type, deviceId) => {
+            if (isUiLocked()) return;
+
+            if (type === "screen") {
+                requestHardSwitch("screen", null, "pick-screen");
+                return;
+            }
+
+            // ✅ 카메라 “기기 변경”은 원래 잘 된다 했으니 리조인 안 함
+            // 단, 지금 screen 모드였다면 mode 전환은 하드리조인
+            if (uiMedia.videoSource === "screen") {
+                requestHardSwitch("camera", deviceId, "pick-camera-mode");
+                return;
+            }
+
+            // camera 모드에서 device 변경만
+            lockUi(900);
+            setVideoSource?.("camera", deviceId);
+        },
+        [
+            isUiLocked,
+            requestHardSwitch,
+            uiMedia.videoSource,
+            lockUi,
+            setVideoSource,
+        ]
+    );
+
+    // =========================================================
+    // Intent/Commit 송출 로직 (유지)
+    // =========================================================
+    const lastIntentKeyRef = useRef("");
+    const lastCommitKeyRef = useRef("");
+
+    // A) INTENT
     useEffect(() => {
         if (!joinInfo) return;
         if (!mediaSignalConnected) return;
         if (!isConnected) return;
 
-        // ✅ 변화 감지 키 (훅이 관리하는 것만)
-        const key = [
-            uiMedia.audio ? 1 : 0,
-            uiMedia.video ? 1 : 0,
-            uiMedia.videoDeviceLost ? 1 : 0,
-            // uiMedia.videoSource || "camera",
-            // uiMedia.screenSoftMuted ? 1 : 0,
-            // uiMedia.screenCapturing ? 1 : 0,
+        const wantAudio = !!uiMedia.audio;
+        const wantVideo = !!uiMedia.video;
+
+        const intentKey = [
+            wantAudio ? 1 : 0,
+            wantVideo ? 1 : 0,
+            uiMedia.videoSource || "camera",
+            uiMedia.screenSoftMuted ? 1 : 0,
         ].join("|");
 
-        // ✅ 첫 1회는 즉시, 이후는 디바운스
-        const isFirst = lastSentKeyRef.current === "";
-        const changed = key !== lastSentKeyRef.current;
-        if (!changed) return;
+        if (intentKey === lastIntentKeyRef.current) return;
+        lastIntentKeyRef.current = intentKey;
 
-        lastSentKeyRef.current = key;
+        const extra = buildSignalExtra(uiMedia, "localIntent", "intent", {
+            wantAudio,
+            wantVideo,
+        });
 
-        const extra = buildSignalExtra(
-            uiMedia,
-            isFirst ? "initial" : "localChanged"
-        );
+        sendMediaStateRef.current?.(wantAudio, wantVideo, extra);
+    }, [
+        joinInfo,
+        mediaSignalConnected,
+        isConnected,
+        uiMedia,
+        buildSignalExtra,
+    ]);
 
-        if (isFirst) {
-            sendMediaStateNowRef.current?.(
-                !!uiMedia.audio,
-                !!uiMedia.video,
-                extra
-            );
-        } else {
-            // ✅ 연타/짧은 토글은 디바운스로 처리
-            sendMediaStateRef.current?.(
-                !!uiMedia.audio,
-                !!uiMedia.video,
-                extra
-            );
-        }
+    // B) COMMIT
+    useEffect(() => {
+        if (!joinInfo) return;
+        if (!mediaSignalConnected) return;
+        if (!isConnected) return;
+
+        const liveAudio = !!uiMedia.liveAudio;
+        const liveVideo = !!uiMedia.liveVideo;
+
+        const commitKey = [
+            liveAudio ? 1 : 0,
+            liveVideo ? 1 : 0,
+            uiMedia.videoSource || "camera",
+            uiMedia.screenSoftMuted ? 1 : 0,
+            uiMedia.screenCapturing ? 1 : 0,
+        ].join("|");
+
+        if (commitKey === lastCommitKeyRef.current) return;
+        lastCommitKeyRef.current = commitKey;
+
+        const extra = buildSignalExtra(uiMedia, "publishOk", "commit", {
+            liveAudio,
+            liveVideo,
+        });
+
+        sendMediaStateNowRef.current?.(liveAudio, liveVideo, extra);
     }, [
         joinInfo,
         mediaSignalConnected,
@@ -567,7 +823,7 @@ function MeetingJoinPage() {
     ]);
 
     // =========================================================
-    // 11) Script Loader
+    // Script Loader
     // =========================================================
     const loadScript = (src) =>
         new Promise((resolve, reject) => {
@@ -596,7 +852,7 @@ function MeetingJoinPage() {
     }, []);
 
     // =========================================================
-    // 12) JoinInfo Fetch
+    // JoinInfo Fetch
     // =========================================================
     useEffect(() => {
         let cancelled = false;
@@ -623,10 +879,10 @@ function MeetingJoinPage() {
         return () => {
             cancelled = true;
         };
-    }, [meetingId]); // joinInfo 제외(의도)
+    }, [meetingId]);
 
     // =========================================================
-    // 13) Join Flow (Janus -> REST)
+    // Join Flow (Janus -> REST)
     // =========================================================
     const handleJoined = useCallback(async () => {
         if (hasJoined) return;
@@ -679,8 +935,10 @@ function MeetingJoinPage() {
             userId: joinInfo.userId,
         });
 
-        joinRoom({ roomNumber, displayName });
-    }, [joinInfo, scriptsLoaded, joinRoom]);
+        const args = { roomNumber, displayName };
+        lastJoinArgsRef.current = args;
+        joinRoomRef.current?.(args);
+    }, [joinInfo, scriptsLoaded, meetingId]);
 
     useEffect(() => {
         if (!isConnected) return;
@@ -698,7 +956,7 @@ function MeetingJoinPage() {
     }, [hasJoined, sessionKey, handleTerminateAndLeave]);
 
     // =========================================================
-    // 14) Keepalive / Ping
+    // Keepalive / Ping
     // =========================================================
     useEffect(() => {
         if (!meetingId) return;
@@ -745,9 +1003,7 @@ function MeetingJoinPage() {
             try {
                 const res = await api.post(
                     `/api/meetings/${meetingId}/participants/ping`,
-                    {
-                        sessionKey,
-                    }
+                    { sessionKey }
                 );
 
                 const { active, reason } = res.data || {};
@@ -784,7 +1040,7 @@ function MeetingJoinPage() {
     }, [meetingId, sessionKey, terminated, handleTerminateAndLeave]);
 
     // =========================================================
-    // 15) Render helpers
+    // Render helpers
     // =========================================================
     const renderStatusText = () => {
         if (!isSupported) return "이 브라우저는 WebRTC를 지원하지 않습니다.";
@@ -868,12 +1124,12 @@ function MeetingJoinPage() {
                     onToggleAudio={onToggleAudioUiFirst}
                     onToggleVideo={onToggleVideoUiFirst}
                     onToggleScreenShare={onToggleScreenShareWithSignal}
+                    onRestartScreenShare={onRestartScreenShareWithSignal}
                     onLeave={handleLeave}
                     isConnected={isConnected}
                     isConnecting={isConnecting}
                     getVideoInputs={getVideoInputs}
                     onChangeVideoSource={onChangeVideoSource}
-                    onRestartScreenShare={onRestartScreenShareWithSignal}
                 />
 
                 <div className="meeting-side">
@@ -932,16 +1188,15 @@ function MeetingJoinPage() {
                                 isHost={isHostSelfRender}
                                 onInvite={() => setInviteOpen(true)}
                             />
-
                             <InviteParticipantsModal
                                 open={inviteOpen}
                                 onClose={() => setInviteOpen(false)}
                                 meetingId={meetingId}
                                 onInvited={() => {
-                                    // 필요하면 여기서 fetchRosterParticipants() 호출
-                                    // fetchRosterParticipants();
+                                    fetchRosterParticipants();
                                 }}
                             />
+
                             <div style={{ fontSize: 12, opacity: 0.7 }}>
                                 presenceConnected: {String(presenceConnected)}
                             </div>

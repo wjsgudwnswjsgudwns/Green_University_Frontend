@@ -66,6 +66,10 @@ export default function MediaPanel({
         uiMedia?.videoDeviceLost !== true &&
         uiMedia?.noMediaDevices !== true;
 
+    // ✅ OFF 판단(여기서 “검증/지연 없이” 바로 토글 처리하려고)
+    const isTurningOffCamera = !isScreenMode && uiMedia?.video === true;
+    const isTurningOffScreen = isScreenSending === true;
+
     // =========================================================
     // ✅ Notices (dismissible + auto-hide + fade out)
     // =========================================================
@@ -342,21 +346,30 @@ export default function MediaPanel({
         pushNotice,
     ]);
 
+    // ✅ 카메라 토글: OFF는 검증/refresh 없이 즉시 실행
     const handleCameraToggle = useCallback(async () => {
         if (disableControls) return;
 
+        // ✅ OFF는 빠르게(여기서 async refreshCameras가 들어가면 꺼질 때도 느려짐)
+        if (isTurningOffCamera) {
+            onToggleVideo?.();
+            return;
+        }
+
+        // ---- ON(켜기)만 안내 ----
+        // ✅ 권한 거부여도 "재시도"는 가능하게: 안내만 띄우고 계속 진행
         if (permissionDeniedVideo) {
             pushNotice(
                 {
                     type: "danger",
-                    text: "카메라 권한이 거부되어 영상 송출이 불가능합니다. (브라우저 권한 허용 후 다시 시도)",
+                    text: "카메라 권한이 거부된 상태입니다. 브라우저 권한을 허용한 뒤 다시 시도하세요. (지금은 재시도 요청을 보냅니다)",
                 },
                 { ttlMs: 5200, allowSameText: true }
             );
-            return;
+            // ✅ return 하지 않음
         }
 
-        // ✅ 클릭 순간에 다시 확인(확실하게)
+        // ✅ 켤 때만 장치 확인
         const cams = await refreshCameras();
         if (noMediaDevices || cams.length === 0) {
             pushNotice(
@@ -372,6 +385,7 @@ export default function MediaPanel({
         onToggleVideo?.();
     }, [
         disableControls,
+        isTurningOffCamera,
         permissionDeniedVideo,
         refreshCameras,
         noMediaDevices,
@@ -380,52 +394,83 @@ export default function MediaPanel({
     ]);
 
     // =========================================================
-    // Screen share handlers
+    // ✅ Screen Share: in-flight lock (중복 호출 방지)
+    // - permissionDeniedScreen이 "오탐/잔상"일 수 있어서: 안내는 하되, 시도는 막지 않음
     // =========================================================
+    const screenBusyRef = useRef(false);
+    const [screenBusy, setScreenBusy] = useState(false);
+
+    const runScreenOp = useCallback(async (fn) => {
+        if (screenBusyRef.current) return;
+        screenBusyRef.current = true;
+        setScreenBusy(true);
+
+        try {
+            const ret = fn?.();
+            if (ret && typeof ret.then === "function") await ret;
+        } finally {
+            screenBusyRef.current = false;
+            setScreenBusy(false);
+        }
+    }, []);
+
+    // ✅ 화면공유 토글: OFF는 “권한 경고/검증” 없이 바로 실행
     const handleScreenToggle = useCallback(() => {
         if (disableControls) return;
 
+        // ✅ OFF(종료)는 바로
+        if (isTurningOffScreen) {
+            runScreenOp(() => onToggleScreenShare?.());
+            return;
+        }
+
+        // ✅ ON(시작)일 때만 안내(시도는 막지 않음)
         if (permissionDeniedScreen) {
             pushNotice(
                 {
                     type: "danger",
-                    text: "화면 공유 권한이 차단되어 시작할 수 없습니다. (브라우저/사이트 권한에서 화면 공유 허용 후 다시 시도)",
+                    text: "화면 공유 권한이 차단되어 시작이 안 될 수 있습니다. (브라우저/사이트 권한에서 화면 공유 허용 후 다시 시도)",
                 },
                 { ttlMs: 5200, allowSameText: true }
             );
-            return;
         }
 
-        onToggleScreenShare?.();
+        runScreenOp(() => onToggleScreenShare?.());
     }, [
         disableControls,
+        isTurningOffScreen,
         permissionDeniedScreen,
         onToggleScreenShare,
         pushNotice,
+        runScreenOp,
     ]);
 
     const handleScreenRestart = useCallback(() => {
         if (disableControls) return;
 
+        // ✅ 재선택은 본질적으로 ON 흐름이라 안내 유지
         if (permissionDeniedScreen) {
             pushNotice(
                 {
                     type: "danger",
-                    text: "화면 공유 권한이 차단되어 다시 선택할 수 없습니다. (브라우저/사이트 권한에서 화면 공유 허용 후 다시 시도)",
+                    text: "화면 공유 권한이 차단되어 재선택이 안 될 수 있습니다. (브라우저/사이트 권한에서 화면 공유 허용 후 다시 시도)",
                 },
                 { ttlMs: 5200, allowSameText: true }
             );
-            return;
         }
 
-        if (typeof onRestartScreenShare === "function") onRestartScreenShare();
-        else onToggleScreenShare?.();
+        runScreenOp(() => {
+            if (typeof onRestartScreenShare === "function")
+                return onRestartScreenShare();
+            return onToggleScreenShare?.();
+        });
     }, [
         disableControls,
         permissionDeniedScreen,
         onRestartScreenShare,
         onToggleScreenShare,
         pushNotice,
+        runScreenOp,
     ]);
 
     // =========================================================
@@ -523,6 +568,9 @@ export default function MediaPanel({
         if (mode === "focus" && isSolo) return "solo";
         return "focus";
     }, [mode, isSolo]);
+
+    // ✅ 화면공유 버튼은 작업중엔 잠시 비활성(중복 클릭 방지)
+    const screenControlsDisabled = disableControls || screenBusy;
 
     return (
         <div className="meeting-video" data-count={gridCount}>
@@ -817,8 +865,8 @@ export default function MediaPanel({
                     className={[
                         "meeting-video__control-group",
                         camDropdownOpen && "open",
-                        (disableControls || permissionDeniedVideo) &&
-                            "disabled",
+                        // ✅ 권한 거부여도 "카메라 버튼"은 재시도 가능해야 해서 그룹 전체 disabled는 막지 않음
+                        disableControls && "disabled",
                     ]
                         .filter(Boolean)
                         .join(" ")}
@@ -893,7 +941,7 @@ export default function MediaPanel({
                 <div
                     className={[
                         "meeting-video__control-group",
-                        (disableControls || permissionDeniedScreen) &&
+                        (screenControlsDisabled || permissionDeniedScreen) &&
                             "disabled",
                     ]
                         .filter(Boolean)
@@ -907,8 +955,14 @@ export default function MediaPanel({
                                 : "meeting-video__control-btn--off"
                         }`}
                         onClick={handleScreenToggle}
-                        disabled={disableControls}
-                        title={isScreenSending ? "화면 공유 종료" : "화면 공유"}
+                        disabled={screenControlsDisabled}
+                        title={
+                            screenBusy
+                                ? "화면 공유 처리중..."
+                                : isScreenSending
+                                ? "화면 공유 종료"
+                                : "화면 공유"
+                        }
                     >
                         🖥
                     </button>
@@ -916,8 +970,8 @@ export default function MediaPanel({
                     <button
                         type="button"
                         className="meeting-video__control-btn meeting-video__control-btn--in-group meeting-video__control-btn--sub"
-                        disabled={disableControls}
-                        title="화면 다시 선택"
+                        disabled={screenControlsDisabled}
+                        title={screenBusy ? "처리중..." : "화면 다시 선택"}
                         onMouseDown={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -1031,7 +1085,9 @@ function AutoplayGate({ onConfirm, onClose }) {
 }
 
 // =========================================================
-// VideoTile (P0-safe: signals는 표시만, attach/play는 stream/track 기반만)
+// VideoTile (patched - remote screen OFF 즉시 반영)
+// - signals는 "표시"도 담당해야 함: screenCapturing/videoSource 기반으로 videoOn 계산
+// - attach/play는 기존처럼 stream+track 기반(최소 attach)
 // =========================================================
 function VideoTile({
     participant,
@@ -1056,6 +1112,17 @@ function VideoTile({
     const videoRef = useRef(null);
     const audioRef = useRef(null);
 
+    // ✅ 트랙 이벤트 폭주 방지용(짧은 디바운스)
+    const bumpTimerRef = useRef(null);
+    const bumpTrackVersion = useCallback(() => {
+        if (bumpTimerRef.current) return;
+        bumpTimerRef.current = window.setTimeout(() => {
+            bumpTimerRef.current = null;
+            setTrackVersion((v) => v + 1);
+        }, 60);
+    }, []);
+    const [trackVersion, setTrackVersion] = useState(0);
+
     const getTracks = useCallback((stream, kind) => {
         if (!stream) return [];
         try {
@@ -1076,6 +1143,58 @@ function VideoTile({
         [participant?.stream, getTracks]
     );
 
+    // ✅ MediaStream 내부 트랙 변화를 감지해서 재-attach 트리거
+    // - addtrack/removetrack + ended만(⚠ mute/unmute는 폭주 원인이라 제외)
+    useEffect(() => {
+        const s = participant?.stream;
+        if (!s) return;
+
+        const onAdd = () => bumpTrackVersion();
+        const onRemove = () => bumpTrackVersion();
+
+        try {
+            s.addEventListener?.("addtrack", onAdd);
+            s.addEventListener?.("removetrack", onRemove);
+        } catch {}
+
+        // 현재 트랙 ended 감지
+        const all = [];
+        try {
+            const vts = s.getVideoTracks?.() || [];
+            const ats = s.getAudioTracks?.() || [];
+            all.push(...vts, ...ats);
+        } catch {}
+
+        const onEnded = () => bumpTrackVersion();
+        all.forEach((t) => {
+            try {
+                t.addEventListener?.("ended", onEnded);
+            } catch {}
+        });
+
+        return () => {
+            try {
+                s.removeEventListener?.("addtrack", onAdd);
+                s.removeEventListener?.("removetrack", onRemove);
+            } catch {}
+
+            all.forEach((t) => {
+                try {
+                    t.removeEventListener?.("ended", onEnded);
+                } catch {}
+            });
+        };
+    }, [participant?.stream, bumpTrackVersion]);
+
+    useEffect(() => {
+        return () => {
+            try {
+                if (bumpTimerRef.current) clearTimeout(bumpTimerRef.current);
+            } catch {}
+            bumpTimerRef.current = null;
+        };
+    }, []);
+
     const mediaState =
         participant?.userId != null
             ? mediaStates[String(participant.userId)]
@@ -1092,7 +1211,7 @@ function VideoTile({
     const hasRemoteVideoTrack = !participant?.isMe && hasAnyTrack("video");
     const hasRemoteAudioTrack = !participant?.isMe && hasAnyTrack("audio");
 
-    // ✅ signals는 “표시용 상태”만 (없으면 undefined)
+    // ✅ signals 기본 플래그
     const remoteVideoFlag =
         !participant?.isMe && isKnown && typeof mediaState?.video === "boolean"
             ? mediaState.video
@@ -1103,14 +1222,36 @@ function VideoTile({
             ? mediaState.audio
             : undefined;
 
-    // -----------------------
+    // ✅ (중요) remote screen 상태를 UI에 반영
+    const remoteVideoSource =
+        !participant?.isMe && isKnown ? mediaState?.videoSource : undefined;
+
+    const remoteScreenCapturing =
+        !participant?.isMe && isKnown ? mediaState?.screenCapturing : undefined;
+
+    const remoteScreenSoftMuted =
+        !participant?.isMe && isKnown ? mediaState?.screenSoftMuted : undefined;
+
+    // remote가 screen 모드인지(둘 중 하나라도 힌트가 있으면 screen으로 간주)
+    const remoteIsScreen =
+        remoteVideoSource === "screen" || remoteScreenCapturing === true;
+
+    // remote screen “송출중” 판단(OFF를 즉시 placeholder로 반영)
+    const remoteScreenSending =
+        remoteIsScreen &&
+        (remoteVideoFlag ?? true) &&
+        remoteScreenSoftMuted !== true &&
+        remoteScreenCapturing !== false &&
+        !remoteDeviceLost;
+
     // ✅ 표시(뱃지/오버레이)용 on/off
-    // -----------------------
     const videoOn = participant?.isMe
         ? !isLocalScreenSoftMuted &&
           videoEnabled &&
           !isVideoDeviceLost &&
           !noMediaDevices
+        : remoteIsScreen
+        ? remoteScreenSending
         : remoteDeviceLost
         ? false
         : remoteVideoFlag ?? true;
@@ -1119,17 +1260,13 @@ function VideoTile({
         ? audioEnabled && !noMediaDevices
         : remoteAudioFlag ?? hasRemoteAudioTrack;
 
-    // -----------------------
     // ✅ 실제 attach/유지 기준은 track로만
-    // -----------------------
     const renderVideoTag = participant?.isMe
-        ? !!participant?.stream && hasAnyTrack("video") && videoOn
+        ? !!participant?.stream && hasAnyTrack("video")
         : !!participant?.stream && hasRemoteVideoTrack;
 
     // ✅ 화면 "보이기"만 signals로 제어(attach 유지)
-    const showVideoVisual = participant?.isMe
-        ? renderVideoTag
-        : renderVideoTag && videoOn;
+    const showVideoVisual = renderVideoTag && videoOn;
 
     const canHearRemote =
         !participant?.isMe &&
@@ -1167,7 +1304,27 @@ function VideoTile({
     }, [tryPlayEl, participant?.isMe]);
 
     // =========================================================
-    // ✅ VIDEO attach (signals 변화로 detach/attach/play 재시도 금지)
+    // ✅ attach 최소화를 위한 signature
+    // =========================================================
+    const getTrackSig = useCallback((stream, kind) => {
+        try {
+            const list =
+                kind === "video"
+                    ? stream?.getVideoTracks?.() || []
+                    : stream?.getAudioTracks?.() || [];
+            const t = list[0];
+            if (!t) return `no-${kind}`;
+            return `${t.id}:${t.readyState}:${t.enabled ? "en" : "dis"}`;
+        } catch {
+            return `err-${kind}`;
+        }
+    }, []);
+
+    const videoAttachSigRef = useRef({ stream: null, sig: null });
+    const audioAttachSigRef = useRef({ stream: null, sig: null });
+
+    // =========================================================
+    // ✅ VIDEO attach
     // =========================================================
     useEffect(() => {
         const el = videoRef.current;
@@ -1182,31 +1339,55 @@ function VideoTile({
             try {
                 if (el.srcObject) el.srcObject = null;
             } catch {}
+            videoAttachSigRef.current = { stream: null, sig: null };
             return;
         }
 
-        if (!participant?.stream) return;
+        const s = participant?.stream;
+        if (!s) return;
+
+        const sig = getTrackSig(s, "video");
+        const last = videoAttachSigRef.current;
 
         try {
             el.muted = true;
+        } catch {}
+
+        const needsAttach =
+            last.stream !== s || last.sig !== sig || el.srcObject !== s;
+
+        if (!needsAttach) {
+            tryPlayEl(el);
+            return;
+        }
+
+        videoAttachSigRef.current = { stream: s, sig };
+
+        try {
+            try {
+                if (el.srcObject) el.srcObject = null;
+            } catch {}
 
             if (Janus && Janus.attachMediaStream) {
-                Janus.attachMediaStream(el, participant.stream);
+                Janus.attachMediaStream(el, s);
             } else {
-                if (el.srcObject !== participant.stream)
-                    el.srcObject = participant.stream;
+                el.srcObject = s;
             }
 
-            // ✅ play()는 attach 시점만(= stream/track 변화에만)
             tryPlayEl(el);
         } catch (e) {
             console.error("[VideoTile] video attach 실패", e);
         }
-    }, [participant?.stream, renderVideoTag, tryPlayEl]);
+    }, [
+        participant?.stream,
+        renderVideoTag,
+        trackVersion,
+        getTrackSig,
+        tryPlayEl,
+    ]);
 
     // =========================================================
-    // ✅ AUDIO attach (signals 변화로 srcObject 분리 금지)
-    // - signals는 mute만
+    // ✅ AUDIO attach (remote only)
     // =========================================================
     useEffect(() => {
         const el = audioRef.current;
@@ -1218,31 +1399,47 @@ function VideoTile({
             try {
                 if (el.srcObject) el.srcObject = null;
             } catch {}
+            audioAttachSigRef.current = { stream: null, sig: null };
             return;
         }
 
-        if (!participant?.stream || !hasRemoteAudioTrack) {
+        const s = participant?.stream;
+
+        if (!s || !hasRemoteAudioTrack) {
             try {
                 el.pause?.();
             } catch {}
             try {
                 if (el.srcObject) el.srcObject = null;
             } catch {}
+            audioAttachSigRef.current = { stream: null, sig: null };
             return;
         }
 
+        const sig = getTrackSig(s, "audio");
+        const last = audioAttachSigRef.current;
+
+        const needsAttach =
+            last.stream !== s || last.sig !== sig || el.srcObject !== s;
+
+        if (!needsAttach) {
+            if (canHearRemote) tryPlayEl(el);
+            return;
+        }
+
+        audioAttachSigRef.current = { stream: s, sig };
+
         try {
-            // ✅ signals는 "들리게 할지"만(attach 유지)
-            el.muted = !audioOn;
+            try {
+                if (el.srcObject) el.srcObject = null;
+            } catch {}
 
             if (Janus && Janus.attachMediaStream) {
-                Janus.attachMediaStream(el, participant.stream);
+                Janus.attachMediaStream(el, s);
             } else {
-                if (el.srcObject !== participant.stream)
-                    el.srcObject = participant.stream;
+                el.srcObject = s;
             }
 
-            // ✅ play()는 attach 시점만
             if (canHearRemote) tryPlayEl(el);
         } catch (e) {
             console.error("[VideoTile] audio attach 실패", e);
@@ -1251,10 +1448,21 @@ function VideoTile({
         participant?.stream,
         participant?.isMe,
         hasRemoteAudioTrack,
-        audioOn,
         canHearRemote,
+        trackVersion,
+        getTrackSig,
         tryPlayEl,
     ]);
+
+    // ✅ remote audio mute만 별도로 즉시 반영(재-attach X)
+    useEffect(() => {
+        const el = audioRef.current;
+        if (!el) return;
+        if (participant?.isMe) return;
+        try {
+            el.muted = !audioOn;
+        } catch {}
+    }, [audioOn, participant?.isMe]);
 
     // ✅ 사용자 제스처로 "재생 시작" 했을 때만 일괄 play 재시도
     useEffect(() => {
@@ -1271,7 +1479,6 @@ function VideoTile({
         variant === "thumb" && "meeting-video__remote--thumb",
         variant === "grid" && "meeting-video__remote--grid",
         isFocused && variant !== "grid" && "meeting-video__remote--focused",
-        // ✅ (필수 수정) CSS에 없는 meeting-video__remote--video-hidden 제거
     ]
         .filter(Boolean)
         .join(" ");
@@ -1340,6 +1547,9 @@ function VideoTile({
             <div className="meeting-video__badge-row">
                 {!audioOn && <span className="meeting-video__badge">🔇</span>}
                 {!videoOn && <span className="meeting-video__badge">📷✕</span>}
+                {!participant?.isMe && remoteIsScreen && (
+                    <span className="meeting-video__badge">🖥</span>
+                )}
                 {participant.isHost && (
                     <span className="meeting-video__badge meeting-video__badge--host">
                         H

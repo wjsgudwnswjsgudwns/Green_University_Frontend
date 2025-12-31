@@ -36,26 +36,50 @@ export default function InviteParticipantsModal({
     const [q, setQ] = useState("");
     const [searching, setSearching] = useState(false);
     const [results, setResults] = useState([]);
-    const [invited, setInvited] = useState([]); // [{userId,name,role,email}]
+    const [invited, setInvited] = useState([]); // [{userId,name,role,email,alreadyInMeeting?}]
 
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState("");
 
     // =========================================================
-    // 2) Open init reset
+    // 2) Search internals (refs)
+    // =========================================================
+    const lastSearchKeyRef = useRef("");
+    const searchAbortRef = useRef(null);
+    const searchSeqRef = useRef(0);
+    const searchCacheRef = useRef(new Map()); // key -> results[]
+
+    // =========================================================
+    // 3) Open init reset
     // =========================================================
     useEffect(() => {
         if (!open) return;
+
+        // 진행 중 검색 중단(늦게 도착한 응답이 results를 덮는 것 방지)
+        if (searchAbortRef.current) {
+            try {
+                searchAbortRef.current.abort();
+            } catch {}
+        }
+        // seq 증가로 "이전 응답" 무효화
+        searchSeqRef.current += 1;
+
         setError("");
+        setSubmitting(false);
+
         setInviteRole("student");
         setQ("");
         setResults([]);
         setInvited([]);
         setSearching(false);
+
+        // 모달 열릴 때는 캐시/키도 리셋(회의/역할/키워드 꼬임 방지)
+        searchCacheRef.current.clear();
+        lastSearchKeyRef.current = "";
     }, [open]);
 
     // =========================================================
-    // 3) ESC close
+    // 4) ESC close
     // =========================================================
     useEffect(() => {
         if (!open) return;
@@ -67,11 +91,12 @@ export default function InviteParticipantsModal({
     }, [open, onClose]);
 
     // =========================================================
-    // 4) toggle invite
+    // 5) toggle invite
     // =========================================================
     const toggleInvite = (u) => {
         if (!u?.userId) return;
         if (u?.alreadyInMeeting) return; // ✅ 이미 등록된 사람은 선택 불가
+
         setInvited((prev) => {
             const exists = prev.some(
                 (x) => String(x.userId) === String(u.userId)
@@ -92,22 +117,24 @@ export default function InviteParticipantsModal({
     };
 
     // =========================================================
-    // 5) Search
+    // 6) Search
     // =========================================================
-    const lastSearchKeyRef = useRef("");
-    const searchAbortRef = useRef(null);
-    const searchSeqRef = useRef(0);
-    const searchCacheRef = useRef(new Map()); // key -> results[]
-
     useEffect(() => {
         if (!open) return;
 
         const keyword = (q || "").trim();
 
-        // ✅ 2글자 미만: API 호출 X / 기존 results 유지
+        // ✅ 2글자 미만: API 호출 X
         if (keyword.length < 2) {
-            if (searchAbortRef.current) searchAbortRef.current.abort();
+            if (searchAbortRef.current) {
+                try {
+                    searchAbortRef.current.abort();
+                } catch {}
+            }
             setSearching(false);
+            // 입력이 짧아졌을 때는 화면 결과도 비우는 게 UX 상 더 자연스러움
+            setResults([]);
+            lastSearchKeyRef.current = "";
             return;
         }
 
@@ -128,13 +155,17 @@ export default function InviteParticipantsModal({
         lastSearchKeyRef.current = searchKey;
 
         // ✅ abort previous
-        if (searchAbortRef.current) searchAbortRef.current.abort();
+        if (searchAbortRef.current) {
+            try {
+                searchAbortRef.current.abort();
+            } catch {}
+        }
         const ac = new AbortController();
         searchAbortRef.current = ac;
 
         const seq = ++searchSeqRef.current;
 
-        const t = setTimeout(async () => {
+        const t = window.setTimeout(async () => {
             try {
                 setSearching(true);
 
@@ -144,13 +175,14 @@ export default function InviteParticipantsModal({
                     signal: ac.signal,
                 });
 
-                if (!ac.signal.aborted) {
-                    const data = Array.isArray(res.data) ? res.data : [];
-                    // (옵션) seq로 최신만 반영하고 싶으면 여기서 체크 가능
-                    if (seq === searchSeqRef.current) {
-                        searchCacheRef.current.set(searchKey, data);
-                        setResults(data);
-                    }
+                if (ac.signal.aborted) return;
+
+                const data = Array.isArray(res.data) ? res.data : [];
+
+                // 최신 요청만 반영
+                if (seq === searchSeqRef.current) {
+                    searchCacheRef.current.set(searchKey, data);
+                    setResults(data);
                 }
             } catch (e) {
                 if (ac.signal.aborted) return;
@@ -161,13 +193,15 @@ export default function InviteParticipantsModal({
         }, 300);
 
         return () => {
-            clearTimeout(t);
-            ac.abort();
+            window.clearTimeout(t);
+            try {
+                ac.abort();
+            } catch {}
         };
     }, [open, inviteRole, q, meetingId]);
 
     // =========================================================
-    // 6) Submit invite
+    // 7) Submit invite
     // =========================================================
     const endpoint = useMemo(() => {
         if (inviteEndpoint) return inviteEndpoint;
@@ -191,6 +225,7 @@ export default function InviteParticipantsModal({
 
             await api.post(endpoint, payload);
 
+            // ✅ 부모는 목록만 갱신 / 닫기는 모달이 처리
             onInvited?.();
             onClose?.();
         } catch (e) {
@@ -234,7 +269,18 @@ export default function InviteParticipantsModal({
                                 setQ("");
                                 setResults([]);
                                 setSearching(false);
+
+                                // 역할 바꾸면 캐시/키 리셋(같은 키워드라도 결과가 달라짐)
+                                if (searchAbortRef.current) {
+                                    try {
+                                        searchAbortRef.current.abort();
+                                    } catch {}
+                                }
+                                searchSeqRef.current += 1;
+                                searchCacheRef.current.clear();
+                                lastSearchKeyRef.current = "";
                             }}
+                            disabled={submitting}
                         >
                             <option value="student">학생</option>
                             <option value="professor">교수</option>
@@ -249,6 +295,7 @@ export default function InviteParticipantsModal({
                             value={q}
                             onChange={(e) => setQ(e.target.value)}
                             placeholder="이름을 입력하세요 (2글자 이상)"
+                            disabled={submitting}
                         />
                     </div>
 
@@ -360,6 +407,7 @@ export default function InviteParticipantsModal({
                                                 removeInvite(u.userId)
                                             }
                                             type="button"
+                                            disabled={submitting}
                                         >
                                             ✕
                                         </button>

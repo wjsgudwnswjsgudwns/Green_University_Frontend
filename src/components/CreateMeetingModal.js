@@ -1,5 +1,5 @@
 // src/components/CreateMeetingModal.js
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import api from "../api/axiosConfig";
 import "../styles/createMeetingModal.css";
@@ -35,13 +35,12 @@ export default function CreateMeetingModal({ open, onClose, onCreated }) {
 
     const escHandlerRef = useRef(null);
 
-    const { startAt: dStart, endAt: dEnd } = useMemo(defaultStartEnd, []);
     const [meetingType, setMeetingType] = useState("INSTANT"); // INSTANT | SCHEDULED
 
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
-    const [startAt, setStartAt] = useState(dStart);
-    const [endAt, setEndAt] = useState(dEnd);
+    const [startAt, setStartAt] = useState("");
+    const [endAt, setEndAt] = useState("");
 
     // 예약(SCHEDULED)에서만 초대
     const [inviteRole, setInviteRole] = useState("student");
@@ -83,11 +82,16 @@ export default function CreateMeetingModal({ open, onClose, onCreated }) {
     ]);
 
     // =========================================================
-    // 모달 열릴 때 초기화
+    // ✅ 모달 열릴 때 초기화 (중요: useLayoutEffect)
+    // - 렌더 후 useEffect로 초기화하면 "입력 먼저 들어간 뒤 리셋"이 가끔 발생
     // =========================================================
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (!open) return;
-        console.log(`[${debugId}] open -> init reset`);
+
+        console.log(`[${debugId}] open -> init reset (layout)`);
+
+        const { startAt: dStart, endAt: dEnd } = defaultStartEnd();
+
         setError("");
         setMeetingType("INSTANT");
         setTitle("");
@@ -100,7 +104,7 @@ export default function CreateMeetingModal({ open, onClose, onCreated }) {
         setResults([]);
         setInvited([]);
         setSearching(false);
-    }, [open, dStart, dEnd, debugId]);
+    }, [open, debugId]);
 
     // =========================================================
     // ESC 닫기
@@ -197,8 +201,6 @@ export default function CreateMeetingModal({ open, onClose, onCreated }) {
             console.log(`[${debugId}] search skip (<2)`, { keyword });
             if (searchAbortRef.current) searchAbortRef.current.abort();
             setSearching(false);
-            // setResults([]); // ✅ 유지
-            // lastSearchKeyRef.current = ""; // ✅ 유지
             return;
         }
 
@@ -267,7 +269,6 @@ export default function CreateMeetingModal({ open, onClose, onCreated }) {
                         e?.response?.data?.message || e?.message || "unknown",
                     status: e?.response?.status,
                 });
-                // 실패해도 결과는 유지하고 싶으면 주석 처리 가능
                 setResults([]);
             } finally {
                 if (!ac.signal.aborted) {
@@ -355,11 +356,21 @@ export default function CreateMeetingModal({ open, onClose, onCreated }) {
 
     if (!open) return null;
 
+    // =========================================================
+    // ✅ backdrop 닫기: onClick + target 가드
+    // - 포커스는 mousedown에서 잡히므로, click 닫기가 안전
+    // =========================================================
+    const onBackdropClick = (e) => {
+        if (e.target !== e.currentTarget) return;
+        onClose?.();
+    };
+
     return ReactDOM.createPortal(
-        <div className="cmm-backdrop" onMouseDown={onClose}>
+        <div className="cmm-backdrop" onClick={onBackdropClick}>
             <div
                 className="cmm-modal"
                 onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
                 role="dialog"
                 aria-modal="true"
             >

@@ -329,3 +329,17 @@
         gap: 6px;
     }
 }
+/* 오른쪽(배지 + 입장가능 칩) 정렬 */
+.mdp-head__right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+/* 입장 가능 칩(기존 mdp-chip 재사용 + 변형) */
+.mdp-chip--joinable {
+    cursor: default; /* 클릭 칩 아니면 */
+    border: 1px solid rgba(34, 197, 94, 0.35);
+    background: rgba(34, 197, 94, 0.12);
+}

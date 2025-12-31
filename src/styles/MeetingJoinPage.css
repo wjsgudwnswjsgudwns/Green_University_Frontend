@@ -536,3 +536,83 @@
     font-weight: 700;
     font-size: 14px;
 }
+/* ===========================
+   New messages bar (scroll up)
+   =========================== */
+
+.meeting-side {
+    position: relative; /* ✅ absolute 배치 기준 */
+}
+
+.meeting-side__header {
+    font-size: 14px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 10px;
+}
+
+.meeting-side__chat-loading-top {
+    text-align: center;
+    font-size: 12px;
+    color: #6b7280;
+    padding: 6px 0 10px;
+}
+
+.meeting-side__new-messages {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+
+    /* ✅ input-row 위로 띄우기 (대략값) */
+    bottom: 72px;
+
+    z-index: 5;
+
+    /* ✅ 반투명(유리) */
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(229, 231, 235, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    border-radius: 12px;
+    padding: 10px 12px;
+
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+    cursor: pointer;
+
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.meeting-side__new-messages:hover {
+    background: rgba(255, 255, 255, 0.85);
+}
+
+.meeting-side__new-messages-count {
+    font-size: 12px;
+    font-weight: 700;
+    color: #2563eb;
+}
+
+.meeting-side__new-messages-preview {
+    font-size: 13px;
+    color: #111827;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.meeting-side__new-messages-hint {
+    font-size: 11px;
+    color: #6b7280;
+}
+
+/* (옵션) 상대 메타 줄 정렬 더 깔끔하게 */
+.chat-msg__meta {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-bottom: 4px;
+}
